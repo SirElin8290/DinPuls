@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.7.0
+   DINPULS.SE v0.7.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.7.0";
+const DINPULS_VERSION = "0.7.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -738,7 +738,7 @@ startDinPuls();
 
 
 /* =========================================================
-   DINPULS v0.7.0 – NYHETSCENTRAL
+   DINPULS v0.7.1 – NYHETSCENTRAL
 ========================================================= */
 let allNewsArticles = [];
 let allNewsSources = [];
@@ -880,7 +880,7 @@ function escapeAttribute(value){return escapeHtml(value);}
 
 
 /* =========================================================
-   DINPULS v0.7.0 – BUSS- OCH TÅGTIDER
+   DINPULS v0.7.1 – BUSS- OCH TÅGTIDER
 ========================================================= */
 let transportData = null;
 let activeTransportMode = "all";

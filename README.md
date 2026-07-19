@@ -1,4 +1,28 @@
-# DinPuls v0.7.0
+# DinPuls v0.7.1
+
+## Automatisk aktivering av riktiga avgångar
+
+Version 0.7.1 använder repository-hemligheten `TRAFIKLAB_API_KEY` utan att
+skriva nyckeln till filer eller loggar. Det manuella GitHub-flödet
+**Hitta hållplatser och aktivera trafikdata** söker hållplatsgrupper för de sju
+startkommunerna. Endast exakta namnträffar aktiveras automatiskt. Samtliga
+kandidater sparas i `data/stop-candidates.json` för granskning.
+
+När alla sju kommuner har säkra id:n hämtas de första riktiga avgångarna.
+Vid saknade id:n eller API-fel bevaras senaste fungerande `transport.json`.
+Trafikstörningar från API-svaret förs vidare till webbplatsen när de finns.
+
+## Aktivera efter uppladdning till GitHub
+
+1. Kontrollera att repository-hemligheten heter `TRAFIKLAB_API_KEY`.
+2. Öppna fliken **Actions** i GitHub.
+3. Välj **Hitta hållplatser och aktivera trafikdata**.
+4. Klicka **Run workflow** och därefter den gröna **Run workflow**-knappen.
+5. När körningen är grön uppdateras webbplatsen automatiskt efter GitHub Pages nästa publicering.
+
+---
+
+# Tidigare: DinPuls v0.7.0
 
 ## Central kommunmotor
 
@@ -162,8 +186,8 @@ Denna version lägger till en kommunanpassad avgångstavla för buss och tåg.
 
 1. Skapa konto och API-nyckel hos Trafiklab.
 2. Lägg nyckeln i GitHub-repot som secret med namnet `TRAFIKLAB_API_KEY`.
-3. Verifiera rikshållplats-/area-id för varje station och fyll i `STOP_AREAS` i `scripts/update_transport.py`.
-4. Kör arbetsflödet **Uppdatera kollektivtrafik** manuellt första gången.
+3. Kör arbetsflödet **Hitta hållplatser och aktivera trafikdata**.
+4. Hållplats-id:n sparas centralt och de första riktiga avgångarna hämtas automatiskt.
 
 Trafiklab-data måste krediteras. Länken “Data från Trafiklab.se” finns därför i modulen.
 
