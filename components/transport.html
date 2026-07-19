@@ -1,0 +1,35 @@
+<section class="transport-section" id="kollektivtrafik">
+  <div class="section-heading transport-heading">
+    <div>
+      <span class="section-kicker">Buss och tåg nära dig</span>
+      <h2>Avgångar från <span id="transport-place">Åmål</span></h2>
+    </div>
+    <span class="transport-updated" id="transport-updated"><i data-lucide="refresh-cw"></i> Laddar tider…</span>
+  </div>
+
+  <div class="transport-toolbar">
+    <div class="transport-tabs" role="tablist" aria-label="Trafikslag">
+      <button class="transport-tab active" type="button" data-transport-mode="all" aria-selected="true"><i data-lucide="route"></i>Alla</button>
+      <button class="transport-tab" type="button" data-transport-mode="bus" aria-selected="false"><i data-lucide="bus-front"></i>Buss</button>
+      <button class="transport-tab" type="button" data-transport-mode="train" aria-selected="false"><i data-lucide="train-front"></i>Tåg</button>
+    </div>
+    <label class="transport-stop-select">
+      <span>Hållplats eller station</span>
+      <select id="transport-stop"></select>
+    </label>
+  </div>
+
+  <div class="transport-alert" id="transport-alert" hidden></div>
+  <div class="transport-loading" id="transport-loading"><span class="loading-spinner"></span><span>Hämtar kommande avgångar…</span></div>
+  <div class="departure-board" id="departure-board" hidden></div>
+  <div class="transport-empty" id="transport-empty" hidden>
+    <i data-lucide="clock-alert"></i>
+    <strong>Inga avgångar hittades</strong>
+    <span>Prova en annan hållplats eller välj ett annat trafikslag.</span>
+  </div>
+
+  <div class="transport-footer">
+    <span id="transport-source-note"><i data-lucide="info"></i> Kontrollerar datakälla…</span>
+    <a id="transport-source-link" href="https://www.trafiklab.se/" target="_blank" rel="noopener noreferrer" hidden>Data från Trafiklab.se</a>
+  </div>
+</section>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="DinPuls.se – din lokala startsida.">
+  <meta name="theme-color" content="#082653">
+  <meta name="dinpuls-version" content="0.7.0">
+  <title>DinPuls.se – din lokala startsida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div data-component="header"></div>
+  <div data-component="quick-strip"></div>
+  <div data-component="navigation"></div>
+
+  <section class="municipality-status" aria-live="polite">
+    <div>
+      <i data-lucide="map-pin"></i>
+      <span>Du följer <strong data-municipality-name>Åmål</strong></span>
+    </div>
+    <span class="municipality-demo-note">
+      Väder, nyhetsurval och kollektivtrafik följer vald kommun. Vissa övriga moduler är tills vidare demonstrationsdata.
+    </span>
+    <button id="change-municipality-inline" type="button">Byt kommun</button>
+  </section>
+
+  <main>
+    <div data-component="hero"></div>
+    <div data-component="primary-cards"></div>
+    <div data-component="transport"></div>
+    <div data-component="secondary-cards"></div>
+    <div data-component="jobs-housing"></div>
+    <div data-component="services"></div>
+
+    <section class="news-sources-section" id="news-sources">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Öppen och tydlig källhantering</span>
+          <h2>Nyhetskällor för <span data-municipality-name>Åmål</span></h2>
+        </div>
+        <p>DinPuls visar rubrik, källa, tid och länk. Artikeln läses alltid hos originalutgivaren.</p>
+      </div>
+      <div class="news-source-grid" id="news-source-grid"></div>
+    </section>
+
+    <div data-component="ads"></div>
+  </main>
+  <div data-component="footer"></div>
+
+  <dialog class="municipality-dialog" id="municipality-dialog">
+    <form method="dialog">
+      <button class="dialog-close" value="cancel" aria-label="Stäng"><i data-lucide="x"></i></button>
+      <span class="dialog-icon"><i data-lucide="map-pin"></i></span>
+      <h2>Vilken kommun vill du följa?</h2>
+      <p>DinPuls anpassar innehållet efter platsen du väljer.</p>
+      <label for="municipality-select">Kommun</label>
+      <select id="municipality-select"></select>
+      <button class="primary-button" id="save-municipality" value="default">Spara kommun</button>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="script.js"></script>
+</body>
+</html>

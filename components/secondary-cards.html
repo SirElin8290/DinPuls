@@ -1,0 +1,46 @@
+<section class="grid three">
+  <article class="card news-centre-card" id="nyheter">
+  <div class="news-centre-header">
+    <div>
+      <span class="section-kicker">DinPuls nyhetscentral</span>
+      <h2 id="news-heading">Nyheter nära dig</h2>
+      <small id="news-subheading">Lokalt för <span data-municipality-name>Åmål</span></small>
+    </div>
+    <span class="news-updated" id="news-updated"><i data-lucide="refresh-cw"></i> Uppdaterar…</span>
+  </div>
+
+  <div class="news-scope-tabs" role="tablist" aria-label="Nyhetsområde">
+    <button class="news-scope-tab active" type="button" role="tab" aria-selected="true" data-news-scope="local"><i data-lucide="map-pin"></i>Lokalt</button>
+    <button class="news-scope-tab" type="button" role="tab" aria-selected="false" data-news-scope="sweden"><i data-lucide="landmark"></i>Sverige</button>
+    <button class="news-scope-tab" type="button" role="tab" aria-selected="false" data-news-scope="world"><i data-lucide="globe-2"></i>Världen</button>
+  </div>
+
+  <div class="important-news" id="important-news" hidden></div>
+
+  <div class="news-filter-row" role="group" aria-label="Filtrera nyheter">
+    <button class="news-filter active" type="button" data-news-filter="all">Alla</button>
+    <button class="news-filter" type="button" data-news-filter="free">Fria</button>
+    <button class="news-filter" type="button" data-news-filter="subscription">Prenumeration</button>
+    <button class="news-filter" type="button" data-news-filter="authority">Myndigheter</button>
+    <button class="news-filter" type="button" data-news-filter="media">Redaktionellt</button>
+  </div>
+
+  <div class="news-principle"><i data-lucide="shield-check"></i><span>Urvalet väger samman <strong>aktualitet, relevans, samhällspåverkan och källkvalitet</strong>. Betalväggar kringgås aldrig.</span></div>
+  <div class="news-loading" id="news-loading"><span class="loading-spinner" aria-hidden="true"></span><span>Hämtar nyheter…</span></div>
+  <div class="news-feed" id="news-feed" hidden></div>
+  <div class="news-empty" id="news-empty" hidden><i data-lucide="newspaper"></i><strong>Inga nyheter matchar filtret</strong><span>Välj en annan kategori.</span></div>
+  <div class="news-centre-footer"><span id="news-count">0 nyheter</span><a href="#news-sources">Se källorna</a></div>
+</article>
+
+  <article class="card" id="evenemang">
+    <div class="heading"><h2>Evenemang</h2><small data-municipality-name>Åmål</small></div>
+    <div class="module-placeholder"><i data-lucide="calendar-days"></i><strong>Evenemangsdata är inte ansluten</strong><span>Riktiga evenemang för <span data-municipality-name>Åmål</span> kopplas in i en kommande version.</span></div>
+  </article>
+
+  <article class="card" id="karta">
+    <div class="heading"><h2>Kartkollen</h2><small data-municipality-name>Åmål</small></div>
+    <div class="map main-map"><i class="p1">●</i><i class="p2">●</i><i class="p3">●</i><i class="p4">●</i><i class="p5">●</i></div>
+    <div class="legend"><span>Kartdata för <span data-municipality-name>Åmål</span> ansluts senare.</span></div>
+    <span class="card-link">Kommande modul <i data-lucide="clock-3"></i></span>
+  </article>
+</section>
