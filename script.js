@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.7.2
+   DINPULS.SE v0.8.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.7.2";
+const DINPULS_VERSION = "0.8.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -179,7 +179,7 @@ async function startDinPuls() {
     initializeMobileMenu();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeNews(), initializeTransport()]);
+    await Promise.all([initializeNews(), initializeTransport(), initializeJobs()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -738,7 +738,7 @@ startDinPuls();
 
 
 /* =========================================================
-   DINPULS v0.7.2 – NYHETSCENTRAL
+   DINPULS v0.8.0 – NYHETSCENTRAL
 ========================================================= */
 let allNewsArticles = [];
 let allNewsSources = [];
@@ -880,7 +880,7 @@ function escapeAttribute(value){return escapeHtml(value);}
 
 
 /* =========================================================
-   DINPULS v0.7.2 – BUSS- OCH TÅGTIDER
+   DINPULS v0.8.0 – BUSS- OCH TÅGTIDER
 ========================================================= */
 let transportData = null;
 let activeTransportMode = "all";
@@ -1085,3 +1085,142 @@ function updateQuickTransport() {
 }
 
 window.setInterval(updateQuickTransport, 60000);
+
+/* =========================================================
+   DINPULS v0.8.0 – LEDIGA JOBB
+========================================================= */
+let jobsData = null;
+let activeJobsQuery = "";
+
+async function initializeJobs() {
+  document.querySelector("#jobs-search")?.addEventListener("input", (event) => {
+    activeJobsQuery = event.target.value.trim().toLocaleLowerCase("sv-SE");
+    renderJobs();
+  });
+
+  DinPulsMunicipality.subscribe("jobs", refreshJobsForMunicipality);
+  await loadJobs();
+}
+
+async function loadJobs() {
+  const loading = document.querySelector("#jobs-loading");
+  if (loading) loading.hidden = false;
+
+  try {
+    const response = await fetch(`data/jobs.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    const data = await response.json();
+    if (!data?.municipalities || typeof data.municipalities !== "object") {
+      throw new Error("Jobbfilen saknar kommuner");
+    }
+    jobsData = data;
+    renderJobs();
+  } catch (error) {
+    console.error("Lediga jobb kunde inte laddas:", error);
+    showJobsError();
+  }
+}
+
+function refreshJobsForMunicipality() {
+  activeJobsQuery = "";
+  const search = document.querySelector("#jobs-search");
+  if (search) search.value = "";
+  renderJobs();
+}
+
+function renderJobs() {
+  const list = document.querySelector("#jobs-list");
+  const loading = document.querySelector("#jobs-loading");
+  const empty = document.querySelector("#jobs-empty");
+  if (!list || !empty || !jobsData) return;
+
+  const municipality = DinPulsMunicipality.getName();
+  const municipalityData = jobsData.municipalities?.[municipality] || { total: 0, jobs: [] };
+  const allJobs = Array.isArray(municipalityData.jobs) ? municipalityData.jobs : [];
+  const relevant = allJobs.filter((job) => {
+    if (!activeJobsQuery) return true;
+    return [job.headline, job.employer, job.occupation, job.workingHours]
+      .some((value) => String(value || "").toLocaleLowerCase("sv-SE").includes(activeJobsQuery));
+  });
+  const visible = relevant.slice(0, 8);
+
+  list.innerHTML = visible.map(renderJob).join("");
+  if (loading) loading.hidden = true;
+  list.hidden = visible.length === 0;
+  empty.hidden = visible.length > 0;
+
+  const total = document.querySelector("#jobs-total");
+  if (total) total.textContent = String(Number(municipalityData.total) || allJobs.length);
+
+  const showing = document.querySelector("#jobs-showing");
+  if (showing) {
+    showing.textContent = activeJobsQuery
+      ? `${relevant.length} träffar i hämtade annonser`
+      : `Visar ${visible.length} av ${Number(municipalityData.total) || allJobs.length}`;
+  }
+
+  const updated = document.querySelector("#jobs-updated");
+  if (updated) {
+    const timestamp = new Date(municipalityData.updatedAt || jobsData.generatedAt);
+    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Uppdaterad ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;
+  }
+
+  const sourceLink = document.querySelector("#jobs-source-link");
+  if (sourceLink) {
+    sourceLink.href = `https://arbetsformedlingen.se/platsbanken/annonser?q=${encodeURIComponent(municipality)}`;
+  }
+
+  updateQuickJobs(municipalityData, municipality);
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderJob(job) {
+  const published = formatJobDate(job.publicationDate, "Publicerad");
+  const deadline = formatJobDate(job.applicationDeadline, "Sök senast");
+  const meta = [job.workingHours, job.duration].filter(Boolean).slice(0, 2);
+  return `<a class="job-item" href="${escapeAttribute(job.webpageUrl)}" target="_blank" rel="noopener noreferrer">
+    <span class="job-icon"><i data-lucide="briefcase-business"></i></span>
+    <span class="job-content">
+      <strong>${escapeHtml(job.headline || "Ledigt jobb")}</strong>
+      <span class="job-employer">${escapeHtml(job.employer || "Arbetsgivare saknas")} · ${escapeHtml(job.workplace || job.municipality || "")}</span>
+      <span class="job-tags">${meta.map((label) => `<span>${escapeHtml(label)}</span>`).join("")}</span>
+      <small>${published}${deadline ? ` · ${deadline}` : ""}${Number(job.vacancies) > 1 ? ` · ${Number(job.vacancies)} platser` : ""}</small>
+    </span>
+    <i class="job-open" data-lucide="arrow-up-right"></i>
+  </a>`;
+}
+
+function formatJobDate(value, prefix) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${prefix} ${date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" })}`;
+}
+
+function updateQuickJobs(municipalityData, municipality) {
+  const total = Number(municipalityData?.total) || 0;
+  const latest = municipalityData?.jobs?.[0];
+  document.querySelectorAll("[data-quick-jobs-title]").forEach((element) => {
+    element.textContent = `${total} lediga jobb i ${municipality}`;
+  });
+  document.querySelectorAll("[data-quick-jobs-detail]").forEach((element) => {
+    element.textContent = latest?.headline || "Se aktuella annonser från Platsbanken";
+  });
+}
+
+function showJobsError() {
+  document.querySelector("#jobs-loading")?.setAttribute("hidden", "");
+  document.querySelector("#jobs-list")?.setAttribute("hidden", "");
+  const empty = document.querySelector("#jobs-empty");
+  if (empty) {
+    empty.hidden = false;
+    empty.querySelector("strong").textContent = "Jobben kunde inte laddas";
+    empty.querySelector("span").textContent = "Försök igen när sidan har uppdaterats.";
+  }
+  document.querySelectorAll("[data-quick-jobs-title]").forEach((element) => {
+    element.textContent = `Jobb i ${DinPulsMunicipality.getName()}`;
+  });
+  document.querySelectorAll("[data-quick-jobs-detail]").forEach((element) => {
+    element.textContent = "Jobbdata är tillfälligt otillgänglig";
+  });
+  if (window.lucide) lucide.createIcons();
+}

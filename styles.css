@@ -1511,3 +1511,52 @@ body{transition:background .25s,color .25s}
 .module-placeholder>span{max-width:36ch;font-size:.86rem;line-height:1.5}
 [data-theme="dark"] .module-placeholder{background:#09192c;border-color:#385071}
 [data-theme="dark"] .module-placeholder>strong{color:#eaf1fb}
+
+/* =========================================================
+   DINPULS v0.8.0 – LEDIGA JOBB
+========================================================= */
+.jobs-card{display:flex;min-width:0;grid-column:1/-1;flex-direction:column;gap:14px}
+.jobs-heading{align-items:flex-start;margin:0}
+.jobs-heading>div{display:grid;gap:3px}
+.jobs-heading h2{margin:0}
+.jobs-live{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;color:#18783a;background:#e6f7eb;border-radius:999px;font-size:8px;font-weight:800;white-space:nowrap}
+.jobs-live svg{width:12px;height:12px}
+.jobs-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid #d6e8fc;border-radius:13px}
+.jobs-summary>div{display:flex;align-items:baseline;gap:7px}
+.jobs-summary strong{color:#0a57c7;font-size:25px;line-height:1}
+.jobs-summary span{color:#5e7087;font-size:9px}
+#jobs-updated{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+#jobs-updated svg{width:12px;height:12px}
+.jobs-search{display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--card,#fff);border:1px solid var(--border,#dfe5ec);border-radius:11px}
+.jobs-search:focus-within{border-color:#7fb3ed;box-shadow:0 0 0 3px rgba(10,87,199,.10)}
+.jobs-search svg{width:16px;height:16px;color:#6c7b90;flex:0 0 auto}
+.jobs-search input{width:100%;min-width:0;padding:11px 0;color:inherit;background:transparent;border:0;outline:0;font:inherit;font-size:10px}
+.jobs-loading,.jobs-empty{min-height:230px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted,#667386)}
+.jobs-loading{flex-direction:column;font-size:10px}
+.jobs-empty{flex-direction:column;text-align:center;padding:24px}
+.jobs-empty svg{width:30px;height:30px;color:#7b8da3}
+.jobs-empty strong{color:var(--text,#10213e)}
+.jobs-empty span{max-width:34ch;font-size:9px;line-height:1.5}
+.jobs-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:570px;overflow:auto;padding-right:2px;scrollbar-width:thin}
+.job-item{display:grid;grid-template-columns:36px minmax(0,1fr) 16px;gap:10px;align-items:start;padding:11px;color:inherit;background:var(--card,#fff);border:1px solid var(--border,#e1e7ef);border-radius:12px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.job-item:hover{transform:translateY(-1px);border-color:#b9d3ef;box-shadow:0 8px 22px rgba(15,48,90,.08)}
+.job-icon{width:36px;height:36px;display:grid;place-items:center;color:#0a57c7;background:#eaf3ff;border-radius:10px}
+.job-icon svg{width:18px;height:18px}
+.job-content{min-width:0;display:grid;gap:4px}
+.job-content>strong{font-size:11px;line-height:1.35}
+.job-employer{overflow:hidden;color:#596b81;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.job-content small{color:#7a8798;font-size:8px;line-height:1.4}
+.job-tags{display:flex;flex-wrap:wrap;gap:5px}
+.job-tags span{padding:3px 6px;color:#3f5f80;background:#edf3f8;border-radius:999px;font-size:7px;font-weight:700}
+.job-open{width:15px;height:15px;color:#8190a3}
+.jobs-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;color:#738197;border-top:1px solid var(--border,#e4eaf2);font-size:8px}
+.jobs-footer a{display:inline-flex;align-items:center;gap:4px;color:#0a57c7;font-weight:800;text-align:right}
+.jobs-footer a svg{width:12px;height:12px}
+[data-theme="dark"] .jobs-live{color:#8de0a7;background:#143523}
+[data-theme="dark"] .jobs-summary{background:linear-gradient(135deg,#102946,#132f4d);border-color:#29496f}
+[data-theme="dark"] .jobs-summary strong{color:#8fc2ff}
+[data-theme="dark"] .job-icon{color:#8fc2ff;background:#102946}
+[data-theme="dark"] .job-employer{color:#b0bdd0}
+[data-theme="dark"] .job-tags span{color:#b9cbe0;background:#19334f}
+[data-theme="dark"] .jobs-empty strong{color:#eaf1fb}
+@media(max-width:760px){.jobs-summary{align-items:flex-start;flex-direction:column}.jobs-summary>div{flex-wrap:wrap}.jobs-live{display:none}.jobs-list{grid-template-columns:1fr;max-height:none}.jobs-footer{align-items:flex-start;flex-direction:column}.jobs-footer a{text-align:left}}

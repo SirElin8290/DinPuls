@@ -1,4 +1,31 @@
-# DinPuls v0.7.2
+# DinPuls v0.8.0
+
+## Lediga jobb med riktig data
+
+Jobbmodulen hämtar aktuella annonser från Arbetsförmedlingens öppna JobSearch-
+API och följer alltid kommunen som valts i den centrala kommunmotorn.
+
+- Alla sju startkommuner har ett centralt `jobSearchMunicipalityId` i
+  `data/municipalities.json`.
+- `scripts/update_jobs.py` hämtar upp till 25 aktuella annonser per kommun och
+  skriver normaliserad data till `data/jobs.json`.
+- Jobbkortet visar totalt antal annonser, titel, arbetsgivare, ort,
+  anställningsform, publiceringsdatum och sista ansökningsdag.
+- Sökfältet filtrerar de hämtade annonserna direkt i webbläsaren.
+- Snabbraden visar antal jobb och den senast publicerade annonsen för vald
+  kommun.
+- GitHub-flödet **Uppdatera lediga jobb** körs varannan timme och kan även
+  startas manuellt. Ingen API-nyckel krävs.
+- Vid tillfälligt API-fel bevaras senaste fungerande kommundata.
+
+Efter uppladdning till GitHub: öppna **Actions**, välj **Uppdatera lediga jobb**
+och kör arbetsflödet en gång manuellt. Därefter sköts uppdateringen automatiskt.
+
+Datakälla: Arbetsförmedlingen – Platsbanken via JobTech JobSearch.
+
+---
+
+# Tidigare: DinPuls v0.7.2
 
 ## Verifierade hållplatsgrupper
 
