@@ -1,4 +1,26 @@
-# DinPuls v0.7.1
+# DinPuls v0.7.2
+
+## Verifierade hållplatsgrupper
+
+Version 0.7.2 låser de huvudstationer och metahållplatser som verifierats i
+Trafiklabs verkliga Stop Lookup-svar:
+
+- Åmål station — `740000076`
+- Säffle station — `740000023`
+- Bengtsfors — `740098286`
+- Mellerud — `740098017`
+- Årjäng busstation — `740000364`
+- Arvika — `740098080`
+- Grums station — `740000217`
+
+Hållplatssökningen accepterar nu antingen en exakt kommunträff eller ett
+tidigare manuellt granskat id som fortfarande finns i Trafiklabs svar. Därmed
+väljs exempelvis Säffle station, inte den mer trafikerade men felaktiga träffen
+Säfflegatan.
+
+---
+
+# Tidigare: DinPuls v0.7.1
 
 ## Automatisk aktivering av riktiga avgångar
 
