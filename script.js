@@ -1,1 +1,0 @@
-document.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{if(!b.closest('.heroText')&&!b.closest('.app')&&!b.closest('.sponsor'))return;alert('Funktionen kopplas till riktig data i nästa steg.')}));
