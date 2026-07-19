@@ -1,0 +1,70 @@
+<section class="grid four">
+  <article class="card weather-card" id="vader" aria-live="polite">
+  <div class="card-title">
+    <span class="title-icon blue-soft"><i data-lucide="cloud-sun"></i></span>
+    <div>
+      <h2>Väder</h2>
+      <small id="weather-location" data-municipality-name>Åmål</small>
+    </div>
+    <span class="weather-live-badge" id="weather-status">Hämtar…</span>
+  </div>
+
+  <div class="weather-loading" id="weather-loading">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span>Hämtar prognos från SMHI…</span>
+  </div>
+
+  <div class="weather-content" id="weather-content" hidden>
+    <div class="weather">
+      <span class="weather-symbol" id="weather-symbol">🌤️</span>
+      <div>
+        <strong id="weather-temperature">--°C</strong>
+        <p id="weather-description">Prognos saknas</p>
+        <small>
+          ↑ <span id="weather-high">--°</span>
+          &nbsp; ↓ <span id="weather-low">--°</span>
+        </small>
+      </div>
+    </div>
+
+    <div class="weather-metrics">
+      <span><i data-lucide="wind"></i><b id="weather-wind">-- m/s</b><small>Vind</small></span>
+      <span><i data-lucide="droplets"></i><b id="weather-humidity">-- %</b><small>Luftfuktighet</small></span>
+      <span><i data-lucide="cloud-rain"></i><b id="weather-precipitation">-- mm</b><small>Nederbörd</small></span>
+    </div>
+
+    <div class="forecast" id="weather-forecast"></div>
+
+    <div class="weather-footer">
+      <span id="weather-updated">Senast uppdaterad: --</span>
+      <a href="https://www.smhi.se/" target="_blank" rel="noopener">Källa: SMHI</a>
+    </div>
+  </div>
+
+  <div class="weather-error" id="weather-error" hidden>
+    <i data-lucide="cloud-off"></i>
+    <div>
+      <strong>Vädret kunde inte hämtas</strong>
+      <small>Kontrollera internetanslutningen och försök igen.</small>
+    </div>
+    <button type="button" id="weather-retry">Försök igen</button>
+  </div>
+</article>
+  <article class="card" id="trafik">
+    <div class="card-title"><span class="title-icon green-soft"><i data-lucide="car-front"></i></span><div><h2>Trafik</h2><small data-municipality-name>Åmål</small></div></div>
+    <p class="good"><i data-lucide="circle-check"></i>Inga större störningar</p><p class="muted">Trafiken flyter på bra.</p>
+    <div class="map traffic"><span class="road r1"></span><span class="road r2"></span><span class="road r3"></span><b class="w1">⚠</b><b class="w2">⚠</b></div>
+    <a class="card-link" href="#">Se trafik på karta <i data-lucide="arrow-right"></i></a>
+  </article>
+  <article class="card" id="buss">
+    <div class="card-title"><span class="title-icon blue-soft"><i data-lucide="bus-front"></i></span><div><h2>Buss & tåg</h2><small><span data-municipality-name>Åmål</span> station</small></div></div>
+    <div class="tabs"><button class="active">Bussar</button><button>Tåg</button></div>
+    <ul class="departures"><li><i data-lucide="bus-front"></i><time>14:32</time><span><strong>Åmål centrum</strong><small>Linje 501</small></span><em>3 min</em></li><li><i data-lucide="bus-front"></i><time>14:35</time><span><strong>Tösse</strong><small>Linje 502</small></span><em>6 min</em></li><li><i data-lucide="bus-front"></i><time>14:42</time><span><strong>Säffle</strong><small>Linje 503</small></span><em>13 min</em></li><li><i data-lucide="bus-front"></i><time>14:50</time><span><strong>Bengtsfors</strong><small>Linje 504</small></span><em>21 min</em></li></ul>
+    <a class="card-link" href="#">Fler avgångar <i data-lucide="arrow-right"></i></a>
+  </article>
+  <article class="card" id="drivmedel">
+    <div class="card-title"><span class="title-icon orange-soft"><i data-lucide="fuel"></i></span><div><h2>Drivmedel</h2><small data-municipality-name>Åmål</small></div></div>
+    <ul class="prices"><li><b>Bensin (95)</b><span>17,54 kr</span></li><li><b>Diesel</b><span>18,34 kr</span></li><li><b>E85</b><span>13,24 kr</span></li><li><b>Diesel MK1</b><span>18,79 kr</span></li><li><b>Laddning</b><span>3,20 kr/kWh</span></li></ul>
+    <a class="card-link" href="#">Se billigaste stationerna <i data-lucide="arrow-right"></i></a>
+  </article>
+</section>
