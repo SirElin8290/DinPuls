@@ -2,8 +2,8 @@
 """Söker säkra hållplatsgrupper för DinPuls startkommuner.
 
 API-nyckeln läses enbart från TRAFIKLAB_API_KEY och skrivs aldrig till fil.
-Endast en exakt namnträff eller ett tidigare granskat id aktiveras. Alla
-kandidater sparas för granskning i data/stop-candidates.json.
+De sju manuellt granskade hållplats-id:na återställs alltid i den centrala
+kommunfilen. Kandidater sparas fortsatt i data/stop-candidates.json.
 """
 from __future__ import annotations
 
@@ -22,6 +22,19 @@ MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 CANDIDATE_FILE = ROOT / "data" / "stop-candidates.json"
 API_KEY = os.getenv("TRAFIKLAB_API_KEY", "").strip()
 
+# Manuellt verifierade mot Trafiklab Stop Lookup 2026-07-19.
+# Denna reserv gör körningen självreparerande om en äldre workflow tidigare
+# har hunnit skriva tomma transportStops till municipalities.json.
+REVIEWED_STOPS = {
+    "Åmål": {"id": "740000076", "name": "Åmål station"},
+    "Säffle": {"id": "740000023", "name": "Säffle station"},
+    "Bengtsfors": {"id": "740098286", "name": "Bengtsfors"},
+    "Mellerud": {"id": "740098017", "name": "Mellerud"},
+    "Årjäng": {"id": "740000364", "name": "Årjäng busstation"},
+    "Arvika": {"id": "740098080", "name": "Arvika"},
+    "Grums": {"id": "740000217", "name": "Grums station"},
+}
+
 
 def normalize_name(value: str) -> str:
     value = unicodedata.normalize("NFKC", str(value)).casefold().strip()
@@ -33,7 +46,7 @@ def fetch_candidates(name: str) -> list[dict]:
         "https://realtime-api.trafiklab.se/v1/stops/name/"
         f"{quote(name)}?key={quote(API_KEY)}"
     )
-    request = Request(url, headers={"User-Agent": "DinPuls/0.7.2"})
+    request = Request(url, headers={"User-Agent": "DinPuls/0.7.3"})
     try:
         with urlopen(request, timeout=25) as response:
             payload = json.load(response)
@@ -101,12 +114,13 @@ def main() -> int:
             print(f"{name}: {error}")
             return 1
 
-        configured_ids = {
-            str(stop.get("id", ""))
-            for stop in municipality.get("transportStops", [])
-            if stop.get("id")
-        }
+        reviewed = REVIEWED_STOPS.get(name)
+        configured_ids = {reviewed["id"]} if reviewed else set()
         selected = choose_safe(name, groups, configured_ids)
+        if reviewed:
+            # ID:t är redan manuellt verifierat. Använd det även om Trafiklabs
+            # namnsökning tillfälligt ändrar sortering eller inte returnerar det.
+            selected = reviewed
         candidates = [public_candidate(group) for group in groups[:10]]
         result["municipalities"][name] = {
             "selectedId": str(selected.get("id")) if selected else None,
