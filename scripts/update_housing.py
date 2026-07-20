@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import sys
+from http.cookiejar import CookieJar
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
-from urllib.request import Request, urlopen
+from urllib.parse import urlencode, urljoin
+from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 OUTPUT = ROOT / "data" / "housing.json"
-USER_AGENT = "DinPuls/0.9.0 (+https://sirelin8290.github.io/DinPuls/)"
+USER_AGENT = "DinPuls/0.9.1 (+https://sirelin8290.github.io/DinPuls/)"
 
 
 class HousingTableParser(HTMLParser):
@@ -24,6 +26,7 @@ class HousingTableParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.in_row = False
+        self.row_depth = 0
         self.in_cell = False
         self.cells: list[str] = []
         self.cell_parts: list[str] = []
@@ -34,29 +37,50 @@ class HousingTableParser(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
         if tag == "tr":
-            self.in_row = True
-            self.cells, self.link, self.address = [], "", ""
-        elif tag in {"td", "th"} and self.in_row:
+            if not self.in_row:
+                self.in_row = True
+                self.row_depth = 1
+                self.cells, self.link, self.address = [], "", ""
+            else:
+                self.row_depth += 1
+        elif tag in {"td", "th"} and self.in_row and self.row_depth == 1:
             self.in_cell = True
             self.cell_parts = []
-        elif tag == "a" and self.in_row and str(attributes.get("id", "")).endswith("ObjectDetailsUrl"):
-            self.link = str(attributes.get("href") or "")
+        elif tag == "a" and self.in_row and self.row_depth == 1:
+            identifier = str(attributes.get("id", ""))
+            href = str(attributes.get("href") or "")
+            if identifier.endswith("ObjectDetailsUrl") or "hlDetails" in identifier or "ObjectDetailsTemplate" in href:
+                self.link = href
 
     def handle_data(self, data: str) -> None:
         if self.in_cell:
             self.cell_parts.append(data)
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in {"td", "th"} and self.in_cell:
+        if tag in {"td", "th"} and self.in_cell and self.row_depth == 1:
             value = " ".join("".join(self.cell_parts).replace("\xa0", " ").split())
             self.cells.append(value)
             if self.link and not self.address and value:
                 self.address = value
             self.in_cell = False
+        elif tag == "tr" and self.in_row and self.row_depth > 1:
+            self.row_depth -= 1
         elif tag == "tr" and self.in_row:
             if self.link and self.address:
                 self.rows.append({"cells": self.cells[:], "link": self.link, "address": self.address})
             self.in_row = False
+            self.row_depth = 0
+
+
+class HiddenFieldParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.fields: dict[str, str] = {}
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "input" and str(attributes.get("type", "")).lower() == "hidden" and attributes.get("name"):
+            self.fields[str(attributes["name"])] = str(attributes.get("value") or "")
 
 
 def get_json(path: Path, fallback: dict) -> dict:
@@ -88,7 +112,8 @@ def number(value: str) -> int | float | None:
 
 def parse_hss(provider: dict) -> list[dict]:
     parser = HousingTableParser()
-    parser.feed(fetch(provider["dataUrl"]).decode("utf-8", errors="replace"))
+    for page in fetch_hss_pages(provider["dataUrl"]):
+        parser.feed(page)
     listings = []
     seen = set()
     for row in parser.rows:
@@ -123,6 +148,46 @@ def parse_hss(provider: dict) -> list[dict]:
             "provider": provider["name"],
         })
     return listings
+
+
+def fetch_hss_pages(url: str) -> list[str]:
+    """Hämtar samtliga ASP.NET-resultatsidor med samma session."""
+    opener = build_opener(HTTPCookieProcessor(CookieJar()))
+    request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html"})
+    try:
+        first = opener.open(request, timeout=35).read().decode("utf-8", errors="replace")
+    except HTTPError as error:
+        raise RuntimeError(f"HTTP {error.code}") from None
+    except URLError as error:
+        raise RuntimeError(f"kunde inte nå källan: {error.reason}") from None
+
+    pagination_text = html.unescape(first).replace("\xa0", " ")
+    match = re.search(r"lblNoOfPages[^>]*>(\d+)<", pagination_text, flags=re.IGNORECASE)
+    total_pages = min(int(match.group(1)), 20) if match else 1
+    pages = [first]
+    current = first
+    event_target = "ctl00$ctl01$DefaultSiteContentPlaceHolder1$Col1$ucNavBar$btnNavNext"
+    for _ in range(1, total_pages):
+        hidden = HiddenFieldParser()
+        hidden.feed(current)
+        form = hidden.fields
+        form["__EVENTTARGET"] = event_target
+        form["__EVENTARGUMENT"] = ""
+        post = Request(
+            url,
+            data=urlencode(form).encode("utf-8"),
+            headers={
+                "User-Agent": USER_AGENT,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Referer": url,
+            },
+        )
+        try:
+            current = opener.open(post, timeout=35).read().decode("utf-8", errors="replace")
+        except (HTTPError, URLError) as error:
+            raise RuntimeError(f"sidbläddringen misslyckades: {error}") from None
+        pages.append(current)
+    return pages
 
 
 def parse_arvika(provider: dict) -> list[dict]:
