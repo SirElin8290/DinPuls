@@ -6,6 +6,7 @@ import html
 import json
 import re
 import sys
+import uuid
 from http.cookiejar import CookieJar
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -17,7 +18,7 @@ from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
 ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 OUTPUT = ROOT / "data" / "housing.json"
-USER_AGENT = "DinPuls/0.9.1 (+https://sirelin8290.github.io/DinPuls/)"
+USER_AGENT = "DinPuls/0.9.2 (+https://sirelin8290.github.io/DinPuls/)"
 
 
 class HousingTableParser(HTMLParser):
@@ -213,6 +214,69 @@ def parse_arvika(provider: dict) -> list[dict]:
     return listings
 
 
+def momentum_date(value: object) -> str | None:
+    match = re.search(r"/Date\((\d+)", str(value or ""))
+    if not match:
+        return None
+    return datetime.fromtimestamp(int(match.group(1)) / 1000, tz=timezone.utc).isoformat(timespec="seconds")
+
+
+def fetch_json_url(url: str, headers: dict[str, str] | None = None) -> dict:
+    request_headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+    request_headers.update(headers or {})
+    try:
+        with urlopen(Request(url, headers=request_headers), timeout=35) as response:
+            return json.load(response)
+    except HTTPError as error:
+        raise RuntimeError(f"HTTP {error.code}") from None
+    except URLError as error:
+        raise RuntimeError(f"kunde inte nå källan: {error.reason}") from None
+
+
+def parse_momentum(provider: dict) -> list[dict]:
+    settings_url = urljoin(provider["url"], "/assets/app-settings.json")
+    settings = fetch_json_url(settings_url)
+    api_base = str(settings.get("apiBaseUrl") or "")
+    api_key = str(settings.get("xApiKey") or "")
+    client_id = str(settings.get("appInstanceId") or "")
+    if not api_base or not api_key or not client_id:
+        raise RuntimeError("Momentum-konfigurationen är ofullständig")
+
+    query = urlencode({"type": "residential", "limit": 100, "offset": 0})
+    api_url = urljoin(api_base.rstrip("/") + "/", "v2/market/objects") + "?" + query
+    payload = fetch_json_url(api_url, {
+        "X-Api-Key": api_key,
+        "Accept-Language": "sv-SE",
+        "X-Momentum-Client-Version": str(settings.get("appVersion") or ""),
+        "X-Momentum-Client": "momentum.se-fastighetminasidor",
+        "X-Momentum-Client-Id": client_id,
+        "X-Momentum-Device-Key": str(uuid.uuid5(uuid.NAMESPACE_URL, provider["url"])),
+    })
+
+    listings = []
+    for item in payload.get("items", []) if isinstance(payload, dict) else []:
+        identifier = str(item.get("id") or "")
+        if not identifier:
+            continue
+        pricing = item.get("pricing") or {}
+        location = item.get("location") or {}
+        area = location.get("area") or {}
+        size = item.get("size") or {}
+        availability = item.get("availability") or {}
+        listings.append({
+            "id": identifier,
+            "address": str(item.get("displayName") or "Ledig lägenhet"),
+            "area": str(area.get("displayName") or ""),
+            "rooms": size.get("rooms"),
+            "size": size.get("area"),
+            "rent": pricing.get("priceInclVAT") or pricing.get("price"),
+            "available": momentum_date(availability.get("availableFrom")),
+            "url": provider["url"].rstrip("/") + "/" + identifier,
+            "provider": provider["name"],
+        })
+    return listings
+
+
 def main() -> int:
     configuration = get_json(MUNICIPALITY_FILE, {})
     existing = get_json(OUTPUT, {"municipalities": {}})
@@ -232,7 +296,14 @@ def main() -> int:
             if not parser_name:
                 continue
             try:
-                fetched = parse_hss(provider) if parser_name == "vitec-hss" else parse_arvika(provider)
+                if parser_name == "vitec-hss":
+                    fetched = parse_hss(provider)
+                elif parser_name == "vitec-arena":
+                    fetched = parse_arvika(provider)
+                elif parser_name == "momentum":
+                    fetched = parse_momentum(provider)
+                else:
+                    raise RuntimeError(f"okänd hämtare: {parser_name}")
                 listings.extend(fetched)
                 fetched_any = True
                 print(f"{name}, {provider['name']}: {len(fetched)} objekt")

@@ -1,4 +1,32 @@
-# DinPuls v0.9.0
+# DinPuls v0.9.2
+
+## Bostäder direkt i alla sju startkommuner
+
+Den offentliga Momentum-källan är nu ansluten för Säffle, Bengtsfors, Årjäng
+och Grums. Tillsammans med Åmål, Mellerud och Arvika innebär det att samtliga
+sju startkommuner kan visa verkliga lediga bostäder direkt i DinPuls.
+
+- Ingen inloggning eller ny GitHub-hemlighet krävs för hämtningen.
+- API-inställningarna läses från respektive bostadsbolags offentliga
+  webbkonfiguration.
+- Alla objekt normaliseras till samma centrala bostadsmodell.
+- Senaste fungerande kommundata bevaras om en källa tillfälligt ligger nere.
+- Direktlänken på varje objekt går till det officiella bostadsbolaget.
+
+---
+
+# Tidigare: DinPuls v0.9.1
+
+## Korrigerad bostadshämtning för Åmål
+
+Åmåls Kommunfastigheter använder ett eget Vitec-format och delar upp de
+lediga objekten på flera resultatsidor. Hämtaren läser nu samtliga sidor och
+identifierar Åmåls annonslänkar korrekt. Tidigare kunde Åmål därför felaktigt
+visas med 0 bostäder trots publicerade objekt.
+
+---
+
+# Tidigare: DinPuls v0.9.0
 
 ## Lediga bostäder från officiella hyresvärdar
 
