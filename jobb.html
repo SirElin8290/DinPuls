@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="sv" data-portal="jobs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Alla aktuella lediga jobb nära dig – samlade av DinPuls.">
+  <title>Lediga jobb – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-pages.css">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero jobs"><span class="section-kicker">DinPuls Jobb</span><h1>Lediga jobb i <span data-portal-municipality>Åmål</span></h1><p>Utforska aktuella jobb lokalt. Ansökan görs hos Arbetsförmedlingen eller arbetsgivaren.</p></section>
+    <div class="portal-layout">
+      <section class="portal-content">
+        <div class="portal-toolbar two">
+          <label>Kommun<select id="portal-municipality"></select></label>
+          <label>Sök jobb<input id="portal-search" type="search" placeholder="Titel, yrke eller arbetsgivare"></label>
+        </div>
+        <div class="portal-result-heading"><h2 id="portal-total">Laddar jobb…</h2><span id="portal-updated"></span></div>
+        <div id="portal-list" class="portal-list"></div>
+        <div id="portal-empty" class="portal-empty" hidden>Inga jobb matchar din sökning.</div>
+      </section>
+      <aside class="portal-ad-column" data-secondary-ads="jobb"></aside>
+    </div>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="portal-pages.js"></script>
+</body></html>

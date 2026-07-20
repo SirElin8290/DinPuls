@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.9.2
+   DINPULS.SE v0.10.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.9.2";
+const DINPULS_VERSION = "0.10.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -177,6 +177,7 @@ async function startDinPuls() {
     initializeClock();
     initializeTheme();
     initializeMobileMenu();
+    initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
     await Promise.all([initializeNews(), initializeTransport(), initializeJobs(), initializeHousing()]);
@@ -1166,7 +1167,7 @@ function renderJobs() {
 
   const sourceLink = document.querySelector("#jobs-source-link");
   if (sourceLink) {
-    sourceLink.href = `https://arbetsformedlingen.se/platsbanken/annonser?q=${encodeURIComponent(municipality)}`;
+    sourceLink.href = `jobb.html?kommun=${encodeURIComponent(municipality)}`;
   }
 
   updateQuickJobs(municipalityData, municipality);
@@ -1177,7 +1178,8 @@ function renderJob(job) {
   const published = formatJobDate(job.publicationDate, "Publicerad");
   const deadline = formatJobDate(job.applicationDeadline, "Sök senast");
   const meta = [job.workingHours, job.duration].filter(Boolean).slice(0, 2);
-  return `<a class="job-item" href="${escapeAttribute(job.webpageUrl)}" target="_blank" rel="noopener noreferrer">
+  const detailUrl = `jobb.html?kommun=${encodeURIComponent(DinPulsMunicipality.getName())}&annons=${encodeURIComponent(job.id || "")}`;
+  return `<a class="job-item" href="${escapeAttribute(detailUrl)}">
     <span class="job-icon"><i data-lucide="briefcase-business"></i></span>
     <span class="job-content">
       <strong>${escapeHtml(job.headline || "Ledigt jobb")}</strong>
@@ -1283,7 +1285,7 @@ function renderHousing() {
   const sourceLink = document.querySelector("#housing-source-link");
   if (sourceLink) {
     sourceLink.hidden = providers.length === 0;
-    sourceLink.href = providers[0]?.url || "#bostader";
+    sourceLink.href = `bostader.html?kommun=${encodeURIComponent(municipality)}`;
   }
 
   updateQuickHousing(municipalityData, municipality);
@@ -1296,7 +1298,8 @@ function renderHousingItem(item) {
     Number(item.size) > 0 ? `${formatHousingNumber(item.size)} m²` : "",
     Number(item.rent) > 0 ? `${new Intl.NumberFormat("sv-SE").format(Number(item.rent))} kr/mån` : ""
   ].filter(Boolean);
-  return `<a class="housing-item" href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">
+  const detailUrl = `bostader.html?kommun=${encodeURIComponent(DinPulsMunicipality.getName())}&annons=${encodeURIComponent(item.url || item.address || "")}`;
+  return `<a class="housing-item" href="${escapeAttribute(detailUrl)}">
     <span class="housing-item-icon"><i data-lucide="house"></i></span>
     <span class="housing-item-content">
       <strong>${escapeHtml(item.address || "Ledig bostad")}</strong>
@@ -1350,4 +1353,38 @@ function showHousingError() {
     element.textContent = "Bostadsdata är tillfälligt otillgänglig";
   });
   if (window.lucide) lucide.createIcons();
+}
+
+/* =========================================================
+   DINPULS v0.10.0 – TRE ROTERANDE PREMIUMANNONSGRUPPER
+========================================================= */
+function initializeRotatingAds() {
+  document.querySelectorAll("[data-ad-dice]").forEach((module, moduleIndex) => {
+    const startNumber = moduleIndex * 10 + 1;
+    module.innerHTML = `<span class="ad-dice-label">Annonsgrupp ${moduleIndex + 1}</span>
+      ${Array.from({ length: 10 }, (_, faceIndex) => {
+        const slot = startNumber + faceIndex;
+        return `<a class="ad-face" data-ad-face href="mailto:annonser@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
+          <span class="ad-slot">PREMIUM ${slot}</span>
+          <strong>Din verksamhet kan synas här</strong>
+          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 1 500 kr/mån</small>
+          <b>Boka plats <i data-lucide="arrow-right"></i></b>
+        </a>`;
+      }).join("")}
+      <div class="ad-dots" aria-hidden="true">${Array.from({ length: 10 }, (_, index) => `<span data-ad-dot class="${index === moduleIndex ? "active" : ""}"></span>`).join("")}</div>`;
+    const faces = [...module.querySelectorAll("[data-ad-face]")];
+    const dots = [...module.querySelectorAll("[data-ad-dot]")];
+    if (!faces.length) return;
+    let current = moduleIndex % faces.length;
+
+    const show = (index) => {
+      current = (index + faces.length) % faces.length;
+      faces.forEach((face, faceIndex) => face.hidden = faceIndex !== current);
+      dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === current));
+      module.dataset.activeAd = String(current + 1);
+    };
+
+    show(current);
+    window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
+  });
 }

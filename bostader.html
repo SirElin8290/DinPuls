@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="sv" data-portal="housing">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Alla aktuella lediga bostäder nära dig – samlade av DinPuls.">
+  <title>Lediga bostäder – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-pages.css">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero"><span class="section-kicker">DinPuls Bostad</span><h1>Lediga bostäder i <span data-portal-municipality>Åmål</span></h1><p>Jämför aktuella objekt här. Ansökan görs tryggt hos den officiella hyresvärden.</p></section>
+    <div class="portal-layout">
+      <section class="portal-content">
+        <div class="portal-toolbar">
+          <label>Kommun<select id="portal-municipality"></select></label>
+          <label>Minst antal rum<select id="housing-rooms"><option value="0">Alla</option><option value="1">1 rum</option><option value="2">2 rum</option><option value="3">3 rum</option><option value="4">4+ rum</option></select></label>
+          <label>Högsta hyra<input id="housing-rent" type="number" min="0" step="500" placeholder="Ingen gräns"></label>
+          <label>Sök<input id="portal-search" type="search" placeholder="Adress eller område"></label>
+        </div>
+        <div class="portal-result-heading"><h2 id="portal-total">Laddar bostäder…</h2><span id="portal-updated"></span></div>
+        <div id="portal-list" class="portal-list"></div>
+        <div id="portal-empty" class="portal-empty" hidden>Inga bostäder matchar din filtrering.</div>
+      </section>
+      <aside class="portal-ad-column" data-secondary-ads="bostäder"></aside>
+    </div>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="portal-pages.js"></script>
+</body></html>

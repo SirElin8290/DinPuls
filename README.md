@@ -1,4 +1,17 @@
-# DinPuls v0.9.2
+# DinPuls v0.10.0
+
+## Jobb- och bostadssidor samt annonsnivåer
+
+- `bostader.html` visar samtliga hämtade bostäder i vald kommun med sökning,
+  rumsfilter och högsta hyra. Besökaren går vidare till hyresvärden först via
+  knappen på DinPuls-sidan.
+- `jobb.html` visar samtliga hämtade jobb i vald kommun med lokal sökning och
+  en tydlig ansökningslänk till originalannonsen.
+- Startsidan har tre roterande premiumannonsgrupper med tio platser per grupp,
+  totalt 30 platser avsedda för 1 500 kr per månad.
+- Jobb- och bostadssidorna har kategoriannonser avsedda för 500 kr per månad.
+- Kommunvalet delas via `localStorage`, så mellansidorna öppnas för kommunen
+  som användaren redan följer.
 
 ## Bostäder direkt i alla sju startkommuner
 

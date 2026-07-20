@@ -1612,3 +1612,13 @@ body{transition:background .25s,color .25s}
 [data-theme="dark"] .housing-empty{background:#09192c}
 [data-theme="dark"] .housing-empty strong{color:#eaf1fb}
 @media(max-width:760px){.housing-summary{align-items:flex-start;flex-direction:column}.housing-summary>div{flex-wrap:wrap}.housing-live{display:none}.housing-list,.housing-providers{grid-template-columns:1fr;max-height:none}.housing-footer{align-items:flex-start;flex-direction:column}.housing-footer a{text-align:left}}
+
+/* =========================================================
+   DINPULS v0.10.0 – 3 × 10 ROTERANDE PREMIUMANNONSER
+========================================================= */
+.premium-ads{margin:20px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
+.premium-ads-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px}.premium-ads-heading h2{margin:4px 0 0}.premium-ads-heading>span{color:var(--muted);font-size:11px;font-weight:700}
+.ad-dice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.ad-dice{position:relative;min-height:210px;overflow:hidden;padding:14px;border:1px solid #274f81;border-radius:18px;background:linear-gradient(145deg,#061a3a,#0a57c7);box-shadow:0 14px 28px rgba(8,38,83,.16);perspective:700px}.ad-dice-label{display:inline-flex;padding:5px 8px;color:#dcecff;background:rgba(255,255,255,.12);border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.ad-face{min-height:145px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:18px;color:#fff;animation:ad-dice-turn .55s ease}.ad-face[hidden]{display:none}.ad-face .ad-slot{padding:4px 7px;color:#082653;background:#ffd43b;border-radius:5px;font-size:9px;font-weight:900}.ad-face strong{font-size:20px;line-height:1.2}.ad-face small{color:#dcecff;line-height:1.45}.ad-face b{display:inline-flex;align-items:center;gap:5px;margin-top:3px;font-size:11px}.ad-face b svg{width:14px}.ad-dots{display:flex;justify-content:center;gap:4px}.ad-dots span{width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%}.ad-dots span.active{width:15px;background:#fff;border-radius:999px}@keyframes ad-dice-turn{from{opacity:0;transform:rotateY(70deg) scale(.94)}to{opacity:1;transform:rotateY(0) scale(1)}}
+[data-theme="dark"] .premium-ads{background:#0b1b30}
+@media(max-width:900px){.ad-dice-grid{grid-template-columns:1fr}.ad-dice{min-height:190px}}@media(max-width:760px){.premium-ads{margin:14px 12px;padding:16px}.premium-ads-heading{align-items:flex-start;flex-direction:column}.ad-face strong{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.ad-face{animation:none}}
