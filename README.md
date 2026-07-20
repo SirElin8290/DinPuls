@@ -1,4 +1,10 @@
-# DinPuls v0.11.0
+# DinPuls v0.11.1
+
+## Klickbar drivmedelsruta
+
+Hela drivmedelskortet på startsidan öppnar nu drivmedelssidan. De enskilda
+stationsraderna och länken längst ned fungerar fortfarande separat. Kortet kan
+även öppnas med Enter eller mellanslag för tangentbordsanvändare.
 
 ## Tankning och billaddning
 

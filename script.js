@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.11.0
+   DINPULS.SE v0.11.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.11.0";
+const DINPULS_VERSION = "0.11.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -177,6 +177,7 @@ async function startDinPuls() {
     initializeClock();
     initializeTheme();
     initializeMobileMenu();
+    initializeFuelCardLink();
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
@@ -220,6 +221,31 @@ function initializeSearch() {
         `Sökning efter: ${value}\n\nSökfunktionen kopplas till riktiga data i en senare sprint.`
       );
     }
+  });
+}
+
+function initializeFuelCardLink() {
+  const card = document.querySelector("#drivmedel");
+  if (!card) return;
+  card.classList.add("is-clickable-card");
+  card.tabIndex = 0;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", "Öppna tankning och billaddning för vald kommun");
+
+  const openFuelPage = () => {
+    const link = document.querySelector("#fuel-page-link");
+    window.location.href = link?.href || `drivmedel.html?kommun=${encodeURIComponent(DinPulsMunicipality.getName())}`;
+  };
+
+  card.addEventListener("click", event => {
+    if (event.target.closest("a, button, input, select, label")) return;
+    openFuelPage();
+  });
+  card.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.target.closest("a, button, input, select")) return;
+    event.preventDefault();
+    openFuelPage();
   });
 }
 

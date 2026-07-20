@@ -144,7 +144,7 @@ def main() -> None:
     municipalities = json.loads(MUNICIPALITIES.read_text(encoding="utf-8"))["municipalities"]
     previous = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {"municipalities": {}}
     generated = datetime.now(timezone.utc).isoformat()
-    result = {"version": "0.11.0", "generatedAt": generated, "radiusKm": RADIUS_METERS // 1000,
+    result = {"version": "0.11.1", "generatedAt": generated, "radiusKm": RADIUS_METERS // 1000,
               "principle": "Lokala pumppriser gissas aldrig. Prisets typ och kontrolltid visas alltid.", "municipalities": {}}
     try:
         elements = fetch_all_elements(municipalities)
