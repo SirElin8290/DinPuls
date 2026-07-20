@@ -1,4 +1,17 @@
-# DinPuls v0.10.0
+# DinPuls v0.11.0
+
+## Tankning och billaddning
+
+- `drivmedel.html` samlar tank- och laddstationer för vald kommun och har
+  filtrering efter stationstyp, prisstatus och fritext.
+- Startsidans drivmedelskort och snabbrad följer den centrala kommunmotorn.
+- `scripts/update_fuel.py` hämtar öppna stationsuppgifter i ett samlat
+  Overpass-anrop och fördelar stationerna inom 15 km till de sju kommunerna.
+- GitHub-flödet **Uppdatera tank- och laddstationer** körs var sjätte timme.
+- Lokala pumppriser gissas aldrig. Pris saknas visas när det inte finns en
+  tillförlitlig prisuppgift. Operatörspriser märks uttryckligen som sådana.
+- En verifierad officiell grundlista per kommun finns kvar om den öppna
+  karttjänsten tillfälligt inte svarar.
 
 ## Jobb- och bostadssidor samt annonsnivåer
 

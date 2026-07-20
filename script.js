@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.10.0
+   DINPULS.SE v0.11.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.10.0";
+const DINPULS_VERSION = "0.11.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -180,7 +180,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeNews(), initializeTransport(), initializeJobs(), initializeHousing()]);
+    await Promise.all([initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -1352,6 +1352,52 @@ function showHousingError() {
   document.querySelectorAll("[data-quick-housing-detail]").forEach((element) => {
     element.textContent = "Bostadsdata är tillfälligt otillgänglig";
   });
+  if (window.lucide) lucide.createIcons();
+}
+
+/* =========================================================
+   DINPULS v0.11.0 – TANKNING OCH BILLADDNING
+========================================================= */
+let fuelData = null;
+
+async function initializeFuel() {
+  DinPulsMunicipality.subscribe("fuel", renderFuel);
+  try {
+    const response = await fetch(`data/fuel.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    fuelData = await response.json();
+    renderFuel();
+  } catch (error) {
+    console.error("Tank- och laddstationer kunde inte laddas:", error);
+    const list = document.querySelector("#fuel-compact-list");
+    if (list) list.innerHTML = `<span class="fuel-empty">Stationsdata är tillfälligt otillgänglig.</span>`;
+  }
+}
+
+function renderFuel() {
+  if (!fuelData) return;
+  const municipality = DinPulsMunicipality.getName();
+  const stations = fuelData.municipalities?.[municipality]?.stations || [];
+  const priced = stations.filter(station => Number(station.price) > 0);
+  const visible = [...stations].sort((a, b) => {
+    if (Number(a.price) > 0 && Number(b.price) <= 0) return -1;
+    if (Number(b.price) > 0 && Number(a.price) <= 0) return 1;
+    return Number(a.distanceKm) - Number(b.distanceKm);
+  }).slice(0, 3);
+  const total = document.querySelector("#fuel-station-total");
+  if (total) total.textContent = String(stations.length);
+  const list = document.querySelector("#fuel-compact-list");
+  if (list) {
+    list.innerHTML = visible.length ? visible.map(station => `<a href="drivmedel.html?kommun=${encodeURIComponent(municipality)}">
+      <span class="fuel-compact-icon ${station.type}"><i data-lucide="${station.type === "charging" ? "plug-zap" : "fuel"}"></i></span>
+      <span><strong>${escapeHtml(station.name)}</strong><small>${escapeHtml(station.type === "charging" ? "Billaddning" : "Tankstation")} · ${Number(station.distanceKm) > 0 ? `${formatHousingNumber(station.distanceKm)} km` : `i ${escapeHtml(municipality)}`}</small></span>
+      <b class="${Number(station.price) > 0 ? "has-price" : "missing-price"}">${Number(station.price) > 0 ? `${formatHousingNumber(station.price)} ${escapeHtml(station.unit)}` : "Pris saknas"}</b>
+    </a>`).join("") : `<span class="fuel-empty">Inga registrerade stationer hittades inom 15 km.</span>`;
+  }
+  const pageLink = document.querySelector("#fuel-page-link");
+  if (pageLink) pageLink.href = `drivmedel.html?kommun=${encodeURIComponent(municipality)}`;
+  document.querySelectorAll("[data-quick-fuel-title]").forEach(element => element.textContent = `${stations.length} tank- och laddstationer i ${municipality}`);
+  document.querySelectorAll("[data-quick-fuel-detail]").forEach(element => element.textContent = priced.length ? `${priced.length} med verifierat operatörspris` : "Se stationer, utbud och vägbeskrivning");
   if (window.lucide) lucide.createIcons();
 }
 

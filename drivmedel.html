@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Tankstationer, laddstationer och verifierade priser nära dig – DinPuls.">
+  <title>Tankning och billaddning – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-pages.css">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero fuel"><span class="section-kicker">DinPuls Drivmedel</span><h1>Tanka eller ladda i <span data-fuel-municipality>Åmål</span></h1><p>Stationer inom 15 km. Vi visar bara priser med tydlig källa och kontrolltid – aldrig gissade lokala pumppriser.</p></section>
+    <div class="fuel-principle"><i data-lucide="shield-check"></i><span><strong>Öppen prismärkning:</strong> operatörspris, stationspris och användarrapporterat pris hålls isär. ”Pris saknas” betyder att vi saknar ett säkert aktuellt pris.</span></div>
+    <div class="portal-layout">
+      <section class="portal-content">
+        <div class="portal-toolbar fuel-toolbar">
+          <label>Kommun<select id="fuel-municipality"></select></label>
+          <label>Stationstyp<select id="fuel-type"><option value="all">Alla</option><option value="fuel">Tankstationer</option><option value="charging">Laddstationer</option></select></label>
+          <label>Prisuppgift<select id="fuel-price-filter"><option value="all">Alla</option><option value="priced">Pris finns</option><option value="missing">Pris saknas</option></select></label>
+          <label>Sök<input id="fuel-search" type="search" placeholder="Station, kedja eller adress"></label>
+        </div>
+        <div class="portal-result-heading"><h2 id="fuel-total">Hämtar stationer…</h2><span id="fuel-updated"></span></div>
+        <div class="fuel-legend"><span><i class="price-dot verified"></i>Verifierat operatörspris</span><span><i class="price-dot missing"></i>Pris saknas</span></div>
+        <div id="fuel-list" class="portal-list"></div><div id="fuel-empty" class="portal-empty" hidden>Inga stationer matchar filtret.</div>
+      </section>
+      <aside class="portal-ad-column" id="fuel-ads"></aside>
+    </div>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="fuel-page.js"></script>
+</body></html>
