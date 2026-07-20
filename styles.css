@@ -1560,3 +1560,55 @@ body{transition:background .25s,color .25s}
 [data-theme="dark"] .job-tags span{color:#b9cbe0;background:#19334f}
 [data-theme="dark"] .jobs-empty strong{color:#eaf1fb}
 @media(max-width:760px){.jobs-summary{align-items:flex-start;flex-direction:column}.jobs-summary>div{flex-wrap:wrap}.jobs-live{display:none}.jobs-list{grid-template-columns:1fr;max-height:none}.jobs-footer{align-items:flex-start;flex-direction:column}.jobs-footer a{text-align:left}}
+
+/* =========================================================
+   DINPULS v0.9.0 – LEDIGA BOSTÄDER
+========================================================= */
+.housing-card{display:flex;min-width:0;grid-column:1/-1;flex-direction:column;gap:14px}
+.housing-heading{align-items:flex-start;margin:0}
+.housing-heading>div{display:grid;gap:3px}
+.housing-live{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;color:#18783a;background:#e6f7eb;border-radius:999px;font-size:8px;font-weight:800;white-space:nowrap}
+.housing-live svg{width:12px;height:12px}
+.housing-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:linear-gradient(135deg,#edf8f1,#f8fcf9);border:1px solid #d5ebdd;border-radius:13px}
+.housing-summary>div{display:flex;align-items:baseline;gap:7px}
+.housing-summary strong{color:#18783a;font-size:25px;line-height:1}
+.housing-summary span{color:#5e7087;font-size:9px}
+#housing-updated{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+#housing-updated svg{width:12px;height:12px}
+.housing-loading,.housing-empty{min-height:190px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted,#667386)}
+.housing-loading{flex-direction:column;font-size:10px}
+.housing-empty{flex-direction:column;text-align:center;padding:24px;background:var(--bg,#f5f7fb);border:1px dashed var(--border,#dfe6ef);border-radius:13px}
+.housing-empty svg{width:30px;height:30px;color:#6f8e79}
+.housing-empty strong{color:var(--text,#10213e)}
+.housing-empty span{max-width:48ch;font-size:9px;line-height:1.5}
+.housing-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:570px;overflow:auto;padding-right:2px;scrollbar-width:thin}
+.housing-item{display:grid;grid-template-columns:36px minmax(0,1fr) 16px;gap:10px;align-items:start;padding:11px;color:inherit;background:var(--card,#fff);border:1px solid var(--border,#e1e7ef);border-radius:12px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.housing-item:hover{transform:translateY(-1px);border-color:#b8dcc5;box-shadow:0 8px 22px rgba(15,72,43,.08)}
+.housing-item-icon{width:36px;height:36px;display:grid;place-items:center;color:#18783a;background:#e8f6ed;border-radius:10px}
+.housing-item-icon svg{width:18px;height:18px}
+.housing-item-content{min-width:0;display:grid;gap:4px}
+.housing-item-content>strong{font-size:11px;line-height:1.35}
+.housing-item-content>span:not(.housing-tags){overflow:hidden;color:#596b81;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.housing-item-content small{color:#7a8798;font-size:8px;line-height:1.4}
+.housing-tags{display:flex;flex-wrap:wrap;gap:5px}
+.housing-tags span{display:inline;padding:3px 6px;color:#376548;background:#eaf5ee;border-radius:999px;font-size:7px;font-weight:700}
+.housing-open{width:15px;height:15px;color:#8190a3}
+.housing-providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.housing-provider{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;color:inherit;background:var(--bg,#f5f7fb);border:1px solid var(--border,#e1e7ef);border-radius:11px}
+.housing-provider>span{display:flex;align-items:center;gap:7px;min-width:0}
+.housing-provider strong{overflow:hidden;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.housing-provider svg{width:15px;height:15px;color:#18783a;flex:0 0 auto}
+.housing-provider small{display:flex;align-items:center;gap:3px;color:#18783a;font-size:8px;white-space:nowrap}
+.housing-provider small svg{width:11px;height:11px}
+.housing-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;color:#738197;border-top:1px solid var(--border,#e4eaf2);font-size:8px}
+.housing-footer a{display:inline-flex;align-items:center;gap:4px;color:#18783a;font-weight:800;text-align:right}
+.housing-footer a svg{width:12px;height:12px}
+[data-theme="dark"] .housing-live{color:#8de0a7;background:#143523}
+[data-theme="dark"] .housing-summary{background:linear-gradient(135deg,#123326,#153b2b);border-color:#2c5940}
+[data-theme="dark"] .housing-summary strong{color:#8de0a7}
+[data-theme="dark"] .housing-item-icon{color:#8de0a7;background:#143523}
+[data-theme="dark"] .housing-item-content>span:not(.housing-tags){color:#b0bdd0}
+[data-theme="dark"] .housing-tags span{color:#bce5c9;background:#183b29}
+[data-theme="dark"] .housing-empty{background:#09192c}
+[data-theme="dark"] .housing-empty strong{color:#eaf1fb}
+@media(max-width:760px){.housing-summary{align-items:flex-start;flex-direction:column}.housing-summary>div{flex-wrap:wrap}.housing-live{display:none}.housing-list,.housing-providers{grid-template-columns:1fr;max-height:none}.housing-footer{align-items:flex-start;flex-direction:column}.housing-footer a{text-align:left}}

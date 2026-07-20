@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.8.0
+   DINPULS.SE v0.9.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.8.0";
+const DINPULS_VERSION = "0.9.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -179,7 +179,7 @@ async function startDinPuls() {
     initializeMobileMenu();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeNews(), initializeTransport(), initializeJobs()]);
+    await Promise.all([initializeNews(), initializeTransport(), initializeJobs(), initializeHousing()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -368,7 +368,6 @@ function renderMunicipalityPlaceholders(config) {
     const kind = element.dataset.quickPlaceholder;
     const labels = {
       jobs: [`Jobb i ${config.name}`, "Datakälla ansluts"],
-      housing: [`Bostäder i ${config.name}`, "Datakälla ansluts"],
       events: [`Evenemang i ${config.name}`, "Datakälla ansluts"],
       fuel: [`Drivmedel i ${config.name}`, "Prisdata ansluts"]
     };
@@ -1221,6 +1220,134 @@ function showJobsError() {
   });
   document.querySelectorAll("[data-quick-jobs-detail]").forEach((element) => {
     element.textContent = "Jobbdata är tillfälligt otillgänglig";
+  });
+  if (window.lucide) lucide.createIcons();
+}
+
+/* =========================================================
+   DINPULS v0.9.0 – LEDIGA BOSTÄDER
+========================================================= */
+let housingData = null;
+
+async function initializeHousing() {
+  DinPulsMunicipality.subscribe("housing", renderHousing);
+  const loading = document.querySelector("#housing-loading");
+  if (loading) loading.hidden = false;
+  try {
+    const response = await fetch(`data/housing.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    const data = await response.json();
+    if (!data?.municipalities || typeof data.municipalities !== "object") {
+      throw new Error("Bostadsfilen saknar kommuner");
+    }
+    housingData = data;
+    renderHousing();
+  } catch (error) {
+    console.error("Lediga bostäder kunde inte laddas:", error);
+    showHousingError();
+  }
+}
+
+function renderHousing() {
+  const list = document.querySelector("#housing-list");
+  const empty = document.querySelector("#housing-empty");
+  const loading = document.querySelector("#housing-loading");
+  const providersBox = document.querySelector("#housing-providers");
+  if (!list || !empty || !providersBox || !housingData) return;
+
+  const municipality = DinPulsMunicipality.getName();
+  const municipalityData = housingData.municipalities?.[municipality] || { listings: [], providers: [] };
+  const listings = Array.isArray(municipalityData.listings) ? municipalityData.listings : [];
+  const providers = Array.isArray(municipalityData.providers) ? municipalityData.providers : [];
+  const visible = listings.slice(0, 8);
+
+  list.innerHTML = visible.map(renderHousingItem).join("");
+  list.hidden = visible.length === 0;
+  empty.hidden = visible.length > 0;
+  if (loading) loading.hidden = true;
+
+  const total = document.querySelector("#housing-total");
+  if (total) total.textContent = String(listings.length);
+
+  const updated = document.querySelector("#housing-updated");
+  if (updated) {
+    const timestamp = new Date(municipalityData.updatedAt || housingData.generatedAt);
+    const label = Number.isNaN(timestamp.getTime())
+      ? "Källor kontrollerade"
+      : `Kontrollerad ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${label}`;
+  }
+
+  providersBox.innerHTML = providers.map((provider) => `<a class="housing-provider" href="${escapeAttribute(provider.url)}" target="_blank" rel="noopener noreferrer"><span><i data-lucide="building-2"></i><strong>${escapeHtml(provider.name)}</strong></span><small>Officiell bostadskö <i data-lucide="arrow-up-right"></i></small></a>`).join("");
+
+  const sourceLink = document.querySelector("#housing-source-link");
+  if (sourceLink) {
+    sourceLink.hidden = providers.length === 0;
+    sourceLink.href = providers[0]?.url || "#bostader";
+  }
+
+  updateQuickHousing(municipalityData, municipality);
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderHousingItem(item) {
+  const attributes = [
+    Number(item.rooms) > 0 ? `${formatHousingNumber(item.rooms)} rum` : "",
+    Number(item.size) > 0 ? `${formatHousingNumber(item.size)} m²` : "",
+    Number(item.rent) > 0 ? `${new Intl.NumberFormat("sv-SE").format(Number(item.rent))} kr/mån` : ""
+  ].filter(Boolean);
+  return `<a class="housing-item" href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">
+    <span class="housing-item-icon"><i data-lucide="house"></i></span>
+    <span class="housing-item-content">
+      <strong>${escapeHtml(item.address || "Ledig bostad")}</strong>
+      <span>${escapeHtml(item.area || item.provider || "")}</span>
+      <span class="housing-tags">${attributes.map((value) => `<span>${escapeHtml(value)}</span>`).join("")}</span>
+      <small>${escapeHtml(formatHousingAvailability(item.available))} · ${escapeHtml(item.provider || "Officiell hyresvärd")}</small>
+    </span>
+    <i class="housing-open" data-lucide="arrow-up-right"></i>
+  </a>`;
+}
+
+function formatHousingNumber(value) {
+  return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
+}
+
+function formatHousingAvailability(value) {
+  if (!value) return "Tillgänglighet hos hyresvärden";
+  if (String(value).toLocaleLowerCase("sv-SE") === "nu") return "Tillgänglig nu";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? `Tillgänglig ${value}`
+    : `Tillgänglig ${date.toLocaleDateString("sv-SE", { day: "numeric", month: "short", year: "numeric" })}`;
+}
+
+function updateQuickHousing(municipalityData, municipality) {
+  const listings = Array.isArray(municipalityData?.listings) ? municipalityData.listings : [];
+  const provider = municipalityData?.providers?.[0];
+  document.querySelectorAll("[data-quick-housing-title]").forEach((element) => {
+    element.textContent = listings.length > 0
+      ? `${listings.length} lediga bostäder i ${municipality}`
+      : `Bostäder i ${municipality}`;
+  });
+  document.querySelectorAll("[data-quick-housing-detail]").forEach((element) => {
+    element.textContent = listings[0]?.address || (provider ? `Sök hos ${provider.name}` : "Se officiella bostadsköer");
+  });
+}
+
+function showHousingError() {
+  document.querySelector("#housing-loading")?.setAttribute("hidden", "");
+  document.querySelector("#housing-list")?.setAttribute("hidden", "");
+  const empty = document.querySelector("#housing-empty");
+  if (empty) {
+    empty.hidden = false;
+    empty.querySelector("strong").textContent = "Bostäderna kunde inte laddas";
+    empty.querySelector("span").textContent = "Öppna den officiella bostadskön eller försök igen senare.";
+  }
+  document.querySelectorAll("[data-quick-housing-title]").forEach((element) => {
+    element.textContent = `Bostäder i ${DinPulsMunicipality.getName()}`;
+  });
+  document.querySelectorAll("[data-quick-housing-detail]").forEach((element) => {
+    element.textContent = "Bostadsdata är tillfälligt otillgänglig";
   });
   if (window.lucide) lucide.createIcons();
 }

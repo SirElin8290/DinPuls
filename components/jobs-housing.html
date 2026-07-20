@@ -21,10 +21,23 @@
     </div>
   </article>
 
-  <article class="card" id="bostader">
-    <div class="heading"><h2>Lediga bostäder</h2><span class="new">Kommande</span></div>
-    <h3>Bostäder i <span data-municipality-name>Åmål</span></h3>
-    <div class="module-placeholder"><i data-lucide="house"></i><strong>Bostadsdata är inte ansluten</strong><span>Riktiga bostadsannonser för <span data-municipality-name>Åmål</span> kopplas in senare.</span></div>
+  <article class="card housing-card" id="bostader">
+    <div class="heading housing-heading">
+      <div><span class="section-kicker">Officiella hyresvärdar</span><h2>Lediga bostäder</h2></div>
+      <span class="housing-live"><i data-lucide="circle-check"></i> Aktuella objekt</span>
+    </div>
+    <div class="housing-summary">
+      <div><strong id="housing-total">–</strong><span>lediga bostäder i <span data-municipality-name>Åmål</span></span></div>
+      <span id="housing-updated"><i data-lucide="refresh-cw"></i> Hämtar…</span>
+    </div>
+    <div class="housing-loading" id="housing-loading"><span class="spinner"></span><span>Hämtar bostäder i <span data-municipality-name>Åmål</span>…</span></div>
+    <div class="housing-list" id="housing-list" hidden></div>
+    <div class="housing-empty" id="housing-empty" hidden>
+      <i data-lucide="house"></i><strong>Inga publicerade objekt just nu</strong>
+      <span>Kontrollera även den officiella bostadskön – nya objekt kan publiceras där först.</span>
+    </div>
+    <div class="housing-providers" id="housing-providers"></div>
+    <div class="housing-footer"><span>Uppgifter från kommunala bostadsbolag</span><a id="housing-source-link" target="_blank" rel="noopener noreferrer">Se alla hos hyresvärden <i data-lucide="arrow-up-right"></i></a></div>
   </article>
 
   <article class="app-card">

@@ -1,4 +1,28 @@
-# DinPuls v0.8.0
+# DinPuls v0.9.0
+
+## Lediga bostäder från officiella hyresvärdar
+
+Bostadsmodulen följer vald kommun i den centrala kommunmotorn. Den visar
+aktuella strukturerade lägenheter från Åmåls Kommunfastigheter, Melleruds
+Bostäder och Arvika Fastighets AB när objekten kan läsas säkert. För samtliga
+sju startkommuner finns dessutom en direktlänk till respektive officiella
+bostadskö.
+
+- `scripts/update_housing.py` hämtar och normaliserar bostadsuppgifter.
+- `data/housing.json` innehåller objekt och officiella hyresvärdar per kommun.
+- GitHub-flödet **Uppdatera lediga bostäder** körs var fjärde timme och kan
+  startas manuellt. Ingen ny API-nyckel krävs.
+- Senaste fungerande data bevaras om en strukturerad källa tillfälligt fallerar.
+- Säffle, Bengtsfors, Årjäng och Grums använder externa Mina sidor-system som
+  inte erbjuder stabil öppen export. DinPuls länkar därför direkt till deras
+  verkliga objekt i stället för att presentera osäker eller påhittad data.
+
+Efter uppladdning till GitHub: öppna **Actions**, välj **Uppdatera lediga
+bostäder** och kör flödet en gång. Därefter uppdateras modulen automatiskt.
+
+---
+
+# Tidigare: DinPuls v0.8.0
 
 ## Lediga jobb med riktig data
 
