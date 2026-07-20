@@ -1,0 +1,40 @@
+name: Uppdatera lediga bostäder
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 */4 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-housing-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Hämta aktuella bostäder
+        run: python scripts/update_housing.py
+
+      - name: Spara ny bostadsdata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/housing.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Uppdatera lediga bostäder"
+            git pull --rebase
+            git push
+          fi
