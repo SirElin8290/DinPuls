@@ -50,11 +50,11 @@
     <button type="button" id="weather-retry">Försök igen</button>
   </div>
 </article>
-  <article class="card" id="trafik">
-    <div class="card-title"><span class="title-icon green-soft"><i data-lucide="car-front"></i></span><div><h2>Trafik</h2><small data-municipality-name>Åmål</small></div></div>
-    <p class="muted"><i data-lucide="info"></i> Trafikdata för <span data-municipality-name>Åmål</span> är ännu inte ansluten.</p>
-    <div class="map traffic"><span class="road r1"></span><span class="road r2"></span><span class="road r3"></span><b class="w1">⚠</b><b class="w2">⚠</b></div>
-    <span class="card-link">Kommande modul <i data-lucide="clock-3"></i></span>
+  <article class="card traffic-card" id="trafik">
+    <div class="card-title"><span class="title-icon green-soft"><i data-lucide="car-front"></i></span><div><h2>Trafik</h2><small data-municipality-name>Åmål</small></div><span class="traffic-live" id="traffic-status">Hämtar…</span></div>
+    <div class="traffic-summary"><strong id="traffic-total">–</strong><span>aktuella vägmeddelanden inom 35 km</span></div>
+    <div class="traffic-compact-list" id="traffic-compact-list"><span class="spinner"></span> Hämtar trafikläget…</div>
+    <a class="card-link" id="traffic-page-link" href="trafik.html">Se hela trafikläget <i data-lucide="arrow-right"></i></a>
   </article>
   <article class="card" id="buss">
     <div class="card-title"><span class="title-icon blue-soft"><i data-lucide="bus-front"></i></span><div><h2>Buss & tåg</h2><small><span data-municipality-name>Åmål</span></small></div></div>
