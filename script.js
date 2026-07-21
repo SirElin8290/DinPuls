@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.12.0
+   DINPULS.SE v0.13.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.12.0";
+const DINPULS_VERSION = "0.13.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -182,7 +182,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
+    await Promise.all([initializeImportant(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -904,6 +904,70 @@ function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNa
 function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 function escapeAttribute(value){return escapeHtml(value);}
+
+/* =========================================================
+   DINPULS v0.13.0 – DAGENS VIKTIGASTE
+========================================================= */
+let importantData = null;
+
+async function initializeImportant() {
+  DinPulsMunicipality.subscribe("important", renderImportant);
+  try {
+    const response = await fetch(`data/important.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    importantData = await response.json();
+  } catch (error) {
+    console.error("Dagens viktigaste kunde inte laddas:", error);
+    importantData = null;
+  }
+}
+
+function renderImportant(config = DinPulsMunicipality.getConfig()) {
+  const list = document.querySelector("#important-list");
+  const status = document.querySelector("#important-status");
+  if (!list || !status || !config) return;
+
+  const municipality = importantData?.municipalities?.[config.name];
+  const items = Array.isArray(municipality?.items) ? municipality.items.slice(0, 3) : [];
+  const generatedAt = new Date(importantData?.generatedAt || "");
+
+  if (!importantData) {
+    status.textContent = "Kunde inte uppdateras";
+    list.innerHTML = renderImportantEmpty(
+      "Aktuell information kunde inte hämtas",
+      "Försök igen om en stund eller öppna kommunens webbplats."
+    );
+  } else if (items.length === 0) {
+    status.textContent = Number.isNaN(generatedAt.getTime())
+      ? "Kontrollerad"
+      : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
+    list.innerHTML = renderImportantEmpty(
+      `Inga akuta händelser hittades i ${config.name}`,
+      "Krisinformation, Polisen och trafikläget har kontrollerats."
+    );
+  } else {
+    status.textContent = `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
+    list.innerHTML = items.map(renderImportantItem).join("");
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderImportantEmpty(title, detail) {
+  return `<article class="important-empty"><i class="status-icon success" data-lucide="circle-check"></i><div><strong>${escapeHtml(title)}</strong><small>${escapeHtml(detail)}</small></div></article>`;
+}
+
+function renderImportantItem(item) {
+  const severity = ["danger", "warning", "info"].includes(item.severity) ? item.severity : "info";
+  const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "car-front" };
+  const icon = icons[item.category] || "info";
+  const published = formatRelativeNewsTime(item.publishedAt);
+  const source = item.source || "Officiell källa";
+  const body = `<i class="status-icon ${severity}" data-lucide="${icon}"></i><div><strong>${escapeHtml(item.title || "Viktig information")}</strong><small>${escapeHtml(source)} · ${escapeHtml(published)}</small></div>`;
+  return item.url
+    ? `<article class="important-item">${body}<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer" aria-label="Läs mer hos ${escapeAttribute(source)}"><i data-lucide="arrow-up-right"></i></a></article>`
+    : `<article class="important-item">${body}</article>`;
+}
 
 
 /* =========================================================
