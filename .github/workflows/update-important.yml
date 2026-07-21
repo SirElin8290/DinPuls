@@ -1,0 +1,44 @@
+name: Uppdatera dagens viktigaste
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/update_important.py"
+      - ".github/workflows/update-important.yml"
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-important-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Hämta officiella händelser
+        run: python scripts/update_important.py
+
+      - name: Spara dagens viktigaste
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/important.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Uppdatera dagens viktigaste"
+            git pull --rebase
+            git push
+          fi
