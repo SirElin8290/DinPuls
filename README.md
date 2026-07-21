@@ -1,4 +1,17 @@
-# DinPuls v0.13.0
+# DinPuls v0.14.0
+
+## Nytt i v0.14.0 – Trafik
+
+- Trafikkortet visar olyckor, vägarbeten, köer, hinder och väglag inom 35 km.
+- En ny mellansida i `trafik.html` samlar alla vägmeddelanden och fyra kategoriannonser.
+- Kommunval, filtrering och sökning följer DinPuls centrala kommunmotor.
+- Riktig data hämtas från Trafikverkets öppna API med hemligheten `TRAFIKVERKET_API_KEY`.
+- GitHub-flödet **Uppdatera vägtrafik** uppdaterar data var femtonde minut.
+- Om nyckel eller händelser saknas visas ett ärligt tomläge utan demodata.
+
+---
+
+# Tidigare: DinPuls v0.13.0
 
 ## Nytt i v0.13.0 – Dagens viktigaste
 
