@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.13.0
+   DINPULS.SE v0.14.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.13.0";
+const DINPULS_VERSION = "0.14.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -179,10 +179,11 @@ async function startDinPuls() {
     initializeTheme();
     initializeMobileMenu();
     initializeFuelCardLink();
+    initializeTrafficCardLink();
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -247,6 +248,22 @@ function initializeFuelCardLink() {
     if (event.target.closest("a, button, input, select")) return;
     event.preventDefault();
     openFuelPage();
+  });
+}
+
+function initializeTrafficCardLink() {
+  const card = document.querySelector("#trafik");
+  if (!card) return;
+  card.classList.add("is-clickable-card");
+  card.tabIndex = 0;
+  card.setAttribute("role", "link");
+  card.setAttribute("aria-label", "Öppna trafikläget för vald kommun");
+  const openTrafficPage = () => location.href = `trafik.html?kommun=${encodeURIComponent(DinPulsMunicipality.getName())}`;
+  card.addEventListener("click", event => { if (!event.target.closest("a,button,input,select,label")) openTrafficPage(); });
+  card.addEventListener("keydown", event => {
+    if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a,button,input,select")) {
+      event.preventDefault(); openTrafficPage();
+    }
   });
 }
 
@@ -904,6 +921,53 @@ function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNa
 function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 function escapeAttribute(value){return escapeHtml(value);}
+
+/* =========================================================
+   DINPULS v0.14.0 – VÄGTRAFIK
+========================================================= */
+let roadTrafficData = null;
+
+async function initializeTraffic() {
+  DinPulsMunicipality.subscribe("road-traffic", renderTrafficCard);
+  try {
+    const response = await fetch(`data/road-traffic.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    roadTrafficData = await response.json();
+  } catch (error) {
+    console.error("Vägtrafiken kunde inte laddas:", error);
+    roadTrafficData = null;
+  }
+}
+
+function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
+  const list = document.querySelector("#traffic-compact-list");
+  const total = document.querySelector("#traffic-total");
+  const status = document.querySelector("#traffic-status");
+  const link = document.querySelector("#traffic-page-link");
+  if (!list || !total || !status || !config) return;
+  if (link) link.href = `trafik.html?kommun=${encodeURIComponent(config.name)}`;
+  const municipality = roadTrafficData?.municipalities?.[config.name];
+  const items = Array.isArray(municipality?.items) ? municipality.items : [];
+  total.textContent = String(items.length);
+  if (!roadTrafficData) {
+    status.textContent = "Ej tillgänglig";
+    list.innerHTML = '<div class="traffic-empty"><i data-lucide="cloud-off"></i><span>Trafikdata kunde inte laddas.</span></div>';
+  } else if (!roadTrafficData.active) {
+    status.textContent = "Väntar på nyckel";
+    list.innerHTML = '<div class="traffic-empty"><i data-lucide="key-round"></i><span>Trafikverkets API aktiveras när nyckeln lagts in.</span></div>';
+  } else if (!items.length) {
+    status.textContent = "Inga störningar";
+    list.innerHTML = `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Inga aktuella vägmeddelanden nära ${escapeHtml(config.name)}.</span></div>`;
+  } else {
+    status.textContent = "Live";
+    list.innerHTML = items.slice(0, 3).map(item => `<a href="${escapeAttribute(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/")}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`).join("");
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+function trafficIcon(category) {
+  return ({ accident: "triangle-alert", roadwork: "construction", congestion: "traffic-cone", obstacle: "shield-alert", weather: "cloud-snow" })[category] || "car-front";
+}
 
 /* =========================================================
    DINPULS v0.13.0 – DAGENS VIKTIGASTE
