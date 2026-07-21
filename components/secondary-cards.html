@@ -32,9 +32,12 @@
   <div class="news-centre-footer"><span id="news-count">0 nyheter</span><a href="#news-sources">Se källorna</a></div>
 </article>
 
-  <article class="card" id="evenemang">
-    <div class="heading"><h2>Evenemang</h2><small data-municipality-name>Åmål</small></div>
-    <div class="module-placeholder"><i data-lucide="calendar-days"></i><strong>Evenemangsdata är inte ansluten</strong><span>Riktiga evenemang för <span data-municipality-name>Åmål</span> kopplas in i en kommande version.</span></div>
+  <article class="card events-card" id="evenemang" tabindex="0">
+    <div class="heading"><div><span class="section-kicker">Det händer nära dig</span><h2>Evenemang</h2></div><small data-municipality-name>Åmål</small></div>
+    <div class="events-loading" id="events-loading"><span class="loading-spinner"></span><span>Hämtar evenemang…</span></div>
+    <ul class="events" id="events-list" hidden></ul>
+    <div class="events-empty" id="events-empty" hidden><i data-lucide="calendar-search"></i><strong>Inga publicerade evenemang hittades</strong><span>Öppna kalendern för att gå direkt till de lokala källorna.</span></div>
+    <div class="events-card-footer"><span id="events-total">Kontrollerar källor…</span><a id="events-page-link" href="evenemang.html">Se hela kalendern <i data-lucide="arrow-right"></i></a></div>
   </article>
 
   <article class="card" id="karta">
