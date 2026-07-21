@@ -1,4 +1,17 @@
-# DinPuls v0.12.0
+# DinPuls v0.13.0
+
+## Nytt i v0.13.0 – Dagens viktigaste
+
+- Panelen ovanpå huvudbilden visar aktuella händelser för vald kommun.
+- Officiella uppgifter hämtas från Krisinformation.se och Polisen.
+- Inställda avgångar och trafikmeddelanden hämtas från befintlig Trafiklab-data.
+- GitHub-flödet **Uppdatera dagens viktigaste** körs var femtonde minut.
+- Om inga händelser finns visas ett tydligt kontrollerat tomläge – aldrig påhittad data.
+- Kommunbyte uppdaterar panelen genom samma centrala kommunmotor som övriga moduler.
+
+---
+
+# Tidigare: DinPuls v0.12.0
 
 ## Nytt i v0.12.0 – Matkassar för fyra
 
