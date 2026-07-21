@@ -1503,6 +1503,22 @@ body{transition:background .25s,color .25s}
 
 /* v0.7.0 – ärliga tomlägen och kommunanpassad hero */
 [hidden]{display:none!important}
+
+/* Dagens viktigaste v0.13.0 */
+.important .heading>span{padding:5px 8px;border-radius:999px;background:#eaf3ff;color:#0a57c7;font-size:10px;font-weight:800;white-space:nowrap}
+.important-list{display:grid}
+.important-list article{min-width:0}
+.important-list article>div{min-width:0}
+.important-list article strong,.important-list article small{display:block;overflow:hidden;text-overflow:ellipsis}
+.important-list article small{color:#66758a;font-size:10px;line-height:1.4}
+.important-list article>a{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#edf5ff}
+.important-list article>a svg{width:15px;height:15px}
+.important .status-icon.warning{background:#e28a00}
+.important-loading .status-icon{animation:important-spin 1.2s linear infinite}
+@keyframes important-spin{to{transform:rotate(360deg)}}
+[data-theme="dark"] .important .heading>span,[data-theme="dark"] .important-list article>a{background:#183b67;color:#d9eaff}
+[data-theme="dark"] .important-list article small{color:#a8b8cc}
+@media(prefers-reduced-motion:reduce){.important-loading .status-icon{animation:none}}
 .hero.has-generic-background{background:linear-gradient(135deg,#082653 0%,#0a57c7 58%,#27a4d8 100%)}
 .hero.has-generic-background .hero-shade{background:linear-gradient(90deg,rgba(4,22,54,.92),rgba(4,22,54,.32))}
 .module-placeholder{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:9px;padding:24px;border:1px dashed var(--border,#dfe6ef);border-radius:14px;background:var(--bg,#f5f7fb);color:var(--muted,#6e7b91)}
