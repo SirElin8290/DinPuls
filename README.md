@@ -1,4 +1,14 @@
-# DinPuls v0.11.1
+# DinPuls v0.12.0
+
+## Nytt i v0.12.0 – Matkassar för fyra
+
+- Ny startsidemodul och mellansida i `matkasse.html`.
+- Vardagskasse, lunchkasse och helgkasse med måltider och inköpslista för exakt fyra personer.
+- Inköpslistan kan bockas av och sparas lokalt i webbläsaren.
+- Kommunvalet följer samma centrala kommun som resten av DinPuls.
+- `data/grocery.json` skiljer kassinnehåll, lokala butikslänkar och verifierade prisuppgifter åt.
+- Butikspris visas bara när total, källa och kontrolldatum finns. Saknade priser uppskattas aldrig.
+- Matkassesidan har fyra kategoriannonsplatser enligt nivån 500 kr per månad.
 
 ## Klickbar drivmedelsruta
 
