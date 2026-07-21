@@ -59,7 +59,9 @@ def fetch(key):
     request=Request(API,data=body,headers={"Content-Type":"text/xml","User-Agent":"DinPuls/0.14.0"})
     try:
         with urlopen(request,timeout=45) as response:return json.load(response)
-    except HTTPError as error:raise RuntimeError(f"Trafikverket svarade HTTP {error.code}") from None
+    except HTTPError as error:
+        details=error.read().decode("utf-8","replace").replace(key,"***")[:1000]
+        raise RuntimeError(f"Trafikverket svarade HTTP {error.code}: {details}") from None
     except URLError as error:raise RuntimeError(f"Trafikverket kunde inte nås: {error.reason}") from None
 
 def main():
