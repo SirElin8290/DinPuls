@@ -55,7 +55,7 @@ def normalize(situation,deviation,index):
     return {"id":f"{situation.get('Id','situation')}-{index}","category":kind,"categoryLabel":label,"severity":severity,"title":first(deviation,"Header") or message or label,"message":message,"road":road,"location":location,"startTime":deviation.get("StartTime"),"endTime":deviation.get("EndTime"),"updatedAt":deviation.get("LastUpdateTime") or situation.get("ModifiedTime"),"latitude":coords[0] if coords else None,"longitude":coords[1] if coords else None,"sourceUrl":"https://www.trafikverket.se/trafikinformation/vag/"}
 
 def fetch(key):
-    body=f'''<REQUEST><LOGIN authenticationkey="{key}"/><QUERY objecttype="RoadSituation" schemaversion="1" limit="1000"></QUERY></REQUEST>'''.encode()
+    body=f'''<REQUEST><LOGIN authenticationkey="{key}"/><QUERY objecttype="road.trafficinfo" schemaversion="1" limit="1000"></QUERY></REQUEST>'''.encode()
     request=Request(API,data=body,headers={"Content-Type":"text/xml","User-Agent":"DinPuls/0.14.0"})
     try:
         with urlopen(request,timeout=45) as response:return json.load(response)
