@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="sv" data-portal="traffic">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Aktuella vägtrafikhändelser nära dig – olyckor, vägarbeten, köer och hinder.">
+  <title>Trafikläget – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-pages.css">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero traffic-page"><span class="section-kicker">DinPuls Trafik</span><h1>Trafikläget nära <span data-traffic-municipality>Åmål</span></h1><p>Olyckor, vägarbeten, köer, hinder och andra aktuella vägmeddelanden.</p></section>
+    <div class="traffic-principle"><i data-lucide="shield-check"></i><span>Uppgifterna hämtas från Trafikverkets öppna API. Kontrollera alltid skyltning och myndighetsinformation innan du kör.</span></div>
+    <div class="portal-layout">
+      <section class="portal-content">
+        <div class="portal-toolbar traffic-toolbar">
+          <label>Kommun<select id="traffic-municipality"></select></label>
+          <label>Typ<select id="traffic-type"><option value="all">Alla händelser</option><option value="accident">Olyckor</option><option value="roadwork">Vägarbeten</option><option value="congestion">Köer</option><option value="obstacle">Hinder</option><option value="weather">Väder och väglag</option></select></label>
+          <label>Sök väg eller plats<input id="traffic-search" type="search" placeholder="Exempel: E45"></label>
+        </div>
+        <div class="portal-result-heading"><h2 id="traffic-page-total">Hämtar trafikläget…</h2><span id="traffic-page-updated"></span></div>
+        <div id="traffic-page-list" class="portal-list"></div>
+        <div id="traffic-page-empty" class="portal-empty" hidden>Inga aktuella vägmeddelanden matchar filtret.</div>
+      </section>
+      <aside class="portal-ad-column" id="traffic-ads"></aside>
+    </div>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="traffic-page.js"></script>
+</body></html>
