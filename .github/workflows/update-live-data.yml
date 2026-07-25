@@ -2,6 +2,12 @@ name: Uppdatera liveinformation
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/update-live-data.yml"
+      - "scripts/update_transport.py"
+      - "scripts/update_road_traffic.py"
+      - "scripts/update_important.py"
   schedule:
     - cron: "7,22,37,52 * * * *"
 
