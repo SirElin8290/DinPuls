@@ -7,6 +7,7 @@
 - Samlade originalkällor för alla sju kommuner: kommunernas kalendrar, regionala besökskalendrar och Svenska kyrkans lokala församlingar/pastorat.
 - Tydlig källmärkning och direktlänkar; tider och ändringar kontrolleras alltid hos arrangören.
 - Fyra separata lokala annonsplatser på evenemangssidan enligt 500 kr/mån-modellen.
+- Version 0.15.0 publiceras komplett från projektets huvudgren.
 
 ## Nytt i v0.14.0 – Trafik
 
