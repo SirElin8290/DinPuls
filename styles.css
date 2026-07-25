@@ -120,7 +120,24 @@ footer{min-height:72px;display:flex;align-items:center;justify-content:space-bet
 .lunch-airport-item{min-width:520px;max-width:660px;display:grid;grid-template-columns:max-content minmax(220px,1fr) max-content;align-items:center;gap:15px;padding:12px 24px;color:#f8ead0;border-right:1px solid #3a4853}
 .lunch-airport-item strong{color:#ffb15f;font-size:12px;letter-spacing:.05em;text-transform:uppercase}.lunch-airport-item span{overflow:hidden;font-size:12px;font-weight:700;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}.lunch-airport-item b{display:flex;align-items:center;gap:3px;color:#a8bbc9;font-size:8px}.lunch-airport-item b svg{width:12px}
 @keyframes lunch-airport-roll{to{transform:translateX(-50%)}}
-@media(max-width:760px){.lunch-airport-strip{grid-template-columns:132px;margin:10px 12px 0}.lunch-airport-label{padding:10px}.lunch-airport-label svg{width:19px}.lunch-airport-label strong{font-size:9px}.lunch-airport-item{min-width:380px;grid-template-columns:1fr;padding:9px 16px;gap:3px}.lunch-airport-item span{font-size:10px}.lunch-airport-item b{display:none}}
+@media(max-width:760px){
+  .lunch-airport-strip{min-height:58px;grid-template-columns:112px minmax(0,1fr);margin:10px 12px 0}
+  .lunch-airport-label{gap:7px;padding:8px 9px;box-shadow:5px 0 12px rgba(0,0,0,.2)}
+  .lunch-airport-label svg{width:18px;flex:0 0 auto}
+  .lunch-airport-label strong{font-size:9px;letter-spacing:.04em;white-space:nowrap}
+  .lunch-airport-label small{margin-top:2px;font-size:7px;letter-spacing:.08em;white-space:nowrap}
+  .lunch-airport-track{min-height:58px}
+  .lunch-airport-item{box-sizing:border-box;min-width:calc(100vw - 138px);max-width:calc(100vw - 138px);min-height:58px;grid-template-columns:minmax(0,1fr);align-content:center;padding:8px 12px;gap:2px}
+  .lunch-airport-item strong{overflow:hidden;font-size:9px;white-space:nowrap;text-overflow:ellipsis}
+  .lunch-airport-item span{font-size:10px}
+  .lunch-airport-item b{display:none}
+}
+@media(max-width:360px){
+  .lunch-airport-strip{grid-template-columns:96px minmax(0,1fr)}
+  .lunch-airport-label{padding:8px}
+  .lunch-airport-label svg{display:none}
+  .lunch-airport-item{min-width:calc(100vw - 122px);max-width:calc(100vw - 122px)}
+}
 
 .quick-strip:hover .ticker-track {
   animation-play-state: paused;

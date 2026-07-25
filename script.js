@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.1";
+const DINPULS_VERSION = "0.17.2";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
