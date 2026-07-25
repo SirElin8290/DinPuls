@@ -135,7 +135,28 @@ function openPriceCollector(storeName,basket) {
 }
 
 function renderAds() {
-  document.querySelector("#grocery-ads").innerHTML = `<span class="section-kicker">Lokala annonser</span><h2>Nå kunder inför veckohandlingen</h2>${Array.from({length:4},(_,index)=>`<a class="secondary-ad" href="mailto:annonser@dinpuls.se?subject=Annonsplats%20matkasse%20${index+1}"><b>ANNONSPLATS ${index+1}</b><strong>Ditt företag här</strong><small>På DinPuls matkassesida · 500 kr/mån</small></a>`).join("")}<p class="ad-sales-note">Annonsplatserna kan säljas separat per kommun och kategori.</p>`;
+  renderStrategicAds("matkasse", "matkassesida", "#grocery-shopping-list");
 }
 
 initializeGrocery().catch(error => { console.error(error); document.querySelector("#grocery-basket-summary").innerHTML = "<strong>Matkassen kunde inte laddas. Försök igen om en liten stund.</strong>"; });
+
+
+function renderStrategicAds(category, pageLabel, listSelector) {
+  const slots = [...document.querySelectorAll("[data-strategic-ad]")];
+  slots.forEach(slot => {
+    const position = Number(slot.dataset.adPosition || 1);
+    const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/mån</small></a>`;
+  });
+  const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");
+  const list = document.querySelector(listSelector);
+  if (!inlineSlot || !list) return;
+  const placeInline = () => {
+    const cards = [...list.children].filter(child => child !== inlineSlot);
+    if (cards.length < 4) return;
+    const anchor = cards[Math.min(cards.length - 1, Math.max(2, Math.floor(cards.length / 2)))];
+    if (anchor.previousElementSibling !== inlineSlot) list.insertBefore(inlineSlot, anchor);
+  };
+  new MutationObserver(placeInline).observe(list, { childList: true });
+  queueMicrotask(placeInline);
+}
