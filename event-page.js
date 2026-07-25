@@ -11,7 +11,7 @@ async function initializeEventPage(){
   select.addEventListener("change",()=>{eventMunicipality=select.value;localStorage.setItem("dinpuls-municipality",eventMunicipality);history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(eventMunicipality)}`);renderEventPage()});
   ["#events-category","#events-period"].forEach(id=>document.querySelector(id).addEventListener("change",renderEventPage));
   document.querySelector("#events-search").addEventListener("input",renderEventPage);
-  document.querySelector("#events-ads").innerHTML=`<span class="section-kicker">Lokala annonser</span><h2>Syns när något händer</h2>${Array.from({length:4},(_,i)=>`<a class="secondary-ad" href="mailto:annonser@dinpuls.se?subject=Annonsplats%20evenemang%20${i+1}"><b>ANNONSPLATS ${i+1}</b><strong>Ditt företag här</strong><small>På DinPuls evenemangssida · 500 kr/mån</small></a>`).join("")}<p class="ad-sales-note">Annonsplatser kan säljas separat per kommun och kategori.</p>`;
+  renderStrategicAds("evenemang", "evenemangssida", "#events-page-list");
   const response=await fetch(`data/events.json?version=${Date.now()}`,{cache:"no-store"});if(!response.ok)throw new Error(`Status ${response.status}`);
   fullEventsData=await response.json();renderEventPage();
 }
@@ -29,3 +29,24 @@ function renderEventPage(){
 function renderEventCard(item){const start=new Date(item.startDate),end=new Date(item.endDate||item.startDate),same=start.toDateString()===end.toDateString();const date=Number.isNaN(start.getTime())?"Datum saknas":same?start.toLocaleDateString("sv-SE",{weekday:"short",day:"numeric",month:"short"}):`${start.toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}–${end.toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}`;const icons={culture:"palette",music:"music",family:"baby",church:"church",sport:"trophy",community:"users",motor:"car-front"};return `<article class="portal-card event-message"><span class="portal-card-icon event"><i data-lucide="${icons[item.category]||"calendar-days"}"></i></span><div><span class="event-date">${escapeEvent(date)}${item.time?` · ${escapeEvent(item.time)}`:""}</span><h3>${escapeEvent(item.title)}</h3><p>${escapeEvent(item.venue||eventMunicipality)}</p><div class="portal-tags"><span>${escapeEvent(item.categoryLabel||"Evenemang")}</span><span>${escapeEvent(item.sourceName||"Lokal källa")}</span></div></div><a class="portal-source-button" href="${escapeEvent(item.url)}" target="_blank" rel="noopener noreferrer">Detaljer hos källan <i data-lucide="external-link"></i></a></article>`}
 function renderEventSource(source){return `<a class="event-source" href="${escapeEvent(source.url)}" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon event"><i data-lucide="${escapeEvent(source.icon||"calendar-days")}"></i></span><span><strong>${escapeEvent(source.name)}</strong><small>${escapeEvent(source.type)}</small></span><i data-lucide="external-link"></i></a>`}
 initializeEventPage().catch(error=>{console.error(error);document.querySelector("#events-page-total").textContent="Evenemangen kunde inte laddas";document.querySelector("#events-page-empty").hidden=false});
+
+
+function renderStrategicAds(category, pageLabel, listSelector) {
+  const slots = [...document.querySelectorAll("[data-strategic-ad]")];
+  slots.forEach(slot => {
+    const position = Number(slot.dataset.adPosition || 1);
+    const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/mån</small></a>`;
+  });
+  const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");
+  const list = document.querySelector(listSelector);
+  if (!inlineSlot || !list) return;
+  const placeInline = () => {
+    const cards = [...list.children].filter(child => child !== inlineSlot);
+    if (cards.length < 4) return;
+    const anchor = cards[Math.min(cards.length - 1, Math.max(2, Math.floor(cards.length / 2)))];
+    if (anchor.previousElementSibling !== inlineSlot) list.insertBefore(inlineSlot, anchor);
+  };
+  new MutationObserver(placeInline).observe(list, { childList: true });
+  queueMicrotask(placeInline);
+}
