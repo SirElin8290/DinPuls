@@ -6,14 +6,15 @@
   <title>Evenemang – DinPuls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal-pages.css">
+  <link rel="stylesheet" href="styles.css?version=0.17.7"><link rel="stylesheet" href="portal-pages.css?version=0.17.7">
 </head>
 <body>
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
   <main class="portal-main">
     <section class="portal-hero events-page"><span class="section-kicker">DinPuls Kalender</span><h1>Evenemang i <span data-events-municipality>Åmål</span></h1><p>Lokala aktiviteter, konserter, kultur, föreningsliv och kyrkans öppna arrangemang på ett ställe.</p></section>
     <div class="events-principle"><i data-lucide="badge-check"></i><span>DinPuls samlar och länkar vidare. Kontrollera alltid tid, plats, biljetter och eventuella ändringar hos originalkällan.</span></div>
-    <div class="portal-layout">
+    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="evenemang" data-ad-position="1"></div>
+    <div class="portal-layout strategic-layout">
       <section class="portal-content">
         <div class="portal-toolbar events-toolbar">
           <label>Kommun<select id="events-municipality"></select></label>
@@ -21,13 +22,15 @@
           <label>När<select id="events-period"><option value="all">Alla kommande</option><option value="today">I dag</option><option value="weekend">I helgen</option><option value="30">Nästa 30 dagar</option></select></label>
           <label>Sök<input id="events-search" type="search" placeholder="Titel, plats eller arrangör"></label>
         </div>
+<div class="strategic-ad-slot" data-strategic-ad="evenemang" data-ad-position="2"></div>
         <div class="portal-result-heading"><h2 id="events-page-total">Hämtar evenemang…</h2><span id="events-page-updated"></span></div>
         <div id="events-page-list" class="portal-list"></div>
+        <div class="strategic-ad-slot" data-strategic-ad="evenemang" data-ad-position="3"></div>
         <div id="events-page-empty" class="portal-empty" hidden>Inga publicerade evenemang matchar filtret. Prova källorna nedan.</div>
+<div class="strategic-ad-slot" data-strategic-ad="evenemang" data-ad-position="4"></div>
         <section class="events-sources"><div class="portal-result-heading"><div><h2>Lokala kalendrar och källor</h2><p>Här ingår även Svenska kyrkans lokala kalendrar.</p></div></div><div id="events-source-list" class="events-source-grid"></div></section>
       </section>
-      <aside class="portal-ad-column" id="events-ads"></aside>
     </div>
   </main>
-  <script src="https://unpkg.com/lucide@latest"></script><script src="event-page.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="event-page.js?version=0.17.7"></script>
 </body></html>
