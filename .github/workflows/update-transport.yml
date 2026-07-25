@@ -2,21 +2,25 @@ name: Uppdatera kollektivtrafik
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: dinpuls-live-data
+  group: dinpuls-transport-data
   cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Aktivera Python
         uses: actions/setup-python@v5
@@ -28,13 +32,34 @@ jobs:
           TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
         run: python scripts/update_transport.py
 
-      - name: Spara ny trafikdata
+      - name: Spara ny trafikdata konfliktsäkert
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/transport.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Uppdatera buss- och tågtider"
-            git pull --rebase
-            git push
+
+          if git diff --cached --quiet; then
+            echo "Transportfilen är redan aktuell."
+            exit 0
           fi
+
+          git commit -m "Uppdatera buss- och tågtider"
+
+          for attempt in 1 2 3 4; do
+            echo "Publiceringsförsök $attempt av 4"
+            git pull --rebase origin main
+
+            if git push origin HEAD:main; then
+              echo "Nya avgångar publicerade."
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 4 ]; then
+              sleep $((attempt * 2))
+            fi
+          done
+
+          echo "Kunde inte publicera efter fyra försök."
+          exit 1
