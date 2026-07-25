@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.3
+   DINPULS.SE v0.17.4
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.3";
+const DINPULS_VERSION = "0.17.4";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -515,7 +515,7 @@ function collectNotifications(municipality) {
   };
 
   (importantData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
-    add("important", "shield-alert", item.id, item.title, item.source || "Dagens viktigaste", item.url || "#", item.publishedAt, Boolean(item.url))
+    add("important", item.category === "municipal" ? "wrench" : "shield-alert", item.id, item.title, item.source || "Dagens viktigaste", item.url || "#", item.publishedAt, Boolean(item.url))
   );
   (roadTrafficData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
     add("traffic", "triangle-alert", item.id, item.title, item.location || "Trafikinformation", "trafik.html", item.startTime || item.publishedAt)
@@ -1281,7 +1281,15 @@ function renderImportantEmpty(title, detail) {
 }
 
 function renderImportantCalm(municipality, sources) {
-  const sourceLinks = (sources || []).slice(0, 3).map(source =>
+  const municipalityPrefix = municipality.toLocaleLowerCase("sv-SE").slice(0, 4);
+  const municipalSource = (sources || []).find((source) =>
+    String(source.name || "").toLocaleLowerCase("sv-SE").startsWith(municipalityPrefix)
+  );
+  const selectedSources = [
+    municipalSource,
+    ...(sources || []).filter((source) => ["Krisinformation.se", "Polisen"].includes(source.name))
+  ].filter(Boolean).slice(0, 3);
+  const sourceLinks = selectedSources.map(source =>
     `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}<i data-lucide="arrow-up-right"></i></a>`
   ).join("");
   return `<article class="important-calm">
@@ -1293,7 +1301,7 @@ function renderImportantCalm(municipality, sources) {
 
 function renderImportantItem(item) {
   const severity = ["danger", "warning", "info"].includes(item.severity) ? item.severity : "info";
-  const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "car-front" };
+  const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "car-front", municipal: "wrench" };
   const icon = icons[item.category] || "info";
   const published = formatRelativeNewsTime(item.publishedAt);
   const source = item.source || "Officiell källa";
