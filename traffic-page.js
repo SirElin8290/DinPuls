@@ -11,7 +11,7 @@ async function initializeTrafficPage() {
   select.addEventListener("change", () => { trafficMunicipality = select.value; localStorage.setItem("dinpuls-municipality", trafficMunicipality); history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(trafficMunicipality)}`); renderTrafficPage(); });
   document.querySelector("#traffic-type").addEventListener("change", renderTrafficPage);
   document.querySelector("#traffic-search").addEventListener("input", renderTrafficPage);
-  document.querySelector("#traffic-ads").innerHTML = `<span class="section-kicker">Lokala annonser</span><h2>Nå trafikanter nära dig</h2>${Array.from({length:4},(_,i)=>`<a class="secondary-ad" href="mailto:annonser@dinpuls.se?subject=Annonsplats%20trafik%20${i+1}"><b>ANNONSPLATS ${i+1}</b><strong>Ditt företag här</strong><small>På DinPuls trafiksida · 500 kr/mån</small></a>`).join("")}`;
+  renderStrategicAds("trafik", "trafiksida", "#traffic-page-list");
   const response = await fetch(`data/road-traffic.json?version=${Date.now()}`, {cache:"no-store"});
   if (!response.ok) throw new Error(`Status ${response.status}`);
   fullRoadTrafficData = await response.json(); renderTrafficPage();
@@ -44,3 +44,24 @@ function renderTrafficMessage(item) {
 }
 
 initializeTrafficPage().catch(error => { console.error(error); document.querySelector("#traffic-page-total").textContent="Trafikläget kunde inte laddas"; document.querySelector("#traffic-page-empty").hidden=false; });
+
+
+function renderStrategicAds(category, pageLabel, listSelector) {
+  const slots = [...document.querySelectorAll("[data-strategic-ad]")];
+  slots.forEach(slot => {
+    const position = Number(slot.dataset.adPosition || 1);
+    const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/mån</small></a>`;
+  });
+  const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");
+  const list = document.querySelector(listSelector);
+  if (!inlineSlot || !list) return;
+  const placeInline = () => {
+    const cards = [...list.children].filter(child => child !== inlineSlot);
+    if (cards.length < 4) return;
+    const anchor = cards[Math.min(cards.length - 1, Math.max(2, Math.floor(cards.length / 2)))];
+    if (anchor.previousElementSibling !== inlineSlot) list.insertBefore(inlineSlot, anchor);
+  };
+  new MutationObserver(placeInline).observe(list, { childList: true });
+  queueMicrotask(placeInline);
+}
