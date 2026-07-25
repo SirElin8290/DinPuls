@@ -1,4 +1,16 @@
-# DinPuls v0.15.1
+# DinPuls v0.16.0
+
+## Nytt i v0.16.0
+
+- Ny kommunstyrd lunchsida för Åmål, Säffle, Bengtsfors, Mellerud, Årjäng,
+  Arvika och Grums.
+- Dagens luncher visas i den rullande remsan på startsidan.
+- Exakta rätter visas endast när restaurangens originalkälla anger den
+  aktuella veckan.
+- Restauranger utan maskinläsbar meny visas med direktlänk till sin aktuella
+  meny.
+- Fyra lokala annonsplatser på lunchsidan för 500 kr per månad.
+- Lunchdata uppdateras automatiskt med GitHub Actions.
 
 ## Rättningar i v0.15.1
 

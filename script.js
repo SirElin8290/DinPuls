@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.15.1
+   DINPULS.SE v0.16.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.15.1";
+const DINPULS_VERSION = "0.16.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -183,7 +183,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel(), initializeEvents()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel(), initializeEvents(), initializeLunch()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -1617,6 +1617,71 @@ function renderFuel() {
   if (pageLink) pageLink.href = `drivmedel.html?kommun=${encodeURIComponent(municipality)}`;
   document.querySelectorAll("[data-quick-fuel-title]").forEach(element => element.textContent = `${stations.length} tank- och laddstationer i ${municipality}`);
   document.querySelectorAll("[data-quick-fuel-detail]").forEach(element => element.textContent = priced.length ? `${priced.length} med verifierat operatörspris` : "Se stationer, utbud och vägbeskrivning");
+  if (window.lucide) lucide.createIcons();
+}
+
+/* =========================================================
+   DINPULS v0.16.0 – DAGENS LUNCH I DEN RULLANDE REMSAN
+========================================================= */
+let lunchTickerData = null;
+
+async function initializeLunch() {
+  DinPulsMunicipality.subscribe("lunch", () => {
+    renderLunchTicker(DinPulsMunicipality.getName());
+  });
+
+  try {
+    const response = await fetch(`data/lunch.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Lunchdata kunde inte laddas: ${response.status}`);
+    lunchTickerData = await response.json();
+  } catch (error) {
+    console.error(error);
+    lunchTickerData = null;
+  }
+
+  renderLunchTicker(DinPulsMunicipality.getName());
+}
+
+function getStockholmWeekday() {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone: "Europe/Stockholm"
+  }).format(new Date()).toLowerCase();
+}
+
+function renderLunchTicker(municipality) {
+  const restaurants = lunchTickerData?.municipalities?.[municipality]?.restaurants || [];
+  const weekday = getStockholmWeekday();
+  const visible = restaurants.slice(0, 5);
+  const fallback = [{
+    id: "lunch",
+    name: `Lunch i ${municipality}`,
+    hours: "Se restauranger och aktuella veckomenyer",
+    status: "source-only",
+    days: {}
+  }];
+
+  const markup = (visible.length ? visible : fallback).map((restaurant) => {
+    const dishes = restaurant.status === "current"
+      ? (restaurant.days?.[weekday] || [])
+      : [];
+    const detail = dishes.length
+      ? dishes.slice(0, 2).join(" · ")
+      : restaurant.hours || "Öppna aktuell veckomeny";
+    const restaurantQuery = restaurant.id && restaurant.id !== "lunch"
+      ? `&restaurang=${encodeURIComponent(restaurant.id)}`
+      : "";
+
+    return `<a class="lunch-ticker-item" href="lunch.html?kommun=${encodeURIComponent(municipality)}${restaurantQuery}">
+      <i data-lucide="utensils"></i>
+      <span><strong>${escapeHtml(restaurant.name)}</strong><small>${escapeHtml(detail)}</small></span>
+    </a>`;
+  }).join("");
+
+  document.querySelectorAll("[data-lunch-ticker]").forEach((container) => {
+    container.innerHTML = markup;
+  });
+
   if (window.lucide) lucide.createIcons();
 }
 
