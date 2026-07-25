@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="#" aria-label="DinPuls startsida">
-      <img class="brand-logo" src="assets/logo.svg" alt="DinPuls.se">
+      <img class="brand-logo" src="assets/logo.svg?version=0.17.1" alt="DinPuls.se">
     </a>
 
     <form class="search" role="search">
@@ -22,12 +22,22 @@
       <button class="icon-button" id="theme-toggle" type="button" aria-label="Växla mörkt läge">
         <i data-lucide="moon"></i>
       </button>
-      <button class="icon-button notification-button" type="button" aria-label="Notiser">
-        <i data-lucide="bell"></i><b>2</b>
+      <button class="icon-button notification-button" id="notification-button" type="button" aria-label="Öppna notiser" aria-expanded="false" aria-controls="notification-panel">
+        <i data-lucide="bell"></i><b id="notification-count" hidden>0</b>
       </button>
       <button class="icon-button mobile-menu-button" id="mobile-menu-button" type="button" aria-label="Öppna meny">
         <i data-lucide="menu"></i>
       </button>
     </div>
   </div>
+  <aside class="notification-panel" id="notification-panel" hidden aria-label="Notiser">
+    <div class="notification-panel-heading">
+      <div><span class="section-kicker">LOKALA UPPDATERINGAR</span><h2>Notiser för <span data-notification-municipality>Åmål</span></h2></div>
+      <button type="button" id="notification-close" aria-label="Stäng notiser"><i data-lucide="x"></i></button>
+    </div>
+    <p class="notification-explanation">Fungerar utan konto och sparas bara i den här webbläsaren.</p>
+    <div class="notification-list" id="notification-list"></div>
+    <div class="notification-empty" id="notification-empty" hidden><i data-lucide="bell-check"></i><strong>Du är uppdaterad</strong><span>Inga nya lokala händelser just nu.</span></div>
+    <button class="notification-mark-read" id="notification-mark-read" type="button">Markera alla som lästa</button>
+  </aside>
 </header>

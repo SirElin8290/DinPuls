@@ -1,4 +1,15 @@
-# DinPuls v0.17.0
+# DinPuls v0.17.1
+
+## Rättningar i v0.17.1
+
+- Logotypens fasta text ”Åmåls kommun” är ersatt med en kommunneutral
+  beskrivning.
+- Klockan i sidhuvudet öppnar nu ett riktigt lokalt notiscenter.
+- Notiscentret samlar nya jobb, bostäder, evenemang, lokala nyheter,
+  trafikmeddelanden, viktiga händelser, kollektivtrafikvarningar och
+  verifierade drivmedelspriser för vald kommun.
+- Lästa notiser sparas lokalt per kommun och webbläsare utan konto.
+- Komponenter och logotyp hämtas versionsstyrt för att undvika gammal cache.
 
 ## Nytt i v0.17.0
 

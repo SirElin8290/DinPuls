@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.0
+   DINPULS.SE v0.17.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.0";
+const DINPULS_VERSION = "0.17.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -157,7 +157,9 @@ async function loadComponent(name) {
     return;
   }
 
-  const response = await fetch(`components/${name}.html`);
+  const response = await fetch(`components/${name}.html?version=${DINPULS_VERSION}`, {
+    cache: "no-store"
+  });
 
   if (!response.ok) {
     throw new Error(`Kunde inte ladda komponenten ${name}`);
@@ -188,6 +190,7 @@ async function startDinPuls() {
     initializeMunicipality();
     initializeWeather();
     await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel(), initializeEvents(), initializeLunch()]);
+    initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -421,6 +424,160 @@ function initializeTheme() {
     localStorage.setItem("dinpuls-theme", root.dataset.theme);
     refreshThemeIcon();
   });
+}
+
+/* =========================================================
+   DINPULS v0.17.1 – LOKALT NOTISCENTER UTAN INLOGGNING
+========================================================= */
+let currentNotificationItems = [];
+
+function initializeNotifications() {
+  const button = document.querySelector("#notification-button");
+  const panel = document.querySelector("#notification-panel");
+  const close = document.querySelector("#notification-close");
+  const markRead = document.querySelector("#notification-mark-read");
+  if (!button || !panel) return;
+
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open && window.lucide) lucide.createIcons();
+  };
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setOpen(panel.hidden);
+  });
+  close?.addEventListener("click", () => setOpen(false));
+  panel.addEventListener("click", (event) => event.stopPropagation());
+  document.addEventListener("click", () => setOpen(false));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
+  markRead?.addEventListener("click", () => {
+    saveSeenNotifications(
+      DinPulsMunicipality.getName(),
+      currentNotificationItems.map((item) => item.key)
+    );
+    renderNotifications(DinPulsMunicipality.getName());
+  });
+  panel.addEventListener("click", (event) => {
+    const link = event.target.closest("[data-notification-key]");
+    if (!link) return;
+    saveSeenNotifications(DinPulsMunicipality.getName(), [link.dataset.notificationKey]);
+  });
+
+  DinPulsMunicipality.subscribe("notifications", (config) => {
+    renderNotifications(config.name);
+  });
+  renderNotifications(DinPulsMunicipality.getName());
+}
+
+function renderNotifications(municipality) {
+  const list = document.querySelector("#notification-list");
+  const empty = document.querySelector("#notification-empty");
+  const badge = document.querySelector("#notification-count");
+  if (!list || !empty || !badge) return;
+
+  currentNotificationItems = collectNotifications(municipality).slice(0, 24);
+  const seen = getSeenNotifications(municipality);
+  const unread = currentNotificationItems.filter((item) => !seen.has(item.key));
+
+  document.querySelectorAll("[data-notification-municipality]").forEach((element) => {
+    element.textContent = municipality;
+  });
+  badge.textContent = unread.length > 9 ? "9+" : String(unread.length);
+  badge.hidden = unread.length === 0;
+  list.hidden = currentNotificationItems.length === 0;
+  empty.hidden = currentNotificationItems.length !== 0;
+  list.innerHTML = currentNotificationItems.map((item) => `
+    <a class="notification-item ${seen.has(item.key) ? "read" : "unread"}"
+       href="${escapeAttribute(item.url)}"
+       ${item.external ? 'target="_blank" rel="noopener noreferrer"' : ""}
+       data-notification-key="${escapeAttribute(item.key)}">
+      <span class="notification-icon ${escapeAttribute(item.kind)}"><i data-lucide="${escapeAttribute(item.icon)}"></i></span>
+      <span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span>
+      ${seen.has(item.key) ? "" : '<i class="notification-unread-dot" aria-label="Oläst"></i>'}
+    </a>
+  `).join("");
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function collectNotifications(municipality) {
+  const items = [];
+  const add = (kind, icon, id, title, detail, url, date, external = false) => {
+    if (!id || !title) return;
+    items.push({
+      kind, icon, title, detail: detail || municipality, url,
+      external, date: date || "", key: `${kind}:${municipality}:${id}`
+    });
+  };
+
+  (importantData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
+    add("important", "shield-alert", item.id, item.title, item.source || "Dagens viktigaste", item.url || "#", item.publishedAt, Boolean(item.url))
+  );
+  (roadTrafficData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
+    add("traffic", "triangle-alert", item.id, item.title, item.location || "Trafikinformation", "trafik.html", item.startTime || item.publishedAt)
+  );
+  (jobsData?.municipalities?.[municipality]?.jobs || []).slice(0, 5).forEach((item) =>
+    add("jobs", "briefcase-business", item.id, item.headline, `${item.employer || "Arbetsgivare"} · Nytt jobb`, "jobb.html", item.publicationDate)
+  );
+  (housingData?.municipalities?.[municipality]?.listings || []).slice(0, 5).forEach((item) =>
+    add("housing", "house", item.id, item.address || "Ny ledig bostad", `${item.rooms || ""} ${item.rooms ? "rum · " : ""}${item.provider || "Bostad"}`, "bostader.html", item.available || housingData.generatedAt)
+  );
+  (eventsData?.municipalities?.[municipality]?.events || []).filter((item) =>
+    new Date(item.endDate || item.startDate) >= new Date(new Date().setHours(0, 0, 0, 0))
+  ).slice(0, 4).forEach((item) =>
+    add("events", "calendar-days", item.id, item.title, `${item.startDate || ""} · ${item.venue || municipality}`, "evenemang.html", item.startDate)
+  );
+  allNewsArticles.filter((item) =>
+    item.scope === "local" && (item.municipalities || []).includes(municipality)
+  ).slice(0, 4).forEach((item) =>
+    add("news", "newspaper", item.id, item.title, item.source || "Lokal nyhet", item.url, item.publishedAt, true)
+  );
+  (transportData?.municipalities?.[municipality]?.stops || []).flatMap((stop) =>
+    (stop.alerts || []).map((alert, index) => ({ alert, stop, index }))
+  ).slice(0, 3).forEach(({ alert, stop, index }) => {
+    const title = typeof alert === "string" ? alert : alert.header || alert.title || alert.description;
+    const id = typeof alert === "string" ? `${stop.id}-${index}-${alert}` : alert.id || `${stop.id}-${index}-${title}`;
+    add("transport", "bus-front", id, title, stop.name, "#kollektivtrafik", transportData.generatedAt);
+  });
+  (fuelData?.municipalities?.[municipality]?.stations || []).filter((station) =>
+    Number(station.price) > 0
+  ).slice(0, 3).forEach((station) =>
+    add("fuel", station.type === "charging" ? "plug-zap" : "fuel", `${station.id}-${station.price}`, `${station.name}: ${station.price} ${station.unit || ""}`, "Nytt registrerat pris", "drivmedel.html", fuelData.generatedAt)
+  );
+  const lunchDay = getStockholmWeekday();
+  (lunchTickerData?.municipalities?.[municipality]?.restaurants || []).filter((restaurant) =>
+    restaurant.status === "current" && (restaurant.days?.[lunchDay] || []).length
+  ).slice(0, 4).forEach((restaurant) =>
+    add("lunch", "utensils", `${restaurant.id}-${restaurant.weekNumber}-${lunchDay}`, `Dagens lunch hos ${restaurant.name}`, restaurant.days[lunchDay].slice(0, 2).join(" · "), "lunch.html", restaurant.checkedAt)
+  );
+
+  return items.sort((first, second) => {
+    const firstDate = new Date(first.date).getTime() || 0;
+    const secondDate = new Date(second.date).getTime() || 0;
+    return secondDate - firstDate;
+  });
+}
+
+function notificationStorageKey(municipality) {
+  return `dinpuls-notifications-seen:${municipality}`;
+}
+
+function getSeenNotifications(municipality) {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(notificationStorageKey(municipality)) || "[]"));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSeenNotifications(municipality, keys) {
+  const seen = getSeenNotifications(municipality);
+  keys.forEach((key) => seen.add(key));
+  localStorage.setItem(notificationStorageKey(municipality), JSON.stringify([...seen].slice(-300)));
 }
 
 function initializeMobileMenu() {
