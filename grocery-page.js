@@ -50,18 +50,72 @@ function renderShoppingList(basket) {
   box.querySelectorAll("input").forEach(input => input.addEventListener("change", () => { const saved = checkedItems(); const index = Number(input.dataset.itemIndex); input.checked ? saved.add(index) : saved.delete(index); localStorage.setItem(basketKey(), JSON.stringify([...saved])); input.closest("label").classList.toggle("checked", input.checked); }));
 }
 
+function priceStorageKey(storeName) {
+  return `dinpuls-grocery-price:${groceryMunicipality}:${groceryBasketId}:${storeName}`;
+}
+
+function localPriceReport(storeName) {
+  try { return JSON.parse(localStorage.getItem(priceStorageKey(storeName)) || "null"); }
+  catch { return null; }
+}
+
 function renderStores(basket) {
   const stores = groceryData.municipalities?.[groceryMunicipality]?.stores || [];
-  const prices = groceryData.prices?.[groceryMunicipality]?.[basket.id] || {};
-  const verifiedTotals = stores.map(store => Number(prices[store.name]?.total)).filter(total => total > 0);
+  const published = groceryData.prices?.[groceryMunicipality]?.[basket.id] || {};
+  const reports = stores.map(store => {
+    const official = published[store.name] || null;
+    const local = localPriceReport(store.name);
+    return { store, price: local || official || {}, local: Boolean(local) };
+  });
+  const verifiedTotals = reports.map(entry => Number(entry.price.total)).filter(total => total > 0 && entryIsComplete(total));
   const lowest = verifiedTotals.length ? Math.min(...verifiedTotals) : null;
-  document.querySelector("#grocery-updated").textContent = lowest ? "Verifierade butikpriser" : "Inväntar säker prisdata";
-  document.querySelector("#grocery-stores").innerHTML = stores.map(store => {
-    const price = prices[store.name] || {};
+  document.querySelector("#grocery-updated").textContent = lowest ? "Jämförelse från kontrollerade priser" : "Registrera första prisrundan";
+  document.querySelector("#grocery-stores").innerHTML = reports.map(({store, price, local}) => {
     const total = Number(price.total);
-    const isLowest = total > 0 && total === lowest;
-    return `<article class="grocery-store ${isLowest ? "lowest" : ""}"><span class="portal-card-icon grocery"><i data-lucide="store"></i></span><div><h3>${escapeGrocery(store.name)}</h3><p>${total > 0 ? `${basket.items.length} av ${basket.items.length} varor prissatta` : `Välj lokal butik för ${escapeGrocery(groceryMunicipality)}`}</p>${price.checkedAt ? `<small>Kontrollerat ${escapeGrocery(new Date(price.checkedAt).toLocaleDateString("sv-SE"))} · ${escapeGrocery(price.source || "butikens webbplats")}</small>` : `<small>Inget verifierat totalpris ännu</small>`}</div><div class="grocery-store-price">${isLowest ? `<em>Billigast</em>` : ""}<strong>${total > 0 ? `${new Intl.NumberFormat("sv-SE").format(total)} kr` : "Pris saknas"}</strong><a href="${escapeGrocery(store.url)}" target="_blank" rel="noopener noreferrer">Kontrollera hos butiken <i data-lucide="external-link"></i></a></div></article>`;
+    const complete = Number(price.itemCount || basket.items.length) === basket.items.length && total > 0;
+    const isLowest = complete && total === lowest;
+    const count = Number(price.itemCount || 0);
+    return `<article class="grocery-store ${isLowest ? "lowest" : ""}"><span class="portal-card-icon grocery"><i data-lucide="store"></i></span><div><h3>${escapeGrocery(store.name)}</h3><p>${complete ? `${basket.items.length} av ${basket.items.length} varor prissatta` : count ? `${count} av ${basket.items.length} varor registrerade` : `Ingen komplett kontroll för ${escapeGrocery(groceryMunicipality)}`}</p>${price.checkedAt ? `<small>Kontrollerat ${escapeGrocery(new Date(price.checkedAt).toLocaleString("sv-SE",{dateStyle:"short",timeStyle:"short"}))} · ${escapeGrocery(price.source || "manuell prisrunda")}${local ? " · sparat på den här enheten" : ""}</small>` : `<small>Registrera de synliga hyllpriserna utan butikskonto</small>`}</div><div class="grocery-store-price">${isLowest ? `<em>Billigast</em>` : ""}<strong>${complete ? `${new Intl.NumberFormat("sv-SE",{minimumFractionDigits:2,maximumFractionDigits:2}).format(total)} kr` : "Pris saknas"}</strong><button class="grocery-report-button" type="button" data-price-store="${escapeGrocery(store.name)}">Registrera priser</button><a href="${escapeGrocery(store.url)}" target="_blank" rel="noopener noreferrer">Kontrollera hos butiken <i data-lucide="external-link"></i></a></div></article>`;
   }).join("");
+  document.querySelectorAll("[data-price-store]").forEach(button => button.addEventListener("click", () => openPriceCollector(button.dataset.priceStore, basket)));
+}
+
+function entryIsComplete(total) { return Number(total) > 0; }
+
+function openPriceCollector(storeName, basket) {
+  const panel = document.querySelector("#grocery-price-collector");
+  const saved = localPriceReport(storeName) || {};
+  const values = saved.items || {};
+  panel.hidden = false;
+  panel.innerHTML = `<div class="grocery-collector-heading"><div><span class="section-kicker">Manuell prisrunda</span><h2>${escapeGrocery(storeName)} · ${escapeGrocery(groceryMunicipality)}</h2><p>Ange kostnaden för den mängd som står på varje rad. Alla ${basket.items.length} rader måste fyllas för en rättvis totalsumma.</p></div><button type="button" class="grocery-collector-close" aria-label="Stäng">×</button></div>
+    <form id="grocery-price-form">
+      <div class="grocery-price-fields">${basket.items.map((item,index)=>`<label><span><strong>${escapeGrocery(item.name)}</strong><small>${escapeGrocery(item.quantity)}</small></span><span class="grocery-price-input"><input inputmode="decimal" type="number" min="0.01" step="0.01" name="item-${index}" value="${escapeGrocery(values[index] ?? "")}" required><b>kr</b></span></label>`).join("")}</div>
+      <div class="grocery-collector-actions"><button type="submit">Spara och jämför</button><button type="button" id="grocery-copy-report" ${saved.total ? "" : "disabled"}>Kopiera prisrapport</button><span id="grocery-form-total">${saved.total ? `Senast: ${new Intl.NumberFormat("sv-SE",{minimumFractionDigits:2}).format(saved.total)} kr` : "Totalsumman räknas automatiskt"}</span></div>
+    </form>`;
+  panel.scrollIntoView({behavior:"smooth",block:"start"});
+  panel.querySelector(".grocery-collector-close").addEventListener("click", () => { panel.hidden = true; });
+  panel.querySelector("#grocery-price-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const fields = [...event.currentTarget.querySelectorAll("input[type=number]")];
+    const itemPrices = Object.fromEntries(fields.map((field,index)=>[index,Number(field.value)]));
+    const total = Object.values(itemPrices).reduce((sum,value)=>sum+value,0);
+    const report = { municipality:groceryMunicipality,basketId:basket.id,basketName:basket.name,store:storeName,itemCount:fields.length,items:itemPrices,total:Number(total.toFixed(2)),checkedAt:new Date().toISOString(),source:"Manuellt kontrollerade hyllpriser" };
+    localStorage.setItem(priceStorageKey(storeName),JSON.stringify(report));
+    renderStores(basket);
+    openPriceCollector(storeName,basket);
+  });
+  panel.querySelector("#grocery-copy-report").addEventListener("click", async () => {
+    const report = localPriceReport(storeName);
+    if (!report) return;
+    const itemRows = basket.items.map((item,index)=>({name:item.name,quantity:item.quantity,cost:report.items[index]}));
+    const exportText = JSON.stringify({...report,itemRows},null,2);
+    try {
+      await navigator.clipboard.writeText(exportText);
+      panel.querySelector("#grocery-form-total").textContent = "Prisrapporten är kopierad – skicka den till DinPuls för publicering.";
+    } catch {
+      panel.querySelector("#grocery-form-total").textContent = "Kopiering blockerades. Försök igen i en vanlig webbläsare.";
+    }
+  });
 }
 
 function renderAds() {
