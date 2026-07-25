@@ -6,26 +6,25 @@
   <title>Matkassar för fyra personer – DinPuls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?version=0.17.5"><link rel="stylesheet" href="portal-pages.css?version=0.17.5">
+  <link rel="stylesheet" href="styles.css?version=0.17.6"><link rel="stylesheet" href="portal-pages.css?version=0.17.6">
 </head>
 <body>
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
   <main class="portal-main">
-    <section class="portal-hero grocery"><span class="section-kicker">DinPuls Matkasse</span><h1>Mat för fyra i <span data-grocery-municipality>Åmål</span></h1><p>Tre färdiga kassar, samlad inköpslista och en öppen jämförelse av verifierade lokala butikpriser.</p></section>
-    <div class="grocery-principle"><i data-lucide="badge-check"></i><span><strong>Fyra personer – alltid.</strong> Mängderna är planerade för fyra portioner. Du kan registrera synliga hyllpriser utan butikskonto. Priser visas med butik, källa och kontrolltid.</span></div>
+    <section class="portal-hero grocery"><span class="section-kicker">DinPuls Matkasse</span><h1>Mat för fyra i <span data-grocery-municipality>Åmål</span></h1><p>En fast baskasse med 25 vanliga varor och en öppen jämförelse av lokala butikpriser.</p></section>
+    <div class="grocery-principle"><i data-lucide="badge-check"></i><span><strong>Samma baskasse – varje vecka.</strong> Mängderna är planerade för fyra portioner. Jämför ordinarie pris rättvist. Kampanj- och medlemspris redovisas separat med butik och kontrolltid.</span></div>
     <div class="portal-layout">
       <section class="portal-content grocery-content">
         <div class="portal-toolbar two grocery-toolbar">
           <label>Kommun<select id="grocery-municipality"></select></label>
-          <label>Välj matkasse<select id="grocery-basket"></select></label>
         </div>
         <div id="grocery-basket-summary" class="grocery-basket-summary"></div>
         <div class="grocery-page-grid">
-          <section><div class="portal-result-heading"><h2>Veckans måltider</h2><span id="grocery-meal-count"></span></div><div id="grocery-meals" class="grocery-meals"></div></section>
+          <section><div class="portal-result-heading"><h2>Så fungerar baskassen</h2><span id="grocery-meal-count"></span></div><div id="grocery-meals" class="grocery-meals"></div></section>
           <section><div class="portal-result-heading"><h2>Inköpslista</h2><button id="grocery-reset" class="grocery-reset" type="button">Rensa bockar</button></div><div id="grocery-shopping-list" class="grocery-shopping-list"></div></section>
         </div>
         <section class="grocery-comparison">
-          <div class="portal-result-heading"><div><h2>Prisjämförelse i <span data-grocery-municipality>Åmål</span></h2><p>Billigaste verifierade totalpris markeras automatiskt.</p></div><span id="grocery-updated"></span></div>
+          <div class="portal-result-heading"><div><h2>Prisjämförelse i <span data-grocery-municipality>Åmål</span></h2><p>Billigaste ordinarie totalpris markeras. Kampanj och medlemspris visas separat.</p></div><span id="grocery-updated"></span></div>
           <div id="grocery-stores" class="grocery-store-list"></div>
         </section>
         <section id="grocery-price-collector" class="grocery-price-collector" hidden aria-live="polite"></section>
@@ -33,5 +32,5 @@
       <aside class="portal-ad-column" id="grocery-ads"></aside>
     </div>
   </main>
-  <script src="https://unpkg.com/lucide@latest"></script><script src="grocery-page.js?version=0.17.5"></script>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="grocery-page.js?version=0.17.6"></script>
 </body></html>
