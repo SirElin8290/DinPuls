@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.7
+   DINPULS.SE v0.17.8
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.7";
+const DINPULS_VERSION = "0.17.8";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -181,6 +181,7 @@ async function startDinPuls() {
     initializeTabs();
     initializeSearch();
     initializeClock();
+    await initializeNameDay();
     initializeTheme();
     initializeSeasonalTheme();
     initializeMobileMenu();
@@ -198,6 +199,48 @@ async function startDinPuls() {
   } catch (error) {
     console.error("DinPuls kunde inte starta:", error);
   }
+}
+
+
+async function initializeNameDay() {
+  const dateParts = Object.fromEntries(
+    new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Europe/Stockholm",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date()).filter(part => part.type !== "literal").map(part => [part.type, part.value])
+  );
+  const dateKey = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
+  const cacheKey = `dinpuls-nameday-${dateKey}`;
+  let dayData = null;
+
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) dayData = JSON.parse(cached);
+  } catch {}
+
+  try {
+    const response = await fetch(
+      `https://sholiday.faboul.se/dagar/v2.1/${dateParts.year}/${dateParts.month}/${dateParts.day}`,
+      { cache: "no-store" }
+    );
+    if (!response.ok) throw new Error(`Namnsdags-API svarade ${response.status}`);
+    const payload = await response.json();
+    dayData = payload?.dagar?.[0] || dayData;
+    if (dayData) localStorage.setItem(cacheKey, JSON.stringify(dayData));
+  } catch (error) {
+    console.warn("Namnsdagen kunde inte uppdateras:", error);
+  }
+
+  const names = Array.isArray(dayData?.namnsdag) ? dayData.namnsdag.filter(Boolean) : [];
+  const title = names.length ? `Namnsdag: ${names.join(" och ")}` : "Ingen namnsdag i dag";
+  const detail = dayData?.veckodag
+    ? `${dayData.veckodag} ${Number(dateParts.day)} ${new Intl.DateTimeFormat("sv-SE", { month: "long", timeZone: "Europe/Stockholm" }).format(new Date())}`
+    : "Svensk almanacka";
+
+  document.querySelectorAll("[data-nameday-title]").forEach(element => { element.textContent = title; });
+  document.querySelectorAll("[data-nameday-detail]").forEach(element => { element.textContent = detail; });
 }
 
 function initializeTabs() {
