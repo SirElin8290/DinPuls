@@ -1,4 +1,16 @@
-# DinPuls v0.16.1
+# DinPuls v0.17.0
+
+## Nytt i v0.17.0
+
+- Sektionen ”Personligt för dig” och länken ”Alla tjänster” är borttagna tills
+  det finns fler funktioner som behöver samlas där.
+- Automatiska årstidsteman för vår, sommar, höst och vinter.
+- Sommarläge med ljusare himmel, solvärme, gröna accenter och neutrala
+  vita/gula ängsblommor.
+- Automatiska specialteman för nyår, alla hjärtans dag, påsk, May the 4th,
+  mors dag, midsommar, kanelbullens dag, Halloween, fars dag, Lucia och jul.
+- Rörliga svenska datum beräknas automatiskt för påsk, midsommar, mors dag och
+  fars dag.
 
 ## Rättningar i v0.16.1
 

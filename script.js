@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.16.1
+   DINPULS.SE v0.17.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.16.1";
+const DINPULS_VERSION = "0.17.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -19,7 +19,6 @@ const componentNames = [
   "premium-ad-2",
   "jobs-housing",
   "grocery",
-  "services",
   "premium-ad-3",
   "footer"
 ];
@@ -169,6 +168,7 @@ async function loadComponent(name) {
 
 async function startDinPuls() {
   try {
+    initializeSeasonalTheme();
     await Promise.all(componentNames.map(loadComponent));
     await DinPulsMunicipality.initialize();
 
@@ -180,6 +180,7 @@ async function startDinPuls() {
     initializeSearch();
     initializeClock();
     initializeTheme();
+    initializeSeasonalTheme();
     initializeMobileMenu();
     initializeFuelCardLink();
     initializeTrafficCardLink();
@@ -286,6 +287,107 @@ function initializeClock() {
 
   updateClock();
   window.setInterval(updateClock, 1000);
+}
+
+/* =========================================================
+   DINPULS v0.17.0 – AUTOMATISKA ÅRSTIDS- OCH HÖGTIDSTEMAN
+========================================================= */
+function initializeSeasonalTheme() {
+  const root = document.documentElement;
+  const stockholmParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date()).reduce((parts, part) => {
+    if (part.type !== "literal") parts[part.type] = Number(part.value);
+    return parts;
+  }, {});
+  const { year, month, day } = stockholmParts;
+  const current = new Date(Date.UTC(year, month - 1, day));
+  const season = month >= 3 && month <= 5
+    ? "spring"
+    : month >= 6 && month <= 8
+      ? "summer"
+      : month >= 9 && month <= 11
+        ? "autumn"
+        : "winter";
+  const special = resolveSpecialTheme(current);
+
+  root.dataset.season = season;
+  if (special) {
+    root.dataset.specialTheme = special.id;
+  } else {
+    delete root.dataset.specialTheme;
+  }
+
+  const seasonLabels = {
+    spring: { label: "Vår", icon: "sprout" },
+    summer: { label: "Sommar", icon: "sun" },
+    autumn: { label: "Höst", icon: "leaf" },
+    winter: { label: "Vinter", icon: "snowflake" }
+  };
+  const display = special || seasonLabels[season];
+  const badge = document.querySelector("#seasonal-theme-badge");
+  if (badge) {
+    badge.innerHTML = `<i data-lucide="${escapeAttribute(display.icon)}"></i><span>${escapeHtml(display.label)}</span>`;
+    badge.title = special
+      ? `${display.label} – tillfälligt DinPuls-tema`
+      : `${display.label} – automatiskt årstidstema`;
+  }
+}
+
+function resolveSpecialTheme(current) {
+  const year = current.getUTCFullYear();
+  const month = current.getUTCMonth() + 1;
+  const day = current.getUTCDate();
+  const dayKey = month * 100 + day;
+  const daysBetween = (first, second) => Math.round((first - second) / 86400000);
+  const lastSunday = (monthIndex) => {
+    const date = new Date(Date.UTC(year, monthIndex + 1, 0));
+    date.setUTCDate(date.getUTCDate() - date.getUTCDay());
+    return date;
+  };
+  const nthSunday = (monthIndex, nth) => {
+    const date = new Date(Date.UTC(year, monthIndex, 1));
+    date.setUTCDate(1 + ((7 - date.getUTCDay()) % 7) + (nth - 1) * 7);
+    return date;
+  };
+  const midsummer = new Date(Date.UTC(year, 5, 19));
+  midsummer.setUTCDate(19 + ((5 - midsummer.getUTCDay() + 7) % 7));
+  const easter = calculateGregorianEaster(year);
+  const easterOffset = daysBetween(current, easter);
+
+  if (dayKey === 1231 || dayKey === 101) return { id: "new-year", label: "Nyår", icon: "sparkles" };
+  if (dayKey >= 1220 && dayKey <= 1230) return { id: "christmas", label: "Jul", icon: "gift" };
+  if (dayKey === 1213) return { id: "lucia", label: "Lucia", icon: "flame" };
+  if (dayKey >= 213 && dayKey <= 214) return { id: "valentine", label: "Alla hjärtans dag", icon: "heart" };
+  if (easterOffset >= -2 && easterOffset <= 1) return { id: "easter", label: "Påsk", icon: "egg" };
+  if (dayKey === 504) return { id: "may-fourth", label: "May the 4th", icon: "orbit" };
+  if (current.getTime() === lastSunday(4).getTime()) return { id: "mothers-day", label: "Mors dag", icon: "heart-handshake" };
+  if (daysBetween(current, midsummer) >= 0 && daysBetween(current, midsummer) <= 1) return { id: "midsummer", label: "Midsommar", icon: "flower-2" };
+  if (dayKey === 1004) return { id: "cinnamon-bun", label: "Kanelbullens dag", icon: "cookie" };
+  if (dayKey >= 1029 && dayKey <= 1031) return { id: "halloween", label: "Halloween", icon: "ghost" };
+  if (current.getTime() === nthSunday(10, 2).getTime()) return { id: "fathers-day", label: "Fars dag", icon: "heart-handshake" };
+  return null;
+}
+
+function calculateGregorianEaster(year) {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(Date.UTC(year, month - 1, day));
 }
 
 function initializeTheme() {

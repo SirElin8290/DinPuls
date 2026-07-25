@@ -1666,6 +1666,59 @@ body{transition:background .25s,color .25s}
 .ad-dice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.premium-ad-break{padding:18px 22px}.premium-ad-break .premium-ads-heading{margin-bottom:12px}.premium-ad-break .ad-dice{min-height:190px}.ad-dice{position:relative;min-height:210px;overflow:hidden;padding:14px;border:1px solid #274f81;border-radius:18px;background:linear-gradient(145deg,#061a3a,#0a57c7);box-shadow:0 14px 28px rgba(8,38,83,.16);perspective:700px}.ad-dice-label{display:inline-flex;padding:5px 8px;color:#dcecff;background:rgba(255,255,255,.12);border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.ad-face{min-height:125px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:14px 18px;color:#fff;animation:ad-dice-turn .55s ease}.ad-face[hidden]{display:none}.ad-face .ad-slot{padding:4px 7px;color:#082653;background:#ffd43b;border-radius:5px;font-size:9px;font-weight:900}.ad-face strong{font-size:20px;line-height:1.2}.ad-face small{color:#dcecff;line-height:1.45}.ad-face b{display:inline-flex;align-items:center;gap:5px;margin-top:3px;font-size:11px}.ad-face b svg{width:14px}.ad-navigation{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:9px}.ad-navigation button{width:34px;height:30px;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;cursor:pointer}.ad-navigation button:hover{background:rgba(255,255,255,.24)}.ad-navigation button svg{width:15px}.ad-dots{display:flex;justify-content:center;gap:4px}.ad-dots span{width:5px;height:5px;background:rgba(255,255,255,.3);border-radius:50%}.ad-dots span.active{width:15px;background:#fff;border-radius:999px}@keyframes ad-dice-turn{from{opacity:0;transform:rotateY(70deg) scale(.94)}to{opacity:1;transform:rotateY(0) scale(1)}}
 [data-theme="dark"] .premium-ads{background:#0b1b30}
 @media(max-width:900px){.ad-dice-grid{grid-template-columns:1fr}.ad-dice{min-height:190px}}@media(max-width:760px){.premium-ads{margin:14px 12px;padding:16px}.premium-ads-heading{align-items:flex-start;flex-direction:column}.ad-face strong{font-size:18px}}
+
+/* =========================================================
+   DINPULS v0.17.0 – ÅRSTIDER OCH UTVALDA HÖGTIDER
+========================================================= */
+body{position:relative;isolation:isolate}
+body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;transition:background .5s ease,opacity .5s ease}
+body::before{top:120px;right:-90px;width:330px;height:330px;border-radius:50%;opacity:0}
+body::after{left:0;right:0;bottom:0;height:210px;opacity:0}
+.seasonal-theme-badge{display:flex;align-items:center;gap:6px;padding:7px 10px;color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}.seasonal-theme-badge svg{width:15px!important;height:15px!important}
+
+/* Sommar: klar himmel, solvärme och neutrala vita/gula ängsblommor */
+[data-season="summer"]{--bg:#f5faf5;--header-gradient:linear-gradient(120deg,#075b72 0%,#078aa2 52%,#3b9f68 100%)}
+[data-season="summer"] body{background:linear-gradient(180deg,#edf9ff 0,#f7fbef 440px,#f5faf5 100%)}
+[data-season="summer"] body::before{opacity:.48;background:radial-gradient(circle,#ffd75a 0 30%,rgba(255,215,90,.28) 31% 48%,transparent 49%)}
+[data-season="summer"] body::after{opacity:.5;background:
+radial-gradient(circle at 8% 86%,#ffcf3f 0 4px,#fff 5px 11px,transparent 12px),
+radial-gradient(circle at 18% 94%,#ffcf3f 0 4px,#fff 5px 11px,transparent 12px),
+radial-gradient(circle at 82% 91%,#ffcf3f 0 4px,#fff 5px 11px,transparent 12px),
+radial-gradient(circle at 94% 84%,#ffcf3f 0 4px,#fff 5px 11px,transparent 12px),
+linear-gradient(0deg,rgba(84,161,76,.18),transparent 62%)}
+[data-season="summer"] .site-header{background:radial-gradient(circle at 78% -20%,rgba(255,221,92,.34),transparent 30%),var(--header-gradient)}
+[data-season="summer"] .main-nav{border-bottom-color:#bddfc8}
+[data-season="summer"] .main-nav a:hover,[data-season="summer"] .main-nav a.active{color:#087b64;border-color:#ef9a36}
+[data-season="summer"] .card,[data-season="summer"] .premium-ads,[data-season="summer"] .municipality-status{border-color:#d5e7d8}
+[data-season="summer"] .section-kicker{color:#167a60}
+
+/* Grundfärger för övriga årstider */
+[data-season="spring"]{--bg:#f5faf6;--header-gradient:linear-gradient(120deg,#174f71,#238a77,#68a34e)}
+[data-season="autumn"]{--bg:#faf6ef;--header-gradient:linear-gradient(120deg,#492c35,#9a4b2c,#d18a32)}
+[data-season="winter"]{--bg:#f2f7fb;--header-gradient:linear-gradient(120deg,#071d43,#24527a,#6f91ab)}
+[data-season="spring"] body{background:linear-gradient(180deg,#f1fbf5,#f8fbf5)}
+[data-season="autumn"] body{background:linear-gradient(180deg,#fff8ed,#faf6ef)}
+[data-season="winter"] body{background:linear-gradient(180deg,#eef6fc,#f7f9fb)}
+
+/* Tillfälliga högtidsteman – specialdagen har företräde framför årstiden */
+[data-special-theme="midsummer"]{--header-gradient:linear-gradient(120deg,#17663e,#3d9660,#168cb0)}
+[data-special-theme="midsummer"] body::after{opacity:.8}
+[data-special-theme="christmas"]{--header-gradient:linear-gradient(120deg,#5d0c16,#a51f2b,#165a3b)}
+[data-special-theme="lucia"]{--header-gradient:linear-gradient(120deg,#6e1018,#b92b32,#e8b954)}
+[data-special-theme="new-year"]{--header-gradient:linear-gradient(120deg,#080c28,#25205d,#9a772b)}
+[data-special-theme="new-year"] body::before{opacity:.45;background:radial-gradient(circle,#ffe28a 0 3%,transparent 4%),conic-gradient(from 0deg,transparent,#e8c25c,transparent,#8bb7ff,transparent)}
+[data-special-theme="valentine"]{--header-gradient:linear-gradient(120deg,#641b3a,#bb3265,#e35f73)}
+[data-special-theme="easter"]{--header-gradient:linear-gradient(120deg,#7a5b12,#d49b22,#8a67ae)}
+[data-special-theme="may-fourth"]{--header-gradient:linear-gradient(120deg,#030713,#172b5d,#513b84)}
+[data-special-theme="may-fourth"] body{background:radial-gradient(circle at 20% 20%,#425a8a 0 1px,transparent 2px),radial-gradient(circle at 70% 30%,#fff 0 1px,transparent 2px),#080d1b;background-size:80px 80px,120px 120px;color:#e9f3ff}
+[data-special-theme="cinnamon-bun"]{--header-gradient:linear-gradient(120deg,#4c281b,#9a552c,#d88b45)}
+[data-special-theme="halloween"]{--header-gradient:linear-gradient(120deg,#191025,#51276d,#d86a16)}
+[data-special-theme="mothers-day"],[data-special-theme="fathers-day"]{--header-gradient:linear-gradient(120deg,#194d68,#6b4f8f,#bb6583)}
+[data-special-theme] .site-header{background:var(--header-gradient)}
+
+[data-theme="dark"] body::after{opacity:.12}
+[data-theme="dark"][data-season] body{background:#071426}
+@media(max-width:1100px){.seasonal-theme-badge{display:none}}
 @media(prefers-reduced-motion:reduce){.ad-face{animation:none}}
 
 /* v0.11.0 – kompakt tank- och laddmodul */
