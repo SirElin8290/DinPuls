@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.14.0
+   DINPULS.SE v0.15.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.14.0";
+const DINPULS_VERSION = "0.15.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -183,7 +183,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel(), initializeEvents()]);
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
       { persist: false, force: true }
@@ -1240,6 +1240,59 @@ function updateQuickTransport() {
 }
 
 window.setInterval(updateQuickTransport, 60000);
+
+/* =========================================================
+   DINPULS v0.15.0 – EVENEMANG
+========================================================= */
+let eventsData = null;
+
+async function initializeEvents() {
+  const card = document.querySelector("#evenemang");
+  const openPage = () => location.href = `evenemang.html?kommun=${encodeURIComponent(DinPulsMunicipality.getName())}`;
+  card?.addEventListener("click", event => { if (!event.target.closest("a,button,input,select,label")) openPage(); });
+  card?.addEventListener("keydown", event => { if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a,button,input,select")) { event.preventDefault(); openPage(); } });
+  DinPulsMunicipality.subscribe("events", renderEvents);
+  try {
+    const response = await fetch(`data/events.json?version=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    eventsData = await response.json();
+    renderEvents();
+  } catch (error) {
+    console.error("Evenemang kunde inte laddas:", error);
+    document.querySelector("#events-loading")?.setAttribute("hidden", "");
+    const empty = document.querySelector("#events-empty"); if (empty) empty.hidden = false;
+  }
+}
+
+function renderEvents() {
+  if (!eventsData) return;
+  const municipality = DinPulsMunicipality.getName();
+  const data = eventsData.municipalities?.[municipality] || { events: [], sources: [] };
+  const now = new Date(); now.setHours(0,0,0,0);
+  const events = (data.events || []).filter(item => new Date(item.endDate || item.startDate).getTime() >= now.getTime()).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+  const visible = events.slice(0, 4);
+  const list = document.querySelector("#events-list");
+  const loading = document.querySelector("#events-loading");
+  const empty = document.querySelector("#events-empty");
+  if (loading) loading.hidden = true;
+  if (list) { list.innerHTML = visible.map(renderEventPreview).join(""); list.hidden = !visible.length; }
+  if (empty) empty.hidden = !!visible.length;
+  const total = document.querySelector("#events-total"); if (total) total.textContent = events.length ? `${events.length} kommande · ${data.sources?.length || 0} källor` : `${data.sources?.length || 0} lokala källor`;
+  const link = document.querySelector("#events-page-link"); if (link) link.href = `evenemang.html?kommun=${encodeURIComponent(municipality)}`;
+  document.querySelectorAll("[data-quick-events-title]").forEach(el => el.textContent = events.length ? `${events.length} evenemang i ${municipality}` : `Evenemang i ${municipality}`);
+  document.querySelectorAll("[data-quick-events-detail]").forEach(el => el.textContent = events[0] ? `${formatEventShortDate(events[0].startDate)} · ${events[0].title}` : `${data.sources?.length || 0} lokala kalendrar samlade`);
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderEventPreview(item) {
+  const date = new Date(item.startDate); const month = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("sv-SE", { month: "short" }).replace(".", "");
+  const day = Number.isNaN(date.getTime()) ? "–" : date.getDate();
+  return `<li><time><b>${day}</b>${escapeHtml(month)}</time><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml([item.time, item.venue, item.sourceName].filter(Boolean).join(" · "))}</small></span></li>`;
+}
+
+function formatEventShortDate(value) {
+  const date = new Date(value); return Number.isNaN(date.getTime()) ? "Kommande" : date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
+}
 
 /* =========================================================
    DINPULS v0.8.0 – LEDIGA JOBB
