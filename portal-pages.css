@@ -25,3 +25,22 @@
 
 /* Baskasse v0.17.6 */
 .grocery-bas-card{display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:16px;padding:22px;color:#173b25;background:linear-gradient(135deg,#effaf2,#fff);border:1px solid #b9dfc5;border-radius:16px}.grocery-bas-card h3{margin:4px 0;font-size:20px}.grocery-bas-card p{margin:0;color:#54705e;font-size:12px}.grocery-bas-card small{color:#247b42;font-weight:800}.grocery-bas-card>strong{display:flex;align-items:center;gap:6px;color:#18783a;font-size:12px}.grocery-price-columns,.grocery-price-fields>label{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,115px);align-items:center;gap:8px}.grocery-price-columns{margin:18px 0 6px;padding:0 12px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.grocery-price-fields{grid-template-columns:1fr}.grocery-price-fields>label{justify-content:initial}.grocery-price-input input{width:78px}.grocery-offer-total{color:#9a5900!important;font-weight:800}.grocery-member-total{color:#6c2f91!important;font-weight:800}@media(max-width:700px){.grocery-bas-card{grid-template-columns:48px 1fr}.grocery-bas-card>strong{grid-column:1/-1}.grocery-price-columns{display:none}.grocery-price-fields>label{grid-template-columns:1fr repeat(3,minmax(72px,1fr));padding:12px 8px}.grocery-price-fields>label>span:first-child{grid-column:1/-1}.grocery-price-input{display:grid;gap:3px}.grocery-price-input:before{font-size:8px;color:var(--muted)}.grocery-price-input:nth-child(2):before{content:"Ordinarie"}.grocery-price-input:nth-child(3):before{content:"Kampanj"}.grocery-price-input:nth-child(4):before{content:"Medlem"}.grocery-price-input input{width:100%}}
+
+
+/* Strategiska annonsplatser v0.17.7 */
+.portal-layout.strategic-layout{grid-template-columns:minmax(0,1fr)}
+.strategic-ad-slot{margin:20px 0}
+.strategic-ad-top{margin:18px 0 0}
+.strategic-ad-slot:empty{display:none}
+.secondary-ad.strategic-ad{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:16px;margin:0;padding:15px 18px;border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 22px rgba(10,51,107,.12)}
+.secondary-ad.strategic-ad b{padding:5px 8px;background:rgba(255,255,255,.13);border-radius:999px;white-space:nowrap}
+.secondary-ad.strategic-ad strong{font-size:15px}
+.secondary-ad.strategic-ad small{text-align:right;white-space:nowrap}
+.portal-list>.strategic-ad-slot,.grocery-shopping-list>.strategic-ad-slot{grid-column:1/-1;width:100%;margin:8px 0}
+.portal-content>.strategic-ad-slot:first-of-type{margin-top:18px}
+@media(max-width:620px){
+  .strategic-ad-slot{margin:15px 0}
+  .secondary-ad.strategic-ad{grid-template-columns:1fr;gap:6px;padding:15px}
+  .secondary-ad.strategic-ad b{justify-self:start}
+  .secondary-ad.strategic-ad small{text-align:left;white-space:normal}
+}
