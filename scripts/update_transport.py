@@ -6,8 +6,9 @@ centrala kommunfilen. Vid saknade id:n eller API-fel lämnas senaste fungerande
 transport.json orörd.
 """
 import json, os, sys
-from datetime import datetime, timezone
+from datetime import datetime, time, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -27,8 +28,9 @@ def load_stop_areas():
         if item.get("name")
     }
 
-def fetch(area_id):
-    url = f"https://realtime-api.trafiklab.se/v1/departures/{quote(area_id)}?key={quote(API_KEY)}"
+def fetch(area_id, query_time=None):
+    time_path = f"/{quote(query_time)}" if query_time else ""
+    url = f"https://realtime-api.trafiklab.se/v1/departures/{quote(area_id)}{time_path}?key={quote(API_KEY)}"
     request = Request(url, headers={"User-Agent": "DinPuls/0.7.1"})
     try:
         with urlopen(request, timeout=25) as response:
@@ -40,6 +42,18 @@ def fetch(area_id):
     if not isinstance(payload.get("departures"), list):
         raise RuntimeError("Trafiklab-svaret saknar departures")
     return payload
+
+def fallback_query_time():
+    """Väljer ett enda extra 60-minutersfönster utan att spräcka API-kvoten."""
+    stockholm = ZoneInfo("Europe/Stockholm")
+    now = datetime.now(stockholm)
+    if now.hour >= 21:
+        target = datetime.combine((now + timedelta(days=1)).date(), time(7, 0), stockholm)
+    elif now.hour < 5:
+        target = datetime.combine(now.date(), time(7, 0), stockholm)
+    else:
+        target = now + timedelta(hours=1)
+    return target.strftime("%Y-%m-%dT%H:%M")
 
 def alert_text(alert):
     if isinstance(alert, str):
@@ -96,16 +110,27 @@ def main():
         normalized_stops = []
         for stop in stops:
             try:
-                payload = fetch(str(stop["id"]))
+                current_payload = fetch(str(stop["id"]))
+                departure_payload = current_payload
+                lookup_time = None
+                if not current_payload.get("departures"):
+                    lookup_time = fallback_query_time()
+                    fallback_payload = fetch(str(stop["id"]), lookup_time)
+                    if fallback_payload.get("departures"):
+                        departure_payload = fallback_payload
             except RuntimeError as error:
                 print(f"{municipality}: {error}")
                 print("Behåller senaste fungerande transport.json.")
                 return 1
+            alerts = collect_alerts(current_payload)
+            if departure_payload is not current_payload:
+                alerts = list(dict.fromkeys(alerts + collect_alerts(departure_payload)))
             normalized_stops.append({
                 "id": str(stop["id"]),
                 "name": stop["name"],
-                "alerts": collect_alerts(payload),
-                "departures": [normalize(item) for item in payload.get("departures", [])[:20]],
+                "alerts": alerts,
+                "lookupTime": lookup_time,
+                "departures": [normalize(item) for item in departure_payload.get("departures", [])[:20]],
             })
             fetched += 1
         if normalized_stops:
