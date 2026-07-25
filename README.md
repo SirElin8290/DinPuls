@@ -1,4 +1,12 @@
-# DinPuls v0.14.0
+# DinPuls v0.15.0
+
+## Nytt i v0.15.0 – Evenemang
+
+- Ny klickbar evenemangsmodul på startsidan som följer vald kommun.
+- Ny mellansida `evenemang.html` med kommun-, kategori-, tids- och sökfilter.
+- Samlade originalkällor för alla sju kommuner: kommunernas kalendrar, regionala besökskalendrar och Svenska kyrkans lokala församlingar/pastorat.
+- Tydlig källmärkning och direktlänkar; tider och ändringar kontrolleras alltid hos arrangören.
+- Fyra separata lokala annonsplatser på evenemangssidan enligt 500 kr/mån-modellen.
 
 ## Nytt i v0.14.0 – Trafik
 
