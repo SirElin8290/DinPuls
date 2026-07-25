@@ -1,4 +1,20 @@
-# DinPuls v0.15.0
+# DinPuls v0.15.1
+
+## Rättningar i v0.15.1
+
+- Kollektivtrafik, vägtrafik och Dagens viktigaste uppdateras i ett samordnat
+  GitHub-flöde var femtonde minut. Det förhindrar samtidiga commits och för
+  många GitHub Pages-byggen.
+- Buss- och tågtider laddas om automatiskt medan sidan är öppen och gamla
+  uppdateringar märks tydligt.
+- Dagens viktigaste visar ett informativt lugnt läge med kontrollerade
+  originalkällor när inga prioriterade händelser finns.
+- Evenemang publiceras tillsammans med resten av versionen i en enda komplett
+  commit så att livesidan inte blandar v0.14- och v0.15-filer.
+
+---
+
+# Tidigare: DinPuls v0.15.0
 
 ## Nytt i v0.15.0 – Evenemang
 

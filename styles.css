@@ -1514,11 +1514,20 @@ body{transition:background .25s,color .25s}
 .important-list article small{color:#66758a;font-size:10px;line-height:1.4}
 .important-list article>a{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#edf5ff}
 .important-list article>a svg{width:15px;height:15px}
+.important-calm{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:10px}
+.important-sources{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #dce6f1}
+.important-sources>span{width:100%;color:#66758a;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.important-sources a{display:inline-flex;align-items:center;gap:3px;padding:5px 7px;color:#0a57c7;background:#edf5ff;border-radius:7px;font-size:9px;font-weight:800}
+.important-sources a svg{width:11px;height:11px}
+.transport-updated.stale{color:#8a4f00;background:#fff1d6}
 .important .status-icon.warning{background:#e28a00}
 .important-loading .status-icon{animation:important-spin 1.2s linear infinite}
 @keyframes important-spin{to{transform:rotate(360deg)}}
 [data-theme="dark"] .important .heading>span,[data-theme="dark"] .important-list article>a{background:#183b67;color:#d9eaff}
 [data-theme="dark"] .important-list article small{color:#a8b8cc}
+[data-theme="dark"] .important-sources{border-color:#28435f}
+[data-theme="dark"] .important-sources>span{color:#a8b8cc}
+[data-theme="dark"] .important-sources a{color:#d9eaff;background:#183b67}
 @media(prefers-reduced-motion:reduce){.important-loading .status-icon{animation:none}}
 
 /* Vägtrafik v0.14.0 */

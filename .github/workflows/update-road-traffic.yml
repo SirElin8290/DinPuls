@@ -6,14 +6,12 @@ on:
     paths:
       - "scripts/update_road_traffic.py"
       - ".github/workflows/update-road-traffic.yml"
-  schedule:
-    - cron: "7,22,37,52 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: dinpuls-road-traffic
+  group: dinpuls-live-data
   cancel-in-progress: false
 
 jobs:

@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.15.0
+   DINPULS.SE v0.15.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.15.0";
+const DINPULS_VERSION = "0.15.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -1005,10 +1005,7 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
     status.textContent = Number.isNaN(generatedAt.getTime())
       ? "Kontrollerad"
       : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
-    list.innerHTML = renderImportantEmpty(
-      `Inga akuta händelser hittades i ${config.name}`,
-      "Krisinformation, Polisen och trafikläget har kontrollerats."
-    );
+    list.innerHTML = renderImportantCalm(config.name, importantData.sources || []);
   } else {
     status.textContent = `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
     list.innerHTML = items.map(renderImportantItem).join("");
@@ -1019,6 +1016,17 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
 
 function renderImportantEmpty(title, detail) {
   return `<article class="important-empty"><i class="status-icon success" data-lucide="circle-check"></i><div><strong>${escapeHtml(title)}</strong><small>${escapeHtml(detail)}</small></div></article>`;
+}
+
+function renderImportantCalm(municipality, sources) {
+  const sourceLinks = (sources || []).slice(0, 3).map(source =>
+    `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}<i data-lucide="arrow-up-right"></i></a>`
+  ).join("");
+  return `<article class="important-calm">
+    <i class="status-icon success" data-lucide="circle-check"></i>
+    <div><strong>Lugnt läge i ${escapeHtml(municipality)}</strong><small>Inga prioriterade varningar eller akuta händelser har hittats.</small></div>
+  </article>
+  <div class="important-sources"><span>Kontrollerade källor</span>${sourceLinks}</div>`;
 }
 
 function renderImportantItem(item) {
@@ -1056,6 +1064,7 @@ async function initializeTransport() {
   document.querySelector("#transport-stop")?.addEventListener("change", renderTransport);
   DinPulsMunicipality.subscribe("transport", refreshTransportForMunicipality);
   await loadTransport();
+  window.setInterval(loadTransport, 5 * 60 * 1000);
 }
 
 async function loadTransport() {
@@ -1119,7 +1128,9 @@ function renderTransport() {
   const updated = document.querySelector("#transport-updated");
   if (updated) {
     const timestamp = new Date(transportData.generatedAt);
-    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`}`;
+    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 30 * 60 * 1000;
+    updated.classList.toggle("stale", stale);
+    updated.innerHTML = `<i data-lucide="${stale ? "triangle-alert" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast hämtad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   updateTransportSource(isDemo);
@@ -1177,7 +1188,7 @@ function renderCompactTransport(departures, isDemo) {
   }
 
   if (departures.length === 0) {
-    list.innerHTML = "<li><span><strong>Inga aktuella avgångar</strong><small>Kontrollera vald hållplats</small></span></li>";
+    list.innerHTML = '<li><span><strong>Inga aktuella avgångar</strong><small>Tiderna uppdateras automatiskt</small></span></li>';
     return;
   }
 

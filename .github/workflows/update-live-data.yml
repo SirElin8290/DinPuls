@@ -1,11 +1,9 @@
-name: Uppdatera dagens viktigaste
+name: Uppdatera liveinformation
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "scripts/update_important.py"
-      - ".github/workflows/update-important.yml"
+  schedule:
+    - cron: "7,22,37,52 * * * *"
 
 permissions:
   contents: write
@@ -17,7 +15,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
@@ -27,16 +25,26 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Hämta officiella händelser
+      - name: Hämta kollektivtrafik
+        env:
+          TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
+        run: python scripts/update_transport.py
+
+      - name: Hämta vägtrafik
+        env:
+          TRAFIKVERKET_API_KEY: ${{ secrets.TRAFIKVERKET_API_KEY }}
+        run: python scripts/update_road_traffic.py
+
+      - name: Hämta dagens viktigaste
         run: python scripts/update_important.py
 
-      - name: Spara dagens viktigaste
+      - name: Publicera liveinformation
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/important.json
+          git add data/transport.json data/road-traffic.json data/important.json
           if ! git diff --cached --quiet; then
-            git commit -m "Uppdatera dagens viktigaste"
+            git commit -m "Uppdatera liveinformation"
             git pull --rebase
             git push
           fi
