@@ -1,4 +1,13 @@
-# DinPuls v0.16.0
+# DinPuls v0.16.1
+
+## Rättningar i v0.16.1
+
+- Luncherna har fått en separat flygplatsremsa på startsidan.
+- Remsan visar endast verifierade rätter för aktuell dag. När ingen vardagslunch
+  finns visas ett tydligt helg- eller uppdateringsmeddelande.
+- De tre premiumannonsgrupperna är utspridda högt, mitt på och längre ned på
+  startsidan.
+- Besökaren kan bläddra bakåt och framåt mellan annonserna med tydliga knappar.
 
 ## Nytt i v0.16.0
 

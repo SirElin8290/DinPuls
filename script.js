@@ -1,23 +1,26 @@
 /* =========================================================
-   DINPULS.SE v0.16.0
+   DINPULS.SE v0.16.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.16.0";
+const DINPULS_VERSION = "0.16.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
   "header",
   "quick-strip",
   "navigation",
+  "lunch-strip",
   "hero",
+  "premium-ad-1",
   "primary-cards",
   "transport",
   "secondary-cards",
+  "premium-ad-2",
   "jobs-housing",
   "grocery",
   "services",
-  "ads",
+  "premium-ad-3",
   "footer"
 ];
 
@@ -1652,34 +1655,44 @@ function getStockholmWeekday() {
 function renderLunchTicker(municipality) {
   const restaurants = lunchTickerData?.municipalities?.[municipality]?.restaurants || [];
   const weekday = getStockholmWeekday();
-  const visible = restaurants.slice(0, 5);
+  const todayRestaurants = restaurants
+    .map((restaurant) => ({
+      ...restaurant,
+      todayDishes: restaurant.status === "current"
+        ? (restaurant.days?.[weekday] || [])
+        : []
+    }))
+    .filter((restaurant) => restaurant.todayDishes.length);
   const fallback = [{
     id: "lunch",
-    name: `Lunch i ${municipality}`,
-    hours: "Se restauranger och aktuella veckomenyer",
-    status: "source-only",
-    days: {}
+    name: weekday === "saturday" || weekday === "sunday"
+      ? `Ingen vardagslunch i ${municipality} i dag`
+      : `Dagens menyer uppdateras för ${municipality}`,
+    todayDishes: ["Se restauranger och kommande veckomenyer"]
   }];
+  const dayNames = {
+    monday: "MÅNDAG", tuesday: "TISDAG", wednesday: "ONSDAG",
+    thursday: "TORSDAG", friday: "FREDAG", saturday: "LÖRDAG", sunday: "SÖNDAG"
+  };
 
-  const markup = (visible.length ? visible : fallback).map((restaurant) => {
-    const dishes = restaurant.status === "current"
-      ? (restaurant.days?.[weekday] || [])
-      : [];
-    const detail = dishes.length
-      ? dishes.slice(0, 2).join(" · ")
-      : restaurant.hours || "Öppna aktuell veckomeny";
+  const markup = (todayRestaurants.length ? todayRestaurants : fallback).map((restaurant) => {
+    const detail = restaurant.todayDishes.slice(0, 3).join(" · ");
     const restaurantQuery = restaurant.id && restaurant.id !== "lunch"
       ? `&restaurang=${encodeURIComponent(restaurant.id)}`
       : "";
 
-    return `<a class="lunch-ticker-item" href="lunch.html?kommun=${encodeURIComponent(municipality)}${restaurantQuery}">
-      <i data-lucide="utensils"></i>
-      <span><strong>${escapeHtml(restaurant.name)}</strong><small>${escapeHtml(detail)}</small></span>
+    return `<a class="lunch-airport-item" href="lunch.html?kommun=${encodeURIComponent(municipality)}${restaurantQuery}">
+      <strong>${escapeHtml(restaurant.name)}</strong>
+      <span>${escapeHtml(detail)}</span>
+      <b>SE MENY <i data-lucide="chevron-right"></i></b>
     </a>`;
   }).join("");
 
   document.querySelectorAll("[data-lunch-ticker]").forEach((container) => {
     container.innerHTML = markup;
+  });
+  document.querySelectorAll("[data-lunch-strip-day]").forEach((element) => {
+    element.textContent = dayNames[weekday] || "I DAG";
   });
 
   if (window.lucide) lucide.createIcons();
@@ -1701,7 +1714,11 @@ function initializeRotatingAds() {
           <b>Boka plats <i data-lucide="arrow-right"></i></b>
         </a>`;
       }).join("")}
-      <div class="ad-dots" aria-hidden="true">${Array.from({ length: 10 }, (_, index) => `<span data-ad-dot class="${index === moduleIndex ? "active" : ""}"></span>`).join("")}</div>`;
+      <div class="ad-navigation">
+        <button type="button" data-ad-previous aria-label="Föregående annons"><i data-lucide="chevron-left"></i></button>
+        <div class="ad-dots" aria-hidden="true">${Array.from({ length: 10 }, (_, index) => `<span data-ad-dot class="${index === moduleIndex ? "active" : ""}"></span>`).join("")}</div>
+        <button type="button" data-ad-next aria-label="Nästa annons"><i data-lucide="chevron-right"></i></button>
+      </div>`;
     const faces = [...module.querySelectorAll("[data-ad-face]")];
     const dots = [...module.querySelectorAll("[data-ad-dot]")];
     if (!faces.length) return;
@@ -1715,6 +1732,18 @@ function initializeRotatingAds() {
     };
 
     show(current);
-    window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
+    let timer = window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
+    const restart = () => {
+      window.clearInterval(timer);
+      timer = window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
+    };
+    module.querySelector("[data-ad-previous]")?.addEventListener("click", () => {
+      show(current - 1);
+      restart();
+    });
+    module.querySelector("[data-ad-next]")?.addEventListener("click", () => {
+      show(current + 1);
+      restart();
+    });
   });
 }
