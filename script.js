@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.10
+   DINPULS.SE v0.18.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.10";
+const DINPULS_VERSION = "0.18.0";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -15,6 +15,7 @@ const componentNames = [
   "premium-ad-1",
   "primary-cards",
   "transport",
+  "sport",
   "secondary-cards",
   "premium-ad-2",
   "jobs-housing",
@@ -189,7 +190,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -2096,4 +2097,35 @@ function initializeRotatingAds() {
       restart();
     });
   });
+}
+
+/* =========================================================
+   DINPULS v0.18.0 – LOKAL SPORT
+========================================================= */
+let sportsData = null;
+
+async function initializeSports() {
+  const response = await fetch(`data/sports.json?version=${DINPULS_VERSION}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Sportdata kunde inte laddas: ${response.status}`);
+  sportsData = await response.json();
+  DinPulsMunicipality.subscribe("sport", renderSportsHome);
+  renderSportsHome(DinPulsMunicipality.getConfig());
+}
+
+function renderSportsHome(config) {
+  const municipality = sportsData?.municipalities?.[config.name] || { clubs: [], liveSources: [] };
+  const clubs = Array.isArray(municipality.clubs) ? municipality.clubs : [];
+  const sources = Array.isArray(municipality.liveSources) ? municipality.liveSources : [];
+  const sports = [...new Set(clubs.flatMap((club) => club.sports || []))];
+  const summary = document.querySelector("#sport-home-summary");
+  const list = document.querySelector("#sport-home-list");
+  const link = document.querySelector("#sport-home-link");
+  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar</strong><span>${sports.length} sporter · ${sources.length} källor för matcher och tabeller</span>`;
+  if (list) list.innerHTML = clubs.slice(0, 4).map((club) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sok=${encodeURIComponent(club.name)}">
+    <span class="sport-home-icon"><i data-lucide="medal"></i></span>
+    <span><strong>${escapeHtml(club.name)}</strong><small>${escapeHtml((club.sports || []).join(" · "))}</small></span>
+    <i data-lucide="chevron-right"></i>
+  </a>`).join("");
+  if (link) link.href = `sport.html?kommun=${encodeURIComponent(config.name)}`;
+  if (window.lucide) lucide.createIcons();
 }

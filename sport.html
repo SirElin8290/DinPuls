@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="sv" data-portal="sport">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Lokal sport, matcher, resultat, tabeller och föreningar i din kommun.">
+  <title>Lokal sport – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?version=0.18.0"><link rel="stylesheet" href="portal-pages.css?version=0.18.0">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero sport-page"><span class="section-kicker">DinPuls lokalsport</span><h1>Sport i <span data-sport-municipality>Åmål</span></h1><p>Matcher, resultat, tabeller och föreningar – från de största lagidrotterna till kommunens minsta sporter.</p></section>
+    <div class="sport-principle"><i data-lucide="shield-check"></i><span>Endast lokal sport. Uppgifter visas från föreningar, kommunala föreningsregister och specialförbund. Originalkällan gäller alltid.</span></div>
+    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="sport" data-ad-position="1"></div>
+    <section class="portal-content sport-content">
+      <div class="portal-toolbar sport-toolbar">
+        <label>Kommun<select id="sport-municipality"></select></label>
+        <label>Sport<select id="sport-filter"><option value="all">Alla sporter</option></select></label>
+        <label>Sök<input id="sport-search" type="search" placeholder="Förening eller sport"></label>
+      </div>
+      <div class="sport-stat-grid" id="sport-stat-grid"></div>
+      <div class="strategic-ad-slot" data-strategic-ad="sport" data-ad-position="2"></div>
+      <div class="sport-tabs" role="tablist" aria-label="Sportinnehåll">
+        <button class="active" data-sport-tab="overview">Översikt</button>
+        <button data-sport-tab="upcoming">Kommande matcher</button>
+        <button data-sport-tab="results">Spelade matcher</button>
+        <button data-sport-tab="tables">Tabeller</button>
+        <button data-sport-tab="clubs">Föreningar</button>
+      </div>
+      <div id="sport-view"></div>
+      <div class="strategic-ad-slot" data-strategic-ad="sport" data-ad-position="8"></div>
+    </section>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="sport-page.js?version=0.18.0"></script>
+</body></html>

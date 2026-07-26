@@ -1,4 +1,16 @@
-# DinPuls v0.17.1
+# DinPuls v0.18.0
+
+## Lokal sport i v0.18.0
+
+- En kompakt sportöversikt på startsidan följer den centrala kommunmotorn.
+- Den nya stora sportsidan har kommun-, sport- och sökfilter samt separata vyer
+  för kommande matcher, spelade matcher, tabeller och föreningar.
+- 47 lokala föreningar är katalogiserade i de sju startkommunerna, inklusive
+  mindre sporter som kanot, skytte, paintball, trav, bandy, båtsport, boxning,
+  orientering och mountainbike.
+- Match-, resultat- och tabellvyer leder till verifierade livekällor hos
+  föreningar och specialförbund. DinPuls visar inte påhittade resultat.
+- Sportsidan har åtta numrerade icke-premiumplatser för lokala annonsörer.
 
 ## Rättningar i v0.17.1
 
