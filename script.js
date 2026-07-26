@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.8
+   DINPULS.SE v0.17.9
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.8";
+const DINPULS_VERSION = "0.17.9";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -185,12 +185,11 @@ async function startDinPuls() {
     initializeTheme();
     initializeSeasonalTheme();
     initializeMobileMenu();
-    initializeFuelCardLink();
     initializeTrafficCardLink();
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeFuel(), initializeEvents(), initializeLunch()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -1172,9 +1171,10 @@ function renderNewsForMunicipality(municipality) {
   const relevant = allNewsArticles
     .filter((article) => article.scope === activeNewsScope)
     .filter((article) => activeNewsScope !== "local" || (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
+    .filter((article) => activeNewsScope !== "local" || isLocallyRelevantNews(article, municipality))
     .filter(matchesNewsFilter)
     .sort(compareNewsQuality)
-    .slice(0, 12);
+    .slice(0, activeNewsScope === "local" ? 6 : 8);
   feed.innerHTML = relevant.map(renderNewsArticle).join("");
   loading.hidden = true;
   feed.hidden = relevant.length === 0;
@@ -1183,6 +1183,22 @@ function renderNewsForMunicipality(municipality) {
   renderImportantNews(relevant);
   renderNewsSources(municipality);
   if (window.lucide) lucide.createIcons();
+}
+
+function isLocallyRelevantNews(article, municipality) {
+  if (article.sourceType === "municipality") return true;
+  const localTerms = {
+    "Åmål": ["åmål", "tösse", "fengersfors", "edsleskog", "dalsland"],
+    "Säffle": ["säffle", "svanskog", "värmlandsnäs", "värmlandsbro"],
+    "Bengtsfors": ["bengtsfors", "billingsfors", "dals långed", "bäckefors"],
+    "Mellerud": ["mellerud", "dals rostock", "åsensbruk", "brålanda"],
+    "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal"],
+    "Arvika": ["arvika", "gunnarskog", "edane", "klässbol"],
+    "Grums": ["grums", "slottsbron", "segelmon", "vålberg"]
+  };
+  const haystack = `${article.title || ""} ${article.summary || ""} ${article.region || ""}`.toLocaleLowerCase("sv-SE");
+  return (localTerms[municipality] || [municipality.toLocaleLowerCase("sv-SE")])
+    .some((term) => haystack.includes(term));
 }
 
 function matchesNewsFilter(article) {
@@ -1252,7 +1268,15 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
   if (!list || !total || !status || !config) return;
   if (link) link.href = `trafik.html?kommun=${encodeURIComponent(config.name)}`;
   const municipality = roadTrafficData?.municipalities?.[config.name];
-  const items = Array.isArray(municipality?.items) ? municipality.items : [];
+  const sourceItems = Array.isArray(municipality?.items) ? municipality.items : [];
+  const seenTraffic = new Set();
+  const items = sourceItems.filter((item) => {
+    const key = `${item.category || ""}|${item.title || ""}|${item.road || ""}|${item.location || ""}`
+      .toLocaleLowerCase("sv-SE").replace(/\s+/g, " ").trim();
+    if (seenTraffic.has(key)) return false;
+    seenTraffic.add(key);
+    return true;
+  });
   total.textContent = String(items.length);
   if (!roadTrafficData) {
     status.textContent = "Ej tillgänglig";
@@ -1553,7 +1577,21 @@ function updateQuickTransport() {
     }
     const departureTime = new Date(departure.realtime || departure.scheduled);
     const minutes = Math.max(0, Math.round((departureTime.getTime() - Date.now()) / 60000));
-    element.textContent = minutes <= 0 ? "Nästa avgång nu" : `Nästa avgång om ${minutes} min`;
+    const now = new Date();
+    const sameDate = departureTime.toLocaleDateString("sv-SE") === now.toLocaleDateString("sv-SE");
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const isTomorrow = departureTime.toLocaleDateString("sv-SE") === tomorrow.toLocaleDateString("sv-SE");
+    const clock = departureTime.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+    element.textContent = minutes <= 0
+      ? "Nästa avgång nu"
+      : minutes < 120 && sameDate
+        ? `Nästa avgång om ${minutes} min`
+        : isTomorrow
+          ? `Nästa avgång i morgon ${clock}`
+          : sameDate
+            ? `Nästa avgång ${clock}`
+            : `Nästa avgång ${departureTime.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" })} ${clock}`;
   });
 
   document.querySelectorAll("[data-quick-transport-detail]").forEach((element) => {
