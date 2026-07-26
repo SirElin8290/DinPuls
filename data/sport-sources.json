@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "municipalities": {
     "Åmål": [
       {
@@ -9,7 +9,18 @@
         "sport": "Innebandy",
         "sourceName": "Svensk Innebandy iBIS",
         "sourceUrl": "https://statistik.innebandy.se/ft.aspx?flid=4602&scr=teamresult",
-        "team": "Åmåls IBK",
+        "teamFilter": "Åmåls IBK",
+        "municipality": "Åmål"
+      },
+      {
+        "id": "swehockey-amals-sk-preseason-u18-2025",
+        "enabled": true,
+        "adapter": "swehockey-schedule-html",
+        "sport": "Ishockey",
+        "competition": "Preseason U18 Värmland 2025/26",
+        "sourceName": "Svenska Ishockeyförbundet",
+        "sourceUrl": "https://stats.swehockey.se/ScheduleAndResults/Overview/18307",
+        "teamFilter": "Åmåls SK",
         "municipality": "Åmål"
       }
     ],
@@ -17,24 +28,54 @@
     "Bengtsfors": [],
     "Mellerud": [],
     "Årjäng": [],
-    "Arvika": [],
-    "Grums": []
+    "Arvika": [
+      {
+        "id": "swehockey-arvika-hc-preseason-u18-2025",
+        "enabled": true,
+        "adapter": "swehockey-schedule-html",
+        "sport": "Ishockey",
+        "competition": "Preseason U18 Värmland 2025/26",
+        "sourceName": "Svenska Ishockeyförbundet",
+        "sourceUrl": "https://stats.swehockey.se/ScheduleAndResults/Overview/18307",
+        "teamFilter": "Arvika HC",
+        "municipality": "Arvika"
+      }
+    ],
+    "Grums": [
+      {
+        "id": "swehockey-grums-kvalserie-2026",
+        "enabled": true,
+        "adapter": "swehockey-schedule-html",
+        "sport": "Ishockey",
+        "competition": "Kvalserien Västra till Hockeyettan 2025/26",
+        "sourceName": "Svenska Ishockeyförbundet",
+        "sourceUrl": "https://stats.swehockey.se/ScheduleAndResults/Schedule/20269",
+        "teamFilter": "Grums IK",
+        "municipality": "Grums"
+      },
+      {
+        "id": "svenskbandy-slottsbron-div1-2025",
+        "enabled": true,
+        "adapter": "svenskbandy-stats-html",
+        "sport": "Bandy",
+        "competition": "Division 1 Herr 2025/26",
+        "sourceName": "Svenska Bandyförbundet",
+        "sourceUrl": "https://svenskbandy.se/statistik/2025/Senior/Division-1-Herr?id=40756",
+        "teamFilter": "Slottsbron IF",
+        "municipality": "Grums"
+      }
+    ]
   },
   "plannedAdapters": [
     {
       "adapter": "svff-public-html",
       "provider": "Svenska Fotbollförbundet",
-      "status": "requires verified competition or team URLs"
+      "status": "awaiting verified team or competition URLs"
     },
     {
-      "adapter": "swehockey-public-html",
-      "provider": "Svenska Ishockeyförbundet",
-      "status": "requires verified series IDs"
-    },
-    {
-      "adapter": "svenskbandy-public-html",
-      "provider": "Svenska Bandyförbundet",
-      "status": "requires verified competition IDs"
+      "adapter": "stats-innebandy-html",
+      "provider": "Svensk Innebandy",
+      "status": "migration from legacy iBIS pages must be verified"
     }
   ]
 }
