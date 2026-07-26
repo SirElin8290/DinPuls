@@ -10,7 +10,8 @@ on:
       - "scripts/update_transport.py"
       - "data/municipalities.json"
   schedule:
-    - cron: "*/15 * * * *"
+    # Undvik hel- och kvartstimmar då GitHubs schemakö är som mest belastad.
+    - cron: "7,22,37,52 * * * *"
 
 permissions:
   contents: write

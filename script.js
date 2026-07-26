@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.17.9
+   DINPULS.SE v0.17.10
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.17.9";
+const DINPULS_VERSION = "0.17.10";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -1488,6 +1488,8 @@ function renderDeparture(item, isDemo = false) {
     ? '<span class="departure-status canceled">Inställd</span>'
     : delayMinutes > 0
       ? `<span class="departure-status delayed">+${delayMinutes} min</span>`
+      : item.stale
+        ? '<span class="departure-status planned">Sparad tidtabell</span>'
       : item.isRealtime
         ? '<span class="departure-status realtime">Realtid</span>'
         : '<span class="departure-status planned">Tidtabell</span>';

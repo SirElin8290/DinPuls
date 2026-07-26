@@ -28,6 +28,41 @@ def load_stop_areas():
         if item.get("name")
     }
 
+def load_previous_stops():
+    """Indexerar senast publicerade hållplatsdata så tomma svar inte raderar framtida turer."""
+    if not OUTPUT.exists():
+        return {}
+    try:
+        data = json.loads(OUTPUT.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {
+        str(stop.get("id")): stop
+        for municipality in (data.get("municipalities") or {}).values()
+        for stop in municipality.get("stops", [])
+        if stop.get("id")
+    }
+
+def future_departures(stop, now):
+    """Behåller bara tidigare avgångar som ännu inte har passerat."""
+    departures = []
+    for item in stop.get("departures", []):
+        value = item.get("realtime") or item.get("scheduled")
+        if not value:
+            continue
+        try:
+            departure_time = datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            continue
+        if departure_time.tzinfo is None:
+            departure_time = departure_time.replace(tzinfo=now.tzinfo)
+        if departure_time >= now - timedelta(minutes=2):
+            retained = dict(item)
+            retained["isRealtime"] = False
+            retained["stale"] = True
+            departures.append(retained)
+    return departures[:20]
+
 def fetch(area_id, query_time=None):
     time_path = f"/{quote(query_time)}" if query_time else ""
     url = f"https://realtime-api.trafiklab.se/v1/departures/{quote(area_id)}{time_path}?key={quote(API_KEY)}"
@@ -106,6 +141,9 @@ def main():
 
     municipalities = {}
     fetched = 0
+    previous_stops = load_previous_stops()
+    stockholm = ZoneInfo("Europe/Stockholm")
+    now = datetime.now(stockholm)
     for municipality, stops in stop_areas.items():
         normalized_stops = []
         for stop in stops:
@@ -125,12 +163,20 @@ def main():
             alerts = collect_alerts(current_payload)
             if departure_payload is not current_payload:
                 alerts = list(dict.fromkeys(alerts + collect_alerts(departure_payload)))
+            departures = [normalize(item) for item in departure_payload.get("departures", [])[:20]]
+            retained = False
+            if not departures:
+                departures = future_departures(previous_stops.get(str(stop["id"]), {}), now)
+                retained = bool(departures)
+                if retained:
+                    print(f"{municipality}: behåller {len(departures)} framtida avgångar från senaste körningen")
             normalized_stops.append({
                 "id": str(stop["id"]),
                 "name": stop["name"],
                 "alerts": alerts,
                 "lookupTime": lookup_time,
-                "departures": [normalize(item) for item in departure_payload.get("departures", [])[:20]],
+                "retained": retained,
+                "departures": departures,
             })
             fetched += 1
         if normalized_stops:
