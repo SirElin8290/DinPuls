@@ -2,6 +2,11 @@ name: Uppdatera sportflöden
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/sport-feed/**"
+      - "data/sport-sources.json"
+      - ".github/workflows/update-sport-feeds.yml"
   schedule:
     - cron: "17 4,10,16,22 * * *"
 
@@ -9,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-sport-feeds
+  group: update-sport-feeds-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -18,8 +23,6 @@ jobs:
     steps:
       - name: Hämta repository
         uses: actions/checkout@v4
-        with:
-          ref: feature/sport-data-engine
 
       - name: Installera Node
         uses: actions/setup-node@v4
@@ -32,7 +35,12 @@ jobs:
       - name: Kontrollera JSON
         run: node -e "JSON.parse(require('fs').readFileSync('data/sport-feeds.json','utf8')); console.log('sport-feeds.json är giltig JSON')"
 
+      - name: Visa källstatus
+        if: always()
+        run: node -e "const d=require('./data/sport-feeds.json'); console.table(d.sources.map(s=>({id:s.id,status:s.status,matches:s.matchCount,message:s.message||''})))"
+
       - name: Spara uppdaterat sportflöde
+        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet -- data/sport-feeds.json; then
             echo "Ingen förändring i sportflödet."
@@ -42,4 +50,4 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/sport-feeds.json
           git commit -m "data: uppdatera officiella sportflöden"
-          git push origin HEAD:feature/sport-data-engine
+          git push origin HEAD:${GITHUB_REF_NAME}
