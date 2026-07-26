@@ -35,9 +35,17 @@ jobs:
       - name: Kontrollera JSON
         run: node -e "JSON.parse(require('fs').readFileSync('data/sport-feeds.json','utf8')); console.log('sport-feeds.json är giltig JSON')"
 
-      - name: Visa källstatus
-        if: always()
-        run: node -e "const d=require('./data/sport-feeds.json'); console.table(d.sources.map(s=>({id:s.id,status:s.status,matches:s.matchCount,message:s.message||''})))"
+      - name: Verifiera insamlingen
+        run: |
+          node - <<'NODE'
+          const d = require('./data/sport-feeds.json');
+          const failures = d.sources.filter(s => s.status !== 'ok');
+          const matches = Object.values(d.municipalities).reduce((sum, item) => sum + (item.matches?.length || 0), 0);
+          console.table(d.sources.map(s => ({id:s.id,status:s.status,matches:s.matchCount,message:s.message||''})));
+          console.log(`Totalt ${matches} matcher.`);
+          if (failures.length) throw new Error(`${failures.length} källor misslyckades`);
+          if (matches < 1) throw new Error('Inga matcher kunde läsas in');
+          NODE
 
       - name: Spara uppdaterat sportflöde
         if: github.event_name != 'pull_request'
