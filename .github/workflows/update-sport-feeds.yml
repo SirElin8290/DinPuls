@@ -1,0 +1,45 @@
+name: Uppdatera sportflöden
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4,10,16,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-sport-feeds
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta repository
+        uses: actions/checkout@v4
+        with:
+          ref: feature/sport-data-engine
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Hämta och normalisera matcher
+        run: node scripts/sport-feed/update-sport-feeds.mjs
+
+      - name: Kontrollera JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/sport-feeds.json','utf8')); console.log('sport-feeds.json är giltig JSON')"
+
+      - name: Spara uppdaterat sportflöde
+        run: |
+          if git diff --quiet -- data/sport-feeds.json; then
+            echo "Ingen förändring i sportflödet."
+            exit 0
+          fi
+          git config user.name "dinpuls-sport-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sport-feeds.json
+          git commit -m "data: uppdatera officiella sportflöden"
+          git push origin HEAD:feature/sport-data-engine
