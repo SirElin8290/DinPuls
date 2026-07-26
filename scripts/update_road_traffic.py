@@ -85,6 +85,13 @@ def main():
             if item["latitude"] is None:continue
             distance=haversine(lat,lon,item["latitude"],item["longitude"])
             if distance<=RADIUS_KM:items.append({**item,"distanceKm":round(distance,1)})
+        unique={}
+        for item in items:
+            key="|".join(str(item.get(field) or "").strip().lower() for field in ("category","title","road","location"))
+            current=unique.get(key)
+            if current is None or float(item.get("distanceKm") or 9999)<float(current.get("distanceKm") or 9999):
+                unique[key]=item
+        items=list(unique.values())
         items.sort(key=lambda x:({"danger":3,"warning":2,"info":1}.get(x["severity"],0),x.get("updatedAt") or ""),reverse=True)
         municipalities[name]={"items":items[:100]}; print(f"{name}: {len(items)} vägmeddelanden")
     output={"version":"0.14.0","generatedAt":datetime.now(timezone.utc).isoformat(timespec="seconds"),"active":True,"radiusKm":RADIUS_KM,"source":{"name":"Trafikverket","url":"https://www.trafikverket.se/trafikinformation/vag/"},"municipalities":municipalities}
