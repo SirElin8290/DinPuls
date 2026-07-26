@@ -1,0 +1,61 @@
+name: Uppdatera sportflöden
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/sport-feed/**"
+      - "data/sport-sources.json"
+      - ".github/workflows/update-sport-feeds.yml"
+  schedule:
+    - cron: "17 4,10,16,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-sport-feeds-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta repository
+        uses: actions/checkout@v4
+
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Hämta och normalisera matcher
+        run: node scripts/sport-feed/update-sport-feeds.mjs
+
+      - name: Kontrollera JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/sport-feeds.json','utf8')); console.log('sport-feeds.json är giltig JSON')"
+
+      - name: Verifiera insamlingen
+        run: |
+          node - <<'NODE'
+          const d = require('./data/sport-feeds.json');
+          const failures = d.sources.filter(s => s.status !== 'ok');
+          const matches = Object.values(d.municipalities).reduce((sum, item) => sum + (item.matches?.length || 0), 0);
+          console.table(d.sources.map(s => ({id:s.id,status:s.status,matches:s.matchCount,message:s.message||''})));
+          console.log(`Totalt ${matches} matcher.`);
+          if (failures.length) throw new Error(`${failures.length} källor misslyckades`);
+          if (matches < 1) throw new Error('Inga matcher kunde läsas in');
+          NODE
+
+      - name: Spara uppdaterat sportflöde
+        if: github.event_name != 'pull_request'
+        run: |
+          if git diff --quiet -- data/sport-feeds.json; then
+            echo "Ingen förändring i sportflödet."
+            exit 0
+          fi
+          git config user.name "dinpuls-sport-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/sport-feeds.json
+          git commit -m "data: uppdatera officiella sportflöden"
+          git push origin HEAD:${GITHUB_REF_NAME}
