@@ -1,4 +1,13 @@
-# DinPuls v0.19.4
+# DinPuls v0.19.5
+
+## Sprint 4.7 – arenor och idrottsanläggningar
+
+- Kommunfiltrerad arenakatalog för samtliga sju startkommuner.
+- Egen sida per anläggning med karta, väder, sporter, parkering och
+  tillgänglighetsinformation.
+- Matcher kopplas automatiskt när arenanamnet finns i sportflödet.
+- Hemmalag, originalkälla och en lokal arenapartnerplats visas.
+- Okända uppgifter markeras öppet och fylls inte med antaganden.
 
 ## Sprint 4.6 – spelarprofiler
 
