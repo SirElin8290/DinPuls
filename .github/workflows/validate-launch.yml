@@ -1,0 +1,41 @@
+name: Kontrollera DinPuls
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dinpuls-launch-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Kontrollera sidor, kommuner och data
+        run: python scripts/validate_launch.py
+
+      - name: Kontrollera JavaScript
+        run: |
+          node --check script.js
+          node --check portal-pages.js
+          node --check traffic-page.js
+          node --check event-page.js
+          node --check lunch-page.js
+          node --check grocery-page.js
+          node --check sport-data-engine.js
+          node --check sport-hub-stage48.js
