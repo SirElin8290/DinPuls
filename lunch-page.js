@@ -6,6 +6,7 @@ const LUNCH_DAYS=[
 const lunchParams=new URLSearchParams(location.search);
 let lunchMunicipality=lunchParams.get("kommun")||localStorage.getItem("dinpuls-municipality")||"Åmål";
 if(!LUNCH_MUNICIPALITIES.includes(lunchMunicipality))lunchMunicipality="Åmål";
+const selectedRestaurant=lunchParams.get("restaurang")||"";
 let lunchData;
 const escapeLunch=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Europe/Stockholm"}).format(new Date()).toLowerCase();
@@ -38,26 +39,40 @@ function renderLunchPage(){
   const day=document.querySelector("#lunch-day").value;
   const query=document.querySelector("#lunch-search").value.trim().toLocaleLowerCase("sv-SE");
   const restaurants=lunchData.municipalities?.[lunchMunicipality]?.restaurants||[];
-  const filtered=restaurants.filter(item=>![item.name,item.address,...(item.days?.[day]||[])].join(" ").toLocaleLowerCase("sv-SE").includes(query)?false:true);
+  const filtered=restaurants
+    .filter(item=>[item.name,item.address,...(item.days?.[day]||[])].join(" ").toLocaleLowerCase("sv-SE").includes(query))
+    .sort((a,b)=>{
+      const aSelected=a.id===selectedRestaurant?1:0;
+      const bSelected=b.id===selectedRestaurant?1:0;
+      if(aSelected!==bSelected)return bSelected-aSelected;
+      const aVerified=a.status==="current"&&(a.days?.[day]||[]).length?1:0;
+      const bVerified=b.status==="current"&&(b.days?.[day]||[]).length?1:0;
+      return bVerified-aVerified||a.name.localeCompare(b.name,"sv");
+    });
   const dayLabel=LUNCH_DAYS.find(([value])=>value===day)?.[1]||"Vald dag";
-  document.querySelector("#lunch-page-total").textContent=`${filtered.length} lunchställen · ${dayLabel}`;
+  const verified=filtered.filter(item=>item.status==="current"&&(item.days?.[day]||[]).length).length;
+  document.querySelector("#lunch-page-total").textContent=`Lunch i ${lunchMunicipality} · ${dayLabel}`;
+  document.querySelector("#lunch-page-summary").innerHTML=`
+    <span><strong>${filtered.length}</strong> lunchställen</span>
+    <span class="${verified?"verified":""}"><strong>${verified}</strong> verifierade menyer för dagen</span>
+    <span><i data-lucide="${["saturday","sunday"].includes(day)?"calendar-days":"clock-3"}"></i>${["saturday","sunday"].includes(day)?"Helgutbud kan avvika – kontrollera originalkällan":"Verifierade rätter visas först"}</span>`;
   const updated=new Date(lunchData.generatedAt||"");
   document.querySelector("#lunch-page-updated").textContent=Number.isNaN(updated.getTime())?"":`Kontrollerat ${updated.toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
   const list=document.querySelector("#lunch-page-list");
-  list.innerHTML=filtered.map(item=>renderLunchCard(item,day)).join("");
+  list.innerHTML=filtered.map(item=>renderLunchCard(item,day,item.id===selectedRestaurant)).join("");
   list.hidden=!filtered.length;
   document.querySelector("#lunch-page-empty").hidden=!!filtered.length;
   if(window.lucide)lucide.createIcons();
 }
 
-function renderLunchCard(item,day){
+function renderLunchCard(item,day,isSelected=false){
   const dishes=item.status==="current"?(item.days?.[day]||[]):[];
-  const status=dishes.length?"Dagens rätter verifierade":item.status==="outdated"?"Veckomenyn är inte aktuell":item.status==="unavailable"?"Källan kunde inte nås":"Aktuell meny hos restaurangen";
-  const menu=dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna restaurangens sida för aktuell meny och eventuella ändringar.</p>`;
-  return `<article class="portal-card lunch-card">
+  const status=dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":"Meny finns hos restaurangen";
+  const menu=dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna originalkällan för dagens utbud och eventuella ändringar.</p>`;
+  return `<article class="portal-card lunch-card ${isSelected?"selected":""}" id="lunch-${escapeLunch(item.id)}">
     <span class="portal-card-icon lunch"><i data-lucide="utensils"></i></span>
     <div><span class="lunch-status ${dishes.length?"verified":""}">${escapeLunch(status)}</span><h3>${escapeLunch(item.name)}</h3><p>${escapeLunch(item.address)} · ${escapeLunch(item.hours)}</p>${menu}</div>
-    <a class="portal-source-button" href="${escapeLunch(item.url)}" target="_blank" rel="noopener noreferrer">Veckomeny <i data-lucide="external-link"></i></a>
+    <a class="portal-source-button" href="${escapeLunch(item.url)}" target="_blank" rel="noopener noreferrer">${dishes.length?"Kontrollera menyn":"Öppna menyn"} <i data-lucide="external-link"></i></a>
   </article>`;
 }
 
