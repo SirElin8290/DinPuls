@@ -1,4 +1,18 @@
-# DinPuls v0.20.5
+# DinPuls v0.20.6
+
+## Sprint 6 – lanseringskontroll
+
+- Den synliga sökrutan leder nu till rätt aktiv modul i stället för att visa
+  ett meddelande om en framtida funktion.
+- Den inaktiva favoritknappen är borttagen.
+- Vald kommun följer automatiskt med till jobb, bostäder, lunch, evenemang,
+  sport, matkasse och trafik.
+- Startsidelogotypen och Hem-länken leder alltid tillbaka till startsidan.
+- Alla aktiva sidor använder samma cacheversion.
+- Ett permanent lanseringstest kontrollerar sidor, filer, kommunmotor,
+  kollektivtrafik, jobb, bostäder, evenemang, lunch, sport, felaktiga ortsnamn
+  och annonsplatser.
+- GitHub Actions kör lanseringstestet vid varje uppdatering av `main`.
 
 ## Sprint 5 – dagens lunch
 
