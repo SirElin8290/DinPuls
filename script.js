@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.20.4
+   DINPULS.SE v0.20.5
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.4";
+const DINPULS_VERSION = "0.20.5";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -2052,9 +2052,11 @@ function renderLunchTicker(municipality) {
   const fallback = [{
     id: "lunch",
     name: weekday === "saturday" || weekday === "sunday"
-      ? `Ingen vardagslunch i ${municipality} i dag`
+      ? `Helgens restaurangutbud i ${municipality}`
       : `Dagens menyer uppdateras för ${municipality}`,
-    todayDishes: ["Se restauranger och kommande veckomenyer"]
+    todayDishes: [weekday === "saturday" || weekday === "sunday"
+      ? "Se öppna restauranger och kontrollera helgens meny"
+      : "Se lunchställen och deras aktuella originalmenyer"]
   }];
   const dayNames = {
     monday: "MÅNDAG", tuesday: "TISDAG", wednesday: "ONSDAG",
