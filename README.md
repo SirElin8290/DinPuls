@@ -1,4 +1,20 @@
-# DinPuls v0.20.4
+# DinPuls v0.20.5
+
+## Sprint 5 – dagens lunch
+
+- Lunchrullen på startsidan visar restaurangnamn och verifierade rätter för den
+  valda kommunen och den aktuella dagen.
+- På helger visas restaurangutbudet utan att felaktigt påstå att en vardagslunch
+  finns.
+- Lunchsidan har tydlig status för verifierad, äldre, direktlänkad eller
+  tillfälligt onåbar meny.
+- Restauranger med verifierad meny för vald dag sorteras först.
+- Direktlänkar från lunchrullen markerar rätt restaurang på lunchsidan.
+- Desktopvyn använder två balanserade kolumner och mobilvyn ett tydligt
+  enkolumnsläge.
+- Menyinsamlingen filtrerar bort telefonnummer, navigationsord och annan text
+  som inte är maträtter.
+- Fyra lokala annonsplatser ligger kvar på lunchsidan.
 
 ## Sprint 4 – lokala evenemang
 
