@@ -1,4 +1,16 @@
-# DinPuls v0.18.0
+# DinPuls v0.19.4
+
+## Sprint 4.6 – spelarprofiler
+
+- `player.html` ger varje tillgänglig spelare en responsiv profilsida.
+- Profilen visar säsongsstatistik, matcher, mål, assist, poäng,
+  utvisningsminuter, lagets senaste form, kommande matcher och tidigare klubbar
+  när uppgifterna finns i en ansluten källa.
+- Laguppställningar på matchsidan länkar till spelarprofiler.
+- Föreningssidan har en truppsektion som fylls från föreningsdata och
+  laguppställningar.
+- Varje profil har en egen lokal spelarpartnerplats.
+- Saknade uppgifter markeras öppet och ersätts aldrig med påhittad statistik.
 
 ## Lokal sport i v0.18.0
 

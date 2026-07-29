@@ -6,6 +6,8 @@
   const statusText=m=>{const s=String(m.status||"scheduled").toLowerCase();if(["live","inprogress","playing"].includes(s))return `Live${m.clock?` · ${m.clock}`:""}`;if(["finished","final","ended"].includes(s))return "Slut";if(s==="postponed")return "Uppskjuten";if(["cancelled","canceled"].includes(s))return "Inställd";return "Kommande"};
   const dateTime=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?"Tid saknas":d.toLocaleString("sv-SE",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})};
   const list=(items,empty)=>items?.length?`<div class="match-list">${items.map(item=>`<article><time>${esc(item.time||item.clock||"")}</time><span>${esc(item.text||item.description||item.player||item.team||"")}</span><strong>${esc(item.score||item.type||"")}</strong></article>`).join("")}</div>`:`<div class="match-empty">${empty}</div>`;
+  const playerName=item=>String(item?.name||item?.player||item?.fullName||"").trim();
+  const lineupList=(team,items)=>items?.length?`<div class="match-list">${items.map(item=>{const name=playerName(item);return `<article><time>${esc(item.number||item.jerseyNumber||"")}</time><span>${name?`<a class="match-player-link-46" href="player.html?kommun=${encodeURIComponent(municipality)}&klubb=${encodeURIComponent(team)}&spelare=${encodeURIComponent(name)}">${esc(name)}</a>`:"Spelare saknas"}</span><strong>${esc(item.position||item.role||"")}</strong></article>`}).join("")}</div>`:`<div class="match-empty">Ingen trupp tillgänglig.</div>`;
   function render(match){
     const periods=match.periods||match.periodScores||[],events=match.events||match.timeline||[],lineups=match.lineups||match.rosters||[];
     document.title=`${match.homeTeam} – ${match.awayTeam} – DinPuls`;
@@ -22,7 +24,7 @@
         <section class="match-panel"><h2>Perioder och set</h2>${periods.length?`<div class="match-list">${periods.map((p,i)=>`<article><time>${esc(p.name||p.period||`Period ${i+1}`)}</time><span>${esc(p.homeScore??p.home??"")}–${esc(p.awayScore??p.away??"")}</span><strong>${esc(p.status||"")}</strong></article>`).join("")}</div>`:`<div class="match-empty">Period- eller setresultat finns inte i källan ännu.</div>`}</section>
         <section class="match-panel"><h2>Matchhändelser</h2>${list(events,"Mål, utvisningar och andra händelser finns inte i källan ännu.")}</section>
       </div><aside>
-        <section class="match-panel"><h2>Laguppställningar</h2>${lineups.length?lineups.map(team=>`<h3>${esc(team.team||team.name||"")}</h3>${list(team.players||team.lineup||[],"Ingen trupp tillgänglig.")}`).join(""):`<div class="match-empty">Laguppställningar finns inte i källan ännu.</div>`}</section>
+        <section class="match-panel"><h2>Laguppställningar</h2>${lineups.length?lineups.map(team=>{const name=team.team||team.name||"";return `<h3>${esc(name)}</h3>${lineupList(name,team.players||team.lineup||[])}`}).join(""):`<div class="match-empty">Laguppställningar finns inte i källan ännu.</div>`}</section>
         <section class="match-sponsor"><small>Matchpartner</small><strong>Presentera den här lokala matchen</strong><a href="mailto:annonser@dinpuls.se?subject=${encodeURIComponent(`Matchpartner ${match.homeTeam} - ${match.awayTeam}`)}">Boka annonsplats</a></section>
         <p class="match-source-note">DinPuls visar endast information som finns i anslutna källor. Originalkällan gäller alltid.</p>
       </aside></div>`;
