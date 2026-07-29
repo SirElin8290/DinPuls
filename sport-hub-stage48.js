@@ -41,6 +41,10 @@
     sportSelect.value=available.includes(previous)?previous:"all";
     const button=document.querySelector("#sport-hub-spoiler");button.classList.toggle("active",hideResults);button.setAttribute("aria-pressed",String(hideResults));button.innerHTML=`<i data-lucide="${hideResults?"eye":"eye-off"}"></i><span>${hideResults?"Visa resultat":"Dölj resultat"}</span>`;
     document.body.classList.toggle("results-hidden",hideResults);
+    const freshness=document.querySelector("#sport-hub-freshness"),status=current().dataStatus||{};
+    const checked=new Date(status.generatedAt||sportsData?.generatedAt||"");
+    const checkedLabel=Number.isNaN(checked.getTime())?"Kontrolltid saknas":`Kontrollerad ${checked.toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
+    if(freshness)freshness.innerHTML=`<i data-lucide="${status.stale?"clock-alert":"shield-check"}"></i> ${esc(checkedLabel)} · ${Number(status.matchCount)||0} matcher inlästa · originalkällan gäller`;
   }
   function renderSummary(){
     const all=matches(),now=Date.now(),finished=all.filter(matchFinished),upcoming=all.filter(match=>!matchFinished(match)&&new Date(match.startTime).getTime()>=now);
@@ -56,7 +60,7 @@
     return `<article class="sport-hub-match"><time>${esc(dateTime(match.startTime))}</time><div><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc([match.competition,match.venue].filter(Boolean).join(" · "))}</small></div><span class="sport-hub-result">${esc(result)}</span></article>`;
   }
   function emptyState(sport,source){
-    return `<div class="sport-hub-empty"><span><strong>Inga matcher är publicerade just nu</strong><br>Säsongen kan ha uppehåll eller nästa spelschema kan saknas.</span>${source?`<a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">Kontrollera officiell källa ↗</a>`:""}</div>`;
+    return `<div class="sport-hub-empty"><span><strong>Inga matcher har kunnat läsas in just nu</strong><br>Det kan bero på serieuppehåll, att spelschemat ännu inte är publicerat eller att källan saknar maskinläsbar data.</span>${source?`<a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">Kontrollera officiell källa ↗</a>`:""}</div>`;
   }
   function renderMatches(){
     const data=current(),selected=selectedSport(),list=sports().filter(sport=>selected==="all"||sport===selected),all=matches(),now=Date.now();

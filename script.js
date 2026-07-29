@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.18.0
+   DINPULS.SE v0.20.1
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.18.0";
+const DINPULS_VERSION = "0.20.1";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -569,11 +569,19 @@ function collectNotifications(municipality) {
   (housingData?.municipalities?.[municipality]?.listings || []).slice(0, 5).forEach((item) =>
     add("housing", "house", item.id, item.address || "Ny ledig bostad", `${item.rooms || ""} ${item.rooms ? "rum · " : ""}${item.provider || "Bostad"}`, "bostader.html", item.available || housingData.generatedAt)
   );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   (eventsData?.municipalities?.[municipality]?.events || []).filter((item) =>
-    new Date(item.endDate || item.startDate) >= new Date(new Date().setHours(0, 0, 0, 0))
-  ).slice(0, 4).forEach((item) =>
-    add("events", "calendar-days", item.id, item.title, `${item.startDate || ""} · ${item.venue || municipality}`, "evenemang.html", item.startDate)
-  );
+    new Date(item.endDate || item.startDate) >= today
+  ).slice(0, 4).forEach((item) => {
+    const start = new Date(item.startDate);
+    const end = new Date(item.endDate || item.startDate);
+    const ongoing = !Number.isNaN(start.getTime()) && start < today && end >= today;
+    const dateLabel = ongoing
+      ? `Pågår till ${end.toLocaleDateString("sv-SE", { day: "numeric", month: "short" })}`
+      : item.startDate || "";
+    add("events", "calendar-days", item.id, item.title, `${dateLabel} · ${item.venue || municipality}`, "evenemang.html", ongoing ? eventsData.generatedAt : item.startDate);
+  });
   allNewsArticles.filter((item) =>
     item.scope === "local" && (item.municipalities || []).includes(municipality)
   ).slice(0, 4).forEach((item) =>
@@ -1169,18 +1177,30 @@ function renderNewsForMunicipality(municipality) {
   const empty = document.querySelector("#news-empty");
   const count = document.querySelector("#news-count");
   if (!feed || !empty) return;
-  const relevant = allNewsArticles
+  const scoped = allNewsArticles
     .filter((article) => article.scope === activeNewsScope)
     .filter((article) => activeNewsScope !== "local" || (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
-    .filter((article) => activeNewsScope !== "local" || isLocallyRelevantNews(article, municipality))
-    .filter(matchesNewsFilter)
+    .filter(matchesNewsFilter);
+  const exactLocal = activeNewsScope === "local"
+    ? scoped.filter((article) => isLocallyRelevantNews(article, municipality))
+    : scoped;
+  const usesRegionalFallback = activeNewsScope === "local" && exactLocal.length === 0;
+  const relevant = (usesRegionalFallback
+    ? scoped.map((article) => ({ ...article, category: `Regionalt · ${article.region || "nära dig"}` }))
+    : exactLocal)
     .sort(compareNewsQuality)
     .slice(0, activeNewsScope === "local" ? 6 : 8);
   feed.innerHTML = relevant.map(renderNewsArticle).join("");
   loading.hidden = true;
   feed.hidden = relevant.length === 0;
   empty.hidden = relevant.length > 0;
-  if (count) count.textContent = `${relevant.length} ${relevant.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
+  if (count) count.textContent = usesRegionalFallback
+    ? `${relevant.length} regionala nyheter – inga nya kommunträffar`
+    : `${relevant.length} ${relevant.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
+  const subheading = document.querySelector("#news-subheading");
+  if (subheading && activeNewsScope === "local" && usesRegionalFallback) {
+    subheading.textContent = `Regionalt urval för ${municipality}`;
+  }
   renderImportantNews(relevant);
   renderNewsSources(municipality);
   if (window.lucide) lucide.createIcons();
@@ -2116,11 +2136,12 @@ function renderSportsHome(config) {
   const municipality = sportsData?.municipalities?.[config.name] || { clubs: [], liveSources: [] };
   const clubs = Array.isArray(municipality.clubs) ? municipality.clubs : [];
   const sources = Array.isArray(municipality.liveSources) ? municipality.liveSources : [];
+  const matchCount = Number(municipality.dataStatus?.matchCount) || 0;
   const sports = [...new Set(clubs.flatMap((club) => club.sports || []))];
   const summary = document.querySelector("#sport-home-summary");
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
-  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar</strong><span>${sports.length} sporter · ${sources.length} källor för matcher och tabeller</span>`;
+  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar</strong><span>${sports.length} sporter · ${matchCount ? `${matchCount} inlästa matcher` : `inga matcher inlästa just nu`} · ${sources.length} officiella källor</span>`;
   if (list) list.innerHTML = clubs.slice(0, 4).map((club) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sok=${encodeURIComponent(club.name)}">
     <span class="sport-home-icon"><i data-lucide="medal"></i></span>
     <span><strong>${escapeHtml(club.name)}</strong><small>${escapeHtml((club.sports || []).join(" · "))}</small></span>

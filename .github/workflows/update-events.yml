@@ -1,0 +1,48 @@
+name: Uppdatera evenemang
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "42 4,10,16,22 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/update_events.py"
+      - ".github/workflows/update-events.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-events
+  cancel-in-progress: false
+
+jobs:
+  update-events:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+      - name: Installera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Kontrollera lokala evenemangskällor
+        run: python scripts/update_events.py
+      - name: Spara evenemangsdata konfliktsäkert
+        run: |
+          if git diff --quiet -- data/events.json; then
+            echo "Inga evenemangsförändringar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/events.json
+          git commit -m "Uppdatera evenemang"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push-försök $attempt misslyckades; hämtar senaste main."
+            sleep $((attempt * 2))
+          done
+          exit 1

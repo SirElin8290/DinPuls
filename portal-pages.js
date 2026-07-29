@@ -48,7 +48,16 @@ function renderPortal() {
     return true;
   });
   const total = document.querySelector("#portal-total");
-  total.textContent = `${filtered.length} ${portalType === "jobs" ? "lediga jobb" : "lediga bostäder"}`;
+  if (portalType === "jobs") {
+    const advertisedTotal = Number(municipalityData.total) || sourceItems.length;
+    total.textContent = query
+      ? `${filtered.length} jobb matchar sökningen`
+      : sourceItems.length < advertisedTotal
+        ? `Visar ${sourceItems.length} av ${advertisedTotal} lediga jobb`
+        : `${filtered.length} lediga jobb`;
+  } else {
+    total.textContent = `${filtered.length} lediga bostäder`;
+  }
   const updated = new Date(municipalityData.updatedAt || portalData.generatedAt);
   document.querySelector("#portal-updated").textContent = Number.isNaN(updated.getTime()) ? "" : `Uppdaterad ${updated.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   const list = document.querySelector("#portal-list");
@@ -64,7 +73,10 @@ function renderPortalHousing(item) {
 }
 
 function renderPortalJob(job) {
-  return `<article class="portal-card"><span class="portal-card-icon jobs"><i data-lucide="briefcase-business"></i></span><div><h3>${escapePortal(job.headline || "Ledigt jobb")}</h3><p>${escapePortal(job.employer || "Arbetsgivare saknas")} · ${escapePortal(job.workplace || portalMunicipality)}</p><div class="portal-tags"><span>${escapePortal(job.workingHours || "Arbetstid ej angiven")}</span>${job.duration ? `<span>${escapePortal(job.duration)}</span>` : ""}</div><small>${job.applicationDeadline ? `Sök senast ${escapePortal(job.applicationDeadline)}` : "Se ansökningstid i annonsen"}</small></div><a class="portal-source-button" href="${escapePortal(job.webpageUrl)}" target="_blank" rel="noopener noreferrer">Läs och ansök <i data-lucide="external-link"></i></a></article>`;
+  const deadline = job.applicationDeadline
+    ? new Date(job.applicationDeadline).toLocaleDateString("sv-SE", { day: "numeric", month: "short", year: "numeric" })
+    : "";
+  return `<article class="portal-card"><span class="portal-card-icon jobs"><i data-lucide="briefcase-business"></i></span><div><h3>${escapePortal(job.headline || "Ledigt jobb")}</h3><p>${escapePortal(job.employer || "Arbetsgivare saknas")} · ${escapePortal(job.workplace || portalMunicipality)}</p><div class="portal-tags"><span>${escapePortal(job.workingHours || "Arbetstid ej angiven")}</span>${job.duration ? `<span>${escapePortal(job.duration)}</span>` : ""}</div><small>${deadline ? `Sök senast ${escapePortal(deadline)}` : "Se ansökningstid i annonsen"}</small></div><a class="portal-source-button" href="${escapePortal(job.webpageUrl)}" target="_blank" rel="noopener noreferrer">Läs och ansök <i data-lucide="external-link"></i></a></article>`;
 }
 
 function renderSecondaryAds() {

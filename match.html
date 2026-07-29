@@ -1,28 +1,17 @@
 <!doctype html>
-<html lang="sv" data-portal="sport">
+<html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Matchinformation för lokal sport på DinPuls.">
-  <title>Matchinfo – DinPuls</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?version=0.18.1">
-  <link rel="stylesheet" href="portal-pages.css?version=0.18.1">
-  <link rel="stylesheet" href="sport.css?version=0.18.3">
-  <link rel="stylesheet" href="match.css?version=0.18.6">
-  <link rel="stylesheet" href="sport-player-stage46.css?version=0.19.4">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Matcher och resultat visas i DinPuls lokala sporthubb.">
+  <title>Matcher och resultat – DinPuls</title>
+  <script>
+    const municipality = new URLSearchParams(location.search).get("kommun");
+    location.replace(`sport.html${municipality ? `?kommun=${encodeURIComponent(municipality)}` : ""}`);
+  </script>
 </head>
 <body>
-  <header class="portal-header">
-    <a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a>
-    <a id="match-back-link" href="sport.html">← Till lokalsporten</a>
-  </header>
-  <main id="match-page" class="portal-main match-page" aria-live="polite">
-    <div class="match-loading">Laddar matchinformation…</div>
-  </main>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="match.js?version=0.18.6"></script>
+  <p>Matcher och resultat finns nu i <a href="sport.html">DinPuls lokala sporthubb</a>.</p>
 </body>
 </html>

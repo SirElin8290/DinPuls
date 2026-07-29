@@ -219,9 +219,23 @@ def crisis_items(records: list[dict], name: str, county: str, now: datetime) -> 
     for item in records:
         serialized = json.dumps(item, ensure_ascii=False).lower()
         title = text(item, "Headline", "headline", "Title", "title")
-        relevant = name.lower() in serialized or county.lower() in serialized
-        nationally_important = any(marker in title.lower() for marker in ("viktigt meddelande", "vma", "myndighetsmeddelande"))
-        if not relevant and not nationally_important:
+        relevant = name.lower() in serialized or (county and county.lower() in serialized)
+        alert_title = any(marker in title.lower() for marker in ("viktigt meddelande", "vma", "myndighetsmeddelande"))
+        national_scope = any(
+            marker in serialized
+            for marker in (
+                "hela sverige",
+                "rikstäckande",
+                "nationellt meddelande",
+                '"scope": "national"',
+                '"scope":"national"',
+            )
+        )
+        # Ett VMA är normalt geografiskt avgränsat. Rubriken "Viktigt
+        # meddelande" gör därför inte händelsen relevant för alla kommuner.
+        # Endast uttryckligen rikstäckande meddelanden får passera utan lokal
+        # kommun- eller länsträff.
+        if not relevant and not (alert_title and national_scope):
             continue
         published_value = text(item, "Published", "published", "PublishedAt", "publishedAt", "Updated", "updated")
         published = parse_time(published_value)

@@ -1,4 +1,22 @@
-# DinPuls v0.20.0
+# DinPuls v0.20.1
+
+## Stabilisering av hela webbplatsen
+
+- Viktiga meddelanden filtreras geografiskt. Ett lokalt VMA från exempelvis
+  Borlänge visas inte längre i DinPuls startkommuner.
+- Notiscentret använder samma kommunfilter och beskriver pågående händelser
+  med slutdatum i stället för ett missvisande gammalt startdatum.
+- Jobbsidan skiljer på totalantalet hos källan och de annonser som faktiskt
+  har hämtats och kan visas.
+- Kommuner utan exakt lokal nyhetsträff får ett tydligt märkt regionalt urval
+  i stället för en tom eller missvisande modul.
+- Evenemangskällor kontrolleras automatiskt flera gånger per dag och sidan
+  visar när kontrollen gjordes samt vilka källor som svarade.
+- Sport- och matkassesidorna visar öppet när det saknas importerade matcher
+  eller publicerade butikpriser. DinPuls fyller aldrig luckorna med demodata.
+- Äldre sportlänkar för spelare, matcher, föreningar och arenor leder vidare
+  till den förenklade lokala sporthubben.
+- Alla aktiva sidor använder samma versions- och cachemarkering.
 
 ## Förenklad lokal sporthub
 
