@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?version=0.20.1">
-  <link rel="stylesheet" href="portal-pages.css?version=0.20.1">
+  <link rel="stylesheet" href="styles.css?version=0.20.5">
+  <link rel="stylesheet" href="portal-pages.css?version=0.20.5">
 </head>
 <body>
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
@@ -17,7 +17,7 @@
     <section class="portal-hero lunch-page">
       <span class="section-kicker">DinPuls Lunch</span>
       <h1>Dagens lunch i <span data-lunch-municipality>Åmål</span></h1>
-      <p>Restaurangernas luncher och veckomenyer samlade på ett ställe.</p>
+      <p>Dagens verifierade rätter och restaurangernas veckomenyer samlade på ett ställe.</p>
     </section>
     <div class="lunch-principle"><i data-lucide="badge-check"></i><span>Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla. Kontrollera alltid ändringar direkt hos restaurangen.</span></div>
     <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="lunch" data-ad-position="1"></div>
@@ -30,6 +30,7 @@
         </div>
 <div class="strategic-ad-slot" data-strategic-ad="lunch" data-ad-position="2"></div>
         <div class="portal-result-heading"><h2 id="lunch-page-total">Hämtar luncher…</h2><span id="lunch-page-updated"></span></div>
+        <div id="lunch-page-summary" class="lunch-summary" aria-live="polite"></div>
         <div id="lunch-page-list" class="portal-list lunch-list"></div>
         <div class="strategic-ad-slot" data-strategic-ad="lunch" data-ad-position="3"></div>
         <div id="lunch-page-empty" class="portal-empty" hidden>Inga lunchställen matchar filtret.</div>
@@ -38,6 +39,6 @@
     </div>
   </main>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="lunch-page.js?version=0.20.1"></script>
+  <script src="lunch-page.js?version=0.20.5"></script>
 </body>
 </html>
