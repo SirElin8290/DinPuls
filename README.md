@@ -1,4 +1,17 @@
-# DinPuls v0.20.3
+# DinPuls v0.20.4
+
+## Sprint 4 – lokala evenemang
+
+- Evenemangsinsamlingen kan nu läsa den publika besökskalender som används av
+  Västsverige-sidorna, utöver befintlig JSON-LD.
+- Återkommande evenemang delas upp i riktiga datum och tider i stället för att
+  visas som en odaterad kalenderlänk.
+- Ortlistan kontrolleras mot vald kommun så att evenemang från närliggande
+  kommuner inte blandas in.
+- Källstatus skiljer mellan automatiskt importerade evenemang och kontrollerade
+  kalendrar som besökaren behöver öppna för fullständigt program.
+- Svenska kyrkan, kommunernas kalendrar och de regionala besökskalendrarna
+  finns kvar som officiella källor i samtliga sju kommuner.
 
 ## Sprint 3 – lokal sport som snabb hubb
 

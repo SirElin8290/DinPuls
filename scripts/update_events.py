@@ -9,11 +9,20 @@ import re
 import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
-USER_AGENT = "DinPuls/0.20 (+https://sirelin8290.github.io/DinPuls/)"
+USER_AGENT = "DinPuls/0.20.4 (+https://sirelin8290.github.io/DinPuls/)"
+LOCALITIES = {
+    "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog", "tydje"},
+    "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
+    "Bengtsfors": {"bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"},
+    "Mellerud": {"mellerud", "dals rostock", "åsensbruk", "håverud", "köpmannebro", "dalskog", "bolstad"},
+    "Årjäng": {"årjäng", "töcksfors", "lennartsfors", "svanskog"},
+    "Arvika": {"arvika", "edane", "glava", "jössefors", "sulvik", "gunnarskog", "klässbol", "mangskog"},
+    "Grums": {"grums", "slottsbron", "segelmon", "borgvik", "liljedal"},
+}
 
 
 def fetch_html(url: str) -> str:
@@ -22,10 +31,16 @@ def fetch_html(url: str) -> str:
         return response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace")
 
 
+def fetch_json(url: str):
+    raw = fetch_html(url)
+    value = json.loads(raw)
+    return json.loads(value) if isinstance(value, str) else value
+
+
 def json_ld_blocks(markup: str) -> list[object]:
     blocks = []
     pattern = re.compile(
-        r"<script[^>]+type=[\"']application/ld\\+json[\"'][^>]*>(.*?)</script>",
+        r"<script[^>]+type=[\"']application/ld\+json[\"'][^>]*>(.*?)</script>",
         re.I | re.S,
     )
     for raw in pattern.findall(markup):
@@ -56,7 +71,7 @@ def iso_date(value) -> str:
     raw = str(value or "").strip()
     if not raw:
         return ""
-    match = re.match(r"^(\\d{4}-\\d{2}-\\d{2})", raw)
+    match = re.match(r"^(\d{4}-\d{2}-\d{2})", raw)
     return match.group(1) if match else ""
 
 
@@ -117,6 +132,112 @@ def event_from_json_ld(item: dict, municipality: str, source: dict) -> dict | No
     }
 
 
+def filter_api_settings(markup: str) -> tuple[int, int] | None:
+    component = re.search(r"<FilterApplication\b[^>]*>", markup, re.I | re.S)
+    if not component:
+        return None
+    settings = re.search(r":settings=[\"'](\d+)[\"']", component.group(0), re.I)
+    site = re.search(r":site=[\"'](\d+)[\"']", component.group(0), re.I)
+    if not settings or not site:
+        return None
+    return int(settings.group(1)), int(site.group(1))
+
+
+def occurrence_dates(item: dict) -> list[tuple[str, str, str]]:
+    """Returnerar datum, slutdatum och läsbar tid från besökskalenderns API."""
+    rows = []
+    for occurrence in item.get("Dates") or []:
+        start = iso_date(occurrence.get("Date"))
+        end = iso_date(occurrence.get("EndDate")) or start
+        if not start:
+            continue
+        times = occurrence.get("Times") or []
+        time_labels = []
+        for value in times[:3]:
+            start_time = str(value.get("Start") or "").strip()
+            end_time = str(value.get("End") or "").strip()
+            if start_time and end_time:
+                time_labels.append(f"{start_time}–{end_time}")
+            elif start_time:
+                time_labels.append(start_time)
+        rows.append((start, end, ", ".join(time_labels) or "Se källan"))
+    if rows:
+        return rows
+    start = iso_date(item.get("Start"))
+    end = iso_date(item.get("End")) or start
+    if not start:
+        return []
+    raw_start = str(item.get("Start") or "")
+    raw_end = str(item.get("End") or "")
+    start_time = re.search(r"T(\d{2}:\d{2})", raw_start)
+    end_time = re.search(r"T(\d{2}:\d{2})", raw_end)
+    label = start_time.group(1) if start_time else "Se källan"
+    if start_time and end_time and end_time.group(1) != start_time.group(1):
+        label = f"{start_time.group(1)}–{end_time.group(1)}"
+    return [(start, end, label)]
+
+
+def events_from_filter_api(markup: str, municipality: str, source: dict) -> list[dict]:
+    settings = filter_api_settings(markup)
+    if not settings:
+        return []
+    settings_id, site_id = settings
+    parts = urlsplit(source["url"])
+    hits = []
+    total = 1
+    skip = 0
+    page = 1
+    while skip < total and page <= 10:
+        query = urlencode({
+            "includeCategories": "true",
+            "page": str(page),
+            "pageActivites": "1",
+            "site": str(site_id),
+            "settings": str(settings_id),
+            "skip": str(skip),
+            "wasInitialRendered": "true",
+        })
+        endpoint = f"{parts.scheme}://{parts.netloc}/sv/businesslist/list/?{query}"
+        payload = fetch_json(endpoint)
+        page_hits = payload.get("extendedHits") or []
+        hits.extend(page_hits)
+        total = int(payload.get("totalHits") or len(hits))
+        if not page_hits:
+            break
+        skip += len(page_hits)
+        page += 1
+    today = date.today().isoformat()
+    allowed = LOCALITIES.get(municipality, {municipality.casefold()})
+    results = []
+    for item in hits:
+        title = str(item.get("Heading") or "").strip()
+        city = str(item.get("City") or municipality).strip()
+        if not title or city.casefold() not in allowed:
+            continue
+        item_url = urljoin(source["url"], str(item.get("Url") or source["url"]))
+        event_category, label = category(title)
+        # Återkommande kalendrar kan innehålla hundratals datum. Tolv framtida
+        # tillfällen per post räcker för en snabb lokal kalender utan dubblettbrus.
+        future = [row for row in occurrence_dates(item) if row[1] >= today][:12]
+        for start, end, time_label in future:
+            identifier = hashlib.sha1(
+                f"{municipality}|{title}|{start}|{city}|{item_url}".encode()
+            ).hexdigest()[:16]
+            results.append({
+                "id": f"event-{identifier}",
+                "title": title,
+                "startDate": start,
+                "endDate": end,
+                "time": time_label,
+                "venue": city,
+                "category": event_category,
+                "categoryLabel": label,
+                "sourceName": source["name"],
+                "url": item_url,
+            })
+    return results
+
+
 def main() -> int:
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
     today = date.today().isoformat()
@@ -140,8 +261,16 @@ def main() -> int:
                             event = event_from_json_ld(candidate, municipality, source)
                             if event:
                                 rows.append(event)
+                rows.extend(events_from_filter_api(markup, municipality, source))
                 collected.extend(rows)
-                health.append({"name": source["name"], "url": source["url"], "status": "ok", "events": len(rows), "checkedAt": now})
+                health.append({
+                    "name": source["name"],
+                    "url": source["url"],
+                    "status": "ok",
+                    "mode": "automatic" if rows else "reference",
+                    "events": len(rows),
+                    "checkedAt": now,
+                })
                 any_source_ok = True
                 print(f"{municipality}: {source['name']} – {len(rows)} strukturerade evenemang")
             except Exception as error:
@@ -158,7 +287,7 @@ def main() -> int:
     if not any_source_ok:
         print("Ingen evenemangskälla kunde kontrolleras; behåller tidigare tidsstämpel")
         return 1
-    data["version"] = "0.20.1"
+    data["version"] = "0.20.4"
     data["generatedAt"] = now
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 0
