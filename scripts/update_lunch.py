@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "lunch-sources.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
-USER_AGENT = "DinPuls/0.16.0 (+https://sirelin8290.github.io/DinPuls/)"
+USER_AGENT = "DinPuls/0.20.5 (+https://sirelin8290.github.io/DinPuls/)"
 DAYS = {
     "måndag": "monday", "mandag": "monday",
     "tisdag": "tuesday", "onsdag": "wednesday",
@@ -28,7 +28,13 @@ DAYS = {
 STOP_MARKERS = (
     "veckans vegetariska", "sallader", "lunchpriser", "öppettider",
     "kontakt", "pris ", "barn ", "utkörningsservice", "ta kontakt",
+    "catering", "ring oss", "galleri", "adress", "bordsbokning",
+    "öppet för", "veckans meny", "inkl.",
 )
+NON_DISH_LINES = {
+    "stängt", "lunchbuffé", "lunchbuffe", "helgbuffé",
+    "dagens lunch", "veckans lunch", "måltidsdryck", "kaffe & kaka",
+}
 
 
 class TextExtractor(HTMLParser):
@@ -88,6 +94,14 @@ def useful_dish(line: str) -> bool:
         return False
     if any(lowered.startswith(marker) for marker in STOP_MARKERS):
         return False
+    if lowered in NON_DISH_LINES:
+        return False
+    if re.fullmatch(r"\d+\s*(?::-|kr|kronor)?", lowered):
+        return False
+    if re.fullmatch(r"\d{1,2}[:.]\d{2}\s*[-–]\s*\d{1,2}[:.]\d{2}", lowered):
+        return False
+    if re.search(r"(telefon|^\d{3,5}\s*[- ]\s*\d{2,}|\d{3}\s\d{2}\s+\D)", lowered):
+        return False
     if re.fullmatch(r"(meny|hem|lunchmeny|dagens lunch|veckans lunchbuffé)", lowered):
         return False
     return True
@@ -121,22 +135,31 @@ def main() -> int:
     for municipality, sources in config.get("municipalities", {}).items():
         restaurants = []
         for source in sources:
-            item = {**source, "checkedAt": now.isoformat(timespec="seconds"), "weekNumber": None, "days": {}, "status": "source-only"}
+            item = {
+                **source,
+                "checkedAt": now.isoformat(timespec="seconds"),
+                "weekNumber": None,
+                "days": {},
+                "status": "reference",
+                "mode": "reference",
+            }
             if source.get("parser") == "weekday-headings":
                 try:
                     week, days = parse_weekday_menu(fetch(source["url"]))
                     item["weekNumber"] = week
                     item["days"] = days if week == current_week else {}
                     item["status"] = "current" if week == current_week and any(days.values()) else "outdated"
+                    item["mode"] = "automatic"
                 except RuntimeError as error:
                     item["status"] = "unavailable"
+                    item["mode"] = "automatic"
                     item["error"] = str(error)
             restaurants.append(item)
             print(f"{municipality}: {source['name']} – {item['status']}")
         municipalities[municipality] = {"restaurants": restaurants}
 
     output = {
-        "version": "0.16.0",
+        "version": "0.20.5",
         "generatedAt": now.isoformat(timespec="seconds"),
         "timezone": "Europe/Stockholm",
         "currentWeek": current_week,
