@@ -44,7 +44,9 @@
     const freshness=document.querySelector("#sport-hub-freshness"),status=current().dataStatus||{};
     const checked=new Date(status.generatedAt||sportsData?.generatedAt||"");
     const checkedLabel=Number.isNaN(checked.getTime())?"Kontrolltid saknas":`Kontrollerad ${checked.toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
-    if(freshness)freshness.innerHTML=`<i data-lucide="${status.stale?"clock-alert":"shield-check"}"></i> ${esc(checkedLabel)} · ${Number(status.matchCount)||0} matcher inlästa · originalkällan gäller`;
+    const stale=status.stale??(Number.isNaN(checked.getTime())||Date.now()-checked.getTime()>72*60*60*1000);
+    const matchCount=Number(status.matchCount)||(current().matches||[]).length;
+    if(freshness)freshness.innerHTML=`<i data-lucide="${stale?"clock-alert":"shield-check"}"></i> ${esc(checkedLabel)} · ${matchCount} matcher inlästa · ${stale?"kontrollera den officiella källan":"originalkällan gäller"}`;
   }
   function renderSummary(){
     const all=matches(),now=Date.now(),finished=all.filter(matchFinished),upcoming=all.filter(match=>!matchFinished(match)&&new Date(match.startTime).getTime()>=now);
