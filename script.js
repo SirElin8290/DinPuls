@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.20.5
+   DINPULS.SE v0.20.6
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.5";
+const DINPULS_VERSION = "0.20.6";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -115,6 +115,7 @@ const DinPulsMunicipality = {
       })
     );
 
+    updateMunicipalityLinks(config.name);
     document.dispatchEvent(new CustomEvent("dinpuls:municipalitychange", {
       detail: { municipality: config, results }
     }));
@@ -266,12 +267,33 @@ function initializeSearch() {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const value = form.querySelector("input").value.trim();
-
-    if (value) {
-      alert(
-        `Sökning efter: ${value}\n\nSökfunktionen kopplas till riktiga data i en senare sprint.`
-      );
+    const value = form.querySelector("input").value.trim().toLocaleLowerCase("sv-SE");
+    if (!value) return;
+    const municipality = encodeURIComponent(DinPulsMunicipality.getName());
+    const destinations = [
+      { terms: ["jobb", "arbete", "lediga jobb"], url: `jobb.html?kommun=${municipality}` },
+      { terms: ["bostad", "bostäder", "lägenhet", "hyresrätt"], url: `bostader.html?kommun=${municipality}` },
+      { terms: ["lunch", "restaurang", "dagens lunch"], url: `lunch.html?kommun=${municipality}` },
+      { terms: ["evenemang", "event", "kalender"], url: `evenemang.html?kommun=${municipality}` },
+      { terms: ["sport", "matcher", "resultat", "tabell"], url: `sport.html?kommun=${municipality}` },
+      { terms: ["matkasse", "matpriser", "baskasse"], url: `matkasse.html?kommun=${municipality}&kasse=bas` },
+      { terms: ["trafik", "vägarbete", "trafikläge"], url: `trafik.html?kommun=${municipality}` },
+      { terms: ["buss", "tåg", "avgång", "kollektivtrafik"], url: "#kollektivtrafik" },
+      { terms: ["väder", "prognos"], url: "#vader" },
+      { terms: ["nyheter", "lokala nyheter"], url: "#nyheter" },
+      { terms: ["annonsera", "annons"], url: "information.html#annonsera" },
+      { terms: ["kontakt", "feedback", "integritet", "om oss"], url: `information.html#${value.includes("integritet") ? "integritet" : value.includes("feedback") ? "feedback" : value.includes("om ") ? "om" : "kontakt"}` }
+    ];
+    const match = destinations.find(item => item.terms.some(term => value.includes(term)));
+    const feedback = document.querySelector("#search-feedback");
+    if (match) {
+      window.location.href = match.url;
+      return;
+    }
+    if (feedback) {
+      feedback.textContent = "Ingen modul matchade. Prova jobb, bostäder, lunch, evenemang, sport, trafik, buss, väder eller nyheter.";
+      feedback.hidden = false;
+      window.setTimeout(() => { feedback.hidden = true; }, 7000);
     }
   });
 }
@@ -734,6 +756,21 @@ function applyMunicipality(config) {
     compactWeather.textContent = "Hämtar väder…";
   }
   renderMunicipalityPlaceholders(config);
+  updateMunicipalityLinks(config.name);
+}
+
+function updateMunicipalityLinks(municipality) {
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html"]);
+  document.querySelectorAll("a[href]").forEach(link => {
+    const raw = link.getAttribute("href");
+    if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;
+    const url = new URL(raw, window.location.href);
+    if (url.origin !== window.location.origin) return;
+    const page = url.pathname.split("/").pop();
+    if (!municipalPages.has(page)) return;
+    url.searchParams.set("kommun", municipality);
+    link.href = `${page}?${url.searchParams.toString()}${url.hash}`;
+  });
 }
 
 function renderMunicipalityPlaceholders(config) {
