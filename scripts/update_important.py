@@ -41,15 +41,18 @@ MUNICIPAL_SOURCES = {
 
 IMPORTANT_TERMS = (
     "kokningspåbud", "kokrekommendation", "otjänligt vatten", "vattenavstäng",
-    "vattenläcka", "strömavbrott", "elavbrott", "fjärrvärme", "driftstör",
+    "vattenläcka", "strömavbrott", "elavbrott", "driftstör",
     "driftavbrott", "fiberavbrott", "avbrott", "sophämt", "avfallshämt",
     "inställd sophämtning", "stängd skola", "stängd förskola", "stängd verksamhet",
     "tillfälligt stäng", "it-stör", "telefonstör", "trafikomledning",
-    "begränsad framkomlighet", "viktigt meddelande", "akut information",
+    "begränsad framkomlighet", "akut information",
 )
 GENERIC_TITLES = {
     "driftinformation", "driftstörningar", "aktuella driftstörningar",
-    "vatten och avlopp", "nyheter", "information", "läs mer",
+    "vatten och avlopp", "nyheter", "information", "läs mer", "fjärrvärme",
+    "viktigt meddelande till allmänheten - vma",
+    "viktigt meddelande till allmänheten – vma",
+    "sms-tjänst driftstörning",
 }
 RESOLVED_TERMS = ("åtgärdad", "avslutad", "åter i drift", "fungerar igen", "tidigare avbrott")
 MONTHS = {
@@ -74,6 +77,8 @@ def fetch(url: str, accept: str = "application/json") -> bytes:
         raise RuntimeError(f"HTTP {error.code} från {url}") from None
     except URLError as error:
         raise RuntimeError(f"Kunde inte nå {url}: {error.reason}") from None
+    except TimeoutError:
+        raise RuntimeError(f"Tidsgränsen överskreds för {url}") from None
 
 
 def fetch_json(url: str):
@@ -155,9 +160,13 @@ def municipal_items(source_name: str, source_url: str, mode: str, now: datetime)
         if any(term in context_lower for term in RESOLVED_TERMS):
             continue
         published = date_from_text(context, now)
-        if published and published < now - timedelta(days=21):
+        # Kommunernas startsidor länkar ofta till permanenta informationssidor
+        # med ord som "driftstörning", "fjärrvärme" och "VMA". Utan ett
+        # uttryckligt publiceringsdatum är det inte ett verifierat pågående
+        # driftmeddelande och ska därför inte visas som en aktuell händelse.
+        if published is None:
             continue
-        if mode == "archive" and published is None:
+        if published < now - timedelta(days=7) or published > now + timedelta(days=1):
             continue
         url = urljoin(source_url, html.unescape(match.group(1)))
         severity, priority = municipal_priority(title)
@@ -173,6 +182,21 @@ def municipal_items(source_name: str, source_url: str, mode: str, now: datetime)
             "url": url,
         })
     return list({item["id"]: item for item in results}.values())
+
+
+def recent_previous(items: list[dict], category: str, now: datetime, max_age_hours: int = 48) -> list[dict]:
+    result = []
+    cutoff = now - timedelta(hours=max_age_hours)
+    for item in items:
+        if item.get("category") != category:
+            continue
+        title = str(item.get("title") or "").lower().strip(" .:-")
+        if category == "municipal" and title in GENERIC_TITLES:
+            continue
+        published = parse_time(item.get("publishedAt"))
+        if published and published.astimezone(timezone.utc) >= cutoff:
+            result.append(item)
+    return result
 
 
 def police_items(payload, name: str, now: datetime) -> list[dict]:
@@ -315,7 +339,7 @@ def main() -> int:
             items.extend(police_items(police_events, name, now))
         else:
             previous = existing.get("municipalities", {}).get(name, {}).get("items", [])
-            items.extend(item for item in previous if item.get("category") == "police")
+            items.extend(recent_previous(previous, "police", now, 36))
         items.extend(traffic_items(transport, name, now))
 
         source = MUNICIPAL_SOURCES.get(name)
@@ -330,7 +354,7 @@ def main() -> int:
             except RuntimeError as error:
                 print(f"VARNING {source_name}: {error}")
                 previous = existing.get("municipalities", {}).get(name, {}).get("items", [])
-                items.extend(item for item in previous if item.get("category") == "municipal")
+                items.extend(recent_previous(previous, "municipal", now))
 
         unique = {str(item.get("id")): item for item in items if item.get("id") and item.get("title")}
         sorted_items = sorted(
@@ -346,7 +370,7 @@ def main() -> int:
         return 1
     deduped_sources = list({source["url"]: source for source in used_sources}.values())
     output = {
-        "version": "0.17.4",
+        "version": "0.20.2",
         "generatedAt": now.isoformat(timespec="seconds"),
         "sources": deduped_sources,
         "municipalities": municipalities,

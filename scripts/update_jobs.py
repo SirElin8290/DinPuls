@@ -22,12 +22,21 @@ SOURCE = {
     "name": "Arbetsförmedlingen – Platsbanken",
     "url": "https://jobsearch.api.jobtechdev.se/",
 }
+LOCALITIES = {
+    "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog"},
+    "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
+    "Bengtsfors": {"bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"},
+    "Mellerud": {"mellerud", "dals rostocks", "dals rostock", "åsensbruk", "håverud", "köpmannebro", "dalskog", "bolstad"},
+    "Årjäng": {"årjäng", "töcksfors", "lennartsfors", "svanskog"},
+    "Arvika": {"arvika", "edane", "glava", "jössefors", "sulvik", "gunnarskog", "klässbol", "mangskog"},
+    "Grums": {"grums", "slottsbron", "segelmon", "borgvik", "liljedal"},
+}
 
 
 def fetch_jobs(municipality_id: str) -> dict:
     query = urlencode({
         "municipality": municipality_id,
-        "limit": 25,
+        "limit": 100,
         "sort": "pubdate-desc",
     })
     request = Request(
@@ -72,6 +81,18 @@ def normalize_job(item: dict) -> dict:
     }
 
 
+def same_municipality(job: dict, expected_name: str) -> bool:
+    expected = expected_name.casefold().strip()
+    actual = str(job.get("municipality") or "").casefold().strip()
+    workplace = str(job.get("workplace") or "").casefold().strip()
+    workplace = workplace.split(" (", 1)[0].strip()
+    if actual != expected:
+        return False
+    if not workplace:
+        return True
+    return workplace in LOCALITIES.get(expected_name, {expected})
+
+
 def load_json(path: Path, fallback: dict) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -100,8 +121,15 @@ def main() -> int:
         try:
             payload = fetch_jobs(municipality_id)
             jobs = [normalize_job(item) for item in payload["hits"]]
-            jobs = [job for job in jobs if job["id"] and job["webpageUrl"]]
-            total = payload.get("total", {}).get("value", len(jobs))
+            jobs = [
+                job for job in jobs
+                if job["id"] and job["webpageUrl"] and same_municipality(job, name)
+            ]
+            # JobSearch kan returnera rikstäckande annonser eller annonser
+            # vars faktiska arbetsplats ligger i en annan kommun. DinPuls
+            # redovisar därför antalet verifierade kommunträffar, inte API:ets
+            # bredare totalsiffra.
+            total = len(jobs)
             refreshed = {
                 "municipalityId": municipality_id,
                 "total": int(total or 0),
@@ -112,7 +140,7 @@ def main() -> int:
             refreshed["updatedAt"] = previous.get("updatedAt", now) if refreshed == previous_content else now
             municipalities[name] = refreshed
             successful += 1
-            print(f"{name}: {len(jobs)} annonser hämtade, {total} totalt")
+            print(f"{name}: {len(jobs)} verifierade annonser i kommunen")
         except (RuntimeError, ValueError, TypeError) as error:
             failed.append(name)
             print(f"VARNING {name}: {error}")

@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.20.1
+   DINPULS.SE v0.20.2
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.1";
+const DINPULS_VERSION = "0.20.2";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -522,7 +522,7 @@ function renderNotifications(municipality) {
   const badge = document.querySelector("#notification-count");
   if (!list || !empty || !badge) return;
 
-  currentNotificationItems = collectNotifications(municipality).slice(0, 24);
+  currentNotificationItems = collectNotifications(municipality).slice(0, 12);
   const seen = getSeenNotifications(municipality);
   const unread = currentNotificationItems.filter((item) => !seen.has(item.key));
 
@@ -549,25 +549,36 @@ function renderNotifications(municipality) {
 
 function collectNotifications(municipality) {
   const items = [];
+  const priorities = { important: 100, transport: 90, traffic: 80, jobs: 70, housing: 60, events: 55, news: 45, fuel: 35, lunch: 30 };
   const add = (kind, icon, id, title, detail, url, date, external = false) => {
     if (!id || !title) return;
     items.push({
       kind, icon, title, detail: detail || municipality, url,
-      external, date: date || "", key: `${kind}:${municipality}:${id}`
+      external, date: date || "", priority: priorities[kind] || 0,
+      key: `${kind}:${municipality}:${id}`
     });
   };
+  const isRecent = (value, days = 3) => {
+    const timestamp = new Date(value).getTime();
+    if (!timestamp) return false;
+    const difference = Date.now() - timestamp;
+    return difference >= -24 * 60 * 60 * 1000 && difference <= days * 24 * 60 * 60 * 1000;
+  };
+  const genericNewsTitle = (title) => /^(polisens senaste|lokala nyheter från|senaste nytt från|senaste lokala rubrikerna)/i.test(String(title || ""));
 
-  (importantData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
+  (importantData?.municipalities?.[municipality]?.items || []).slice(0, 3).forEach((item) =>
     add("important", item.category === "municipal" ? "wrench" : "shield-alert", item.id, item.title, item.source || "Dagens viktigaste", item.url || "#", item.publishedAt, Boolean(item.url))
   );
-  (roadTrafficData?.municipalities?.[municipality]?.items || []).slice(0, 4).forEach((item) =>
+  (roadTrafficData?.municipalities?.[municipality]?.items || []).slice(0, 2).forEach((item) =>
     add("traffic", "triangle-alert", item.id, item.title, item.location || "Trafikinformation", "trafik.html", item.startTime || item.publishedAt)
   );
-  (jobsData?.municipalities?.[municipality]?.jobs || []).slice(0, 5).forEach((item) =>
+  (jobsData?.municipalities?.[municipality]?.jobs || []).filter((item) =>
+    isRecent(item.publicationDate, 3)
+  ).slice(0, 3).forEach((item) =>
     add("jobs", "briefcase-business", item.id, item.headline, `${item.employer || "Arbetsgivare"} · Nytt jobb`, "jobb.html", item.publicationDate)
   );
-  (housingData?.municipalities?.[municipality]?.listings || []).slice(0, 5).forEach((item) =>
-    add("housing", "house", item.id, item.address || "Ny ledig bostad", `${item.rooms || ""} ${item.rooms ? "rum · " : ""}${item.provider || "Bostad"}`, "bostader.html", item.available || housingData.generatedAt)
+  (housingData?.municipalities?.[municipality]?.listings || []).slice(0, 2).forEach((item) =>
+    add("housing", "house", item.id, item.address || "Ny ledig bostad", `${item.rooms || ""} ${item.rooms ? "rum · " : ""}${item.provider || "Bostad"}`, "bostader.html", housingData.generatedAt)
   );
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -583,8 +594,11 @@ function collectNotifications(municipality) {
     add("events", "calendar-days", item.id, item.title, `${dateLabel} · ${item.venue || municipality}`, "evenemang.html", ongoing ? eventsData.generatedAt : item.startDate);
   });
   allNewsArticles.filter((item) =>
-    item.scope === "local" && (item.municipalities || []).includes(municipality)
-  ).slice(0, 4).forEach((item) =>
+    item.scope === "local" &&
+    (item.municipalities || []).includes(municipality) &&
+    isRecent(item.publishedAt, 2) &&
+    !genericNewsTitle(item.title)
+  ).slice(0, 2).forEach((item) =>
     add("news", "newspaper", item.id, item.title, item.source || "Lokal nyhet", item.url, item.publishedAt, true)
   );
   (transportData?.municipalities?.[municipality]?.stops || []).flatMap((stop) =>
@@ -607,6 +621,7 @@ function collectNotifications(municipality) {
   );
 
   return items.sort((first, second) => {
+    if (second.priority !== first.priority) return second.priority - first.priority;
     const firstDate = new Date(first.date).getTime() || 0;
     const secondDate = new Date(second.date).getTime() || 0;
     return secondDate - firstDate;

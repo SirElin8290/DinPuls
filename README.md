@@ -1,4 +1,17 @@
-# DinPuls v0.20.1
+# DinPuls v0.20.2
+
+## Sprint 2 – trovärdig lokal information
+
+- Kommunala informationssidor utan ett verifierat färskt publiceringsdatum
+  visas inte längre som aktiva driftmeddelanden.
+- Generella sidor om VMA, fjärrvärme och SMS-tjänster filtreras bort från
+  Dagens viktigaste.
+- Jobb kontrolleras mot den faktiska arbetsplatsorten och annonser från andra
+  kommuner tas bort ur det lokala resultatet.
+- Notiscentret prioriterar viktiga händelser, visar färre poster och tar bort
+  generella länkar som inte är nya händelser.
+- Föråldrade kommunala meddelanden återanvänds inte när en källa tillfälligt
+  ligger nere.
 
 ## Stabilisering av hela webbplatsen
 
