@@ -31,7 +31,11 @@ function parseDate(value) {
 
 function makeMatch(source, dateText, homeTeam, awayTeam, homeScore, awayScore, venue = "") {
   const start = parseDate(dateText);
-  if (!start || !homeTeam || !awayTeam) return null;
+  const invalidTeam = value => {
+    const team = cleanText(value);
+    return !team || team.length > 80 || /round date|game result|spectators|venue|undefined|null/i.test(team);
+  };
+  if (!start || invalidTeam(homeTeam) || invalidTeam(awayTeam) || cleanText(homeTeam) === cleanText(awayTeam)) return null;
   const finished = Number.isFinite(homeScore) && Number.isFinite(awayScore);
   return {
     id: stableId([source.id, start.toISOString(), homeTeam, awayTeam]),

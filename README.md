@@ -1,4 +1,20 @@
-# DinPuls v0.19.5
+# DinPuls v0.20.0
+
+## Förenklad lokal sporthub
+
+- Sportsidan fokuserar på spelade matcher, kommande matcher, resultat,
+  aktuella tabeller samt arenor och sporthallar.
+- Alla lokala sporter visas även under säsongsuppehåll eller när nästa
+  spelschema ännu inte är publicerat.
+- Spelarprofiler, laguppställningar och överflödiga matchdetaljer har tagits
+  bort ur det aktiva besökarflödet.
+- Tabeller märks tydligt när de bygger på de verifierade matcher som DinPuls
+  har läst in och länkar alltid vidare till den officiella källan.
+- Arenavyn visar endast praktiska uppgifter: namn, sport, adress, telefon när
+  det finns, kartlänk och officiell information.
+- Åtta lokala annonsplatser är strategiskt fördelade genom sporthubben.
+- Matchvalideringen stoppar rubriktext och andra trasiga värden från att bli
+  lag eller tabellrader.
 
 ## Sprint 4.7 – arenor och idrottsanläggningar
 

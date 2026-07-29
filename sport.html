@@ -3,19 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Lokal sport, matcher, resultat, tabeller och föreningar i din kommun.">
-  <title>Lokal sport – DinPuls</title>
+  <meta name="description" content="Matcher, resultat, tabeller och idrottsanläggningar i din kommun.">
+  <title>Lokalt sportläge – DinPuls</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?version=0.18.1">
   <link rel="stylesheet" href="portal-pages.css?version=0.18.1">
-  <link rel="stylesheet" href="sport.css?version=0.18.3">
-  <link rel="stylesheet" href="sport-matchcenter.css?version=0.18.3">
-  <link rel="stylesheet" href="sport-matchcenter-stage41.css?version=0.19.0">
-  <link rel="stylesheet" href="sport-tables-stage43.css?version=0.19.1">
-  <link rel="stylesheet" href="sport-favorites-stage45.css?version=0.19.3">
-  <link rel="stylesheet" href="sport-arena-stage47.css?version=0.19.5">
+  <link rel="stylesheet" href="sport-hub-stage48.css?version=0.20.0">
 </head>
 <body>
   <header class="portal-header">
@@ -23,51 +18,37 @@
     <a href="index.html">← Till startsidan</a>
   </header>
 
-  <main class="portal-main sport-portal">
-    <section class="sport-hero">
+  <main class="portal-main sport-hub">
+    <section class="sport-hub-hero">
       <div>
-        <span class="section-kicker">DinPuls lokalsport</span>
-        <h1>Sport i <span data-sport-municipality>Åmål</span></h1>
-        <p>Matcher, tabeller och föreningar – helt lokalt och samlat från officiella källor.</p>
+        <span class="section-kicker">Helt lokalt</span>
+        <h1>Sportläget i <span id="sport-hub-place">Åmål</span></h1>
+        <p>Spelade och kommande matcher, resultat, tabeller samt arenor och sporthallar.</p>
       </div>
-      <div class="sport-hero-actions">
-        <button id="sport-spoiler-toggle" type="button" aria-pressed="false"><i data-lucide="eye-off"></i><span>Dölj resultat</span></button>
-        <span class="sport-source-status"><i data-lucide="shield-check"></i> Originalkällan gäller alltid</span>
-      </div>
+      <button id="sport-hub-spoiler" type="button" aria-pressed="false"><i data-lucide="eye-off"></i><span>Dölj resultat</span></button>
     </section>
 
-    <section class="sport-toolbar-panel" aria-label="Filtrera lokalsport">
-      <label>Kommun<select id="sport-municipality"></select></label>
-      <label>Sport<select id="sport-filter"><option value="all">Alla sporter</option></select></label>
-      <label class="sport-search-label">Sök<input id="sport-search" type="search" placeholder="Förening eller sport"></label>
+    <section class="sport-hub-toolbar" aria-label="Välj kommun och sport">
+      <label>Kommun<select id="sport-hub-municipality"></select></label>
+      <label>Sport<select id="sport-hub-sport"><option value="all">Alla sporter</option></select></label>
+      <p id="sport-hub-freshness"><i data-lucide="shield-check"></i> Originalkällan gäller alltid</p>
     </section>
 
-    <section class="sport-overview-strip" id="sport-stat-grid" aria-live="polite"></section>
-    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="sport" data-ad-position="1"></div>
+    <section class="sport-hub-summary" id="sport-hub-summary" aria-live="polite"></section>
 
-    <nav class="sport-tabs" role="tablist" aria-label="Sportinnehåll">
-      <button class="active" data-sport-tab="overview" role="tab" aria-selected="true"><i data-lucide="layout-dashboard"></i>Översikt</button>
-      <button data-sport-tab="favorites" role="tab" aria-selected="false"><i data-lucide="star"></i>Mina lag</button>
-      <button data-sport-tab="matchcenter" role="tab" aria-selected="false"><i data-lucide="radio-tower"></i>Matchcenter</button>
-      <button data-sport-tab="upcoming" role="tab" aria-selected="false"><i data-lucide="calendar-days"></i>Kommande</button>
-      <button data-sport-tab="results" role="tab" aria-selected="false"><i data-lucide="circle-check"></i>Resultat</button>
-      <button data-sport-tab="tables" role="tab" aria-selected="false"><i data-lucide="list-ordered"></i>Tabeller</button>
-      <button data-sport-tab="clubs" role="tab" aria-selected="false"><i data-lucide="users"></i>Föreningar</button>
+    <nav class="sport-hub-tabs" role="tablist" aria-label="Sportinnehåll">
+      <button class="active" data-hub-tab="matches" role="tab" aria-selected="true"><i data-lucide="calendar-days"></i>Matcher & resultat</button>
+      <button data-hub-tab="tables" role="tab" aria-selected="false"><i data-lucide="list-ordered"></i>Tabeller</button>
+      <button data-hub-tab="arenas" role="tab" aria-selected="false"><i data-lucide="map-pin"></i>Arenor & sporthallar</button>
     </nav>
 
-    <section id="sport-view" class="sport-view" aria-live="polite"></section>
-    <div class="strategic-ad-slot" data-strategic-ad="sport" data-ad-position="8"></div>
+    <section id="sport-hub-view" class="sport-hub-view" aria-live="polite">
+      <div class="sport-hub-loading">Hämtar det lokala sportläget…</div>
+    </section>
   </main>
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="sport-data-engine.js?version=0.18.3"></script>
-  <script src="sport-page.js?version=0.18.3"></script>
-  <script src="sport-matchcenter.js?version=0.18.3"></script>
-  <script src="sport-matchcenter-stage41.js?version=0.19.0"></script>
-  <script src="sport-clubs-stage42.js?version=0.18.5"></script>
-  <script src="sport-tables-stage43.js?version=0.19.1"></script>
-  <script src="sport-match-details-stage44.js?version=0.19.2"></script>
-  <script src="sport-favorites-stage45.js?version=0.19.3"></script>
-  <script src="sport-arenas-stage47.js?version=0.19.5"></script>
+  <script src="sport-hub-stage48.js?version=0.20.0"></script>
 </body>
 </html>
