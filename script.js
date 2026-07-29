@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.20.2
+   DINPULS.SE v0.20.3
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.2";
+const DINPULS_VERSION = "0.20.3";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
@@ -2151,15 +2151,21 @@ function renderSportsHome(config) {
   const municipality = sportsData?.municipalities?.[config.name] || { clubs: [], liveSources: [] };
   const clubs = Array.isArray(municipality.clubs) ? municipality.clubs : [];
   const sources = Array.isArray(municipality.liveSources) ? municipality.liveSources : [];
-  const matchCount = Number(municipality.dataStatus?.matchCount) || 0;
+  const matches = Array.isArray(municipality.matches) ? municipality.matches : [];
+  const matchCount = matches.length;
   const sports = [...new Set(clubs.flatMap((club) => club.sports || []))];
   const summary = document.querySelector("#sport-home-summary");
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
   if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar</strong><span>${sports.length} sporter · ${matchCount ? `${matchCount} inlästa matcher` : `inga matcher inlästa just nu`} · ${sources.length} officiella källor</span>`;
-  if (list) list.innerHTML = clubs.slice(0, 4).map((club) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sok=${encodeURIComponent(club.name)}">
+  const featured = sports.slice(0, 4).map((sport) => ({
+    sport,
+    clubs: clubs.filter((club) => (club.sports || []).includes(sport)),
+    matches: matches.filter((match) => match.sport === sport)
+  }));
+  if (list) list.innerHTML = featured.map((item) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sport=${encodeURIComponent(item.sport)}">
     <span class="sport-home-icon"><i data-lucide="medal"></i></span>
-    <span><strong>${escapeHtml(club.name)}</strong><small>${escapeHtml((club.sports || []).join(" · "))}</small></span>
+    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.matches.length ? `${item.matches.length} inlästa matcher` : `${item.clubs.length} lokala föreningar`}</small></span>
     <i data-lucide="chevron-right"></i>
   </a>`).join("");
   if (link) link.href = `sport.html?kommun=${encodeURIComponent(config.name)}`;

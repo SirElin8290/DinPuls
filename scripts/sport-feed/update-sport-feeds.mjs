@@ -25,7 +25,34 @@ const stableId = parts => createHash("sha1").update(parts.filter(Boolean).join("
 function parseDate(value) {
   const match = cleanText(value).match(/(20\d{2})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})/);
   if (!match) return null;
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+  const wanted = [
+    Number(match[1]),
+    Number(match[2]),
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5])
+  ];
+  const utcGuess = Date.UTC(wanted[0], wanted[1] - 1, wanted[2], wanted[3], wanted[4]);
+  const stockholmParts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date(utcGuess)).reduce((result, part) => {
+    if (part.type !== "literal") result[part.type] = Number(part.value);
+    return result;
+  }, {});
+  const stockholmAtGuess = Date.UTC(
+    stockholmParts.year,
+    stockholmParts.month - 1,
+    stockholmParts.day,
+    stockholmParts.hour,
+    stockholmParts.minute
+  );
+  const date = new Date(utcGuess - (stockholmAtGuess - utcGuess));
   return Number.isNaN(date.getTime()) ? null : date;
 }
 

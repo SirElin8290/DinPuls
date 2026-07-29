@@ -3,10 +3,11 @@
   const MUNICIPALITIES=["Åmål","Säffle","Bengtsfors","Mellerud","Årjäng","Arvika","Grums"];
   const params=new URLSearchParams(location.search);
   let municipality=params.get("kommun")||localStorage.getItem("dinpuls-municipality")||"Åmål";
+  const requestedSport=params.get("sport")||"all";
   if(!MUNICIPALITIES.includes(municipality))municipality="Åmål";
   let sportsData=null,arenaData=null,activeTab="matches",hideResults=localStorage.getItem("dinpuls-hide-sport-results")==="true";
   const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
-  const sourceFor=(data,sport)=>(data.liveSources||[]).find(source=>source.sport===sport)||(data.liveSources||[])[0];
+  const sourceFor=(data,sport)=>(data.liveSources||[]).find(source=>source.sport===sport)||(data.liveSources||[]).find(source=>source.sport==="Alla sporter")||null;
   const matchFinished=match=>["finished","final","ended"].includes(String(match.status||"").toLowerCase())||(Number.isFinite(Number(match.homeScore))&&Number.isFinite(Number(match.awayScore))&&new Date(match.startTime)<new Date());
   const matchValid=match=>{
     const home=String(match.homeTeam||"").trim(),away=String(match.awayTeam||"").trim(),date=new Date(match.startTime);
@@ -38,7 +39,7 @@
     document.title=`Sportläget i ${municipality} – DinPuls`;
     const sportSelect=document.querySelector("#sport-hub-sport"),previous=sportSelect.value,available=sports();
     sportSelect.innerHTML=`<option value="all">Alla sporter</option>${available.map(sport=>`<option value="${esc(sport)}">${esc(sport)}</option>`).join("")}`;
-    sportSelect.value=available.includes(previous)?previous:"all";
+    sportSelect.value=available.includes(previous)?previous:(available.includes(requestedSport)?requestedSport:"all");
     const button=document.querySelector("#sport-hub-spoiler");button.classList.toggle("active",hideResults);button.setAttribute("aria-pressed",String(hideResults));button.innerHTML=`<i data-lucide="${hideResults?"eye":"eye-off"}"></i><span>${hideResults?"Visa resultat":"Dölj resultat"}</span>`;
     document.body.classList.toggle("results-hidden",hideResults);
     const freshness=document.querySelector("#sport-hub-freshness"),status=current().dataStatus||{};
@@ -46,7 +47,8 @@
     const checkedLabel=Number.isNaN(checked.getTime())?"Kontrolltid saknas":`Kontrollerad ${checked.toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
     const stale=status.stale??(Number.isNaN(checked.getTime())||Date.now()-checked.getTime()>72*60*60*1000);
     const matchCount=Number(status.matchCount)||(current().matches||[]).length;
-    if(freshness)freshness.innerHTML=`<i data-lucide="${stale?"clock-alert":"shield-check"}"></i> ${esc(checkedLabel)} · ${matchCount} matcher inlästa · ${stale?"kontrollera den officiella källan":"originalkällan gäller"}`;
+    const activeSources=(sportsData?.sourceHealth||[]).filter(source=>source.municipality===municipality&&source.status==="ok").length;
+    if(freshness)freshness.innerHTML=`<i data-lucide="${stale?"clock-alert":"shield-check"}"></i> ${esc(checkedLabel)} · ${matchCount} matcher inlästa · ${activeSources?`${activeSources} automatiskt sportflöde`:"officiella länkar"} · ${stale?"kontrollera källan":"originalkällan gäller"}`;
   }
   function renderSummary(){
     const all=matches(),now=Date.now(),finished=all.filter(matchFinished),upcoming=all.filter(match=>!matchFinished(match)&&new Date(match.startTime).getTime()>=now);
@@ -68,7 +70,8 @@
     const data=current(),selected=selectedSport(),list=sports().filter(sport=>selected==="all"||sport===selected),all=matches(),now=Date.now();
     const sections=list.map((sport,index)=>{
       const source=sourceFor(data,sport),sportMatches=all.filter(match=>match.sport===sport),played=sportMatches.filter(matchFinished).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime)),upcoming=sportMatches.filter(match=>!matchFinished(match)&&new Date(match.startTime).getTime()>=now);
-      return `<section class="sport-hub-section"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(sport)}</span><h2>${esc(sport)} i ${esc(municipality)}</h2><p>${(data.clubs||[]).filter(club=>(club.sports||[]).includes(sport)).map(club=>esc(club.name)).join(" · ")||"Lokala föreningar"}</p></div>${source?`<a class="sport-hub-source" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">Officiell sportkälla ↗</a>`:""}</header>${upcoming.length?`<h3 class="sport-hub-subtitle">Kommande matcher</h3><div class="sport-hub-match-list">${upcoming.slice(0,12).map(match=>matchRow(match,false)).join("")}</div>`:""}${played.length?`<h3 class="sport-hub-subtitle">Spelade matcher och resultat</h3><div class="sport-hub-match-list">${played.slice(0,12).map(match=>matchRow(match,true)).join("")}</div>`:""}${!sportMatches.length?emptyState(sport,source):""}</section>${index<6?ad(index+2):""}`;
+      const sourceLabel=source?`<a class="sport-hub-source" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">Officiell ${esc(sport.toLocaleLowerCase("sv-SE"))}källa ↗</a>`:"";
+      return `<section class="sport-hub-section"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(sport)}</span><h2>${esc(sport)} i ${esc(municipality)}</h2><p>${(data.clubs||[]).filter(club=>(club.sports||[]).includes(sport)).map(club=>esc(club.name)).join(" · ")||"Lokala föreningar"}</p></div>${sourceLabel}</header>${upcoming.length?`<h3 class="sport-hub-subtitle">Kommande matcher</h3><div class="sport-hub-match-list">${upcoming.slice(0,12).map(match=>matchRow(match,false)).join("")}</div>`:""}${played.length?`<h3 class="sport-hub-subtitle">Spelade matcher och resultat</h3><div class="sport-hub-match-list">${played.slice(0,12).map(match=>matchRow(match,true)).join("")}</div>`:""}${!sportMatches.length?emptyState(sport,source):""}</section>${index<6?ad(index+2):""}`;
     });
     return `${ad(1)}${sections.join("")}${sections.length<6?ads(...Array.from({length:6-sections.length},(_,i)=>sections.length+i+2)):""}${ad(8)}`;
   }
@@ -96,8 +99,9 @@
     if(!sportsResponse.ok||!arenaResponse.ok)throw new Error("Sportdata kunde inte laddas");
     sportsData=await sportsResponse.json();arenaData=await arenaResponse.json();
     const municipalitySelect=document.querySelector("#sport-hub-municipality");municipalitySelect.innerHTML=MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");municipalitySelect.value=municipality;
-    municipalitySelect.addEventListener("change",()=>{municipality=municipalitySelect.value;localStorage.setItem("dinpuls-municipality",municipality);history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(municipality)}`);render()});
-    document.querySelector("#sport-hub-sport").addEventListener("change",render);
+    municipalitySelect.addEventListener("change",()=>{municipality=municipalitySelect.value;localStorage.setItem("dinpuls-municipality",municipality);const url=new URL(location.href);url.searchParams.set("kommun",municipality);const sport=selectedSport();sport==="all"?url.searchParams.delete("sport"):url.searchParams.set("sport",sport);history.replaceState(null,"",`${url.pathname}?${url.searchParams.toString()}`);render()});
+    const sportSelect=document.querySelector("#sport-hub-sport");
+    sportSelect.addEventListener("change",()=>{const sport=sportSelect.value;const url=new URL(location.href);sport==="all"?url.searchParams.delete("sport"):url.searchParams.set("sport",sport);url.searchParams.set("kommun",municipality);history.replaceState(null,"",`${url.pathname}?${url.searchParams.toString()}`);render()});
     document.querySelector("#sport-hub-spoiler").addEventListener("click",()=>{hideResults=!hideResults;localStorage.setItem("dinpuls-hide-sport-results",String(hideResults));render()});
     document.querySelectorAll("[data-hub-tab]").forEach(button=>button.addEventListener("click",()=>setTab(button.dataset.hubTab)));
     render();

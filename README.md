@@ -1,4 +1,19 @@
-# DinPuls v0.20.2
+# DinPuls v0.20.3
+
+## Sprint 3 – lokal sport som snabb hubb
+
+- Startsidan och sportsidan använder nu samma sammanslagna sportflöde. Antalet
+  matcher på startsidan blir därför inte längre felaktigt noll när ett
+  automatiskt sportflöde innehåller matcher.
+- Startsidan länkar till den valda sporten i stället för till borttagna
+  föreningsprofiler.
+- Sporthubben visar spelade matcher, kommande matcher, resultat, preliminära
+  tabeller samt arenor och sporthallar.
+- Officiella länkar kopplas endast till rätt sport. En fotbollssektion kan
+  exempelvis inte längre råka länka till en ishockey- eller innebandykälla.
+- Källstatus skiljer mellan automatiskt inlästa matcher och officiella
+  referenslänkar, vilket gör säsongsuppehåll tydligare.
+- Exakt åtta lokala annonsplatser behålls på sportsidan.
 
 ## Sprint 2 – trovärdig lokal information
 
