@@ -1,4 +1,4 @@
-# DinPuls v0.20.7
+# DinPuls v0.20.8
 
 ## Sprint 6 – lanseringskontroll
 
@@ -85,8 +85,8 @@
   visar när kontrollen gjordes samt vilka källor som svarade.
 - Sport- och matkassesidorna visar öppet när det saknas importerade matcher
   eller publicerade butikpriser. DinPuls fyller aldrig luckorna med demodata.
-- Äldre sportlänkar för spelare, matcher, föreningar och arenor leder vidare
-  till den förenklade lokala sporthubben.
+- Äldre avancerade sportvyer för spelare, matchdetaljer, favoriter och
+  föreningsprofiler är borttagna.
 - Alla aktiva sidor använder samma versions- och cachemarkering.
 
 ## Förenklad lokal sporthub
@@ -97,34 +97,13 @@
   spelschema ännu inte är publicerat.
 - Spelarprofiler, laguppställningar och överflödiga matchdetaljer har tagits
   bort ur det aktiva besökarflödet.
-- Tabeller märks tydligt när de bygger på de verifierade matcher som DinPuls
-  har läst in och länkar alltid vidare till den officiella källan.
+- Tabellvyn visar lagets aktuella serie och leder direkt till ansvarig
+  förening eller förbund, så att placering och poäng alltid är aktuella.
 - Arenavyn visar endast praktiska uppgifter: namn, sport, adress, telefon när
   det finns, kartlänk och officiell information.
 - Åtta lokala annonsplatser är strategiskt fördelade genom sporthubben.
 - Matchvalideringen stoppar rubriktext och andra trasiga värden från att bli
   lag eller tabellrader.
-
-## Sprint 4.7 – arenor och idrottsanläggningar
-
-- Kommunfiltrerad arenakatalog för samtliga sju startkommuner.
-- Egen sida per anläggning med karta, väder, sporter, parkering och
-  tillgänglighetsinformation.
-- Matcher kopplas automatiskt när arenanamnet finns i sportflödet.
-- Hemmalag, originalkälla och en lokal arenapartnerplats visas.
-- Okända uppgifter markeras öppet och fylls inte med antaganden.
-
-## Sprint 4.6 – spelarprofiler
-
-- `player.html` ger varje tillgänglig spelare en responsiv profilsida.
-- Profilen visar säsongsstatistik, matcher, mål, assist, poäng,
-  utvisningsminuter, lagets senaste form, kommande matcher och tidigare klubbar
-  när uppgifterna finns i en ansluten källa.
-- Laguppställningar på matchsidan länkar till spelarprofiler.
-- Föreningssidan har en truppsektion som fylls från föreningsdata och
-  laguppställningar.
-- Varje profil har en egen lokal spelarpartnerplats.
-- Saknade uppgifter markeras öppet och ersätts aldrig med påhittad statistik.
 
 ## Lokal sport i v0.18.0
 
