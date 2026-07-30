@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.20.8
+   DINPULS.SE v0.20.9
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.8";
+const DINPULS_VERSION = "0.20.9";
 const DEFAULT_MUNICIPALITY = "Åmål";
 
 const componentNames = [
