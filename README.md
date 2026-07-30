@@ -1,4 +1,4 @@
-# DinPuls v0.20.6
+# DinPuls v0.20.7
 
 ## Sprint 6 – lanseringskontroll
 
