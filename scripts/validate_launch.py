@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.20.7"
+VERSION = "0.20.8"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -129,8 +129,22 @@ def verify_ads() -> None:
     assert "ad(1)" in sport and "ad(8)" in sport, "Sportsidan ska behålla åtta annonsplatser"
 
 
+def verify_simple_sport_hub() -> None:
+    removed = [
+        "player.html", "match.html", "club.html", "arena.html",
+        "sport-matchcenter-stage41.js", "sport-clubs-stage42.js",
+        "sport-tables-stage43.js", "sport-match-details-stage44.js",
+        "sport-favorites-stage45.js", "sport-players-stage46.js",
+        "sport-arenas-stage47.js",
+    ]
+    for asset in removed:
+        assert not (ROOT / asset).exists(), f"Avancerad sportfil ska vara borttagen: {asset}"
+    sport = (ROOT / "sport.html").read_text(encoding="utf-8")
+    assert "Matcher & resultat" in sport and "Tabeller" in sport and "Arenor & sporthallar" in sport
+
+
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_simple_sport_hub]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")
