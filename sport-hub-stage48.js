@@ -103,7 +103,7 @@
   function renderTables(){
     const selected=selectedSport();
     const activeSeries=seasons().filter(item=>(selected==="all"||item.sport===selected)&&item.competition&&!/lokal verksamhet|klubbtävlingar/i.test(item.competition));
-    const sections=activeSeries.map(item=>`<section class="sport-hub-section sport-hub-series-card"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(item.sport)} · ${esc(item.team)}</span><h2>${esc(item.competition)}</h2><p>${esc(item.statusLabel)}. Tabellen visas hos ansvarigt förbund eller förening så att placering och poäng alltid är aktuella.</p></div><a class="sport-hub-source" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">Öppna officiell tabell ↗</a></header></section>`);
+    const sections=activeSeries.map(item=>`<section class="sport-hub-section sport-hub-series-card"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(item.sport)} · ${esc(item.team)}</span><h2>${esc(item.competition)}</h2><p>${esc(item.statusLabel)}. Tabellen visas hos ansvarigt förbund eller förening så att placering och poäng alltid är aktuella.</p></div><a class="sport-hub-source" href="${esc(item.tableUrl||item.sourceUrl)}" target="_blank" rel="noopener noreferrer">Öppna officiell tabell ↗</a></header></section>`);
     if(!sections.length)sections.push(`<section class="sport-hub-section"><div class="sport-hub-empty"><span><strong>Ingen aktuell serietabell för urvalet</strong><br>Sporten kan vara individuell, sakna publicerad serie eller befinna sig mellan två säsonger.</span></div></section>`);
     return pageWithAds(sections);
   }
