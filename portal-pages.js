@@ -7,9 +7,15 @@ let portalSelectedListing = new URLSearchParams(window.location.search).get("ann
 const escapePortal = (value) => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 const formatNumber = value => new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
 
+function updatePortalChrome() {
+  document.querySelectorAll("[data-portal-municipality]").forEach(element => element.textContent = portalMunicipality);
+  document.title = `${portalType === "jobs" ? "Lediga jobb" : "Lediga bostäder"} i ${portalMunicipality} – DinPuls`;
+}
+
 async function initializePortal() {
   const municipalitySelect = document.querySelector("#portal-municipality");
   municipalityState.populateSelect(municipalitySelect, portalMunicipality);
+  updatePortalChrome();
   municipalitySelect.addEventListener("change", () => {
     portalMunicipality = municipalityState.set(municipalitySelect.value);
     portalSelectedListing = "";
@@ -27,8 +33,7 @@ async function initializePortal() {
 
 function renderPortal() {
   if (!portalData) return;
-  document.querySelectorAll("[data-portal-municipality]").forEach(element => element.textContent = portalMunicipality);
-  document.title = `${portalType === "jobs" ? "Lediga jobb" : "Lediga bostäder"} i ${portalMunicipality} – DinPuls`;
+  updatePortalChrome();
   const municipalityData = portalData.municipalities?.[portalMunicipality] || {};
   const query = document.querySelector("#portal-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
   const sourceItems = portalType === "jobs" ? (municipalityData.jobs || []) : (municipalityData.listings || []);
@@ -62,7 +67,7 @@ function renderPortal() {
   const checked = new Date(municipalityData.checkedAt || municipalityData.updatedAt || portalData.generatedAt);
   document.querySelector("#portal-updated").textContent = Number.isNaN(checked.getTime())
     ? ""
-    : `${municipalityData.stale ? "Senaste data visas · kontroll misslyckades" : "Kontrollerad"} ${checked.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+    : `${municipalityData.stale ? "Senaste data visas · kontroll misslyckades" : "Kontrollerad"} ${checked.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   const list = document.querySelector("#portal-list");
   list.innerHTML = filtered.map(portalType === "jobs" ? renderPortalJob : renderPortalHousing).join("");
   document.querySelector("#portal-empty").hidden = filtered.length > 0;
@@ -75,7 +80,16 @@ function renderPortal() {
 
 function renderPortalHousing(item) {
   const details = [Number(item.rooms) > 0 ? `${formatNumber(item.rooms)} rum` : "", Number(item.size) > 0 ? `${formatNumber(item.size)} m²` : "", Number(item.rent) > 0 ? `${new Intl.NumberFormat("sv-SE").format(item.rent)} kr/mån` : ""].filter(Boolean);
-  return `<article class="portal-card${isSelectedHousing(item) ? " selected" : ""}"><span class="portal-card-icon housing"><i data-lucide="house"></i></span><div><h3>${escapePortal(item.address || "Ledig bostad")}</h3><p>${escapePortal(item.area || item.provider || "")}</p><div class="portal-tags">${details.map(detail => `<span>${escapePortal(detail)}</span>`).join("")}</div><small>${escapePortal(item.available ? `Tillgänglig ${item.available}` : "Se tillgänglighet hos hyresvärden")} · ${escapePortal(item.provider || "Officiell hyresvärd")}</small></div><a class="portal-source-button" href="${escapePortal(item.url)}" target="_blank" rel="noopener noreferrer">Visa hos hyresvärden <i data-lucide="external-link"></i></a></article>`;
+  return `<article class="portal-card${isSelectedHousing(item) ? " selected" : ""}"><span class="portal-card-icon housing"><i data-lucide="house"></i></span><div><h3>${escapePortal(item.address || "Ledig bostad")}</h3><p>${escapePortal(item.area || item.provider || "")}</p><div class="portal-tags">${details.map(detail => `<span>${escapePortal(detail)}</span>`).join("")}</div><small>${escapePortal(formatPortalAvailability(item.available))} · ${escapePortal(item.provider || "Officiell hyresvärd")}</small></div><a class="portal-source-button" href="${escapePortal(item.url)}" target="_blank" rel="noopener noreferrer">Visa hos hyresvärden <i data-lucide="external-link"></i></a></article>`;
+}
+
+function formatPortalAvailability(value) {
+  if (!value) return "Se tillgänglighet hos hyresvärden";
+  if (String(value).trim().toLocaleLowerCase("sv-SE") === "nu") return "Tillgänglig nu";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? `Tillgänglig ${value}`
+    : `Tillgänglig ${date.toLocaleDateString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "long", year: "numeric" })}`;
 }
 
 function isSelectedHousing(item) {
@@ -84,7 +98,7 @@ function isSelectedHousing(item) {
 
 function renderPortalJob(job) {
   const deadline = job.applicationDeadline
-    ? new Date(job.applicationDeadline).toLocaleDateString("sv-SE", { day: "numeric", month: "short", year: "numeric" })
+    ? new Date(job.applicationDeadline).toLocaleDateString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", year: "numeric" })
     : "";
   return `<article class="portal-card"><span class="portal-card-icon jobs"><i data-lucide="briefcase-business"></i></span><div><h3>${escapePortal(job.headline || "Ledigt jobb")}</h3><p>${escapePortal(job.employer || "Arbetsgivare saknas")} · ${escapePortal(job.workplace || portalMunicipality)}</p><div class="portal-tags"><span>${escapePortal(job.workingHours || "Arbetstid ej angiven")}</span>${job.duration ? `<span>${escapePortal(job.duration)}</span>` : ""}</div><small>${deadline ? `Sök senast ${escapePortal(deadline)}` : "Se ansökningstid i annonsen"}</small></div><a class="portal-source-button" href="${escapePortal(job.webpageUrl)}" target="_blank" rel="noopener noreferrer">Läs och ansök <i data-lucide="external-link"></i></a></article>`;
 }

@@ -119,7 +119,7 @@
     const checked = validDate(status.generatedAt || sportsData?.engine?.feedGeneratedAt || sportsData?.generatedAt);
     const stale = !checked || Date.now() - checked.getTime() > 24 * 60 * 60 * 1000;
     const automatic = (sportsData?.sourceHealth || []).filter(source => source.municipality === municipality && source.status === "ok").length;
-    document.querySelector("#sport-hub-freshness").innerHTML = `<i data-lucide="${stale ? "clock-alert" : "shield-check"}"></i> ${checked ? `Kontrollerad ${checked.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "Kontrolltid saknas"} · ${automatic ? `${automatic} automatiskt flöde` : "officiella direktlänkar"} · originalkällan gäller`;
+    document.querySelector("#sport-hub-freshness").innerHTML = `<i data-lucide="${stale ? "clock-alert" : "shield-check"}"></i> ${checked ? `Kontrollerad ${checked.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "Kontrolltid saknas"} · ${automatic ? `${automatic} automatiskt flöde` : "officiella direktlänkar"} · originalkällan gäller`;
   }
 
   function renderSummary() {

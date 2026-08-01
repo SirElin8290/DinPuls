@@ -11,9 +11,15 @@ let lunchSelectionScrolled=false;
 const escapeLunch=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Europe/Stockholm"}).format(new Date()).toLowerCase();
 
+function updateLunchPageChrome(){
+  document.querySelectorAll("[data-lunch-municipality]").forEach(element=>element.textContent=lunchMunicipality);
+  document.title=`Dagens lunch i ${lunchMunicipality} – DinPuls`;
+}
+
 async function initializeLunchPage(){
   const municipalitySelect=document.querySelector("#lunch-municipality");
   municipalityState.populateSelect(municipalitySelect,lunchMunicipality);
+  updateLunchPageChrome();
   const daySelect=document.querySelector("#lunch-day");
   const today=stockholmDay();
   daySelect.innerHTML=LUNCH_DAYS.map(([value,label])=>`<option value="${value}" ${value===today?"selected":""}>${label}</option>`).join("");
@@ -34,8 +40,7 @@ async function initializeLunchPage(){
 
 function renderLunchPage(){
   if(!lunchData)return;
-  document.querySelectorAll("[data-lunch-municipality]").forEach(element=>element.textContent=lunchMunicipality);
-  document.title=`Dagens lunch i ${lunchMunicipality} – DinPuls`;
+  updateLunchPageChrome();
   const day=document.querySelector("#lunch-day").value;
   const query=document.querySelector("#lunch-search").value.trim().toLocaleLowerCase("sv-SE");
   const restaurants=lunchData.municipalities?.[lunchMunicipality]?.restaurants||[];
@@ -57,7 +62,7 @@ function renderLunchPage(){
     <span class="${verified?"verified":""}"><strong>${verified}</strong> verifierade menyer för dagen</span>
     <span><i data-lucide="${["saturday","sunday"].includes(day)?"calendar-days":"clock-3"}"></i>${["saturday","sunday"].includes(day)?"Helgutbud kan avvika – kontrollera originalkällan":"Verifierade rätter visas först"}</span>`;
   const updated=new Date(lunchData.generatedAt||"");
-  document.querySelector("#lunch-page-updated").textContent=Number.isNaN(updated.getTime())?"":`Kontrollerat ${updated.toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
+  document.querySelector("#lunch-page-updated").textContent=Number.isNaN(updated.getTime())?"":`Kontrollerat ${updated.toLocaleString("sv-SE",{timeZone:"Europe/Stockholm",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
   const list=document.querySelector("#lunch-page-list");
   list.innerHTML=filtered.map(item=>renderLunchCard(item,day,item.id===selectedRestaurant)).join("");
   list.hidden=!filtered.length;

@@ -1,10 +1,11 @@
 /* =========================================================
-   DINPULS.SE v0.20.9
+   DINPULS.SE v0.21.4
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.20.9";
+const DINPULS_VERSION = "0.21.4";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
+const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
 const componentNames = [
   "header",
@@ -155,11 +156,21 @@ const WEATHER_SYMBOLS = {
 const WEATHER_REFRESH_INTERVAL = 30 * 60 * 1000;
 const WEATHER_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
 const STOCKHOLM_DATE_FORMAT = new Intl.DateTimeFormat("sv-SE", {
-  timeZone: "Europe/Stockholm",
+  timeZone: STOCKHOLM_TIME_ZONE,
   year: "numeric",
   month: "2-digit",
   day: "2-digit"
 });
+const STOCKHOLM_DATE_KEY_FORMAT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: STOCKHOLM_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
+
+function stockholmDateKey(value = new Date()) {
+  return STOCKHOLM_DATE_KEY_FORMAT.format(value);
+}
 
 
 async function loadComponent(name) {
@@ -365,6 +376,7 @@ function initializeClock() {
 
   function updateClock() {
     element.textContent = new Date().toLocaleTimeString("sv-SE", {
+      timeZone: STOCKHOLM_TIME_ZONE,
       hour: "2-digit",
       minute: "2-digit"
     });
@@ -639,7 +651,7 @@ function collectNotifications(municipality) {
     const end = new Date(item.endDate || item.startDate);
     const ongoing = !Number.isNaN(start.getTime()) && start < today && end >= today;
     const dateLabel = ongoing
-      ? `Pågår till ${end.toLocaleDateString("sv-SE", { day: "numeric", month: "short" })}`
+      ? `Pågår till ${end.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short" })}`
       : item.startDate || "";
     add("events", "calendar-days", item.id, item.title, `${dateLabel} · ${item.venue || municipality}`, "evenemang.html", ongoing ? eventsData.generatedAt : item.startDate);
   });
@@ -1178,6 +1190,7 @@ function renderHourlyForecast(entries) {
         index === 0
           ? "Nu"
           : new Date(entry.time).toLocaleTimeString("sv-SE", {
+              timeZone: STOCKHOLM_TIME_ZONE,
               hour: "2-digit",
               minute: "2-digit"
             });
@@ -1214,7 +1227,7 @@ function updateHeaderWeather(temperature, emoji) {
 
 function formatSwedishTime(value) {
   return new Date(value).toLocaleString("sv-SE", {
-    timeZone: "Europe/Stockholm",
+    timeZone: STOCKHOLM_TIME_ZONE,
     hour: "2-digit",
     minute: "2-digit",
     day: "numeric",
@@ -1375,9 +1388,9 @@ function renderNewsSources(municipality) {
 }
 function updateNewsTimestamp(value) {
   const el=document.querySelector("#news-updated"); if(!el)return; const date=new Date(value);
-  el.innerHTML=`<i data-lucide="refresh-cw"></i>${Number.isNaN(date.getTime())?'Källor kontrollerade':`Uppdaterad ${date.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`}`;
+  el.innerHTML=`<i data-lucide="refresh-cw"></i>${Number.isNaN(date.getTime())?'Källor kontrollerade':`Uppdaterad ${date.toLocaleString('sv-SE',{timeZone:STOCKHOLM_TIME_ZONE,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`}`;
 }
-function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNaN(d.getTime()))return"Tid saknas"; const m=Math.max(0,Math.floor((Date.now()-d)/60000)); if(m<2)return"nyss"; if(m<60)return`${m} min sedan`; const h=Math.floor(m/60); if(h<24)return`${h} tim sedan`; const days=Math.floor(h/24); if(days===1)return"igår"; if(days<7)return`${days} dagar sedan`; return d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'}); }
+function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNaN(d.getTime()))return"Tid saknas"; const m=Math.max(0,Math.floor((Date.now()-d)/60000)); if(m<2)return"nyss"; if(m<60)return`${m} min sedan`; const h=Math.floor(m/60); if(h<24)return`${h} tim sedan`; const days=Math.floor(h/24); if(days===1)return"igår"; if(days<7)return`${days} dagar sedan`; return d.toLocaleDateString('sv-SE',{timeZone:STOCKHOLM_TIME_ZONE,day:'numeric',month:'short'}); }
 function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 function escapeAttribute(value){return escapeHtml(value);}
@@ -1438,7 +1451,7 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
     status.textContent = "Inga störningar";
     list.innerHTML = `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Lugnt trafikläge nära ${escapeHtml(config.name)}. Inga aktuella vägmeddelanden hittades inom ${Number(roadTrafficData.radiusKm || 35)} km.</span></div>`;
   } else {
-    status.textContent = Number.isNaN(generatedAt.getTime()) ? "Aktuellt" : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
+    status.textContent = Number.isNaN(generatedAt.getTime()) ? "Aktuellt" : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
     list.innerHTML = items.slice(0, 3).map(renderTrafficCompactItem).join("");
   }
   if (window.lucide) lucide.createIcons();
@@ -1492,7 +1505,7 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
       ? "Senast kontrollerad information"
       : Number.isNaN(generatedAt.getTime())
       ? "Kontrollerad"
-      : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
+      : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
     list.innerHTML = renderImportantCalm(config.name, municipality?.sourceHealth || importantData.sources || [], isStale);
   } else {
     status.textContent = isStale ? `${items.length} – uppdateringen är försenad` : `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
@@ -1633,7 +1646,7 @@ function renderTransport() {
     const timestamp = new Date(transportData.generatedAt);
     const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 35 * 60 * 1000;
     updated.classList.toggle("stale", stale);
-    updated.innerHTML = `<i data-lucide="${stale ? "triangle-alert" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast hämtad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`}`;
+    updated.innerHTML = `<i data-lucide="${stale ? "triangle-alert" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast hämtad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   updateTransportSource(isDemo);
@@ -1659,8 +1672,8 @@ function renderDeparture(item, isDemo = false) {
       : item.isRealtime
         ? '<span class="departure-status realtime">Realtid</span>'
         : '<span class="departure-status planned">Tidtabell</span>';
-  const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
-  const scheduledTime = Number.isNaN(scheduled.getTime()) ? "" : scheduled.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+  const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
+  const scheduledTime = Number.isNaN(scheduled.getTime()) ? "" : scheduled.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
   return `<article class="departure-row${item.canceled ? " is-canceled" : ""}">
     <span class="departure-mode ${item.mode}"><i data-lucide="${modeIcon}"></i></span>
     <span class="departure-line">${escapeHtml(item.line || item.operator || "–")}</span>
@@ -1703,7 +1716,7 @@ function renderCompactTransport(departures, isDemo) {
     const time = new Date(item.realtime || item.scheduled);
     const displayTime = Number.isNaN(time.getTime())
       ? "--:--"
-      : time.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+      : time.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
     return `<li><i data-lucide="${item.mode === "train" ? "train-front" : "bus-front"}"></i><time>${displayTime}</time><span><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(item.line || item.operator || "")}${isDemo ? " · demo" : ""}</small></span></li>`;
   }).join("");
 }
@@ -1748,11 +1761,11 @@ function updateQuickTransport() {
     const departureTime = new Date(departure.realtime || departure.scheduled);
     const minutes = Math.max(0, Math.round((departureTime.getTime() - Date.now()) / 60000));
     const now = new Date();
-    const sameDate = departureTime.toLocaleDateString("sv-SE") === now.toLocaleDateString("sv-SE");
+    const sameDate = stockholmDateKey(departureTime) === stockholmDateKey(now);
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const isTomorrow = departureTime.toLocaleDateString("sv-SE") === tomorrow.toLocaleDateString("sv-SE");
-    const clock = departureTime.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+    const isTomorrow = stockholmDateKey(departureTime) === stockholmDateKey(tomorrow);
+    const clock = departureTime.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
     element.textContent = minutes <= 0
       ? "Nästa avgång nu"
       : minutes < 120 && sameDate
@@ -1761,7 +1774,7 @@ function updateQuickTransport() {
           ? `Nästa avgång i morgon ${clock}`
           : sameDate
             ? `Nästa avgång ${clock}`
-            : `Nästa avgång ${departureTime.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" })} ${clock}`;
+            : `Nästa avgång ${departureTime.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, weekday: "short", day: "numeric", month: "short" })} ${clock}`;
   });
 
   document.querySelectorAll("[data-quick-transport-detail]").forEach((element) => {
@@ -1811,8 +1824,8 @@ function renderEvents() {
   if (!eventsData) return;
   const municipality = DinPulsMunicipality.getName();
   const data = eventsData.municipalities?.[municipality] || { events: [], sources: [] };
-  const now = new Date(); now.setHours(0,0,0,0);
-  const events = (data.events || []).filter(item => new Date(`${String(item.endDate || item.startDate).slice(0,10)}T23:59:59`).getTime() >= now.getTime()).sort((a,b) => String(a.startDate).localeCompare(String(b.startDate)));
+  const today = stockholmDateKey();
+  const events = (data.events || []).filter(item => String(item.endDate || item.startDate).slice(0,10) >= today).sort((a,b) => String(a.startDate).localeCompare(String(b.startDate)));
   const visible = events.slice(0, 4);
   const list = document.querySelector("#events-list");
   const loading = document.querySelector("#events-loading");
@@ -1824,18 +1837,34 @@ function renderEvents() {
   if (total) total.textContent = events.length ? `${events.length} kommande · ${data.sources?.length || 0} källor` : `Inga datum just nu · ${data.sources?.length || 0} källor`;
   const link = document.querySelector("#events-page-link"); if (link) link.href = `evenemang.html?kommun=${encodeURIComponent(municipality)}`;
   document.querySelectorAll("[data-quick-events-title]").forEach(el => el.textContent = events.length ? `${events.length} evenemang i ${municipality}` : `Evenemang i ${municipality}`);
-  document.querySelectorAll("[data-quick-events-detail]").forEach(el => el.textContent = events[0] ? `${formatEventShortDate(events[0].startDate)} · ${events[0].title}` : `${data.sources?.length || 0} lokala kalendrar samlade`);
+  document.querySelectorAll("[data-quick-events-detail]").forEach(el => el.textContent = events[0] ? `${formatEventShortDate(events[0])} · ${events[0].title}` : `${data.sources?.length || 0} lokala kalendrar samlade`);
   if (window.lucide) lucide.createIcons();
 }
 
 function renderEventPreview(item) {
-  const date = new Date(item.startDate); const month = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("sv-SE", { month: "short" }).replace(".", "");
-  const day = Number.isNaN(date.getTime()) ? "–" : date.getDate();
-  return `<li><time><b>${day}</b>${escapeHtml(month)}</time><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml([item.time, item.venue, item.sourceName].filter(Boolean).join(" · "))}</small></span></li>`;
+  const start = String(item.startDate || "").slice(0,10);
+  const end = String(item.endDate || item.startDate || "").slice(0,10);
+  const ongoing = start < stockholmDateKey() && end >= stockholmDateKey();
+  const date = new Date(item.startDate);
+  const month = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, month: "short" }).replace(".", "");
+  const day = Number.isNaN(date.getTime()) ? "–" : new Intl.DateTimeFormat("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric" }).format(date);
+  const dateBox = ongoing
+    ? `<time><b>Nu</b>${escapeHtml(`till ${formatEventDate(item.endDate || item.startDate)}`)}</time>`
+    : `<time><b>${day}</b>${escapeHtml(month)}</time>`;
+  return `<li>${dateBox}<span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml([item.time, item.venue, item.sourceName].filter(Boolean).join(" · "))}</small></span></li>`;
 }
 
-function formatEventShortDate(value) {
-  const date = new Date(value); return Number.isNaN(date.getTime()) ? "Kommande" : date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
+function formatEventShortDate(item) {
+  const start = String(item?.startDate || "").slice(0,10);
+  const end = String(item?.endDate || item?.startDate || "").slice(0,10);
+  return start < stockholmDateKey() && end >= stockholmDateKey()
+    ? `Pågår till ${formatEventDate(item.endDate || item.startDate)}`
+    : formatEventDate(item?.startDate);
+}
+
+function formatEventDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Kommande" : date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short" });
 }
 
 /* =========================================================
@@ -1914,7 +1943,7 @@ function renderJobs() {
   const updated = document.querySelector("#jobs-updated");
   if (updated) {
     const timestamp = new Date(municipalityData.updatedAt || jobsData.generatedAt);
-    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Uppdaterad ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;
+    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Uppdaterad ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   const sourceLink = document.querySelector("#jobs-source-link");
@@ -1946,7 +1975,7 @@ function renderJob(job) {
 function formatJobDate(value, prefix) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return `${prefix} ${date.toLocaleDateString("sv-SE", { day: "numeric", month: "short" })}`;
+  return `${prefix} ${date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short" })}`;
 }
 
 function updateQuickJobs(municipalityData, municipality) {
@@ -2028,7 +2057,7 @@ function renderHousing() {
     const timestamp = new Date(municipalityData.checkedAt || municipalityData.updatedAt || housingData.generatedAt);
     const label = Number.isNaN(timestamp.getTime())
       ? "Källor kontrollerade"
-      : `${municipalityData.stale ? "Senaste data · kontrollfel" : "Kontrollerad"} ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+      : `${municipalityData.stale ? "Senaste data · kontrollfel" : "Kontrollerad"} ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
     updated.innerHTML = `<i data-lucide="refresh-cw"></i>${label}`;
   }
 
@@ -2073,7 +2102,7 @@ function formatHousingAvailability(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
     ? `Tillgänglig ${value}`
-    : `Tillgänglig ${date.toLocaleDateString("sv-SE", { day: "numeric", month: "short", year: "numeric" })}`;
+    : `Tillgänglig ${date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", year: "numeric" })}`;
 }
 
 function updateQuickHousing(municipalityData, municipality) {

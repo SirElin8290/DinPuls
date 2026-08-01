@@ -5,9 +5,15 @@ let fullEventsData = null;
 const escapeEvent = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
 const eventIcons = { culture:"palette", music:"music", family:"baby", church:"church", sport:"trophy", community:"users", motor:"car-front" };
 
+function updateEventPageChrome() {
+  document.querySelectorAll("[data-events-municipality]").forEach(element => element.textContent = eventMunicipality);
+  document.title = `Evenemang i ${eventMunicipality} – DinPuls`;
+}
+
 async function initializeEventPage() {
   const select = document.querySelector("#events-municipality");
   municipalityState.populateSelect(select, eventMunicipality);
+  updateEventPageChrome();
   select.addEventListener("change", () => {
     eventMunicipality = municipalityState.set(select.value);
     renderEventPage();
@@ -54,8 +60,7 @@ function eventMatchesPeriod(item, period) {
 
 function renderEventPage() {
   if (!fullEventsData) return;
-  document.querySelectorAll("[data-events-municipality]").forEach(element => element.textContent = eventMunicipality);
-  document.title = `Evenemang i ${eventMunicipality} – DinPuls`;
+  updateEventPageChrome();
   const data = fullEventsData.municipalities?.[eventMunicipality] || { events:[], sources:[] };
   const query = document.querySelector("#events-search").value.trim().toLocaleLowerCase("sv-SE");
   const category = document.querySelector("#events-category").value;
@@ -69,7 +74,7 @@ function renderEventPage() {
 
   document.querySelector("#events-page-total").textContent = `${items.length} kommande ${items.length === 1 ? "evenemang" : "evenemang"}`;
   const updated = new Date(fullEventsData.generatedAt || "");
-  document.querySelector("#events-page-updated").textContent = Number.isNaN(updated.getTime()) ? "" : `Källor kontrollerade ${updated.toLocaleString("sv-SE", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}`;
+  document.querySelector("#events-page-updated").textContent = Number.isNaN(updated.getTime()) ? "" : `Källor kontrollerade ${updated.toLocaleString("sv-SE", { timeZone:"Europe/Stockholm", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}`;
   const list = document.querySelector("#events-page-list");
   list.innerHTML = items.map(renderEventCard).join("");
   list.hidden = !items.length;
@@ -84,8 +89,8 @@ function renderEventCard(item) {
   const end = new Date(`${String(item.endDate || item.startDate).slice(0, 10)}T12:00:00`);
   const same = start.toDateString() === end.toDateString();
   const dateLabel = Number.isNaN(start.getTime()) ? "Datum saknas" : same
-    ? start.toLocaleDateString("sv-SE", { weekday:"short", day:"numeric", month:"short" })
-    : `${start.toLocaleDateString("sv-SE", { day:"numeric", month:"short" })}–${end.toLocaleDateString("sv-SE", { day:"numeric", month:"short" })}`;
+    ? start.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", weekday:"short", day:"numeric", month:"short" })
+    : `${start.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", day:"numeric", month:"short" })}–${end.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", day:"numeric", month:"short" })}`;
   return `<article class="portal-card event-message"><span class="portal-card-icon event"><i data-lucide="${eventIcons[item.category] || "calendar-days"}"></i></span><div><span class="event-date">${escapeEvent(dateLabel)}${item.time ? ` · ${escapeEvent(item.time)}` : ""}</span><h3>${escapeEvent(item.title)}</h3><p>${escapeEvent(item.venue || eventMunicipality)}</p><div class="portal-tags"><span>${escapeEvent(item.categoryLabel || "Evenemang")}</span><span>${escapeEvent(item.sourceName || "Lokal källa")}</span>${item.verified ? '<span><i data-lucide="badge-check"></i> Verifierad källa</span>' : ""}</div></div><a class="portal-source-button" href="${escapeEvent(item.url)}" target="_blank" rel="noopener noreferrer">Tid och detaljer <i data-lucide="external-link"></i></a></article>`;
 }
 

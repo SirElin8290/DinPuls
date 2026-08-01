@@ -51,7 +51,7 @@ function renderNewsPage() {
   document.querySelector("#news-page-empty").hidden = Boolean(articles.length);
   document.querySelector("#news-page-total").textContent = `${articles.length} ${articles.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
   const generated = new Date(newsPageData.generatedAt || "");
-  document.querySelector("#news-page-updated").textContent = Number.isNaN(generated.getTime()) ? "" : `Uppdaterad ${generated.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+  document.querySelector("#news-page-updated").textContent = Number.isNaN(generated.getTime()) ? "" : `Uppdaterad ${generated.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   renderNewsPageImportant(articles);
   renderNewsPageSources();
   if (window.lucide) lucide.createIcons();
@@ -60,7 +60,7 @@ function renderNewsPage() {
 function renderNewsPageArticle(article) {
   const locked = article.access === "subscription";
   const published = new Date(article.publishedAt);
-  return `<article class="news-page-card ${article.important ? "important" : ""}"><div class="news-page-card-meta"><strong>${newsEscape(article.source)}</strong><time>${Number.isNaN(published.getTime()) ? "" : published.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></div><h2>${newsEscape(article.title)}</h2><p>${newsEscape(article.summary || "")}</p><div class="news-page-card-footer"><span class="news-access ${locked ? "subscription" : "free"}"><i data-lucide="${locked ? "lock" : "unlock"}"></i>${locked ? "Låst artikel" : "Fri artikel"}</span><span>${newsEscape(article.category || article.region || "Nyhet")}</span><a href="${newsEscape(article.url)}" target="_blank" rel="noopener noreferrer">Läs hos ${newsEscape(article.source)} <i data-lucide="arrow-up-right"></i></a></div></article>`;
+  return `<article class="news-page-card ${article.important ? "important" : ""}"><div class="news-page-card-meta"><strong>${newsEscape(article.source)}</strong><time>${Number.isNaN(published.getTime()) ? "" : published.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></div><h2>${newsEscape(article.title)}</h2><p>${newsEscape(article.summary || "")}</p><div class="news-page-card-footer"><span class="news-access ${locked ? "subscription" : "free"}"><i data-lucide="${locked ? "lock" : "unlock"}"></i>${locked ? "Låst artikel" : "Fri artikel"}</span><span>${newsEscape(article.category || article.region || "Nyhet")}</span><a href="${newsEscape(article.url)}" target="_blank" rel="noopener noreferrer">Läs hos ${newsEscape(article.source)} <i data-lucide="arrow-up-right"></i></a></div></article>`;
 }
 
 function renderNewsPageImportant(articles) {

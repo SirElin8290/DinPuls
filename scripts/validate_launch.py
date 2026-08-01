@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.20.9"
+VERSION = "0.21.4"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -183,8 +183,23 @@ def verify_final_experience() -> None:
     assert not (ROOT / "components/ads.html").exists(), "Gammal annonskomponent ligger kvar"
 
 
+def verify_review_fixes() -> None:
+    lunch = (ROOT / "lunch-page.js").read_text(encoding="utf-8")
+    portals = (ROOT / "portal-pages.js").read_text(encoding="utf-8")
+    events = (ROOT / "event-page.js").read_text(encoding="utf-8")
+    news = (ROOT / "news-page.js").read_text(encoding="utf-8")
+    sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
+    script = (ROOT / "script.js").read_text(encoding="utf-8")
+    assert "updateLunchPageChrome();" in lunch, "Lunchsidan visar inte vald kommun före dataladdning"
+    assert "updatePortalChrome();" in portals, "Jobb och bostäder visar inte vald kommun före dataladdning"
+    assert "formatPortalAvailability(item.available)" in portals and 'month: "long"' in portals, "Bostadsdatum är inte läsbart formaterade"
+    assert "Pågår till" in script and "formatEventShortDate(events[0])" in script, "Pågående evenemang saknar tydlig märkning"
+    for name, source in [("startsidan", script), ("lunch", lunch), ("jobb och bostäder", portals), ("evenemang", events), ("nyheter", news), ("sport", sport)]:
+        assert "Europe/Stockholm" in source or "STOCKHOLM_TIME_ZONE" in source, f"{name}: svensk tidszon saknas"
+
+
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_simple_sport_hub, verify_final_experience]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_simple_sport_hub, verify_final_experience, verify_review_fixes]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")
