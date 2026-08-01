@@ -57,12 +57,12 @@ jobs:
 
           for attempt in 1 2 3 4; do
             echo "Publiceringsförsök $attempt av 4"
-            git pull --rebase origin main
-
-            if git push origin HEAD:main; then
+            if git pull --rebase origin main && git push origin HEAD:main; then
               echo "Nya avgångar publicerade."
               exit 0
             fi
+
+            git rebase --abort 2>/dev/null || true
 
             if [ "$attempt" -lt 4 ]; then
               sleep $((attempt * 2))
