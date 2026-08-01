@@ -1,41 +1,45 @@
 #!/usr/bin/env python3
-"""Hämtar kollektivtrafikdata från Trafiklab Timetables API.
+"""Hämta buss- och tågtider från Trafiklab utan att radera fungerande data."""
+from __future__ import annotations
 
-Kräver repository-secret TRAFIKLAB_API_KEY. Hållplats-id:n läses från den
-centrala kommunfilen. Vid saknade id:n eller API-fel lämnas senaste fungerande
-transport.json orörd.
-"""
-import json, os, sys
-from datetime import datetime, time, timedelta, timezone
+import json
+import os
+import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "transport.json"
-API_KEY = os.getenv("TRAFIKLAB_API_KEY", "").strip()
-
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
+API_URL = "https://realtime-api.trafiklab.se/v1/departures"
+STOCKHOLM = ZoneInfo("Europe/Stockholm")
+MAX_DEPARTURES = 20
+MAX_LOOKAHEAD_HOURS = 30
+EMPTY_RETRY_HOURS = 3
+
+
+def load_json(path: Path, fallback):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return fallback
+
 
 def load_stop_areas():
-    """Läser hållplatser från samma centrala kommunfil som webbplatsen."""
-    data = json.loads(MUNICIPALITY_FILE.read_text(encoding="utf-8"))
+    data = load_json(MUNICIPALITY_FILE, {})
     return {
         item["name"]: item.get("transportStops", [])
         for item in data.get("municipalities", [])
         if item.get("name")
     }
 
+
 def load_previous_stops():
-    """Indexerar senast publicerade hållplatsdata så tomma svar inte raderar framtida turer."""
-    if not OUTPUT.exists():
-        return {}
-    try:
-        data = json.loads(OUTPUT.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
+    data = load_json(OUTPUT, {})
     return {
         str(stop.get("id")): stop
         for municipality in (data.get("municipalities") or {}).values()
@@ -43,30 +47,36 @@ def load_previous_stops():
         if stop.get("id")
     }
 
+
+def parse_time(value, default_timezone=STOCKHOLM):
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    return parsed.replace(tzinfo=default_timezone) if parsed.tzinfo is None else parsed
+
+
 def future_departures(stop, now):
-    """Behåller bara tidigare avgångar som ännu inte har passerat."""
     departures = []
     for item in stop.get("departures", []):
-        value = item.get("realtime") or item.get("scheduled")
-        if not value:
-            continue
-        try:
-            departure_time = datetime.fromisoformat(value)
-        except (TypeError, ValueError):
-            continue
-        if departure_time.tzinfo is None:
-            departure_time = departure_time.replace(tzinfo=now.tzinfo)
-        if departure_time >= now - timedelta(minutes=2):
+        departure_time = parse_time(item.get("realtime") or item.get("scheduled"), now.tzinfo)
+        if departure_time and departure_time >= now - timedelta(minutes=2):
             retained = dict(item)
             retained["isRealtime"] = False
             retained["stale"] = True
             departures.append(retained)
-    return departures[:20]
+    return sorted(
+        departures,
+        key=lambda item: parse_time(item.get("realtime") or item.get("scheduled"), now.tzinfo),
+    )[:MAX_DEPARTURES]
 
-def fetch(area_id, query_time=None):
+
+def fetch(api_key, area_id, query_time=None):
     time_path = f"/{quote(query_time)}" if query_time else ""
-    url = f"https://realtime-api.trafiklab.se/v1/departures/{quote(area_id)}{time_path}?key={quote(API_KEY)}"
-    request = Request(url, headers={"User-Agent": "DinPuls/0.7.1"})
+    url = f"{API_URL}/{quote(area_id)}{time_path}?key={quote(api_key)}"
+    request = Request(url, headers={"User-Agent": "DinPuls/transport"})
     try:
         with urlopen(request, timeout=25) as response:
             payload = json.load(response)
@@ -78,17 +88,17 @@ def fetch(area_id, query_time=None):
         raise RuntimeError("Trafiklab-svaret saknar departures")
     return payload
 
-def fallback_query_time():
-    """Väljer ett enda extra 60-minutersfönster utan att spräcka API-kvoten."""
-    stockholm = ZoneInfo("Europe/Stockholm")
-    now = datetime.now(stockholm)
-    if now.hour >= 21:
-        target = datetime.combine((now + timedelta(days=1)).date(), time(7, 0), stockholm)
-    elif now.hour < 5:
-        target = datetime.combine(now.date(), time(7, 0), stockholm)
-    else:
-        target = now + timedelta(hours=1)
-    return target.strftime("%Y-%m-%dT%H:%M")
+
+def future_query_times(now, hours=MAX_LOOKAHEAD_HOURS):
+    """API:t visar alltid 60 minuter, därför söks sammanhängande timfönster."""
+    first = now.replace(second=0, microsecond=0) + timedelta(hours=1)
+    return [(first + timedelta(hours=offset)).strftime("%Y-%m-%dT%H:%M") for offset in range(hours)]
+
+
+def should_deep_search(previous_stop, now):
+    next_search = parse_time(previous_stop.get("nextSearchAfter"), now.tzinfo)
+    return not next_search or next_search <= now
+
 
 def alert_text(alert):
     if isinstance(alert, str):
@@ -99,14 +109,17 @@ def alert_text(alert):
                 return str(alert[key]).strip()
     return ""
 
-def collect_alerts(payload):
+
+def collect_alerts(*payloads):
     alerts = []
-    for stop in payload.get("stops", []):
-        alerts.extend(stop.get("alerts", []))
-    for departure in payload.get("departures", []):
-        alerts.extend(departure.get("alerts", []))
+    for payload in payloads:
+        for stop in payload.get("stops", []):
+            alerts.extend(stop.get("alerts", []))
+        for departure in payload.get("departures", []):
+            alerts.extend(departure.get("alerts", []))
     messages = [alert_text(alert) for alert in alerts]
     return list(dict.fromkeys(message for message in messages if message))
+
 
 def normalize(item):
     route = item.get("route") or {}
@@ -125,75 +138,109 @@ def normalize(item):
         "platform": platform.get("designation") or "",
     }
 
+
+def normalize_departures(payload):
+    return [normalize(item) for item in payload.get("departures", [])[:MAX_DEPARTURES]]
+
+
+def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
+    current = normalize_departures(current_payload)
+    if current:
+        return current, None, False, None, current_payload
+
+    retained = future_departures(previous_stop, now)
+    if retained:
+        return retained, previous_stop.get("lookupTime"), True, previous_stop.get("nextSearchAfter"), None
+
+    if not should_deep_search(previous_stop, now):
+        return [], previous_stop.get("lookupTime"), False, previous_stop.get("nextSearchAfter"), None
+
+    for query_time in future_query_times(now):
+        payload = fetch(api_key, area_id, query_time)
+        departures = normalize_departures(payload)
+        if departures:
+            return departures, query_time, False, None, payload
+
+    next_search = (now + timedelta(hours=EMPTY_RETRY_HOURS)).isoformat(timespec="minutes")
+    return [], None, False, next_search, None
+
+
 def main():
-    if not API_KEY:
-        print("TRAFIKLAB_API_KEY saknas; behåller befintlig transport.json")
-        return 0
+    api_key = os.getenv("TRAFIKLAB_API_KEY", "").strip()
+    if not api_key:
+        print("TRAFIKLAB_API_KEY saknas; befintlig transport.json behålls")
+        return 1
+
     stop_areas = load_stop_areas()
     missing = [
-        municipality for municipality, stops in stop_areas.items()
+        municipality
+        for municipality, stops in stop_areas.items()
         if not stops or any(not str(stop.get("id", "")).strip() for stop in stops)
     ]
     if missing:
         print("Saknar säkra hållplats-id:n för: " + ", ".join(missing))
-        print("Behåller befintlig transport.json tills alla kommuner är klara.")
-        return 0
+        return 1
 
-    municipalities = {}
-    fetched = 0
     previous_stops = load_previous_stops()
-    stockholm = ZoneInfo("Europe/Stockholm")
-    now = datetime.now(stockholm)
+    now = datetime.now(STOCKHOLM)
+    municipalities = {}
+    successful_current_requests = 0
+    failed_stops = []
+
     for municipality, stops in stop_areas.items():
         normalized_stops = []
         for stop in stops:
+            stop_id = str(stop["id"])
+            previous = previous_stops.get(stop_id, {})
             try:
-                current_payload = fetch(str(stop["id"]))
-                departure_payload = current_payload
-                lookup_time = None
-                if not current_payload.get("departures"):
-                    lookup_time = fallback_query_time()
-                    fallback_payload = fetch(str(stop["id"]), lookup_time)
-                    if fallback_payload.get("departures"):
-                        departure_payload = fallback_payload
+                current_payload = fetch(api_key, stop_id)
+                successful_current_requests += 1
+                departures, lookup_time, retained, next_search, future_payload = find_next_departures(
+                    api_key, stop_id, now, previous, current_payload
+                )
+                alerts = collect_alerts(current_payload, future_payload or {})
+                error_message = None
             except RuntimeError as error:
                 print(f"{municipality}: {error}")
-                print("Behåller senaste fungerande transport.json.")
-                return 1
-            alerts = collect_alerts(current_payload)
-            if departure_payload is not current_payload:
-                alerts = list(dict.fromkeys(alerts + collect_alerts(departure_payload)))
-            departures = [normalize(item) for item in departure_payload.get("departures", [])[:20]]
-            retained = False
-            if not departures:
-                departures = future_departures(previous_stops.get(str(stop["id"]), {}), now)
+                departures = future_departures(previous, now)
+                alerts = previous.get("alerts", [])
+                lookup_time = previous.get("lookupTime")
                 retained = bool(departures)
-                if retained:
-                    print(f"{municipality}: behåller {len(departures)} framtida avgångar från senaste körningen")
+                next_search = previous.get("nextSearchAfter")
+                error_message = str(error)
+                failed_stops.append(municipality)
+
             normalized_stops.append({
-                "id": str(stop["id"]),
+                "id": stop_id,
                 "name": stop["name"],
                 "alerts": alerts,
                 "lookupTime": lookup_time,
                 "retained": retained,
+                "nextSearchAfter": next_search,
+                "error": error_message,
                 "departures": departures,
             })
-            fetched += 1
-        if normalized_stops:
-            municipalities[municipality] = {"stops": normalized_stops}
-    if not fetched:
-        print("Inga verifierade hållplats-id:n finns; behåller befintlig transport.json")
-        return 0
-    OUTPUT.write_text(
-        json.dumps({
-            "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "source": "Trafiklab",
-            "municipalities": municipalities,
-        }, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    print(f"Skrev {OUTPUT} med {fetched} hållplatser")
+            print(f"{municipality}: {len(departures)} kommande avgångar")
+
+        municipalities[municipality] = {"stops": normalized_stops}
+
+    if successful_current_requests == 0:
+        print("Samtliga Trafiklab-anrop misslyckades; befintlig transport.json behålls")
+        return 1
+
+    output = {
+        "version": "0.21.0",
+        "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source": "Trafiklab",
+        "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
+        "partial": bool(failed_stops),
+        "failedMunicipalities": failed_stops,
+        "municipalities": municipalities,
+    }
+    OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Skrev {OUTPUT} med {successful_current_requests} fungerande hållplatsanrop")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
