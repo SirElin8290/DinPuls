@@ -2106,9 +2106,7 @@ function renderFuel() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* =========================================================
-   DINPULS v0.16.0 – DAGENS LUNCH I DEN RULLANDE REMSAN
-========================================================= */
+/* Dagens lunch i den rullande remsan. */
 let lunchTickerData = null;
 
 async function initializeLunch() {
@@ -2116,15 +2114,18 @@ async function initializeLunch() {
     renderLunchTicker(DinPulsMunicipality.getName());
   });
 
+  await refreshLunchTicker();
+  window.setInterval(refreshLunchTicker, 2 * 60 * 60 * 1000);
+}
+
+async function refreshLunchTicker() {
   try {
     const response = await fetch(`data/lunch.json?version=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Lunchdata kunde inte laddas: ${response.status}`);
     lunchTickerData = await response.json();
   } catch (error) {
     console.error(error);
-    lunchTickerData = null;
   }
-
   renderLunchTicker(DinPulsMunicipality.getName());
 }
 
@@ -2150,7 +2151,7 @@ function renderLunchTicker(municipality) {
     id: "lunch",
     name: weekday === "saturday" || weekday === "sunday"
       ? `Helgens restaurangutbud i ${municipality}`
-      : `Dagens menyer uppdateras för ${municipality}`,
+      : `${restaurants.length} lunchställen i ${municipality}`,
     todayDishes: [weekday === "saturday" || weekday === "sunday"
       ? "Se öppna restauranger och kontrollera helgens meny"
       : "Se lunchställen och deras aktuella originalmenyer"]

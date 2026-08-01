@@ -1,6 +1,6 @@
 {
-  "version": "0.20.5",
-  "generatedAt": "2026-08-01T12:23:28+02:00",
+  "version": "0.21.2",
+  "generatedAt": "2026-08-01T12:52:09+02:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 31,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
@@ -12,9 +12,9 @@
           "name": "Mickans Grill",
           "url": "https://www.mickansgrill.se/",
           "address": "Åmål",
-          "hours": "Vardagar",
+          "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 33,
           "days": {},
           "status": "outdated",
@@ -23,15 +23,28 @@
         {
           "id": "berga-bistro",
           "name": "Berga Bistro",
-          "url": "https://bergabistro.se/",
+          "url": "https://bergabistro.se/dagenslunch",
           "address": "Stora Berga 501",
-          "hours": "11.30–14.00",
+          "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
-          "weekNumber": 30,
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": 29,
           "days": {},
           "status": "outdated",
           "mode": "automatic"
+        },
+        {
+          "id": "presseriet",
+          "name": "Restaurang Presseriet",
+          "url": "https://www.presseriet.com/",
+          "address": "Industrigatan 12",
+          "hours": "Vardagar 11.30–14.00",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
         },
         {
           "id": "amal-stadshotell",
@@ -40,11 +53,17 @@
           "address": "Kungsgatan 9",
           "hours": "Tisdag–fredag 11.30–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
+        }
+      ],
+      "referenceSources": [
+        {
+          "name": "Visit Åmål – lunch",
+          "url": "https://www.vastsverige.com/amal/ata/lunch/"
         }
       ]
     },
@@ -57,8 +76,21 @@
           "address": "Norrlandsvägen 39",
           "hours": "Vardagar 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 32,
+          "days": {},
+          "status": "outdated",
+          "mode": "automatic"
+        },
+        {
+          "id": "smorgasbutiken",
+          "name": "Smörgåsbutiken i Säffle",
+          "url": "https://smorgasbutiken.org/meny/",
+          "address": "Säffle",
+          "hours": "Vardagar 11.00–14.00",
+          "parser": "weekday-headings",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
           "days": {},
           "status": "outdated",
           "mode": "automatic"
@@ -68,9 +100,9 @@
           "name": "Galna Tuppen",
           "url": "https://galnatuppen.nu/",
           "address": "Sundsgatan 30",
-          "hours": "Se aktuell veckomeny",
+          "hours": "Se aktuell lunchmeny",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -83,29 +115,110 @@
           "address": "Olov Trätäljagatan 2",
           "hours": "Se aktuell lunchbuffé",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "bella-rosa-saffle",
+          "name": "Bella Rosa",
+          "url": "https://www.facebook.com/BellaRosaSaffle/",
+          "address": "Säffle",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "kanalcafeet-saffle",
+          "name": "Kanalcaféet i Säffle",
+          "url": "https://www.facebook.com/p/Kanalcaf%C3%A9et-i-S%C3%A4ffle-100057529275303/",
+          "address": "Säffle",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "seasonal": true,
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "kvarnen-saffle",
+          "name": "Kvarnen",
+          "url": "https://www.facebook.com/p/Kvarnen-100093486871958/",
+          "address": "Säffle",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "cafe-gladjen-saffle",
+          "name": "Café Glädjen",
+          "url": "https://www.facebook.com/p/Cafe-Gl%C3%A4djen-S%C3%A4ffle-100063689974961/",
+          "address": "Säffle",
+          "hours": "Lunch och sopplunch, se aktuell information",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "svanskog-pizzeria",
+          "name": "Svanskog Pizzeria",
+          "url": "https://www.facebook.com/SvanskogPizzeria/",
+          "address": "Svanskog",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "fyren-duse-udde",
+          "name": "Fyren Duse Udde",
+          "url": "https://www.fyrenduseudde.se/",
+          "address": "Duse Udde",
+          "hours": "Säsongsöppet, se lunchmeny",
+          "parser": "source-only",
+          "seasonal": true,
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         }
-      ]
+      ],
+      "referenceSources": []
     },
     "Bengtsfors": {
       "restaurants": [
         {
           "id": "rosellmagasinet",
           "name": "Rosellmagasinet",
-          "url": "https://www.rosellmagasinet.com/",
+          "url": "https://www.rosellmagasinet.com/?page_id=13682",
           "address": "Bengtsfors",
-          "hours": "Ny lunchmeny varje vecka",
+          "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
           "mode": "automatic",
-          "error": "[SSL: TLSV1_UNRECOGNIZED_NAME] tlsv1 unrecognized name (_ssl.c:1010)"
+          "error": "HTTP 502"
         },
         {
           "id": "jnj-bodega",
@@ -114,24 +227,17 @@
           "address": "Storgatan 14",
           "hours": "Vardagar 11.30–15.00",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
-        },
+        }
+      ],
+      "referenceSources": [
         {
-          "id": "bengtsfors-lunchguide",
-          "name": "Bengtsfors lunchguide",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/restaurang-bodegan-43812224",
-          "address": "Bengtsfors",
-          "hours": "Lokala lunchställen",
-          "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
+          "name": "Bengtsfors Handel – restauranger",
+          "url": "https://www.bengtsforshandel.se/"
         }
       ]
     },
@@ -140,24 +246,78 @@
         {
           "id": "sunnana-restaurang",
           "name": "Sunnanå Restaurang",
-          "url": "https://xn--sunnanrestaurang-iob.se/",
+          "url": "https://xn--sunnanrestaurang-iob.se/meny/",
           "address": "Sunnanå Kullen 2",
           "hours": "Vardagar 11.00–15.00",
+          "parser": "weekday-headings",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "outdated",
+          "mode": "automatic"
+        },
+        {
+          "id": "kanyas",
+          "name": "Kanyas Café & Restaurang",
+          "url": "https://thairestaurangen.se/dagens-lunch/",
+          "address": "Sjögatan 1",
+          "hours": "Dagens lunch",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         },
         {
-          "id": "kanyas",
-          "name": "Kanyas Café & Restaurang",
-          "url": "https://thairestaurangen.se/meny/",
+          "id": "dinners-mellerud",
+          "name": "Dinners Mellerud",
+          "url": "https://dinners.se/restaurang/mellerud/",
           "address": "Mellerud",
-          "hours": "Dagens lunch",
+          "hours": "Vardagar 11.00–14.00",
+          "parser": "weekday-headings",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": 31,
+          "days": {
+            "monday": [
+              "Panerad fiskfilé med dansk remouladsås och ugnsrostad potatis",
+              "Husets krämiga skinkgryta med lagrad ost och pasta tagliatelle",
+              "Vegetariskt beställes från köket: Hustes pasta pesto toppad med rostade pinjenötter"
+            ],
+            "tuesday": [
+              "Pestogratinerad fiskfilé med kokt potatis",
+              "Våra klassiska raggmunkar med stekt rimmat fläsk, löksås, bruna bönor samt rårörda lingon",
+              "Vegetariskt beställes från köket: Hustes pasta pesto toppad med rostade pinjenötter"
+            ],
+            "wednesday": [
+              "Panerad fiskfilé med citronaioli med kokt pressad potatis",
+              "Husets pytt i panna med stekta ägg och rödbetor",
+              "Vegetariskt beställes från köket: Hustes pasta pesto toppad med rostade pinjenötter"
+            ],
+            "thursday": [
+              "Västkustgratäng med fiskfilé och handskalade räkor",
+              "Klassisk kålpudding med gräddsås och kokt potatis",
+              "Vegetariskt beställes från köket: Hustes pasta pesto toppad med rostade pinjenötter"
+            ],
+            "friday": [
+              "Kokt fiskfilé med ägg- persiljesås serveras med kokt potatis",
+              "Helstekt fläskkotlett med champinjonsås och rostad potatis",
+              "Vegetariskt beställes från köket: Hustes pasta pesto toppad med rostade pinjenötter"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
+        },
+        {
+          "id": "nya-vagen-mellerud",
+          "name": "Nya Vågen Restaurang",
+          "url": "https://www.facebook.com/profile.php?id=61574961930176",
+          "address": "Mellerud",
+          "hours": "Se dagens lunch",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -170,11 +330,17 @@
           "address": "Mellerud",
           "hours": "Se aktuell lunchmeny",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
+        }
+      ],
+      "referenceSources": [
+        {
+          "name": "Visit Mellerud – mat och dryck",
+          "url": "https://www.vastsverige.com/mellerud/mat-och-dryck/mat-och-dryck/"
         }
       ]
     },
@@ -184,10 +350,10 @@
           "id": "travmuseet",
           "name": "Restaurang Travmuseet",
           "url": "https://restaurangtravmuseet.se/veckans-lunchbuffe/",
-          "address": "Marknadsvägen 24",
+          "address": "Marknadsvägen 24, Årjäng",
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 32,
           "days": {},
           "status": "outdated",
@@ -197,46 +363,91 @@
           "id": "krogeriet",
           "name": "Krogeriet",
           "url": "https://krogeriet.se/",
-          "address": "Storgatan 53",
+          "address": "Storgatan 53, Årjäng",
           "hours": "Vardagar 11.30–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
           "mode": "automatic",
-          "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'krogeriet.se'. (_ssl.c:1010)"
+          "error": "HTTP 502"
         },
         {
           "id": "hotell-arjang",
           "name": "Hotell Årjäng",
           "url": "https://hotellarjang.com/ata/lunch/",
-          "address": "Claras Torg 1",
+          "address": "Claras Torg 1, Årjäng",
           "hours": "Se aktuell lunchstatus",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        }
-      ]
-    },
-    "Arvika": {
-      "restaurants": [
-        {
-          "id": "arvika-lunch",
-          "name": "Arvika Lunch",
-          "url": "https://arvikalunch.se/",
-          "address": "Arvika",
-          "hours": "Flera lokala restauranger",
-          "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         },
+        {
+          "id": "waterside",
+          "name": "Waterside Restaurant",
+          "url": "https://waterside.se/",
+          "address": "Bögatan 1, Töcksfors",
+          "hours": "Dagens lunch, se aktuell tid",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "asian-town-tocksfors",
+          "name": "Asian Town Töcksfors",
+          "url": "https://asiantown.se/tocksfors/",
+          "address": "Töcksfors Shoppingcenter",
+          "hours": "Buffé dagligen från 11.00",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "curry-punjabi-arjang",
+          "name": "Curry Punjabi",
+          "url": "https://www.facebook.com/currypunjabi1/",
+          "address": "Årjäng",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "hornet-arjang",
+          "name": "Hörnet",
+          "url": "https://www.facebook.com/p/H%C3%B6rnet-61559522264272/",
+          "address": "Årjäng",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        }
+      ],
+      "referenceSources": [
+        {
+          "name": "Visit Årjäng – mat och dryck",
+          "url": "https://www.visitvarmland.com/arjang/mat-dryck"
+        }
+      ]
+    },
+    "Arvika": {
+      "restaurants": [
         {
           "id": "gate-gastgiveri",
           "name": "Gate Gästgiveri",
@@ -244,7 +455,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 31,
           "days": {
             "monday": [
@@ -284,7 +495,7 @@
           "address": "Palmviksgatan 11",
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 29,
           "days": {},
           "status": "outdated",
@@ -295,9 +506,9 @@
           "name": "Stefan på Statt",
           "url": "https://www.stefanpastatt.se/mat-dryck/dagens-lunch/",
           "address": "Torggatan 9",
-          "hours": "11.30–14.00",
+          "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": 33,
           "days": {},
           "status": "outdated",
@@ -310,11 +521,70 @@
           "address": "Arvika Näringslivscentrum",
           "hours": "Vardagar 10.30–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
+        },
+        {
+          "id": "elins-bakgard",
+          "name": "Elins Bakgård",
+          "url": "https://elinsbakgard.se/meny.html",
+          "address": "Arvika",
+          "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "cafe-gnistan-arvika",
+          "name": "Café Gnistan",
+          "url": "https://www.facebook.com/cafegnistan/",
+          "address": "Arvika sjukhus, Rackstavägen",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "tolo-arvika",
+          "name": "Tolo Restaurang & Pub",
+          "url": "https://www.facebook.com/ToloRestaurangArvika/",
+          "address": "Arvika",
+          "hours": "Se dagens lunch",
+          "parser": "source-only",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
+          "id": "arvika-golfrestaurang",
+          "name": "Arvika Golfrestaurang",
+          "url": "https://www.arvikagk.com/",
+          "address": "Arvika Golfklubb",
+          "hours": "Säsongsöppet, se dagens lunch",
+          "parser": "source-only",
+          "seasonal": true,
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        }
+      ],
+      "referenceSources": [
+        {
+          "name": "Arvika Lunch",
+          "url": "https://arvikalunch.se/"
         }
       ]
     },
@@ -327,7 +597,7 @@
           "address": "Sveagatan 142",
           "hours": "Se veckans lunchbuffé",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -336,28 +606,69 @@
         {
           "id": "rasta-grums",
           "name": "Rasta Grums",
-          "url": "https://www.rasta.se/grums/",
+          "url": "https://www.rasta.se/grums/dagens-ratt/",
           "address": "Nyängsgatan 1",
-          "hours": "Dagens rätt",
+          "hours": "Dagens rätt 11.00–19.00",
+          "parser": "weekday-headings",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
+          "weekNumber": 31,
+          "days": {
+            "monday": [
+              "Baconsås serveras med pasta"
+            ],
+            "tuesday": [
+              "Kycklinggryta med röd curry serveras med ris"
+            ],
+            "wednesday": [
+              "Kokt fisk i dill och purjolöksås serveras med kokt potatis"
+            ],
+            "thursday": [
+              "Helstekt kotlettrad serveras med kokt potatis, gräddsås och lingonsylt"
+            ],
+            "friday": [
+              "Hemlagad pannbiff serveras med kokt potatis, gräddsås och lingonsylt"
+            ],
+            "saturday": [
+              "Pytt i panna serveras med stekt ägg och rödbetor"
+            ],
+            "sunday": [
+              "Pytt i panna serveras med stekt ägg och rödbetor"
+            ]
+          },
+          "status": "current",
+          "mode": "automatic"
+        },
+        {
+          "id": "pizzeria-97an-grums",
+          "name": "Pizzeria 97:an",
+          "url": "https://www.facebook.com/p/Pizzeria97an-100090669815751/",
+          "address": "Grums",
+          "hours": "Se dagens lunch",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         },
         {
-          "id": "visit-grums-lunch",
-          "name": "Lunchställen i Grums",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck",
-          "address": "Grums kommun",
-          "hours": "Lokal restaurangguide",
+          "id": "restaurang-kina-grums",
+          "name": "Restaurang Kina",
+          "url": "https://www.facebook.com/Kinaigrums/",
+          "address": "Grums",
+          "hours": "Se dagens lunch",
           "parser": "source-only",
-          "checkedAt": "2026-08-01T12:23:28+02:00",
+          "checkedAt": "2026-08-01T12:52:09+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
+        }
+      ],
+      "referenceSources": [
+        {
+          "name": "Visit Grums – mat och dryck",
+          "url": "https://www.visitvarmland.com/grums/mat-dryck"
         }
       ]
     }
