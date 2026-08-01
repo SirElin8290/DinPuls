@@ -15,29 +15,14 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "data" / "municipalities.json"
+SOURCES_CONFIG = ROOT / "data" / "important-sources.json"
 TRANSPORT = ROOT / "data" / "transport.json"
+ROAD_TRAFFIC = ROOT / "data" / "road-traffic.json"
 OUTPUT = ROOT / "data" / "important.json"
 POLICE_API = "https://polisen.se/api/events"
 CRISIS_API = "https://api.krisinformation.se/v3/news"
+SMHI_WARNINGS_API = "https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json"
 USER_AGENT = "DinPuls/0.17.4 (+https://sirelin8290.github.io/DinPuls/)"
-
-MUNICIPAL_SOURCES = {
-    "Åmål": ("Åmåls kommun", "https://amal.se/arkiv/driftinformation", "archive"),
-    "Säffle": ("Säffle kommun", "https://saffle.se/", "front"),
-    "Bengtsfors": (
-        "Bengtsfors kommun",
-        "https://www.bengtsfors.se/kommunala-bolag/bengtsfors-energi-ab/vatten-och-avlopp/driftinformation",
-        "front",
-    ),
-    "Mellerud": ("Melleruds kommun", "https://mellerud.se/", "front"),
-    "Årjäng": (
-        "Årjängs kommun",
-        "https://www.arjang.se/anet/startsidaarjangsnat/kundservice/driftstorningar.5220.html",
-        "archive",
-    ),
-    "Arvika": ("Arvika kommun", "https://www.arvika.se/", "front"),
-    "Grums": ("Grums kommun", "https://www.grums.se/", "front"),
-}
 
 IMPORTANT_TERMS = (
     "kokningspåbud", "kokrekommendation", "otjänligt vatten", "vattenavstäng",
@@ -141,7 +126,7 @@ def municipal_priority(title: str) -> tuple[str, int]:
     return "info", 72
 
 
-def municipal_items(source_name: str, source_url: str, mode: str, now: datetime) -> list[dict]:
+def municipal_items(source_name: str, source_url: str, now: datetime) -> list[dict]:
     page = fetch(source_url, "text/html,application/xhtml+xml").decode("utf-8", errors="replace")
     results = []
     anchor_pattern = re.compile(
@@ -215,11 +200,13 @@ def police_items(payload, name: str, now: datetime) -> list[dict]:
             continue
         title = text(event, "name", "type") or "Polishändelse"
         combined = f"{title} {text(event, 'summary')}".lower()
+        is_serious = any(word in combined for word in serious)
+        if not is_serious:
+            continue
         result.append({
             "id": f"police-{event.get('id', title)}",
             "category": "police",
-            "severity": "warning" if any(word in combined for word in serious) else "info",
-            "priority": 75 if any(word in combined for word in serious) else 45,
+            "severity": "warning", "priority": 78,
             "title": title,
             "publishedAt": event.get("datetime"),
             "source": "Polisen",
@@ -289,25 +276,67 @@ def traffic_items(transport: dict, name: str, now: datetime) -> list[dict]:
                     "title": message, "publishedAt": transport.get("generatedAt"),
                     "source": "Trafiklab", "url": "https://www.trafiklab.se/",
                 })
-        for departure in stop.get("departures") or []:
-            departure_time = parse_time(departure.get("realtime") or departure.get("scheduled"))
-            if departure_time and departure_time.replace(tzinfo=departure_time.tzinfo or timezone.utc) < now - timedelta(minutes=10):
+    return result
+
+
+def localized(value, default="") -> str:
+    if isinstance(value, dict):
+        return str(value.get("sv") or value.get("en") or default).strip()
+    return str(value or default).strip()
+
+
+def weather_items(payload, county: str, now: datetime) -> list[dict]:
+    if not isinstance(payload, list):
+        raise RuntimeError("SMHI:s svar har oväntat format")
+    result = []
+    for warning in payload:
+        event_name = localized((warning.get("event") or {}), "Vädervarning")
+        for area in warning.get("warningAreas") or []:
+            affected = " ".join(localized(entry.get("name")) for entry in area.get("affectedAreas") or [])
+            if county.lower().replace(" län", "") not in affected.lower().replace(" län", ""):
                 continue
-            if departure.get("canceled"):
-                result.append({
-                    "id": f"traffic-cancel-{stop.get('id')}-{departure.get('line')}-{departure.get('scheduled')}",
-                    "category": "traffic", "severity": "warning", "priority": 65,
-                    "title": f"Inställd avgång {departure.get('line', '')} mot {departure.get('direction', '')}".strip(),
-                    "publishedAt": transport.get("generatedAt"), "source": "Trafiklab",
-                    "url": "https://www.trafiklab.se/",
-                })
+            level = localized(area.get("warningLevel"), "Meddelande")
+            code = str((area.get("warningLevel") or {}).get("code") or "").upper()
+            if code == "MESSAGE" and not area.get("pushNotice"):
+                continue
+            description = localized(area.get("eventDescription"))
+            priority = {"RED": 98, "ORANGE": 92, "YELLOW": 82}.get(code, 72)
+            result.append({
+                "id": f"weather-{warning.get('id')}-{area.get('id')}",
+                "category": "weather", "severity": "danger" if code in {"RED", "ORANGE"} else "warning",
+                "priority": priority, "title": f"{level}: {event_name}" + (f" – {description}" if description else ""),
+                "publishedAt": area.get("published") or area.get("approximateStart") or now.isoformat(),
+                "source": "SMHI", "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+            })
+    return result
+
+
+def road_items(road_data: dict, name: str) -> list[dict]:
+    result = []
+    for item in road_data.get("municipalities", {}).get(name, {}).get("items", []):
+        title = str(item.get("title") or "").strip()
+        combined = f"{title} {item.get('message', '')} {item.get('location', '')}".lower()
+        serious = item.get("severity") == "danger" or any(term in combined for term in (
+            "avstängd", "helt stopp", "olycka", "brand", "översväm", "ras", "blockerad",
+        ))
+        if not serious or item.get("category") == "roadwork":
+            continue
+        result.append({
+            "id": f"road-{item.get('id')}", "category": "road", "severity": "danger" if item.get("severity") == "danger" else "warning",
+            "priority": 80 if item.get("severity") == "danger" else 74,
+            "title": title or item.get("message") or "Allvarlig trafikstörning",
+            "publishedAt": item.get("updatedAt") or road_data.get("generatedAt"),
+            "source": "Trafikverket", "url": item.get("sourceUrl") or "https://www.trafikverket.se/trafikinformation/vag/",
+        })
     return result
 
 
 def main() -> int:
     config = load(CONFIG, {})
+    source_config = load(SOURCES_CONFIG, {})
     existing = load(OUTPUT, {"municipalities": {}})
     transport = load(TRANSPORT, {})
+    road_traffic = load(ROAD_TRAFFIC, {})
     now = datetime.now(timezone.utc)
     try:
         crises = crisis_records(fetch_json(f"{CRISIS_API}?format=json"))
@@ -321,14 +350,23 @@ def main() -> int:
     except (RuntimeError, json.JSONDecodeError) as error:
         print(f"VARNING Polisen: {error}")
         police_events, police_ok = [], False
+    try:
+        weather_warnings = fetch_json(SMHI_WARNINGS_API)
+        weather_ok = isinstance(weather_warnings, list)
+    except (RuntimeError, json.JSONDecodeError) as error:
+        print(f"VARNING SMHI: {error}")
+        weather_warnings, weather_ok = [], False
 
     municipalities = {}
-    successful_sources = int(crisis_ok) + int(police_ok)
-    used_sources = [
-        {"name": "Krisinformation.se", "url": "https://www.krisinformation.se/"},
-        {"name": "Polisen", "url": "https://polisen.se/aktuellt/"},
-        {"name": "Trafiklab", "url": "https://www.trafiklab.se/"},
-    ]
+    successful_sources = int(crisis_ok) + int(police_ok) + int(weather_ok)
+    global_sources = source_config.get("global", [])
+    automated_status = {
+        "crisis": "ok" if crisis_ok else "error",
+        "police": "ok" if police_ok else "error",
+        "weather": "ok" if weather_ok else "error",
+        "road": "ok" if road_traffic.get("generatedAt") else "error",
+        "sos": "reference",
+    }
     for municipality in config.get("municipalities", []):
         name = text(municipality, "name")
         county = text(municipality, "county")
@@ -341,38 +379,51 @@ def main() -> int:
             previous = existing.get("municipalities", {}).get(name, {}).get("items", [])
             items.extend(recent_previous(previous, "police", now, 36))
         items.extend(traffic_items(transport, name, now))
+        items.extend(road_items(road_traffic, name))
+        if weather_ok:
+            items.extend(weather_items(weather_warnings, county, now))
 
-        source = MUNICIPAL_SOURCES.get(name)
-        if source:
-            source_name, source_url, mode = source
-            used_sources.append({"name": source_name, "url": source_url})
+        source_health = [
+            {**source, "status": automated_status.get(source.get("id"), "reference")}
+            for source in global_sources
+        ]
+        for source in source_config.get("municipalities", {}).get(name, []):
+            source_name, source_url = source.get("name"), source.get("url")
             try:
-                local_items = municipal_items(source_name, source_url, mode, now)
+                local_items = municipal_items(source_name, source_url, now)
                 items.extend(local_items)
                 successful_sources += 1
+                source_health.append({**source, "status": "ok"})
                 print(f"{name}: {len(local_items)} kommunala driftmeddelanden")
             except RuntimeError as error:
                 print(f"VARNING {source_name}: {error}")
                 previous = existing.get("municipalities", {}).get(name, {}).get("items", [])
                 items.extend(recent_previous(previous, "municipal", now))
+                source_health.append({**source, "status": "error"})
 
-        unique = {str(item.get("id")): item for item in items if item.get("id") and item.get("title")}
+        unique = {
+            str(item.get("id")): item for item in items
+            if item.get("id") and item.get("title") and int(item.get("priority") or 0) >= 70
+        }
         sorted_items = sorted(
             unique.values(),
             key=lambda item: (item.get("priority", 0), item.get("publishedAt") or ""),
             reverse=True,
         )[:8]
-        municipalities[name] = {"items": sorted_items}
+        municipalities[name] = {
+            "items": sorted_items,
+            "checkedAt": now.isoformat(timespec="seconds"),
+            "sourceHealth": source_health,
+        }
         print(f"{name}: {len(sorted_items)} viktiga händelser totalt")
 
     if successful_sources == 0:
         print("Ingen officiell källa kunde nås; behåller befintlig fil")
         return 1
-    deduped_sources = list({source["url"]: source for source in used_sources}.values())
     output = {
-        "version": "0.20.2",
+        "version": "0.21.0",
         "generatedAt": now.isoformat(timespec="seconds"),
-        "sources": deduped_sources,
+        "sources": global_sources,
         "municipalities": municipalities,
     }
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
