@@ -5,8 +5,9 @@ const LUNCH_DAYS=[
 ];
 const lunchParams=new URLSearchParams(location.search);
 let lunchMunicipality=municipalityState.getInitial();
-const selectedRestaurant=lunchParams.get("restaurang")||"";
+let selectedRestaurant=lunchParams.get("restaurang")||"";
 let lunchData;
+let lunchSelectionScrolled=false;
 const escapeLunch=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Europe/Stockholm"}).format(new Date()).toLowerCase();
 
@@ -18,6 +19,8 @@ async function initializeLunchPage(){
   daySelect.innerHTML=LUNCH_DAYS.map(([value,label])=>`<option value="${value}" ${value===today?"selected":""}>${label}</option>`).join("");
   municipalitySelect.addEventListener("change",()=>{
     lunchMunicipality=municipalityState.set(municipalitySelect.value);
+    selectedRestaurant="";
+    lunchSelectionScrolled=true;
     renderLunchPage();
   });
   daySelect.addEventListener("change",renderLunchPage);
@@ -60,11 +63,15 @@ function renderLunchPage(){
   list.hidden=!filtered.length;
   document.querySelector("#lunch-page-empty").hidden=!!filtered.length;
   if(window.lucide)lucide.createIcons();
+  if(selectedRestaurant&&!lunchSelectionScrolled){
+    document.getElementById(`lunch-${selectedRestaurant}`)?.scrollIntoView({behavior:"smooth",block:"center"});
+    lunchSelectionScrolled=true;
+  }
 }
 
 function renderLunchCard(item,day,isSelected=false){
   const dishes=item.status==="current"?(item.days?.[day]||[]):[];
-  const status=dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":"Meny finns hos restaurangen";
+  const status=dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":item.seasonal?"Säsongsöppet lunchställe":"Lunch serveras – kontrollera dagens utbud";
   const menu=dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna originalkällan för dagens utbud och eventuella ändringar.</p>`;
   return `<article class="portal-card lunch-card ${isSelected?"selected":""}" id="lunch-${escapeLunch(item.id)}">
     <span class="portal-card-icon lunch"><i data-lucide="utensils"></i></span>

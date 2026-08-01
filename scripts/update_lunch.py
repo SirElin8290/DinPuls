@@ -17,7 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "lunch-sources.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
-USER_AGENT = "DinPuls/0.20.5 (+https://sirelin8290.github.io/DinPuls/)"
+USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
+EXPECTED_MUNICIPALITIES = {"Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"}
 DAYS = {
     "måndag": "monday", "mandag": "monday",
     "tisdag": "tuesday", "onsdag": "wednesday",
@@ -29,7 +30,8 @@ STOP_MARKERS = (
     "veckans vegetariska", "sallader", "lunchpriser", "öppettider",
     "kontakt", "pris ", "barn ", "utkörningsservice", "ta kontakt",
     "catering", "ring oss", "galleri", "adress", "bordsbokning",
-    "öppet för", "veckans meny", "inkl.",
+    "öppet för", "veckans meny", "inkl.", "sommarerbjudanden",
+    "ladda ner", "med goda drycker", "övrigt",
 )
 NON_DISH_LINES = {
     "stängt", "lunchbuffé", "lunchbuffe", "helgbuffé",
@@ -73,6 +75,8 @@ def fetch(url: str) -> str:
         raise RuntimeError(f"HTTP {error.code}") from None
     except URLError as error:
         raise RuntimeError(str(error.reason)) from None
+    except TimeoutError:
+        raise RuntimeError("timeout") from None
 
 
 def extract_week(lines: list[str]) -> int | None:
@@ -85,7 +89,10 @@ def extract_week(lines: list[str]) -> int | None:
 
 def weekday_key(line: str) -> str | None:
     normalized = line.lower().strip(" .:-")
-    return DAYS.get(normalized)
+    for swedish, english in DAYS.items():
+        if re.fullmatch(rf"{re.escape(swedish)}(?:\s+\d{{1,2}}(?:[/.]\d{{1,2}})?)?", normalized):
+            return english
+    return None
 
 
 def useful_dish(line: str) -> bool:
@@ -113,9 +120,13 @@ def parse_weekday_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
     lines = parser.text_lines()
     menu = {key: [] for key in DAYS.values()}
     active = None
+    seen_days: set[str] = set()
     for line in lines:
         day = weekday_key(line)
         if day:
+            if day in seen_days:
+                break
+            seen_days.add(day)
             active = day
             continue
         if active and any(line.lower().startswith(marker) for marker in STOP_MARKERS):
@@ -126,9 +137,24 @@ def parse_weekday_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
     return extract_week(lines), menu
 
 
-def main() -> int:
-    config = json.loads(SOURCES.read_text(encoding="utf-8"))
-    now = datetime.now(TIMEZONE)
+def validate_config(config: dict) -> None:
+    municipalities = config.get("municipalities", {})
+    missing = EXPECTED_MUNICIPALITIES - set(municipalities)
+    if missing:
+        raise ValueError(f"Kommuner saknas: {', '.join(sorted(missing))}")
+    seen: set[str] = set()
+    for municipality, sources in municipalities.items():
+        for source in sources:
+            source_id = source.get("id")
+            if not source_id or source_id in seen:
+                raise ValueError(f"Saknat eller dubblerat restaurang-id: {source_id!r} ({municipality})")
+            if not source.get("name") or not source.get("url"):
+                raise ValueError(f"Ofullständig restaurangkälla: {source_id}")
+            seen.add(source_id)
+
+
+def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
+    validate_config(config)
     current_week = now.isocalendar().week
     municipalities = {}
 
@@ -145,7 +171,7 @@ def main() -> int:
             }
             if source.get("parser") == "weekday-headings":
                 try:
-                    week, days = parse_weekday_menu(fetch(source["url"]))
+                    week, days = parse_weekday_menu(fetcher(source["url"]))
                     item["weekNumber"] = week
                     item["days"] = days if week == current_week else {}
                     item["status"] = "current" if week == current_week and any(days.values()) else "outdated"
@@ -154,18 +180,31 @@ def main() -> int:
                     item["status"] = "unavailable"
                     item["mode"] = "automatic"
                     item["error"] = str(error)
+            if source.get("seasonal"):
+                item["seasonal"] = True
             restaurants.append(item)
-            print(f"{municipality}: {source['name']} – {item['status']}")
-        municipalities[municipality] = {"restaurants": restaurants}
+        municipalities[municipality] = {
+            "restaurants": restaurants,
+            "referenceSources": config.get("referenceSources", {}).get(municipality, []),
+        }
 
-    output = {
-        "version": "0.20.5",
+    return {
+        "version": "0.21.2",
         "generatedAt": now.isoformat(timespec="seconds"),
         "timezone": "Europe/Stockholm",
         "currentWeek": current_week,
         "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
         "municipalities": municipalities,
     }
+
+
+def main() -> int:
+    config = json.loads(SOURCES.read_text(encoding="utf-8"))
+    now = datetime.now(TIMEZONE)
+    output = build_output(config, now)
+    for municipality, entry in output["municipalities"].items():
+        for item in entry["restaurants"]:
+            print(f"{municipality}: {item['name']} – {item['status']}")
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 0
 
