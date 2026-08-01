@@ -1,11 +1,10 @@
-const LUNCH_MUNICIPALITIES=["Åmål","Säffle","Bengtsfors","Mellerud","Årjäng","Arvika","Grums"];
+const municipalityState=window.DinPulsMunicipalityState;
 const LUNCH_DAYS=[
   ["monday","Måndag"],["tuesday","Tisdag"],["wednesday","Onsdag"],
   ["thursday","Torsdag"],["friday","Fredag"],["saturday","Lördag"],["sunday","Söndag"]
 ];
 const lunchParams=new URLSearchParams(location.search);
-let lunchMunicipality=lunchParams.get("kommun")||localStorage.getItem("dinpuls-municipality")||"Åmål";
-if(!LUNCH_MUNICIPALITIES.includes(lunchMunicipality))lunchMunicipality="Åmål";
+let lunchMunicipality=municipalityState.getInitial();
 const selectedRestaurant=lunchParams.get("restaurang")||"";
 let lunchData;
 const escapeLunch=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
@@ -13,14 +12,12 @@ const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:
 
 async function initializeLunchPage(){
   const municipalitySelect=document.querySelector("#lunch-municipality");
-  municipalitySelect.innerHTML=LUNCH_MUNICIPALITIES.map(name=>`<option ${name===lunchMunicipality?"selected":""}>${name}</option>`).join("");
+  municipalityState.populateSelect(municipalitySelect,lunchMunicipality);
   const daySelect=document.querySelector("#lunch-day");
   const today=stockholmDay();
   daySelect.innerHTML=LUNCH_DAYS.map(([value,label])=>`<option value="${value}" ${value===today?"selected":""}>${label}</option>`).join("");
   municipalitySelect.addEventListener("change",()=>{
-    lunchMunicipality=municipalitySelect.value;
-    localStorage.setItem("dinpuls-municipality",lunchMunicipality);
-    history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(lunchMunicipality)}`);
+    lunchMunicipality=municipalityState.set(municipalitySelect.value);
     renderLunchPage();
   });
   daySelect.addEventListener("change",renderLunchPage);
