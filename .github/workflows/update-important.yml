@@ -5,13 +5,16 @@ on:
   push:
     paths:
       - "scripts/update_important.py"
+      - "data/important-sources.json"
       - ".github/workflows/update-important.yml"
+  schedule:
+    - cron: "4,19,34,49 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: dinpuls-live-data
+  group: dinpuls-important
   cancel-in-progress: false
 
 jobs:
@@ -37,6 +40,10 @@ jobs:
           git add data/important.json
           if ! git diff --cached --quiet; then
             git commit -m "Uppdatera dagens viktigaste"
-            git pull --rebase
-            git push
+            for attempt in 1 2 3; do
+              git pull --rebase && git push && exit 0
+              git rebase --abort 2>/dev/null || true
+              sleep $((attempt * 2))
+            done
+            exit 1
           fi
