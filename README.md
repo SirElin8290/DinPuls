@@ -452,6 +452,11 @@ trettionde minut.
 
 Källa anges i väderkortet.
 
+Väderkortet använder en högst sex timmar gammal lokal reservprognos om SMHI
+tillfälligt inte kan nås. Länken Blixtkarta öppnar SMHI:s officiella kartor.
+SMHI:s individuella blixtnedslag i realtid levereras via WebSocket mot
+leveransavgift och bäddas därför inte in utan ett separat avtal.
+
 ## Sprint 2.1 – Kommunval
 
 Användaren kan nu välja mellan:
