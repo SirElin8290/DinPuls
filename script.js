@@ -153,6 +153,16 @@ const WEATHER_SYMBOLS = {
   27: { emoji: "❄️", text: "Kraftigt snöfall" }
 };
 
+const WEATHER_REFRESH_INTERVAL = 30 * 60 * 1000;
+const WEATHER_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+const STOCKHOLM_DATE_FORMAT = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Europe/Stockholm",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
+
+
 async function loadComponent(name) {
   const target = document.querySelector(`[data-component="${name}"]`);
 
@@ -819,16 +829,24 @@ function initializeWeather() {
 
   DinPulsMunicipality.subscribe("weather", loadWeather);
 
-  /* Uppdatera prognosen var trettionde minut. */
+  /* Uppdatera bara när sidan används; kommunbyte utlöser ett eget anrop. */
   window.setInterval(() => {
-    loadWeather(DinPulsMunicipality.getConfig());
-  }, 30 * 60 * 1000);
+    if (!document.hidden) loadWeather(DinPulsMunicipality.getConfig());
+  }, WEATHER_REFRESH_INTERVAL);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadWeather(DinPulsMunicipality.getConfig());
+  });
 }
 
 let weatherRequestController = null;
 let weatherRequestNumber = 0;
 
 async function loadWeather(config) {
+  if (!config?.name || !Number.isFinite(Number(config.latitude)) || !Number.isFinite(Number(config.longitude))) {
+    showWeatherError(config?.name || "vald kommun");
+    return;
+  }
   const municipality = config.name;
   const requestNumber = ++weatherRequestNumber;
   weatherRequestController?.abort();
@@ -866,6 +884,7 @@ async function loadWeather(config) {
       return;
     }
 
+    writeWeatherCache(config.slug || municipality, weatherData);
     renderWeather(weatherData, municipality);
   } catch (error) {
     if (error.name === "AbortError") {
@@ -873,15 +892,45 @@ async function loadWeather(config) {
     }
     console.error("SMHI-väder kunde inte hämtas:", error);
     if (municipality === DinPulsMunicipality.getName()) {
-      showWeatherError(municipality);
+      const cached = readWeatherCache(config.slug || municipality);
+      if (cached) renderWeather(cached.data, municipality, { cachedAt: cached.savedAt });
+      else showWeatherError(municipality);
     }
   }
 }
 
+function weatherCacheKey(key) {
+  return `dinpuls-weather-${String(key).toLocaleLowerCase("sv-SE")}`;
+}
+
+function writeWeatherCache(key, data) {
+  try {
+    localStorage.setItem(weatherCacheKey(key), JSON.stringify({ savedAt: Date.now(), data }));
+  } catch {}
+}
+
+function readWeatherCache(key) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(weatherCacheKey(key)) || "null");
+    if (!cached?.data || !Number.isFinite(cached.savedAt) || Date.now() - cached.savedAt > WEATHER_CACHE_MAX_AGE) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+}
+
+function setWeatherPanel(panel) {
+  const panels = {
+    loading: document.querySelector("#weather-loading"),
+    content: document.querySelector("#weather-content"),
+    error: document.querySelector("#weather-error")
+  };
+  Object.entries(panels).forEach(([name, element]) => {
+    if (element) element.hidden = name !== panel;
+  });
+}
+
 function showWeatherLoading(municipality) {
-  const loading = document.querySelector("#weather-loading");
-  const content = document.querySelector("#weather-content");
-  const error = document.querySelector("#weather-error");
   const status = document.querySelector("#weather-status");
   const location = document.querySelector("#weather-location");
 
@@ -889,18 +938,15 @@ function showWeatherLoading(municipality) {
     location.textContent = municipality;
   }
 
-  loading.hidden = false;
-  content.hidden = true;
-  error.hidden = true;
+  setWeatherPanel("loading");
 
-  status.textContent = "Hämtar…";
-  status.className = "weather-live-badge";
+  if (status) {
+    status.textContent = "Hämtar…";
+    status.className = "weather-live-badge";
+  }
 }
 
 function showWeatherError(municipality) {
-  const loading = document.querySelector("#weather-loading");
-  const content = document.querySelector("#weather-content");
-  const error = document.querySelector("#weather-error");
   const status = document.querySelector("#weather-status");
   const location = document.querySelector("#weather-location");
 
@@ -908,19 +954,19 @@ function showWeatherError(municipality) {
     location.textContent = municipality;
   }
 
-  loading.hidden = true;
-  content.hidden = true;
-  error.hidden = false;
+  setWeatherPanel("error");
 
-  status.textContent = "Ej tillgängligt";
-  status.className = "weather-live-badge is-fallback";
+  if (status) {
+    status.textContent = "Ej tillgängligt";
+    status.className = "weather-live-badge is-fallback";
+  }
 
   if (window.lucide) {
     lucide.createIcons();
   }
 }
 
-function renderWeather(response, municipality) {
+function renderWeather(response, municipality, options = {}) {
   if (!Array.isArray(response.timeSeries) || response.timeSeries.length === 0) {
     throw new Error("SMHI-svaret saknar tidsserier.");
   }
@@ -934,14 +980,15 @@ function renderWeather(response, municipality) {
   }
 
   const now = Date.now();
-  const current =
-    entries.find((entry) => new Date(entry.time).getTime() >= now) ||
-    entries[0];
+  const current = entries.reduce((closest, entry) => {
+    const distance = Math.abs(new Date(entry.time).getTime() - now);
+    return !closest || distance < closest.distance ? { entry, distance } : closest;
+  }, null).entry;
 
-  const localToday = new Date().toLocaleDateString("sv-SE");
+  const localToday = STOCKHOLM_DATE_FORMAT.format(new Date(now));
   const todayEntries = entries.filter(
     (entry) =>
-      new Date(entry.time).toLocaleDateString("sv-SE") === localToday
+      STOCKHOLM_DATE_FORMAT.format(new Date(entry.time)) === localToday
   );
 
   const temperatures = (todayEntries.length ? todayEntries : entries)
@@ -989,17 +1036,14 @@ function renderWeather(response, municipality) {
 
   renderHourlyForecast(forecastEntries);
 
-  const loading = document.querySelector("#weather-loading");
-  const content = document.querySelector("#weather-content");
-  const error = document.querySelector("#weather-error");
   const status = document.querySelector("#weather-status");
 
-  loading.hidden = true;
-  content.hidden = false;
-  error.hidden = true;
+  setWeatherPanel("content");
 
-  status.textContent = "Live från SMHI";
-  status.className = "weather-live-badge is-live";
+  if (status) {
+    status.textContent = options.cachedAt ? "Senast hämtad prognos" : "SMHI-prognos";
+    status.className = `weather-live-badge ${options.cachedAt ? "is-fallback" : "is-live"}`;
+  }
 
   updateHeaderWeather(current.temperature, symbol.emoji);
 }
@@ -1129,6 +1173,7 @@ function updateHeaderWeather(temperature, emoji) {
 
 function formatSwedishTime(value) {
   return new Date(value).toLocaleString("sv-SE", {
+    timeZone: "Europe/Stockholm",
     hour: "2-digit",
     minute: "2-digit",
     day: "numeric",
@@ -1154,6 +1199,7 @@ let allNewsArticles = [];
 let allNewsSources = [];
 let activeNewsFilter = "all";
 let activeNewsScope = localStorage.getItem("dinpuls-news-scope") || "local";
+
 
 async function initializeNews() {
   if (!["local", "sweden", "world"].includes(activeNewsScope)) {
