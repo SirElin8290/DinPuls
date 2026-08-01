@@ -31,7 +31,7 @@ jobs:
       - name: Hämta aktuella nyheter
         run: python scripts/update_news.py
       - name: Testa nyhetslogiken
-        run: python -m unittest scripts/test_update_news.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_news.py
       - name: Spara nyhetsdata
         shell: bash
         run: |
