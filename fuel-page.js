@@ -1,15 +1,13 @@
-const FUEL_MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"];
-const fuelParams = new URLSearchParams(location.search);
-let fuelMunicipality = fuelParams.get("kommun") || localStorage.getItem("dinpuls-municipality") || "Åmål";
-if (!FUEL_MUNICIPALITIES.includes(fuelMunicipality)) fuelMunicipality = "Åmål";
+const municipalityState = window.DinPulsMunicipalityState;
+let fuelMunicipality = municipalityState.getInitial();
 let fullFuelData;
 const escapeFuel = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
 const fuelNumber = value => new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
 
 async function initializeFuelPage() {
   const select = document.querySelector("#fuel-municipality");
-  select.innerHTML = FUEL_MUNICIPALITIES.map(name => `<option ${name === fuelMunicipality ? "selected" : ""}>${name}</option>`).join("");
-  select.addEventListener("change", () => { fuelMunicipality = select.value; localStorage.setItem("dinpuls-municipality", fuelMunicipality); history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(fuelMunicipality)}`); renderFuelPage(); });
+  municipalityState.populateSelect(select, fuelMunicipality);
+  select.addEventListener("change", () => { fuelMunicipality = municipalityState.set(select.value); renderFuelPage(); });
   ["#fuel-type", "#fuel-price-filter"].forEach(selector => document.querySelector(selector).addEventListener("change", renderFuelPage));
   document.querySelector("#fuel-search").addEventListener("input", renderFuelPage);
   renderStrategicAds("drivmedel", "drivmedelssida", "#fuel-list");
