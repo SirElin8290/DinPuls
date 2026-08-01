@@ -12,7 +12,7 @@
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
   <main class="portal-main">
     <section class="portal-hero traffic-page"><span class="section-kicker">DinPuls Trafik</span><h1>Trafikläget nära <span data-traffic-municipality>Åmål</span></h1><p>Olyckor, vägarbeten, köer, hinder och andra aktuella vägmeddelanden.</p></section>
-    <div class="traffic-principle"><i data-lucide="shield-check"></i><span>Uppgifterna hämtas från Trafikverkets öppna API. Kontrollera alltid skyltning och myndighetsinformation innan du kör.</span></div>
+    <div class="traffic-principle"><i data-lucide="shield-check"></i><span>Aktuella händelser hämtas från Trafikverkets öppna API. Vägkartan och VViS kompletterar med myndighetsinformation om väglag och vägväder.</span></div>
     <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="trafik" data-ad-position="1"></div>
     <div class="portal-layout strategic-layout">
       <section class="portal-content">
@@ -25,10 +25,18 @@
         <div class="portal-result-heading"><h2 id="traffic-page-total">Hämtar trafikläget…</h2><span id="traffic-page-updated"></span></div>
         <div id="traffic-page-list" class="portal-list"></div>
         <div class="strategic-ad-slot" data-strategic-ad="trafik" data-ad-position="3"></div>
-        <div id="traffic-page-empty" class="portal-empty" hidden>Inga aktuella vägmeddelanden matchar filtret.</div>
+        <div id="traffic-page-empty" class="portal-empty traffic-page-empty" hidden></div>
+        <aside class="traffic-official-sources" aria-label="Officiella trafikkällor">
+          <h2>Kontrollera även officiella källor</h2>
+          <div>
+            <a href="https://www.trafikverket.se/trafikinformation/vag/" target="_blank" rel="noopener noreferrer"><strong>Trafikverkets vägkarta</strong><span>Händelser, vägarbeten, väglag och kameror</span></a>
+            <a href="https://bransch.trafikverket.se/tjanster/trafiktjanster/VViS/" target="_blank" rel="noopener noreferrer"><strong>Vägväder VViS</strong><span>Vägyta, nederbörd, vind och halkrisk</span></a>
+            <a id="traffic-municipality-source" href="#" target="_blank" rel="noopener noreferrer"><strong><span data-traffic-municipality>Åmål</span>s kommun</strong><span>Lokala gatuarbeten och avstängningar</span></a>
+          </div>
+        </aside>
         <div class="strategic-ad-slot" data-strategic-ad="trafik" data-ad-position="4"></div>
       </section>
     </div>
   </main>
-  <script src="https://unpkg.com/lucide@latest"></script><script src="municipality-engine.js?version=0.20.10"></script><script src="traffic-page.js?version=0.20.10"></script>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="municipality-engine.js?version=0.21.0"></script><script src="traffic-page.js?version=0.21.0"></script>
 </body></html>

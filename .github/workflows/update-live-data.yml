@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: dinpuls-live-data
+  group: dinpuls-road-traffic
   cancel-in-progress: false
 
 jobs:
@@ -40,8 +40,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/road-traffic.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Uppdatera vägtrafik"
-            git pull --rebase
-            git push
-          fi
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera vägtrafik"
+          for attempt in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 3))
+          done
+          echo "Kunde inte publicera vägtrafiken efter tre försök" >&2
+          exit 1
