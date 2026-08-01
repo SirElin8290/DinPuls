@@ -98,8 +98,8 @@ def fetch(url: str) -> bytes:
             return response.read()
     except HTTPError as error:
         raise RuntimeError(f"HTTP {error.code}") from None
-    except URLError as error:
-        raise RuntimeError(f"kunde inte nå källan: {error.reason}") from None
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
 
 
 def number(value: str) -> int | float | None:
@@ -109,6 +109,14 @@ def number(value: str) -> int | float | None:
         return int(result) if result.is_integer() else result
     except ValueError:
         return None
+
+
+def room_count(value: object) -> int | float | None:
+    """Läser både numeriska rumsvärden och texter som '3 Rum och kök'."""
+    if isinstance(value, (int, float)):
+        return value
+    match = re.search(r"\d+(?:[,.]\d+)?", str(value or ""))
+    return number(match.group(0)) if match else None
 
 
 def parse_hss(provider: dict) -> list[dict]:
@@ -159,8 +167,8 @@ def fetch_hss_pages(url: str) -> list[str]:
         first = opener.open(request, timeout=35).read().decode("utf-8", errors="replace")
     except HTTPError as error:
         raise RuntimeError(f"HTTP {error.code}") from None
-    except URLError as error:
-        raise RuntimeError(f"kunde inte nå källan: {error.reason}") from None
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
 
     pagination_text = html.unescape(first).replace("\xa0", " ")
     match = re.search(r"lblNoOfPages[^>]*>(\d+)<", pagination_text, flags=re.IGNORECASE)
@@ -185,7 +193,7 @@ def fetch_hss_pages(url: str) -> list[str]:
         )
         try:
             current = opener.open(post, timeout=35).read().decode("utf-8", errors="replace")
-        except (HTTPError, URLError) as error:
+        except (HTTPError, URLError, TimeoutError) as error:
             raise RuntimeError(f"sidbläddringen misslyckades: {error}") from None
         pages.append(current)
     return pages
@@ -229,8 +237,8 @@ def fetch_json_url(url: str, headers: dict[str, str] | None = None) -> dict:
             return json.load(response)
     except HTTPError as error:
         raise RuntimeError(f"HTTP {error.code}") from None
-    except URLError as error:
-        raise RuntimeError(f"kunde inte nå källan: {error.reason}") from None
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
 
 
 def parse_momentum(provider: dict) -> list[dict]:
@@ -267,7 +275,7 @@ def parse_momentum(provider: dict) -> list[dict]:
             "id": identifier,
             "address": str(item.get("displayName") or "Ledig lägenhet"),
             "area": str(area.get("displayName") or ""),
-            "rooms": size.get("rooms"),
+            "rooms": room_count(size.get("rooms") or size.get("roomsDisplayName") or size.get("shortRoomsDisplayName")),
             "size": size.get("area"),
             "rent": pricing.get("priceInclVAT") or pricing.get("price"),
             "available": momentum_date(availability.get("availableFrom")),
@@ -304,6 +312,14 @@ def main() -> int:
                     fetched = parse_momentum(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
+                previous_provider_listings = [
+                    item for item in previous.get(name, {}).get("listings", [])
+                    if item.get("provider") == provider.get("name")
+                ]
+                if not fetched and previous_provider_listings:
+                    raise RuntimeError(
+                        f"källan gav oväntat 0 objekt; behåller {len(previous_provider_listings)} tidigare objekt"
+                    )
                 listings.extend(fetched)
                 fetched_any = True
                 print(f"{name}, {provider['name']}: {len(fetched)} objekt")
@@ -311,16 +327,33 @@ def main() -> int:
                 errors.append(f"{provider.get('name', 'Källa')}: {error}")
                 print(f"VARNING {name}: {errors[-1]}")
 
+        unique_listings = {}
+        for item in listings:
+            key = str(item.get("id") or item.get("url") or "")
+            if key and key not in unique_listings:
+                unique_listings[key] = item
+        listings = list(unique_listings.values())
         provider_view = [{key: item[key] for key in ("name", "url", "official") if key in item} for item in providers]
         if fetched_any or not any(item.get("parser") for item in providers):
-            content = {"total": len(listings), "listings": listings, "providers": provider_view, "errors": errors}
+            core = {"total": len(listings), "listings": listings, "providers": provider_view}
             old = previous.get(name, {})
-            old_content = {key: value for key, value in old.items() if key != "updatedAt"}
-            content["updatedAt"] = old.get("updatedAt", now) if content == old_content else now
+            old_core = {key: old.get(key) for key in ("total", "listings", "providers")}
+            content = {
+                **core,
+                "errors": errors,
+                "stale": False,
+                "checkedAt": now,
+                "updatedAt": old.get("updatedAt", now) if core == old_core else now,
+            }
             municipalities[name] = content
             successful += 1
         elif name in previous:
-            municipalities[name] = previous[name]
+            municipalities[name] = {
+                **previous[name],
+                "errors": errors,
+                "stale": True,
+                "checkedAt": now,
+            }
 
     if successful == 0:
         print("Ingen bostadskälla kunde uppdateras; behåller befintlig housing.json")
