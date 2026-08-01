@@ -1191,7 +1191,7 @@ function setText(selector, value) {
 
 startDinPuls();
 
-
+/* =========================================================
    DINPULS v0.8.0 – NYHETSCENTRAL
 ========================================================= */
 let allNewsArticles = [];
@@ -1485,7 +1485,7 @@ function renderImportantItem(item) {
     : `<article class="important-item">${body}</article>`;
 }
 
-
+/* =========================================================
    DINPULS v0.8.0 – BUSS- OCH TÅGTIDER
 ========================================================= */
 let transportData = null;
@@ -1732,6 +1732,7 @@ window.setInterval(updateQuickTransport, 60000);
    DINPULS v0.15.0 – EVENEMANG
 ========================================================= */
 let eventsData = null;
+let eventsRefreshTimer = null;
 
 async function initializeEvents() {
   const card = document.querySelector("#evenemang");
@@ -1739,10 +1740,18 @@ async function initializeEvents() {
   card?.addEventListener("click", event => { if (!event.target.closest("a,button,input,select,label")) openPage(); });
   card?.addEventListener("keydown", event => { if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a,button,input,select")) { event.preventDefault(); openPage(); } });
   DinPulsMunicipality.subscribe("events", renderEvents);
+  await loadEvents();
+  clearInterval(eventsRefreshTimer);
+  eventsRefreshTimer = setInterval(() => { if (!document.hidden) loadEvents(); }, 6 * 60 * 60 * 1000);
+}
+
+async function loadEvents() {
   try {
     const response = await fetch(`data/events.json?version=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
-    eventsData = await response.json();
+    const data = await response.json();
+    if (!data?.municipalities || typeof data.municipalities !== "object") throw new Error("Ogiltig evenemangsdata");
+    eventsData = data;
     renderEvents();
   } catch (error) {
     console.error("Evenemang kunde inte laddas:", error);
@@ -1756,7 +1765,7 @@ function renderEvents() {
   const municipality = DinPulsMunicipality.getName();
   const data = eventsData.municipalities?.[municipality] || { events: [], sources: [] };
   const now = new Date(); now.setHours(0,0,0,0);
-  const events = (data.events || []).filter(item => new Date(item.endDate || item.startDate).getTime() >= now.getTime()).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+  const events = (data.events || []).filter(item => new Date(`${String(item.endDate || item.startDate).slice(0,10)}T23:59:59`).getTime() >= now.getTime()).sort((a,b) => String(a.startDate).localeCompare(String(b.startDate)));
   const visible = events.slice(0, 4);
   const list = document.querySelector("#events-list");
   const loading = document.querySelector("#events-loading");
@@ -1764,7 +1773,8 @@ function renderEvents() {
   if (loading) loading.hidden = true;
   if (list) { list.innerHTML = visible.map(renderEventPreview).join(""); list.hidden = !visible.length; }
   if (empty) empty.hidden = !!visible.length;
-  const total = document.querySelector("#events-total"); if (total) total.textContent = events.length ? `${events.length} kommande · ${data.sources?.length || 0} källor` : `${data.sources?.length || 0} lokala källor`;
+  const total = document.querySelector("#events-total");
+  if (total) total.textContent = events.length ? `${events.length} kommande · ${data.sources?.length || 0} källor` : `Inga datum just nu · ${data.sources?.length || 0} källor`;
   const link = document.querySelector("#events-page-link"); if (link) link.href = `evenemang.html?kommun=${encodeURIComponent(municipality)}`;
   document.querySelectorAll("[data-quick-events-title]").forEach(el => el.textContent = events.length ? `${events.length} evenemang i ${municipality}` : `Evenemang i ${municipality}`);
   document.querySelectorAll("[data-quick-events-detail]").forEach(el => el.textContent = events[0] ? `${formatEventShortDate(events[0].startDate)} · ${events[0].title}` : `${data.sources?.length || 0} lokala kalendrar samlade`);

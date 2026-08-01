@@ -9,6 +9,8 @@ on:
       - main
     paths:
       - "scripts/update_events.py"
+      - "scripts/test_update_events.py"
+      - "data/event-sources.json"
       - ".github/workflows/update-events.yml"
 
 permissions:
@@ -30,8 +32,12 @@ jobs:
           python-version: "3.12"
       - name: Kontrollera lokala evenemangskällor
         run: python scripts/update_events.py
+      - name: Testa evenemangslogiken
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py
       - name: Spara evenemangsdata konfliktsäkert
+        shell: bash
         run: |
+          set -euo pipefail
           if git diff --quiet -- data/events.json; then
             echo "Inga evenemangsförändringar."
             exit 0
@@ -40,9 +46,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/events.json
           git commit -m "Uppdatera evenemang"
-          for attempt in 1 2 3; do
-            git pull --rebase origin main && git push && exit 0
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "Nya evenemang publicerade."
+              exit 0
+            fi
+            git rebase --abort || true
             echo "Push-försök $attempt misslyckades; hämtar senaste main."
-            sleep $((attempt * 2))
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
           done
           exit 1

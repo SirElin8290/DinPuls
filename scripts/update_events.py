@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Samlar verifierbara evenemang ur JSON-LD på DinPuls officiella källsidor."""
+"""Samlar lokala evenemang från officiella kalendrar och källkatalogen."""
 from __future__ import annotations
 
 import hashlib
@@ -13,7 +13,8 @@ from urllib.parse import urlencode, urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
-USER_AGENT = "DinPuls/0.20.4 (+https://sirelin8290.github.io/DinPuls/)"
+SOURCE_CATALOG = ROOT / "data" / "event-sources.json"
+USER_AGENT = "DinPuls.se/0.21 (lokal evenemangskalender; https://sirelin8290.github.io/DinPuls/)"
 LOCALITIES = {
     "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog", "tydje"},
     "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
@@ -103,6 +104,31 @@ def category(title: str) -> tuple[str, str]:
         if any(word in lowered for word in words):
             return result
     return "community", "Lokalt och föreningar"
+
+
+def catalog_event(item: dict, municipality: str) -> dict | None:
+    """Normaliserar ett manuellt verifierat evenemang ur källkatalogen."""
+    title = str(item.get("title") or "").strip()
+    start = iso_date(item.get("startDate"))
+    end = iso_date(item.get("endDate")) or start
+    if not title or not start or end < date.today().isoformat():
+        return None
+    identifier = hashlib.sha1(
+        f"{municipality}|{title}|{start}|{item.get('url', '')}".encode()
+    ).hexdigest()[:16]
+    return {
+        "id": f"event-{identifier}",
+        "title": title,
+        "startDate": start,
+        "endDate": end,
+        "time": str(item.get("time") or "Se källan"),
+        "venue": str(item.get("venue") or municipality),
+        "category": str(item.get("category") or "community"),
+        "categoryLabel": str(item.get("categoryLabel") or "Lokalt och föreningar"),
+        "sourceName": str(item.get("sourceName") or "Lokal arrangör"),
+        "url": str(item.get("url") or ""),
+        "verified": True,
+    }
 
 
 def event_from_json_ld(item: dict, municipality: str, source: dict) -> dict | None:
@@ -240,18 +266,36 @@ def events_from_filter_api(markup: str, municipality: str, source: dict) -> list
 
 def main() -> int:
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
+    catalog = json.loads(SOURCE_CATALOG.read_text(encoding="utf-8"))
     today = date.today().isoformat()
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     any_source_ok = False
 
     for municipality, payload in data.get("municipalities", {}).items():
+        municipality_catalog = catalog.get("municipalities", {}).get(municipality, {})
+        sources = municipality_catalog.get("sources", [])
+        if sources:
+            payload["sources"] = sources
         existing = [
             item for item in payload.get("events", [])
-            if str(item.get("endDate") or item.get("startDate") or "") >= today
+            if not item.get("verified")
+            and str(item.get("endDate") or item.get("startDate") or "") >= today
         ]
-        collected = []
+        collected = [
+            event for item in municipality_catalog.get("featuredEvents", [])
+            if (event := catalog_event(item, municipality))
+        ]
+        if collected:
+            any_source_ok = True
         health = []
         for source in payload.get("sources", []):
+            if not source.get("automatic"):
+                health.append({
+                    "name": source["name"], "url": source["url"],
+                    "status": "reference", "mode": "reference", "events": 0,
+                    "checkedAt": now,
+                })
+                continue
             try:
                 markup = fetch_html(source["url"])
                 rows = []
@@ -279,15 +323,18 @@ def main() -> int:
 
         unique = {}
         for item in existing + collected:
-            key = f"{str(item.get('title', '')).lower()}|{item.get('startDate')}|{item.get('venue')}"
-            unique[key] = item
+            title_key = re.sub(r"\W+", "", str(item.get("title", "")).casefold())
+            key = f"{title_key}|{item.get('startDate')}"
+            current = unique.get(key)
+            if not current or item.get("verified"):
+                unique[key] = item
         payload["events"] = sorted(unique.values(), key=lambda item: (item.get("startDate") or "", item.get("title") or ""))[:80]
         payload["sourceHealth"] = health
 
     if not any_source_ok:
         print("Ingen evenemangskälla kunde kontrolleras; behåller tidigare tidsstämpel")
         return 1
-    data["version"] = "0.20.4"
+    data["version"] = "0.21.0"
     data["generatedAt"] = now
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 0
