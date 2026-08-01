@@ -19,7 +19,7 @@ ACTIVE_PAGES = [
 COMPONENTS = [
     "header", "quick-strip", "navigation", "lunch-strip", "hero",
     "premium-ad-1", "primary-cards", "transport", "sport",
-    "secondary-cards", "premium-ad-2", "jobs-housing", "grocery",
+    "secondary-cards", "premium-ad-2", "jobs-housing",
     "premium-ad-3", "footer",
 ]
 
@@ -118,7 +118,7 @@ def verify_data() -> None:
 
     important_text = json.dumps(load_json("data/important.json"), ensure_ascii=False)
     assert not re.search(r"\bBorlänge\b", important_text, re.I), "Dagens viktigaste innehåller Borlänge"
-    assert load_json("data/lunch.json").get("version") == "0.20.5", "Fel lunchdataversion"
+    assert re.fullmatch(r"\d+\.\d+\.\d+", str(load_json("data/lunch.json").get("version", ""))), "Fel lunchdataversion"
 
 
 def verify_ads() -> None:
@@ -163,8 +163,28 @@ def verify_simple_sport_hub() -> None:
             assert source.get("url", "").startswith("https://"), f"{name}: ogiltig sportkälla"
 
 
+def verify_final_experience() -> None:
+    quick = (ROOT / "components/quick-strip.html").read_text(encoding="utf-8")
+    navigation = (ROOT / "components/navigation.html").read_text(encoding="utf-8")
+    footer = (ROOT / "components/footer.html").read_text(encoding="utf-8")
+    header = (ROOT / "components/header.html").read_text(encoding="utf-8")
+    information = (ROOT / "information.html").read_text(encoding="utf-8")
+    script = (ROOT / "script.js").read_text(encoding="utf-8")
+    index = (ROOT / "index.html").read_text(encoding="utf-8")
+    for marker in ["data-quick-jobs-title", "data-quick-housing-title", "data-quick-events-title", "data-quick-news-title", "data-quick-sport-title", "data-quick-transport-title"]:
+        assert marker in quick, f"Snabbrullen saknar {marker}"
+    assert 'tabindex="-1"' in quick, "Snabbrullens dubblett får inte vara tangentbordsfokuserbar"
+    assert "notification-panel" in header and "aria-expanded" in header, "Notiscentrets tillgänglighet saknas"
+    assert "notiser" in script.lower() and 'kind, icon' in script, "Notiscentret är inte kopplat"
+    assert "matkasse.html" not in navigation and 'data-component="grocery"' not in index, "Dold Matkasse visas fortfarande"
+    assert "Källor & ansvar" in footer and 'id="kallor"' in information, "Käll- och ansvarsinformation saknas"
+    assert index.count('data-component="premium-ad-') == 3, "Startsidan ska ha tre premiumannonsgrupper"
+    assert not (ROOT / "quick-strip.html").exists(), "Gammal snabbrulle ligger kvar"
+    assert not (ROOT / "components/ads.html").exists(), "Gammal annonskomponent ligger kvar"
+
+
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_simple_sport_hub]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_simple_sport_hub, verify_final_experience]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")

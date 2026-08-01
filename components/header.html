@@ -26,12 +26,12 @@
       <button class="icon-button notification-button" id="notification-button" type="button" aria-label="Öppna notiser" aria-expanded="false" aria-controls="notification-panel">
         <i data-lucide="bell"></i><b id="notification-count" hidden>0</b>
       </button>
-      <button class="icon-button mobile-menu-button" id="mobile-menu-button" type="button" aria-label="Öppna meny">
+      <button class="icon-button mobile-menu-button" id="mobile-menu-button" type="button" aria-label="Öppna meny" aria-expanded="false" aria-controls="main-nav">
         <i data-lucide="menu"></i>
       </button>
     </div>
   </div>
-  <aside class="notification-panel" id="notification-panel" hidden aria-label="Notiser">
+  <aside class="notification-panel" id="notification-panel" hidden role="dialog" aria-modal="false" aria-label="Notiser" aria-live="polite">
     <div class="notification-panel-heading">
       <div><span class="section-kicker">LOKALA UPPDATERINGAR</span><h2>Notiser för <span data-notification-municipality>Åmål</span></h2></div>
       <button type="button" id="notification-close" aria-label="Stäng notiser"><i data-lucide="x"></i></button>

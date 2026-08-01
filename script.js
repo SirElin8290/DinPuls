@@ -19,7 +19,6 @@ const componentNames = [
   "secondary-cards",
   "premium-ad-2",
   "jobs-housing",
-  "grocery",
   "premium-ad-3",
   "footer"
 ];
@@ -276,33 +275,40 @@ function initializeSearch() {
     return;
   }
 
+  const input = form.querySelector("input");
+  const feedback = document.querySelector("#search-feedback");
+  input?.addEventListener("input", () => {
+    if (feedback) feedback.hidden = true;
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const value = form.querySelector("input").value.trim().toLocaleLowerCase("sv-SE");
+    const value = input.value.trim().toLocaleLowerCase("sv-SE");
     if (!value) return;
     const municipality = encodeURIComponent(DinPulsMunicipality.getName());
     const destinations = [
-      { terms: ["jobb", "arbete", "lediga jobb"], url: `jobb.html?kommun=${municipality}` },
-      { terms: ["bostad", "bostäder", "lägenhet", "hyresrätt"], url: `bostader.html?kommun=${municipality}` },
+      { terms: ["jobb", "arbete", "lediga jobb", "platsbanken"], url: `jobb.html?kommun=${municipality}` },
+      { terms: ["bostad", "bostäder", "lägenhet", "hyresrätt", "ledig bostad"], url: `bostader.html?kommun=${municipality}` },
       { terms: ["lunch", "restaurang", "dagens lunch"], url: `lunch.html?kommun=${municipality}` },
-      { terms: ["evenemang", "event", "kalender"], url: `evenemang.html?kommun=${municipality}` },
-      { terms: ["sport", "matcher", "resultat", "tabell"], url: `sport.html?kommun=${municipality}` },
-      { terms: ["matkasse", "matpriser", "baskasse"], url: `matkasse.html?kommun=${municipality}&kasse=bas` },
+      { terms: ["evenemang", "event", "kalender", "festival", "konsert"], url: `evenemang.html?kommun=${municipality}` },
+      { terms: ["sport", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf"], url: `sport.html?kommun=${municipality}` },
       { terms: ["trafik", "vägarbete", "trafikläge"], url: `trafik.html?kommun=${municipality}` },
-      { terms: ["buss", "tåg", "avgång", "kollektivtrafik"], url: "#kollektivtrafik" },
+      { terms: ["buss", "tåg", "avgång", "avgångar", "kollektivtrafik", "hållplats"], url: "#kollektivtrafik" },
       { terms: ["väder", "prognos"], url: "#vader" },
-      { terms: ["nyheter", "lokala nyheter"], url: "#nyheter" },
+      { terms: ["nyheter", "lokala nyheter", "senaste nytt"], url: "#nyheter" },
+      { terms: ["notis", "notiser", "uppdateringar"], action: () => document.querySelector("#notification-button")?.click() },
       { terms: ["annonsera", "annons"], url: "information.html#annonsera" },
+      { terms: ["källor", "ansvar", "rättelse"], url: "information.html#kallor" },
       { terms: ["kontakt", "feedback", "integritet", "om oss"], url: `information.html#${value.includes("integritet") ? "integritet" : value.includes("feedback") ? "feedback" : value.includes("om ") ? "om" : "kontakt"}` }
     ];
     const match = destinations.find(item => item.terms.some(term => value.includes(term)));
-    const feedback = document.querySelector("#search-feedback");
     if (match) {
-      window.location.href = match.url;
+      if (match.action) match.action();
+      else window.location.href = match.url;
       return;
     }
     if (feedback) {
-      feedback.textContent = "Ingen modul matchade. Prova jobb, bostäder, lunch, evenemang, sport, trafik, buss, väder eller nyheter.";
+      feedback.textContent = "Ingen träff. Prova jobb, bostäder, lunch, evenemang, sport, trafik, buss, väder, nyheter eller notiser.";
       feedback.hidden = false;
       window.setTimeout(() => { feedback.hidden = true; }, 7000);
     }
@@ -517,7 +523,12 @@ function initializeNotifications() {
   const setOpen = (open) => {
     panel.hidden = !open;
     button.setAttribute("aria-expanded", String(open));
-    if (open && window.lucide) lucide.createIcons();
+    if (open) {
+      if (window.lucide) lucide.createIcons();
+      close?.focus();
+    } else if (document.activeElement && panel.contains(document.activeElement)) {
+      button.focus();
+    }
   };
 
   button.addEventListener("click", (event) => {
@@ -564,8 +575,14 @@ function renderNotifications(municipality) {
   });
   badge.textContent = unread.length > 9 ? "9+" : String(unread.length);
   badge.hidden = unread.length === 0;
+  document.querySelector("#notification-button")?.setAttribute(
+    "aria-label",
+    unread.length ? `Öppna notiser, ${unread.length} olästa` : "Öppna notiser"
+  );
   list.hidden = currentNotificationItems.length === 0;
   empty.hidden = currentNotificationItems.length !== 0;
+  const markRead = document.querySelector("#notification-mark-read");
+  if (markRead) markRead.hidden = unread.length === 0;
   list.innerHTML = currentNotificationItems.map((item) => `
     <a class="notification-item ${seen.has(item.key) ? "read" : "unread"}"
        href="${escapeAttribute(item.url)}"
@@ -582,7 +599,7 @@ function renderNotifications(municipality) {
 
 function collectNotifications(municipality) {
   const items = [];
-  const priorities = { important: 100, transport: 90, traffic: 80, jobs: 70, housing: 60, events: 55, news: 45, fuel: 35, lunch: 30 };
+  const priorities = { important: 100, transport: 90, traffic: 80, sport: 75, jobs: 70, housing: 60, events: 55, news: 45, fuel: 35, lunch: 30 };
   const add = (kind, icon, id, title, detail, url, date, external = false) => {
     if (!id || !title) return;
     items.push({
@@ -641,6 +658,18 @@ function collectNotifications(municipality) {
     const id = typeof alert === "string" ? `${stop.id}-${index}-${alert}` : alert.id || `${stop.id}-${index}-${title}`;
     add("transport", "bus-front", id, title, stop.name, "#kollektivtrafik", transportData.generatedAt);
   });
+  (sportsData?.municipalities?.[municipality]?.matches || []).filter((match) => {
+    const start = new Date(match.startTime).getTime();
+    if (!start) return false;
+    const difference = start - Date.now();
+    const finished = ["finished", "final", "ended"].includes(String(match.status || "").toLowerCase());
+    return finished ? difference >= -2 * 86400000 : difference >= 0 && difference <= 7 * 86400000;
+  }).slice(0, 3).forEach((match) => {
+    const finished = ["finished", "final", "ended"].includes(String(match.status || "").toLowerCase());
+    const score = finished && match.homeScore !== null && match.homeScore !== undefined && match.awayScore !== null && match.awayScore !== undefined && Number.isFinite(Number(match.homeScore)) && Number.isFinite(Number(match.awayScore))
+      ? ` · ${match.homeScore}–${match.awayScore}` : "";
+    add("sport", "trophy", match.id, `${match.homeTeam} – ${match.awayTeam}${score}`, match.competition || match.sport || "Lokalsport", `sport.html?kommun=${encodeURIComponent(municipality)}&sport=${encodeURIComponent(match.sport || "")}`, match.startTime);
+  });
   (fuelData?.municipalities?.[municipality]?.stations || []).filter((station) =>
     Number(station.price) > 0
   ).slice(0, 3).forEach((station) =>
@@ -682,15 +711,27 @@ function saveSeenNotifications(municipality, keys) {
 function initializeMobileMenu() {
   const button = document.querySelector("#mobile-menu-button");
   const nav = document.querySelector("#main-nav");
+  const setOpen = (open) => {
+    nav?.classList.toggle("open", open);
+    button?.setAttribute("aria-expanded", String(open));
+    button?.setAttribute("aria-label", open ? "Stäng meny" : "Öppna meny");
+  };
 
   button?.addEventListener("click", () => {
-    nav?.classList.toggle("open");
+    setOpen(!nav?.classList.contains("open"));
   });
 
   nav?.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
-      nav.classList.remove("open");
+      setOpen(false);
     });
+  });
+  document.addEventListener("click", (event) => {
+    if (!nav?.classList.contains("open") || nav.contains(event.target) || button?.contains(event.target)) return;
+    setOpen(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
   });
 }
 
@@ -1272,6 +1313,12 @@ function renderNewsForMunicipality(municipality) {
   if (subheading && usesRegionalFallback) {
     subheading.textContent = `Regionalt urval för ${municipality}`;
   }
+  document.querySelectorAll("[data-quick-news-title]").forEach((element) => {
+    element.textContent = relevant.length ? `${relevant.length} lokala nyheter` : `Nyheter nära ${municipality}`;
+  });
+  document.querySelectorAll("[data-quick-news-detail]").forEach((element) => {
+    element.textContent = relevant[0]?.title || "Öppna den lokala nyhetssidan";
+  });
   renderImportantNews(relevant);
   renderNewsSources(municipality);
   if (window.lucide) lucide.createIcons();
@@ -2223,6 +2270,7 @@ function initializeRotatingAds() {
       window.clearInterval(timer);
       timer = window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
     };
+    const pause = () => window.clearInterval(timer);
     module.querySelector("[data-ad-previous]")?.addEventListener("click", () => {
       show(current - 1);
       restart();
@@ -2230,6 +2278,16 @@ function initializeRotatingAds() {
     module.querySelector("[data-ad-next]")?.addEventListener("click", () => {
       show(current + 1);
       restart();
+    });
+    module.addEventListener("mouseenter", pause);
+    module.addEventListener("mouseleave", restart);
+    module.addEventListener("focusin", pause);
+    module.addEventListener("focusout", (event) => {
+      if (!module.contains(event.relatedTarget)) restart();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) pause();
+      else restart();
     });
   });
 }
@@ -2258,6 +2316,12 @@ function renderSportsHome(config) {
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
   if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar · ${sports.length} sporter</strong><span>${matchCount ? `${matchCount} inlästa matcher och resultat` : `officiella match-, tävlings- och resultatlänkar`} · hela det lokala sportlivet</span>`;
+  document.querySelectorAll("[data-quick-sport-title]").forEach((element) => {
+    element.textContent = `${sports.length} sporter i ${config.name}`;
+  });
+  document.querySelectorAll("[data-quick-sport-detail]").forEach((element) => {
+    element.textContent = matchCount ? `${matchCount} matcher och resultat` : `${clubs.length} föreningar och officiella länkar`;
+  });
   const withMatches = sports.filter((sport) => matches.some((match) => match.sport === sport));
   const withoutMatches = sports.filter((sport) => !withMatches.includes(sport));
   const dayOffset = withoutMatches.length ? Math.floor(Date.now() / 86400000) % withoutMatches.length : 0;
