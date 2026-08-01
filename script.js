@@ -1978,10 +1978,10 @@ function renderHousing() {
 
   const updated = document.querySelector("#housing-updated");
   if (updated) {
-    const timestamp = new Date(municipalityData.updatedAt || housingData.generatedAt);
+    const timestamp = new Date(municipalityData.checkedAt || municipalityData.updatedAt || housingData.generatedAt);
     const label = Number.isNaN(timestamp.getTime())
       ? "Källor kontrollerade"
-      : `Kontrollerad ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+      : `${municipalityData.stale ? "Senaste data · kontrollfel" : "Kontrollerad"} ${timestamp.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
     updated.innerHTML = `<i data-lucide="refresh-cw"></i>${label}`;
   }
 

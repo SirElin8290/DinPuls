@@ -2,6 +2,7 @@ const municipalityState = window.DinPulsMunicipalityState;
 const portalType = document.documentElement.dataset.portal;
 let portalMunicipality = municipalityState.getInitial();
 let portalData;
+let portalSelectedListing = new URLSearchParams(window.location.search).get("annons") || "";
 
 const escapePortal = (value) => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 const formatNumber = value => new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
@@ -11,6 +12,7 @@ async function initializePortal() {
   municipalityState.populateSelect(municipalitySelect, portalMunicipality);
   municipalitySelect.addEventListener("change", () => {
     portalMunicipality = municipalityState.set(municipalitySelect.value);
+    portalSelectedListing = "";
     renderPortal();
   });
   document.querySelector("#portal-search")?.addEventListener("input", renderPortal);
@@ -30,7 +32,7 @@ function renderPortal() {
   const municipalityData = portalData.municipalities?.[portalMunicipality] || {};
   const query = document.querySelector("#portal-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
   const sourceItems = portalType === "jobs" ? (municipalityData.jobs || []) : (municipalityData.listings || []);
-  const filtered = sourceItems.filter(item => {
+  let filtered = sourceItems.filter(item => {
     const text = portalType === "jobs"
       ? [item.headline, item.employer, item.occupation, item.workplace].join(" ")
       : [item.address, item.area, item.provider].join(" ");
@@ -43,6 +45,9 @@ function renderPortal() {
     }
     return true;
   });
+  if (portalType === "housing" && portalSelectedListing) {
+    filtered = [...filtered].sort((left, right) => Number(isSelectedHousing(right)) - Number(isSelectedHousing(left)));
+  }
   const total = document.querySelector("#portal-total");
   if (portalType === "jobs") {
     const advertisedTotal = Number(municipalityData.total) || sourceItems.length;
@@ -54,18 +59,27 @@ function renderPortal() {
   } else {
     total.textContent = `${filtered.length} lediga bostäder`;
   }
-  const updated = new Date(municipalityData.updatedAt || portalData.generatedAt);
-  document.querySelector("#portal-updated").textContent = Number.isNaN(updated.getTime()) ? "" : `Uppdaterad ${updated.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+  const checked = new Date(municipalityData.checkedAt || municipalityData.updatedAt || portalData.generatedAt);
+  document.querySelector("#portal-updated").textContent = Number.isNaN(checked.getTime())
+    ? ""
+    : `${municipalityData.stale ? "Senaste data visas · kontroll misslyckades" : "Kontrollerad"} ${checked.toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   const list = document.querySelector("#portal-list");
   list.innerHTML = filtered.map(portalType === "jobs" ? renderPortalJob : renderPortalHousing).join("");
   document.querySelector("#portal-empty").hidden = filtered.length > 0;
   list.hidden = filtered.length === 0;
+  if (portalType === "housing" && portalSelectedListing) {
+    requestAnimationFrame(() => list.querySelector(".portal-card.selected")?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  }
   if (window.lucide) lucide.createIcons();
 }
 
 function renderPortalHousing(item) {
   const details = [Number(item.rooms) > 0 ? `${formatNumber(item.rooms)} rum` : "", Number(item.size) > 0 ? `${formatNumber(item.size)} m²` : "", Number(item.rent) > 0 ? `${new Intl.NumberFormat("sv-SE").format(item.rent)} kr/mån` : ""].filter(Boolean);
-  return `<article class="portal-card"><span class="portal-card-icon housing"><i data-lucide="house"></i></span><div><h3>${escapePortal(item.address || "Ledig bostad")}</h3><p>${escapePortal(item.area || item.provider || "")}</p><div class="portal-tags">${details.map(detail => `<span>${escapePortal(detail)}</span>`).join("")}</div><small>${escapePortal(item.available ? `Tillgänglig ${item.available}` : "Se tillgänglighet hos hyresvärden")} · ${escapePortal(item.provider || "Officiell hyresvärd")}</small></div><a class="portal-source-button" href="${escapePortal(item.url)}" target="_blank" rel="noopener noreferrer">Visa hos hyresvärden <i data-lucide="external-link"></i></a></article>`;
+  return `<article class="portal-card${isSelectedHousing(item) ? " selected" : ""}"><span class="portal-card-icon housing"><i data-lucide="house"></i></span><div><h3>${escapePortal(item.address || "Ledig bostad")}</h3><p>${escapePortal(item.area || item.provider || "")}</p><div class="portal-tags">${details.map(detail => `<span>${escapePortal(detail)}</span>`).join("")}</div><small>${escapePortal(item.available ? `Tillgänglig ${item.available}` : "Se tillgänglighet hos hyresvärden")} · ${escapePortal(item.provider || "Officiell hyresvärd")}</small></div><a class="portal-source-button" href="${escapePortal(item.url)}" target="_blank" rel="noopener noreferrer">Visa hos hyresvärden <i data-lucide="external-link"></i></a></article>`;
+}
+
+function isSelectedHousing(item) {
+  return portalSelectedListing !== "" && [item.url, item.id, item.address].some(value => String(value || "") === portalSelectedListing);
 }
 
 function renderPortalJob(job) {

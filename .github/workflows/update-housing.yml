@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "43 */4 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/update_housing.py"
+      - "scripts/test_update_housing.py"
+      - "data/municipalities.json"
+      - ".github/workflows/update-housing.yml"
 
 permissions:
   contents: write
@@ -28,13 +36,26 @@ jobs:
       - name: Hämta aktuella bostäder
         run: python scripts/update_housing.py
 
+      - name: Testa bostadslogiken
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py
+
       - name: Spara ny bostadsdata
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/housing.json
           if ! git diff --cached --quiet; then
             git commit -m "Uppdatera lediga bostäder"
-            git pull --rebase
-            git push
+            for attempt in 1 2 3 4; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                echo "Nya bostadsuppgifter publicerade."
+                exit 0
+              fi
+              git rebase --abort || true
+              echo "Push-försök $attempt misslyckades; hämtar senaste main."
+              [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+            done
+            exit 1
           fi
