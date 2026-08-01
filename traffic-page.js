@@ -1,14 +1,12 @@
-const TRAFFIC_MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"];
-const trafficParams = new URLSearchParams(location.search);
-let trafficMunicipality = trafficParams.get("kommun") || localStorage.getItem("dinpuls-municipality") || "Åmål";
-if (!TRAFFIC_MUNICIPALITIES.includes(trafficMunicipality)) trafficMunicipality = "Åmål";
+const municipalityState = window.DinPulsMunicipalityState;
+let trafficMunicipality = municipalityState.getInitial();
 let fullRoadTrafficData;
 const escapeTraffic = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 
 async function initializeTrafficPage() {
   const select = document.querySelector("#traffic-municipality");
-  select.innerHTML = TRAFFIC_MUNICIPALITIES.map(name => `<option ${name === trafficMunicipality ? "selected" : ""}>${name}</option>`).join("");
-  select.addEventListener("change", () => { trafficMunicipality = select.value; localStorage.setItem("dinpuls-municipality", trafficMunicipality); history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(trafficMunicipality)}`); renderTrafficPage(); });
+  municipalityState.populateSelect(select, trafficMunicipality);
+  select.addEventListener("change", () => { trafficMunicipality = municipalityState.set(select.value); renderTrafficPage(); });
   document.querySelector("#traffic-type").addEventListener("change", renderTrafficPage);
   document.querySelector("#traffic-search").addEventListener("input", renderTrafficPage);
   renderStrategicAds("trafik", "trafiksida", "#traffic-page-list");
