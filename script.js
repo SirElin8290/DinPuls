@@ -1367,9 +1367,18 @@ function escapeAttribute(value){return escapeHtml(value);}
    DINPULS v0.14.0 – VÄGTRAFIK
 ========================================================= */
 let roadTrafficData = null;
+let roadTrafficRefreshTimer = null;
 
 async function initializeTraffic() {
   DinPulsMunicipality.subscribe("road-traffic", renderTrafficCard);
+  await loadRoadTraffic();
+  clearInterval(roadTrafficRefreshTimer);
+  roadTrafficRefreshTimer = setInterval(() => {
+    if (!document.hidden) loadRoadTraffic();
+  }, 15 * 60 * 1000);
+}
+
+async function loadRoadTraffic() {
   try {
     const response = await fetch(`data/road-traffic.json?version=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
@@ -1378,6 +1387,7 @@ async function initializeTraffic() {
     console.error("Vägtrafiken kunde inte laddas:", error);
     roadTrafficData = null;
   }
+  renderTrafficCard();
 }
 
 function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
@@ -1388,30 +1398,33 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
   if (!list || !total || !status || !config) return;
   if (link) link.href = `trafik.html?kommun=${encodeURIComponent(config.name)}`;
   const municipality = roadTrafficData?.municipalities?.[config.name];
-  const sourceItems = Array.isArray(municipality?.items) ? municipality.items : [];
-  const seenTraffic = new Set();
-  const items = sourceItems.filter((item) => {
-    const key = `${item.category || ""}|${item.title || ""}|${item.road || ""}|${item.location || ""}`
-      .toLocaleLowerCase("sv-SE").replace(/\s+/g, " ").trim();
-    if (seenTraffic.has(key)) return false;
-    seenTraffic.add(key);
-    return true;
-  });
+  const items = Array.isArray(municipality?.items) ? municipality.items : [];
+  const generatedAt = new Date(roadTrafficData?.generatedAt || "");
+  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 40 * 60 * 1000;
   total.textContent = String(items.length);
   if (!roadTrafficData) {
     status.textContent = "Ej tillgänglig";
     list.innerHTML = '<div class="traffic-empty"><i data-lucide="cloud-off"></i><span>Trafikdata kunde inte laddas.</span></div>';
   } else if (!roadTrafficData.active) {
-    status.textContent = "Väntar på nyckel";
-    list.innerHTML = '<div class="traffic-empty"><i data-lucide="key-round"></i><span>Trafikverkets API aktiveras när nyckeln lagts in.</span></div>';
+    status.textContent = "Ej tillgänglig";
+    list.innerHTML = '<div class="traffic-empty"><i data-lucide="cloud-off"></i><span>Trafikläget kunde inte kontrolleras. Öppna Trafikverkets vägkarta.</span></div>';
+  } else if (isStale) {
+    status.textContent = "Försenad uppdatering";
+    list.innerHTML = items.length
+      ? items.slice(0, 3).map(renderTrafficCompactItem).join("")
+      : '<div class="traffic-empty"><i data-lucide="clock-alert"></i><span>Senaste trafikuppdateringen är äldre än 40 minuter.</span></div>';
   } else if (!items.length) {
     status.textContent = "Inga störningar";
-    list.innerHTML = `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Inga aktuella vägmeddelanden nära ${escapeHtml(config.name)}.</span></div>`;
+    list.innerHTML = `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Lugnt trafikläge nära ${escapeHtml(config.name)}. Inga aktuella vägmeddelanden hittades inom ${Number(roadTrafficData.radiusKm || 35)} km.</span></div>`;
   } else {
-    status.textContent = "Live";
-    list.innerHTML = items.slice(0, 3).map(item => `<a href="${escapeAttribute(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/")}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`).join("");
+    status.textContent = Number.isNaN(generatedAt.getTime()) ? "Aktuellt" : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
+    list.innerHTML = items.slice(0, 3).map(renderTrafficCompactItem).join("");
   }
   if (window.lucide) lucide.createIcons();
+}
+
+function renderTrafficCompactItem(item) {
+  return `<a href="${escapeAttribute(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/")}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`;
 }
 
 function trafficIcon(category) {
