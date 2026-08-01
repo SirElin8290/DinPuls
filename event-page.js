@@ -1,14 +1,12 @@
-const EVENT_MUNICIPALITIES=["Åmål","Säffle","Bengtsfors","Mellerud","Årjäng","Arvika","Grums"];
-const eventParams=new URLSearchParams(location.search);
-let eventMunicipality=eventParams.get("kommun")||localStorage.getItem("dinpuls-municipality")||"Åmål";
-if(!EVENT_MUNICIPALITIES.includes(eventMunicipality))eventMunicipality="Åmål";
+const municipalityState=window.DinPulsMunicipalityState;
+let eventMunicipality=municipalityState.getInitial();
 let fullEventsData;
 const escapeEvent=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 
 async function initializeEventPage(){
   const select=document.querySelector("#events-municipality");
-  select.innerHTML=EVENT_MUNICIPALITIES.map(name=>`<option ${name===eventMunicipality?"selected":""}>${name}</option>`).join("");
-  select.addEventListener("change",()=>{eventMunicipality=select.value;localStorage.setItem("dinpuls-municipality",eventMunicipality);history.replaceState(null,"",`${location.pathname}?kommun=${encodeURIComponent(eventMunicipality)}`);renderEventPage()});
+  municipalityState.populateSelect(select,eventMunicipality);
+  select.addEventListener("change",()=>{eventMunicipality=municipalityState.set(select.value);renderEventPage()});
   ["#events-category","#events-period"].forEach(id=>document.querySelector(id).addEventListener("change",renderEventPage));
   document.querySelector("#events-search").addEventListener("input",renderEventPage);
   renderStrategicAds("evenemang", "evenemangssida", "#events-page-list");
