@@ -1395,8 +1395,11 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
   if (!list || !status || !config) return;
 
   const municipality = importantData?.municipalities?.[config.name];
-  const items = Array.isArray(municipality?.items) ? municipality.items.slice(0, 3) : [];
+  const items = Array.isArray(municipality?.items)
+    ? municipality.items.filter(item => Number(item.priority || 0) >= 70).sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0)).slice(0, 3)
+    : [];
   const generatedAt = new Date(importantData?.generatedAt || "");
+  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 45 * 60 * 1000;
 
   if (!importantData) {
     status.textContent = "Kunde inte uppdateras";
@@ -1405,12 +1408,14 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
       "Försök igen om en stund eller öppna kommunens webbplats."
     );
   } else if (items.length === 0) {
-    status.textContent = Number.isNaN(generatedAt.getTime())
+    status.textContent = isStale
+      ? "Senast kontrollerad information"
+      : Number.isNaN(generatedAt.getTime())
       ? "Kontrollerad"
       : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`;
-    list.innerHTML = renderImportantCalm(config.name, importantData.sources || []);
+    list.innerHTML = renderImportantCalm(config.name, municipality?.sourceHealth || importantData.sources || [], isStale);
   } else {
-    status.textContent = `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
+    status.textContent = isStale ? `${items.length} – uppdateringen är försenad` : `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
     list.innerHTML = items.map(renderImportantItem).join("");
   }
 
@@ -1421,28 +1426,23 @@ function renderImportantEmpty(title, detail) {
   return `<article class="important-empty"><i class="status-icon success" data-lucide="circle-check"></i><div><strong>${escapeHtml(title)}</strong><small>${escapeHtml(detail)}</small></div></article>`;
 }
 
-function renderImportantCalm(municipality, sources) {
-  const municipalityPrefix = municipality.toLocaleLowerCase("sv-SE").slice(0, 4);
-  const municipalSource = (sources || []).find((source) =>
-    String(source.name || "").toLocaleLowerCase("sv-SE").startsWith(municipalityPrefix)
-  );
-  const selectedSources = [
-    municipalSource,
-    ...(sources || []).filter((source) => ["Krisinformation.se", "Polisen"].includes(source.name))
-  ].filter(Boolean).slice(0, 3);
+function renderImportantCalm(municipality, sources, isStale = false) {
+  const selectedSources = (sources || [])
+    .filter(source => source.status !== "error" && source.automated !== false)
+    .slice(0, 4);
   const sourceLinks = selectedSources.map(source =>
     `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}<i data-lucide="arrow-up-right"></i></a>`
   ).join("");
   return `<article class="important-calm">
     <i class="status-icon success" data-lucide="circle-check"></i>
-    <div><strong>Lugnt läge i ${escapeHtml(municipality)}</strong><small>Inga prioriterade varningar eller akuta händelser har hittats.</small></div>
+    <div><strong>${isStale ? "Ingen ny kontroll har kommit in" : `Lugnt läge i ${escapeHtml(municipality)}`}</strong><small>${isStale ? "Informationen är äldre än 45 minuter. Öppna en officiell källa vid osäkerhet." : "Inga prioriterade varningar eller akuta händelser har hittats."}</small></div>
   </article>
   <div class="important-sources"><span>Kontrollerade källor</span>${sourceLinks}</div>`;
 }
 
 function renderImportantItem(item) {
   const severity = ["danger", "warning", "info"].includes(item.severity) ? item.severity : "info";
-  const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "car-front", municipal: "wrench" };
+  const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "bus-front", road: "car-front", weather: "cloud-lightning", municipal: "wrench" };
   const icon = icons[item.category] || "info";
   const published = formatRelativeNewsTime(item.publishedAt);
   const source = item.source || "Officiell källa";
