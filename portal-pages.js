@@ -1,8 +1,6 @@
-const PORTAL_MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"];
+const municipalityState = window.DinPulsMunicipalityState;
 const portalType = document.documentElement.dataset.portal;
-const params = new URLSearchParams(location.search);
-let portalMunicipality = params.get("kommun") || localStorage.getItem("dinpuls-municipality") || "Åmål";
-if (!PORTAL_MUNICIPALITIES.includes(portalMunicipality)) portalMunicipality = "Åmål";
+let portalMunicipality = municipalityState.getInitial();
 let portalData;
 
 const escapePortal = (value) => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
@@ -10,11 +8,9 @@ const formatNumber = value => new Intl.NumberFormat("sv-SE", { maximumFractionDi
 
 async function initializePortal() {
   const municipalitySelect = document.querySelector("#portal-municipality");
-  municipalitySelect.innerHTML = PORTAL_MUNICIPALITIES.map(name => `<option ${name === portalMunicipality ? "selected" : ""}>${name}</option>`).join("");
+  municipalityState.populateSelect(municipalitySelect, portalMunicipality);
   municipalitySelect.addEventListener("change", () => {
-    portalMunicipality = municipalitySelect.value;
-    localStorage.setItem("dinpuls-municipality", portalMunicipality);
-    history.replaceState(null, "", `${location.pathname}?kommun=${encodeURIComponent(portalMunicipality)}`);
+    portalMunicipality = municipalityState.set(municipalitySelect.value);
     renderPortal();
   });
   document.querySelector("#portal-search")?.addEventListener("input", renderPortal);
