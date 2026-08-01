@@ -1512,11 +1512,11 @@ function renderImportantItem(item) {
 }
 
 
-/* =========================================================
    DINPULS v0.8.0 – BUSS- OCH TÅGTIDER
 ========================================================= */
 let transportData = null;
 let activeTransportMode = "all";
+let transportRefreshTimer = null;
 
 async function initializeTransport() {
   document.querySelectorAll(".transport-tab").forEach((button) => {
@@ -1534,7 +1534,10 @@ async function initializeTransport() {
   document.querySelector("#transport-stop")?.addEventListener("change", renderTransport);
   DinPulsMunicipality.subscribe("transport", refreshTransportForMunicipality);
   await loadTransport();
-  window.setInterval(loadTransport, 5 * 60 * 1000);
+  clearInterval(transportRefreshTimer);
+  transportRefreshTimer = window.setInterval(() => {
+    if (!document.hidden) loadTransport();
+  }, 15 * 60 * 1000);
 }
 
 async function loadTransport() {
@@ -1563,7 +1566,9 @@ function populateTransportStops() {
   if (!select || !transportData) return;
   const municipality = DinPulsMunicipality.getName();
   const stops = transportData.municipalities?.[municipality]?.stops || [];
-  select.innerHTML = stops.map((stop, index) => `<option value="${escapeAttribute(stop.id)}"${index === 0 ? " selected" : ""}>${escapeHtml(stop.name)}</option>`).join("");
+  const previousSelection = select.value;
+  select.innerHTML = stops.map((stop) => `<option value="${escapeAttribute(stop.id)}">${escapeHtml(stop.name)}</option>`).join("");
+  if (stops.some((stop) => stop.id === previousSelection)) select.value = previousSelection;
   const place = document.querySelector("#transport-place");
   if (place) place.textContent = municipality;
 }
@@ -1590,6 +1595,13 @@ function renderTransport() {
   loading.hidden = true;
   board.hidden = departures.length === 0;
   empty.hidden = departures.length > 0;
+  if (!departures.length) {
+    const modeLabel = activeTransportMode === "train" ? "tåg" : activeTransportMode === "bus" ? "bussar" : "avgångar";
+    empty.querySelector("strong").textContent = `Inga kommande ${modeLabel} hittades`;
+    empty.querySelector("span").textContent = stop?.error
+      ? "Trafiklab kunde inte nås. Senast sparade tider visas när de fortfarande gäller."
+      : "Nästa tidtabellsfönster kontrolleras automatiskt.";
+  }
 
   const alerts = stop?.alerts || [];
   alertBox.hidden = alerts.length === 0;
@@ -1598,7 +1610,7 @@ function renderTransport() {
   const updated = document.querySelector("#transport-updated");
   if (updated) {
     const timestamp = new Date(transportData.generatedAt);
-    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 30 * 60 * 1000;
+    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 35 * 60 * 1000;
     updated.classList.toggle("stale", stale);
     updated.innerHTML = `<i data-lucide="${stale ? "triangle-alert" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast hämtad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" })}`}`;
   }
@@ -1643,7 +1655,9 @@ function updateTransportSource(isDemo) {
   if (note) {
     note.textContent = isDemo
       ? "Exempeltider – inte liveinformation"
-      : "Aktuella avgångar från Trafiklab";
+      : transportData.partial
+        ? "Trafiklab – vissa hållplatser kunde inte uppdateras"
+        : "Aktuella avgångar från Trafiklab";
   }
   if (link) {
     link.hidden = isDemo;
@@ -1737,6 +1751,8 @@ function updateQuickTransport() {
 }
 
 window.setInterval(updateQuickTransport, 60000);
+
+/* =========================================================
 
 /* =========================================================
    DINPULS v0.15.0 – EVENEMANG
