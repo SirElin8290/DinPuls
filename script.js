@@ -4,7 +4,7 @@
 ========================================================= */
 
 const DINPULS_VERSION = "0.20.9";
-const DEFAULT_MUNICIPALITY = "Åmål";
+const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 
 const componentNames = [
   "header",
@@ -57,11 +57,12 @@ const DinPulsMunicipality = {
       ? data.defaultMunicipality
       : municipalities[0].name;
 
-    const savedName = localStorage.getItem("dinpuls-municipality");
+    const savedName = window.DinPulsMunicipalityState?.getInitial()
+      || this.defaultName;
     this.currentName = this.isValid(savedName) ? savedName : this.defaultName;
 
     if (savedName && !this.isValid(savedName)) {
-      localStorage.removeItem("dinpuls-municipality");
+      try { localStorage.removeItem("dinpuls-municipality"); } catch {}
     }
   },
 
@@ -90,7 +91,7 @@ const DinPulsMunicipality = {
 
     if (!force && validName === this.currentName) {
       if (persist) {
-        localStorage.setItem("dinpuls-municipality", validName);
+        window.DinPulsMunicipalityState?.set(validName, { updateUrl: false, dispatch: false });
       }
       return;
     }
@@ -98,7 +99,7 @@ const DinPulsMunicipality = {
     this.currentName = validName;
 
     if (persist) {
-      localStorage.setItem("dinpuls-municipality", validName);
+      window.DinPulsMunicipalityState?.set(validName, { updateUrl: false, dispatch: false });
     }
 
     const config = this.getConfig();
