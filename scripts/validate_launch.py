@@ -140,7 +140,27 @@ def verify_simple_sport_hub() -> None:
     for asset in removed:
         assert not (ROOT / asset).exists(), f"Avancerad sportfil ska vara borttagen: {asset}"
     sport = (ROOT / "sport.html").read_text(encoding="utf-8")
-    assert "Matcher & resultat" in sport and "Tabeller" in sport and "Arenor & sporthallar" in sport
+    assert "Matcher & resultat" in sport and "Tabeller" in sport
+    assert "Föreningar & källor" in sport and "Arenor & sporthallar" in sport
+
+    data = load_json("data/sports.json")
+    providers = data.get("sportProviders", {})
+    municipalities = data.get("municipalities", {})
+    clubs = [club for payload in municipalities.values() for club in payload.get("clubs", [])]
+    sports = {name for club in clubs for name in club.get("sports", [])}
+    local_sources = [source for payload in municipalities.values() for source in payload.get("liveSources", [])]
+    assert len(providers) >= 30, "Sporthubben saknar nationella kalender- och resultatkällor"
+    assert len(clubs) >= 70, "Sporthubben har för få lokala föreningar"
+    assert len(sports) >= 25, "Sporthubben representerar för få idrotter"
+    assert len(local_sources) >= 25, "Sporthubben saknar lokala direktlänkar"
+    for name, payload in municipalities.items():
+        assert payload.get("directoryUrl", "").startswith("https://"), f"{name}: föreningsregister saknas"
+        assert payload.get("clubs"), f"{name}: föreningar saknas"
+        assert payload.get("liveSources"), f"{name}: sportkällor saknas"
+        for club in payload["clubs"]:
+            assert club.get("url", "").startswith("https://"), f"{name}: ogiltig klubblänk"
+        for source in payload["liveSources"]:
+            assert source.get("url", "").startswith("https://"), f"{name}: ogiltig sportkälla"
 
 
 def main() -> int:

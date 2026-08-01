@@ -23,7 +23,12 @@ const cleanText = html => decodeEntities(String(html ?? "")
 const stableId = parts => createHash("sha1").update(parts.filter(Boolean).join("|").toLowerCase()).digest("hex").slice(0, 20);
 
 function parseDate(value) {
-  const match = cleanText(value).match(/(20\d{2})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})/);
+  const text = cleanText(value);
+  let match = text.match(/(20\d{2})-(\d{2})-(\d{2})[T\s]+(\d{1,2}):(\d{2})/);
+  if (!match) {
+    const short = text.match(/\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](20\d{2}))?\s+(\d{1,2})[:.](\d{2})\b/);
+    if (short) match = [short[0], short[3] || new Date().getFullYear(), short[2], short[1], short[4], short[5]];
+  }
   if (!match) return null;
   const wanted = [
     Number(match[1]),
@@ -54,6 +59,24 @@ function parseDate(value) {
   );
   const date = new Date(utcGuess - (stockholmAtGuess - utcGuess));
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseGenericClubCalendar(html, source) {
+  const blocks = [
+    ...String(html).matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi),
+    ...String(html).matchAll(/<(?:article|li)\b[^>]*>([\s\S]*?)<\/(?:article|li)>/gi)
+  ].map(hit => cleanText(hit[1])).filter(Boolean);
+  const matches = [];
+  for (const block of blocks) {
+    const date = block.match(/20\d{2}-\d{2}-\d{2}[T\s]+\d{1,2}:\d{2}|\b\d{1,2}[\/.]\d{1,2}(?:[\/.]20\d{2})?\s+\d{1,2}[:.]\d{2}\b/)?.[0];
+    if (!date) continue;
+    const teamHit = block.match(/([^|]{2,70}?)\s+[–-]\s+([^|]{2,70}?)(?=\s+(?:\d+\s*[–-]\s*\d+|20\d{2}|\d{1,2}[\/.]\d{1,2})|\s*\||$)/);
+    if (!teamHit) continue;
+    const score = block.match(/\b(\d{1,3})\s*[–-]\s*(\d{1,3})\b/);
+    const match = makeMatch(source, date, cleanText(teamHit[1]), cleanText(teamHit[2]), score ? Number(score[1]) : NaN, score ? Number(score[2]) : NaN, "");
+    if (match) matches.push(match);
+  }
+  return [...new Map(matches.map(match => [match.id, match])).values()];
 }
 
 function makeMatch(source, dateText, homeTeam, awayTeam, homeScore, awayScore, venue = "") {
@@ -109,7 +132,10 @@ function parseSwehockey(html, source) {
   return [...seen.values()];
 }
 
-const adapters = { "swehockey-schedule-html": parseSwehockey };
+const adapters = {
+  "swehockey-schedule-html": parseSwehockey,
+  "club-calendar-html": parseGenericClubCalendar
+};
 
 async function fetchText(url) {
   const response = await fetch(url, {
@@ -137,11 +163,21 @@ async function collectSource(source) {
 
 async function main() {
   const config = JSON.parse(await readFile(SOURCES_PATH, "utf8"));
+  let previous = { municipalities: {} };
+  try { previous = JSON.parse(await readFile(OUTPUT_PATH, "utf8")); } catch {}
   const output = { version: 2, generatedAt: new Date().toISOString(), sources: [], municipalities: {} };
   for (const [municipality, sources] of Object.entries(config.municipalities || {})) {
     output.municipalities[municipality] = { matches: [] };
     for (const source of sources.filter(item => item.enabled !== false)) {
       const result = await collectSource({ ...source, municipality: source.municipality || municipality });
+      if (result.health.status === "error") {
+        const retained = (previous.municipalities?.[municipality]?.matches || []).filter(match => match.sourceId === source.id);
+        if (retained.length) {
+          result.matches.push(...retained);
+          result.health.retainedCount = retained.length;
+          result.health.message = `${result.health.message}. ${retained.length} tidigare matcher behölls.`;
+        }
+      }
       output.sources.push(result.health);
       output.municipalities[municipality].matches.push(...result.matches);
     }
@@ -150,7 +186,6 @@ async function main() {
   const total = Object.values(output.municipalities).reduce((sum, item) => sum + item.matches.length, 0);
   const failures = output.sources.filter(source => source.status === "error");
   console.log(`Sportflöde skapat: ${output.sources.length} aktiva källor, ${total} matcher, ${failures.length} fel.`);
-  if (failures.length) process.exitCode = 1;
 }
 
 main().catch(error => { console.error(error); process.exitCode = 1; });

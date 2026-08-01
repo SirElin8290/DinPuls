@@ -2257,15 +2257,20 @@ function renderSportsHome(config) {
   const summary = document.querySelector("#sport-home-summary");
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
-  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar</strong><span>${sports.length} sporter · ${matchCount ? `${matchCount} inlästa matcher` : `inga matcher inlästa just nu`} · ${sources.length} officiella källor</span>`;
-  const featured = sports.slice(0, 4).map((sport) => ({
+  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar · ${sports.length} sporter</strong><span>${matchCount ? `${matchCount} inlästa matcher och resultat` : `officiella match-, tävlings- och resultatlänkar`} · hela det lokala sportlivet</span>`;
+  const withMatches = sports.filter((sport) => matches.some((match) => match.sport === sport));
+  const withoutMatches = sports.filter((sport) => !withMatches.includes(sport));
+  const dayOffset = withoutMatches.length ? Math.floor(Date.now() / 86400000) % withoutMatches.length : 0;
+  const rotating = [...withoutMatches.slice(dayOffset), ...withoutMatches.slice(0, dayOffset)];
+  const selected = [...withMatches.slice(0, 2), ...rotating].filter((sport, index, list) => list.indexOf(sport) === index).slice(0, 4);
+  const featured = selected.map((sport) => ({
     sport,
     clubs: clubs.filter((club) => (club.sports || []).includes(sport)),
     matches: matches.filter((match) => match.sport === sport)
   }));
   if (list) list.innerHTML = featured.map((item) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sport=${encodeURIComponent(item.sport)}">
     <span class="sport-home-icon"><i data-lucide="medal"></i></span>
-    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.matches.length ? `${item.matches.length} inlästa matcher` : `${item.clubs.length} lokala föreningar`}</small></span>
+    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.matches.length ? `${item.matches.length} matcher/resultat` : `${item.clubs.length} lokala föreningar · officiella länkar`}</small></span>
     <i data-lucide="chevron-right"></i>
   </a>`).join("");
   if (link) link.href = `sport.html?kommun=${encodeURIComponent(config.name)}`;
