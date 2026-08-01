@@ -1,17 +1,123 @@
 {
   "version": "0.21.0",
   "generatedAt": "2026-08-01T08:51:32+00:00",
-  "sources": [],
+  "sources": [
+    {
+      "id": "crisis",
+      "name": "Krisinformation.se",
+      "url": "https://www.krisinformation.se/",
+      "automated": true
+    },
+    {
+      "id": "weather",
+      "name": "SMHI varningar",
+      "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+      "automated": true
+    },
+    {
+      "id": "police",
+      "name": "Polisen",
+      "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+      "automated": true
+    },
+    {
+      "id": "road",
+      "name": "Trafikverket",
+      "url": "https://www.trafikverket.se/trafikinformation/vag/",
+      "automated": true
+    },
+    {
+      "id": "sos",
+      "name": "SOS Alarm / 112-appen",
+      "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+      "automated": false,
+      "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm."
+    }
+  ],
   "municipalities": {
     "Åmål": {
       "items": [],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Säffle": {
       "items": [],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Bengtsfors": {
       "items": [
@@ -27,12 +133,86 @@
         }
       ],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Mellerud": {
       "items": [],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Årjäng": {
       "items": [
@@ -48,17 +228,128 @@
         }
       ],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Arvika": {
       "items": [],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     },
     "Grums": {
       "items": [],
       "checkedAt": "2026-08-01T08:51:32+00:00",
-      "sourceHealth": []
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        }
+      ]
     }
   }
 }
