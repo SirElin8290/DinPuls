@@ -1,10 +1,9 @@
 (() => {
   "use strict";
-  const MUNICIPALITIES=["Åmål","Säffle","Bengtsfors","Mellerud","Årjäng","Arvika","Grums"];
+  const municipalityState=window.DinPulsMunicipalityState;
   const params=new URLSearchParams(location.search);
-  let municipality=params.get("kommun")||localStorage.getItem("dinpuls-municipality")||"Åmål";
+  let municipality=municipalityState.getInitial();
   const requestedSport=params.get("sport")||"all";
-  if(!MUNICIPALITIES.includes(municipality))municipality="Åmål";
   let sportsData=null,arenaData=null,seasonData=null,activeTab="matches",hideResults=localStorage.getItem("dinpuls-hide-sport-results")==="true";
   const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const sourceFor=(data,sport)=>(data.liveSources||[]).find(source=>source.sport===sport)||(data.liveSources||[]).find(source=>source.sport==="Alla sporter")||null;
@@ -118,8 +117,8 @@
     const [sportsResponse,arenaResponse,seasonResponse]=await Promise.all([fetch(`data/sports.json?version=${Date.now()}`,{cache:"no-store"}),fetch(`data/arenas.json?version=${Date.now()}`,{cache:"no-store"}),fetch(`data/sport-seasons.json?version=${Date.now()}`,{cache:"no-store"})]);
     if(!sportsResponse.ok||!arenaResponse.ok||!seasonResponse.ok)throw new Error("Sportdata kunde inte laddas");
     sportsData=await sportsResponse.json();arenaData=await arenaResponse.json();seasonData=await seasonResponse.json();
-    const municipalitySelect=document.querySelector("#sport-hub-municipality");municipalitySelect.innerHTML=MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");municipalitySelect.value=municipality;
-    municipalitySelect.addEventListener("change",()=>{municipality=municipalitySelect.value;localStorage.setItem("dinpuls-municipality",municipality);const url=new URL(location.href);url.searchParams.set("kommun",municipality);const sport=selectedSport();sport==="all"?url.searchParams.delete("sport"):url.searchParams.set("sport",sport);history.replaceState(null,"",`${url.pathname}?${url.searchParams.toString()}`);render()});
+    const municipalitySelect=document.querySelector("#sport-hub-municipality");municipalityState.populateSelect(municipalitySelect,municipality);
+    municipalitySelect.addEventListener("change",()=>{municipality=municipalityState.set(municipalitySelect.value);const url=new URL(location.href);const sport=selectedSport();sport==="all"?url.searchParams.delete("sport"):url.searchParams.set("sport",sport);history.replaceState(null,"",`${url.pathname}?${url.searchParams.toString()}`);render()});
     const sportSelect=document.querySelector("#sport-hub-sport");
     sportSelect.addEventListener("change",()=>{const sport=sportSelect.value;const url=new URL(location.href);sport==="all"?url.searchParams.delete("sport"):url.searchParams.set("sport",sport);url.searchParams.set("kommun",municipality);history.replaceState(null,"",`${url.pathname}?${url.searchParams.toString()}`);render()});
     document.querySelector("#sport-hub-spoiler").addEventListener("click",()=>{hideResults=!hideResults;localStorage.setItem("dinpuls-hide-sport-results",String(hideResults));render()});
