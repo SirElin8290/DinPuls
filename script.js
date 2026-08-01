@@ -1192,29 +1192,13 @@ function setText(selector, value) {
 startDinPuls();
 
 
-/* =========================================================
    DINPULS v0.8.0 – NYHETSCENTRAL
 ========================================================= */
 let allNewsArticles = [];
 let allNewsSources = [];
 let activeNewsFilter = "all";
-let activeNewsScope = localStorage.getItem("dinpuls-news-scope") || "local";
-
 
 async function initializeNews() {
-  if (!["local", "sweden", "world"].includes(activeNewsScope)) {
-    activeNewsScope = "local";
-    localStorage.removeItem("dinpuls-news-scope");
-  }
-
-  document.querySelectorAll(".news-scope-tab").forEach((button) => {
-    button.addEventListener("click", () => {
-      activeNewsScope = button.dataset.newsScope || "local";
-      localStorage.setItem("dinpuls-news-scope", activeNewsScope);
-      updateNewsTabs();
-      renderNewsForMunicipality(DinPulsMunicipality.getName());
-    });
-  });
   document.querySelectorAll(".news-filter").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelectorAll(".news-filter").forEach((item) => item.classList.remove("active"));
@@ -1223,29 +1207,17 @@ async function initializeNews() {
       renderNewsForMunicipality(DinPulsMunicipality.getName());
     });
   });
-  updateNewsTabs();
   DinPulsMunicipality.subscribe("news", (config) => {
     renderNewsForMunicipality(config.name);
   });
   await loadNews();
 }
 
-function updateNewsTabs() {
-  document.querySelectorAll(".news-scope-tab").forEach((button) => {
-    const active = button.dataset.newsScope === activeNewsScope;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-selected", String(active));
-  });
+function updateNewsHeading(municipality) {
   const heading = document.querySelector("#news-heading");
   const subheading = document.querySelector("#news-subheading");
-  const municipality = DinPulsMunicipality.getName();
-  const labels = {
-    local: ["Nyheter nära dig", `Lokalt för ${municipality}`],
-    sweden: ["Sverige", "Viktiga nationella nyheter"],
-    world: ["Världen", "Internationella händelser med störst betydelse"]
-  };
-  if (heading) heading.textContent = labels[activeNewsScope][0];
-  if (subheading) subheading.textContent = labels[activeNewsScope][1];
+  if (heading) heading.textContent = "Lokala nyheter";
+  if (subheading) subheading.textContent = `Viktiga händelser i ${municipality}`;
 }
 
 async function loadNews() {
@@ -1270,25 +1242,25 @@ async function loadNews() {
 }
 
 function renderNewsForMunicipality(municipality) {
-  updateNewsTabs();
+  updateNewsHeading(municipality);
   const loading = document.querySelector("#news-loading");
   const feed = document.querySelector("#news-feed");
   const empty = document.querySelector("#news-empty");
   const count = document.querySelector("#news-count");
+  const pageLink = document.querySelector("#news-page-link");
   if (!feed || !empty) return;
+  if (pageLink) pageLink.href = `nyheter.html?kommun=${encodeURIComponent(municipality)}`;
   const scoped = allNewsArticles
-    .filter((article) => article.scope === activeNewsScope)
-    .filter((article) => activeNewsScope !== "local" || (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
+    .filter((article) => article.scope === "local")
+    .filter((article) => (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
     .filter(matchesNewsFilter);
-  const exactLocal = activeNewsScope === "local"
-    ? scoped.filter((article) => isLocallyRelevantNews(article, municipality))
-    : scoped;
-  const usesRegionalFallback = activeNewsScope === "local" && exactLocal.length === 0;
+  const exactLocal = scoped.filter((article) => isLocallyRelevantNews(article, municipality));
+  const usesRegionalFallback = exactLocal.length === 0;
   const relevant = (usesRegionalFallback
     ? scoped.map((article) => ({ ...article, category: `Regionalt · ${article.region || "nära dig"}` }))
     : exactLocal)
     .sort(compareNewsQuality)
-    .slice(0, activeNewsScope === "local" ? 6 : 8);
+    .slice(0, 5);
   feed.innerHTML = relevant.map(renderNewsArticle).join("");
   loading.hidden = true;
   feed.hidden = relevant.length === 0;
@@ -1297,7 +1269,7 @@ function renderNewsForMunicipality(municipality) {
     ? `${relevant.length} regionala nyheter – inga nya kommunträffar`
     : `${relevant.length} ${relevant.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
   const subheading = document.querySelector("#news-subheading");
-  if (subheading && activeNewsScope === "local" && usesRegionalFallback) {
+  if (subheading && usesRegionalFallback) {
     subheading.textContent = `Regionalt urval för ${municipality}`;
   }
   renderImportantNews(relevant);
@@ -1338,7 +1310,7 @@ function calculateNewsScore(article) {
 }
 function renderImportantNews(articles) {
   const box=document.querySelector("#important-news"); if(!box)return;
-  const important=articles.filter(a=>a.important || Number(a.impact)>=95).slice(0,2);
+  const important=articles.filter(a=>a.important || Number(a.impact)>=85).slice(0,2);
   box.hidden=!important.length;
   box.innerHTML=important.length?`<div class="important-news-title"><i data-lucide="triangle-alert"></i><strong>Viktiga händelser</strong></div>${important.map(a=>`<a href="${escapeAttribute(a.url)}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(a.source)}</span><b>${escapeHtml(a.title)}</b><i data-lucide="arrow-up-right"></i></a>`).join("")}`:"";
 }
@@ -1350,7 +1322,7 @@ function renderNewsArticle(article) {
 }
 function renderNewsSources(municipality) {
   const grid=document.querySelector("#news-source-grid"); if(!grid)return;
-  const relevant=allNewsSources.filter(s=>s.scope===activeNewsScope && (activeNewsScope!=="local" || (s.municipalities||[]).includes(municipality)));
+  const relevant=allNewsSources.filter(s=>s.scope==="local" && (s.municipalities||[]).includes(municipality));
   grid.innerHTML=relevant.map(source=>`<a class="news-source-card" href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer"><span class="news-source-logo">${getNewsSourceInitials(source.name)}</span><span><strong>${escapeHtml(source.name)}</strong><small>${escapeHtml(source.type)}</small></span><span class="source-access ${source.access==='subscription'?'subscription':'free'}"><i data-lucide="${source.access==='subscription'?'lock':'check'}"></i>${source.access==='subscription'?'Delvis låst':'Fri'}</span></a>`).join("");
   if(window.lucide)lucide.createIcons();
 }
@@ -1362,6 +1334,8 @@ function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNa
 function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 function escapeAttribute(value){return escapeHtml(value);}
+
+/* =========================================================
 
 /* =========================================================
    DINPULS v0.14.0 – VÄGTRAFIK
