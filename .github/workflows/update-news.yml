@@ -30,8 +30,12 @@ jobs:
           python-version: "3.12"
       - name: Hämta aktuella nyheter
         run: python scripts/update_news.py
+      - name: Testa nyhetslogiken
+        run: python -m unittest scripts/test_update_news.py
       - name: Spara nyhetsdata
+        shell: bash
         run: |
+          set -euo pipefail
           if git diff --quiet -- data/news.json; then
             echo "Inga nyhetsförändringar."
             exit 0
@@ -40,4 +44,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/news.json
           git commit -m "Uppdatera nyheter"
-          git push
+          for attempt in 1 2 3 4; do
+            echo "Publiceringsförsök $attempt av 4"
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "Nya lokala nyheter publicerade."
+              exit 0
+            fi
+            git rebase --abort || true
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+          done
+          echo "Kunde inte publicera nyheterna efter fyra försök."
+          exit 1
