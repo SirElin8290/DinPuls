@@ -1,7 +1,6 @@
-const GROCERY_MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"];
+const municipalityState = window.DinPulsMunicipalityState;
 const groceryParams = new URLSearchParams(location.search);
-let groceryMunicipality = groceryParams.get("kommun") || localStorage.getItem("dinpuls-municipality") || "Åmål";
-if (!GROCERY_MUNICIPALITIES.includes(groceryMunicipality)) groceryMunicipality = "Åmål";
+let groceryMunicipality = municipalityState.getInitial();
 let groceryBasketId = groceryParams.get("kasse") || "bas";
 let groceryData;
 
@@ -14,8 +13,8 @@ async function initializeGrocery() {
   groceryData = await response.json();
   if (!groceryData.baskets.some(basket => basket.id === groceryBasketId)) groceryBasketId = groceryData.baskets[0].id;
   const municipalitySelect = document.querySelector("#grocery-municipality");
-  municipalitySelect.innerHTML = GROCERY_MUNICIPALITIES.map(name => `<option ${name === groceryMunicipality ? "selected" : ""}>${name}</option>`).join("");
-  municipalitySelect.addEventListener("change", () => { groceryMunicipality = municipalitySelect.value; localStorage.setItem("dinpuls-municipality", groceryMunicipality); updateAddress(); renderGrocery(); });
+  municipalityState.populateSelect(municipalitySelect, groceryMunicipality);
+  municipalitySelect.addEventListener("change", () => { groceryMunicipality = municipalityState.set(municipalitySelect.value, { updateUrl: false }); updateAddress(); renderGrocery(); });
   const basketSelect = document.querySelector("#grocery-basket");
   if (basketSelect) {
     basketSelect.innerHTML = groceryData.baskets.map(basket => `<option value="${escapeGrocery(basket.id)}" ${basket.id === groceryBasketId ? "selected" : ""}>${escapeGrocery(basket.name)}</option>`).join("");
