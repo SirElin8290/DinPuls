@@ -1,4 +1,4 @@
-# DinPuls v0.21.7 – opublicerad testversion
+# DinPuls v0.21.7 – Myndigheter & samhällsservice
 
 ## Myndigheter & samhällsservice
 
@@ -8,7 +8,7 @@
 - Skiljer tydligt på kommunal verksamhet, statlig myndighet och annan statlig samhällstjänst.
 - Inga personuppgifter, ansökningar eller inloggningar hanteras av DinPuls; externa länkar går till officiella aktörer.
 - Fyra tydligt märkta annonsplatser ligger avskilda från akuta kontakter och myndighetskort.
-- Versionen ligger endast på testgrenen `feature/myndigheter-samhallsservice` och är inte publicerad.
+- Versionen är publicerad på huvudgrenen och ingår i DinPuls för samtliga sju startkommuner.
 
 # Tidigare version: DinPuls v0.21.4
 
