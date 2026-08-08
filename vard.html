@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="sv" data-portal="health">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Vårdcentraler, 1177, apotek och lokala hälsoverksamheter nära dig.">
+  <title>Vård och hälsa – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?version=0.21.5"><link rel="stylesheet" href="portal-pages.css?version=0.21.5">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero health-page"><span class="section-kicker">DinPuls Vård och hälsa</span><h1>Rätt kontakt i <span data-health-municipality>Åmål</span></h1><p>Akut hjälp, offentlig vård, apotek och lokala behandlingsverksamheter samlade på ett ställe.</p></section>
+
+    <section class="health-urgent" aria-label="Viktiga vårdnummer">
+      <a class="health-urgent-card emergency" href="tel:112"><i data-lucide="siren"></i><span><small>Fara för liv</small><strong>Ring 112</strong><em>Akut nödsituation</em></span></a>
+      <a class="health-urgent-card advice" href="tel:1177"><i data-lucide="phone-call"></i><span><small>Sjukvårdsrådgivning</small><strong>Ring 1177</strong><em>Öppet dygnet runt</em></span></a>
+      <a class="health-urgent-card" href="https://www.1177.se/hitta-vard/" target="_blank" rel="noopener noreferrer"><i data-lucide="hospital"></i><span><small>Officiell vårdinformation</small><strong>Hitta vård hos 1177</strong><em>Kontakt, öppettider och e-tjänster</em></span></a>
+    </section>
+
+    <div class="health-principle"><i data-lucide="shield-check"></i><span>DinPuls ger kontaktvägar och lokal överblick men inga medicinska råd. Kontrollera alltid telefonnummer, öppettider och vårdinformation hos mottagningen eller 1177 före besök.</span></div>
+    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="vard" data-ad-position="1"></div>
+
+    <section class="portal-content health-content">
+      <div class="portal-toolbar health-toolbar">
+        <label>Kommun<select id="health-municipality"></select></label>
+        <label>Sök vård eller behandling<input id="health-search" type="search" placeholder="Exempel: apotek, fysioterapi eller massage"></label>
+      </div>
+      <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="2"></div>
+
+      <section id="offentlig-vard" class="health-section">
+        <div class="portal-result-heading"><div><span class="section-kicker">Officiell vård</span><h2>Vårdcentraler, jour och akutmottagningar</h2></div><span id="health-county"></span></div>
+        <div class="health-official-grid">
+          <a id="health-1177-link" href="https://www.1177.se/hitta-vard/" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon health"><i data-lucide="stethoscope"></i></span><span><strong>Hitta vård hos 1177</strong><small>Vårdcentraler, jour, tandvård och mottagningar</small></span><i data-lucide="external-link"></i></a>
+          <a id="health-region-link" href="https://www.1177.se/" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon health"><i data-lucide="landmark"></i></span><span><strong id="health-region-name">Regional vårdinformation</strong><small>Råd, e-tjänster och regionala kontaktvägar</small></span><i data-lucide="external-link"></i></a>
+        </div>
+      </section>
+
+      <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="3"></div>
+
+      <section id="lokal-halsa" class="health-section">
+        <div class="portal-result-heading"><div><span class="section-kicker">Lokalt utbud</span><h2>Apotek, behandling och friskvård</h2></div><span id="health-result-count"></span></div>
+        <p class="health-directory-note">Sökresultaten öppnas i en extern karttjänst. DinPuls rekommenderar eller rangordnar inte verksamheter.</p>
+        <div id="health-category-grid" class="health-category-grid"></div>
+        <div id="health-empty" class="portal-empty" hidden>Ingen kategori matchar sökningen.</div>
+      </section>
+
+      <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="4"></div>
+    </section>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="municipality-engine.js?version=0.21.5"></script><script src="health-page.js?version=0.21.5"></script>
+</body>
+</html>

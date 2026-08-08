@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.4
+   DINPULS.SE v0.21.5
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.4";
+const DINPULS_VERSION = "0.21.5";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
@@ -17,6 +17,7 @@ const componentNames = [
   "primary-cards",
   "transport",
   "sport",
+  "health",
   "secondary-cards",
   "premium-ad-2",
   "jobs-housing",
@@ -303,6 +304,7 @@ function initializeSearch() {
       { terms: ["lunch", "restaurang", "dagens lunch"], url: `lunch.html?kommun=${municipality}` },
       { terms: ["evenemang", "event", "kalender", "festival", "konsert"], url: `evenemang.html?kommun=${municipality}` },
       { terms: ["sport", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf"], url: `sport.html?kommun=${municipality}` },
+      { terms: ["vård", "hälsa", "vårdcentral", "1177", "apotek", "tandläkare", "fysioterapeut", "fysioterapi", "kiropraktor", "naprapat", "massage", "fotvård", "psykolog"], url: `vard.html?kommun=${municipality}` },
       { terms: ["trafik", "vägarbete", "trafikläge"], url: `trafik.html?kommun=${municipality}` },
       { terms: ["buss", "tåg", "avgång", "avgångar", "kollektivtrafik", "hållplats"], url: "#kollektivtrafik" },
       { terms: ["väder", "prognos"], url: "#vader" },
@@ -319,7 +321,7 @@ function initializeSearch() {
       return;
     }
     if (feedback) {
-      feedback.textContent = "Ingen träff. Prova jobb, bostäder, lunch, evenemang, sport, trafik, buss, väder, nyheter eller notiser.";
+      feedback.textContent = "Ingen träff. Prova jobb, bostäder, vård, apotek, lunch, evenemang, sport, trafik, buss, väder, nyheter eller notiser.";
       feedback.hidden = false;
       window.setTimeout(() => { feedback.hidden = true; }, 7000);
     }
@@ -824,7 +826,7 @@ function applyMunicipality(config) {
 }
 
 function updateMunicipalityLinks(municipality) {
-  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html"]);
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html", "vard.html"]);
   document.querySelectorAll("a[href]").forEach(link => {
     const raw = link.getAttribute("href");
     if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;

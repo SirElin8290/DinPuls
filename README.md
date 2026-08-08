@@ -557,3 +557,16 @@ Trafiklab-data måste krediteras. Länken “Data från Trafiklab.se” finns d�
 - Hållplatslistan byts till vald kommun.
 - Trafikfliken återställs till Alla vid kommunbyte.
 - Snabbraden visar nästa faktiska avgång för vald kommun i stället för statisk demodata.
+# DinPuls v0.21.5 – Vård och hälsa (lokal testversion)
+
+- Ny startsidemodul och undersida `vard.html` för samtliga sju startkommuner.
+- 112 och 1177 visas som tydliga, direkt ringbara kontaktvägar.
+- Offentlig vård länkas till 1177 Hitta vård och rätt regional 1177-ingång.
+- Apotek, tandvård, fysioterapi, kiropraktik, naprapati, massage, fotvård,
+  psykisk hälsa, arbetsterapi, rehabilitering, syn och hörsel ingår i den
+  lokala kategorikatalogen.
+- DinPuls ger inga medicinska råd och visar inga påhittade öppettider,
+  telefonnummer eller verksamhetsuppgifter.
+- Fyra lokala annonsplatser finns på undersidan utan att påverka offentlig
+  samhällsinformation.
+- Versionen är endast lokal och har inte publicerats.
