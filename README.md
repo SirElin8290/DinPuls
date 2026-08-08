@@ -557,7 +557,7 @@ Trafiklab-data måste krediteras. Länken “Data från Trafiklab.se” finns d�
 - Hållplatslistan byts till vald kommun.
 - Trafikfliken återställs till Alla vid kommunbyte.
 - Snabbraden visar nästa faktiska avgång för vald kommun i stället för statisk demodata.
-# DinPuls v0.21.5 – Vård och hälsa (lokal testversion)
+# DinPuls v0.21.5 – Vård och hälsa
 
 - Ny startsidemodul och undersida `vard.html` för samtliga sju startkommuner.
 - 112 och 1177 visas som tydliga, direkt ringbara kontaktvägar.
@@ -569,4 +569,4 @@ Trafiklab-data måste krediteras. Länken “Data från Trafiklab.se” finns d�
   telefonnummer eller verksamhetsuppgifter.
 - Fyra lokala annonsplatser finns på undersidan utan att påverka offentlig
   samhällsinformation.
-- Versionen är endast lokal och har inte publicerats.
+- Versionen är publicerad på DinPuls huvudgren.
