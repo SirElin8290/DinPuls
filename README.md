@@ -570,3 +570,15 @@ Trafiklab-data måste krediteras. Länken “Data från Trafiklab.se” finns d�
 - Fyra lokala annonsplatser finns på undersidan utan att påverka offentlig
   samhällsinformation.
 - Versionen är publicerad på DinPuls huvudgren.
+
+# DinPuls v0.21.6 – Service & hantverk
+
+- Ny startsidemodul och undersida `service.html` för samtliga sju startkommuner.
+- Bilverkstäder, däckbyte, bärgning, snickare, byggföretag, VVS, elektriker,
+  målare, golvläggare, tak, ventilation, städ, flytt, markarbete, låssmed,
+  reparation, byggvaruhus och maskinuthyrning ingår.
+- Kategorier öppnar neutrala externa kartsökningar; DinPuls rekommenderar eller
+  rangordnar inte enskilda verksamheter.
+- Grundöversikten hålls skild från fyra tydligt märkta annonsplatser.
+- Sökning, kategoriurval och kommunbyte fungerar för alla sju kommuner.
+- Versionen är publicerad på DinPuls huvudgren.
