@@ -37,6 +37,9 @@
 .secondary-ad.strategic-ad b{padding:5px 8px;background:rgba(255,255,255,.13);border-radius:999px;white-space:nowrap}
 .secondary-ad.strategic-ad strong{font-size:15px}
 .secondary-ad.strategic-ad small{text-align:right;white-space:nowrap}
+.secondary-ad.strategic-ad.strategic-image-ad{position:relative;display:block;padding:0;overflow:hidden;color:inherit;background:#fff;border-color:var(--border)}
+.strategic-image-ad img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:#fff}
+.strategic-image-ad-label{position:absolute;z-index:1;top:10px;left:10px;padding:5px 8px;color:#fff;background:rgba(10,34,61,.88);border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .portal-list>.strategic-ad-slot,.grocery-shopping-list>.strategic-ad-slot{grid-column:1/-1;width:100%;margin:8px 0}
 .portal-card.selected{border-color:#2b9a59;background:#f1fbf4;box-shadow:0 0 0 3px rgba(43,154,89,.14)}
 .portal-content>.strategic-ad-slot:first-of-type{margin-top:18px}
@@ -45,6 +48,7 @@
   .secondary-ad.strategic-ad{grid-template-columns:1fr;gap:6px;padding:15px}
   .secondary-ad.strategic-ad b{justify-self:start}
   .secondary-ad.strategic-ad small{text-align:left;white-space:normal}
+  .secondary-ad.strategic-ad.strategic-image-ad{padding:0}
 }
 
 /* Lokal sport v0.18.0 */

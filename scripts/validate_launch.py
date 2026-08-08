@@ -139,9 +139,12 @@ def verify_data() -> None:
 
 
 def verify_ads() -> None:
-    for page in ["jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "myndigheter.html", "service.html"]:
+    four_slot_pages = ["jobb.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "myndigheter.html", "service.html", "nyheter.html"]
+    for page in four_slot_pages:
         source = (ROOT / page).read_text(encoding="utf-8")
         assert source.count("data-strategic-ad=") == 4, f"{page}: ska ha fyra annonsplatser"
+    housing = (ROOT / "bostader.html").read_text(encoding="utf-8")
+    assert housing.count("data-strategic-ad=") == 7, "Bostadssidan ska ha sju annonsplatser"
     sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
     assert "ad(1)" in sport and "ad(8)" in sport, "Sportsidan ska behålla åtta annonsplatser"
 
@@ -175,6 +178,11 @@ def verify_service() -> None:
     assert "märks tydligt som annons" in page.lower(), "Servicemodulen skiljer inte annons från katalog"
     assert "data-municipality-name" in component and "service.html" in component, "Startsidans servicemodul är inte kommunansluten"
     assert "serviceState.populateSelect" in script and "serviceState.set" in script, "Servicesidan följer inte kommunmotorn"
+    assert '"Årjäng"' in script and "Åslanda Handelsträdgård" in script, "Årjängs lokala serviceannons saknas"
+    assert "assets/ads/aslanda-handelstradgard.webp" in script, "Åslandas annonsbild är inte kopplad"
+    assert "https://www.facebook.com/profile.php?id=61576659453588" in script, "Åslandas Facebooklänk saknas"
+    assert 'target="_blank"' in script and 'rel="noopener noreferrer"' in script, "Extern annonslänk öppnas inte säkert i ny flik"
+    assert (ROOT / "assets" / "ads" / "aslanda-handelstradgard.webp").is_file(), "Åslandas annonsbild saknas"
 
 
 def verify_authorities() -> None:

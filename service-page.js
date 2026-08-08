@@ -2,6 +2,17 @@ const serviceState = window.DinPulsMunicipalityState;
 let serviceMunicipality = serviceState.getInitial();
 let serviceData;
 
+const serviceAdvertisers = {
+  "Årjäng": {
+    1: {
+      name: "Åslanda Handelsträdgård",
+      image: "assets/ads/aslanda-handelstradgard.webp",
+      url: "https://www.facebook.com/profile.php?id=61576659453588",
+      alt: "Åslanda Handelsträdgård – öppet torsdagar 14–18"
+    }
+  }
+};
+
 const escapeService = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 
 function serviceSearchUrl(category, municipality) {
@@ -31,6 +42,15 @@ function renderServicePage() {
 function renderServiceAds() {
   document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
     const position = Number(slot.dataset.adPosition || 1);
+    const advertiser = serviceAdvertisers[serviceMunicipality]?.[position];
+    if (advertiser) {
+      slot.innerHTML = `
+        <a class="secondary-ad strategic-ad strategic-image-ad" href="${escapeService(advertiser.url)}" target="_blank" rel="noopener noreferrer" aria-label="Annons: ${escapeService(advertiser.name)} – öppna Facebooksidan i en ny flik">
+          <span class="strategic-image-ad-label">Annons</span>
+          <img src="${escapeService(advertiser.image)}" alt="${escapeService(advertiser.alt)}" width="1536" height="1024">
+        </a>`;
+      return;
+    }
     const subject = encodeURIComponent(`Annonsplats Service & hantverk ${position}`);
     slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Service &amp; hantverk · 500 kr/mån</small></a>`;
   });
@@ -46,7 +66,11 @@ async function initializeServicePage() {
   [...new Set(serviceData.categories.map(category => category.group))].forEach(group => groupSelect.add(new Option(group, group)));
   const parameters = new URLSearchParams(window.location.search);
   if (parameters.get("grupp") && [...groupSelect.options].some(option => option.value === parameters.get("grupp"))) groupSelect.value = parameters.get("grupp");
-  municipalitySelect.addEventListener("change", () => { serviceMunicipality = serviceState.set(municipalitySelect.value); renderServicePage(); });
+  municipalitySelect.addEventListener("change", () => {
+    serviceMunicipality = serviceState.set(municipalitySelect.value);
+    renderServiceAds();
+    renderServicePage();
+  });
   groupSelect.addEventListener("change", renderServicePage);
   document.querySelector("#service-search")?.addEventListener("input", renderServicePage);
   renderServiceAds();
