@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.6
+   DINPULS.SE v0.21.7
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.6";
+const DINPULS_VERSION = "0.21.7";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
@@ -18,6 +18,7 @@ const componentNames = [
   "transport",
   "sport",
   "health",
+  "authorities",
   "service",
   "secondary-cards",
   "premium-ad-2",
@@ -306,6 +307,7 @@ function initializeSearch() {
       { terms: ["evenemang", "event", "kalender", "festival", "konsert"], url: `evenemang.html?kommun=${municipality}` },
       { terms: ["sport", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf"], url: `sport.html?kommun=${municipality}` },
       { terms: ["vård", "hälsa", "vårdcentral", "1177", "apotek", "tandläkare", "fysioterapeut", "fysioterapi", "kiropraktor", "naprapat", "massage", "fotvård", "psykolog"], url: `vard.html?kommun=${municipality}` },
+      { terms: ["myndighet", "myndigheter", "samhällsservice", "socialen", "socialtjänst", "försäkringskassan", "vab", "sjukpenning", "pension", "skatt", "deklaration", "folkbokföring", "arbetsförmedlingen", "csn", "kronofogden", "skuld", "polisen", "körkort", "transportstyrelsen", "trafikverket", "bygglov", "god man"], url: `myndigheter.html?kommun=${municipality}` },
       { terms: ["service", "hantverk", "verkstad", "bilverkstad", "däck", "däckbyte", "snickare", "rörmokare", "vvs", "elektriker", "målare", "golvläggare", "byggvaruhus", "byggmax", "optimera", "jem och fix", "städ", "flytt", "låssmed"], url: `service.html?kommun=${municipality}` },
       { terms: ["trafik", "vägarbete", "trafikläge"], url: `trafik.html?kommun=${municipality}` },
       { terms: ["buss", "tåg", "avgång", "avgångar", "kollektivtrafik", "hållplats"], url: "#kollektivtrafik" },
@@ -323,7 +325,7 @@ function initializeSearch() {
       return;
     }
     if (feedback) {
-      feedback.textContent = "Ingen träff. Prova jobb, bostäder, vård, service, hantverk, lunch, evenemang, sport, trafik, buss, väder, nyheter eller notiser.";
+      feedback.textContent = "Ingen träff. Prova jobb, bostäder, vård, myndigheter, service, hantverk, lunch, evenemang, sport, trafik, buss, väder, nyheter eller notiser.";
       feedback.hidden = false;
       window.setTimeout(() => { feedback.hidden = true; }, 7000);
     }
@@ -828,7 +830,7 @@ function applyMunicipality(config) {
 }
 
 function updateMunicipalityLinks(municipality) {
-  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html", "vard.html", "service.html"]);
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
   document.querySelectorAll("a[href]").forEach(link => {
     const raw = link.getAttribute("href");
     if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;

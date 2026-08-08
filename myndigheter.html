@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="sv" data-portal="authorities">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Hitta rätt myndighet och kommunal samhällsservice utifrån ditt ärende.">
+  <title>Myndigheter &amp; samhällsservice – DinPuls</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?version=0.21.7"><link rel="stylesheet" href="portal-pages.css?version=0.21.7">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls"></a><a href="index.html">← Till startsidan</a></header>
+  <main class="portal-main">
+    <section class="portal-hero authorities-page"><span class="section-kicker">DinPuls myndighetsguide</span><h1>Vad behöver du hjälp med?</h1><p>Sök med dina egna ord och hitta rätt statlig myndighet eller kommunal verksamhet i <span data-authority-municipality>Åmål</span>.</p></section>
+    <div class="authority-safety"><i data-lucide="shield-check"></i><span>DinPuls hanterar inga personuppgifter, ansökningar eller inloggningar. Alla ärenden öppnas hos den ansvariga aktörens officiella webbplats.</span></div>
+    <section class="authority-urgent" aria-label="Akuta kontakter"><div><i data-lucide="siren"></i><span><strong>Akut fara</strong><small>Ring alltid 112</small></span></div><a href="tel:112">Ring 112</a><div><i data-lucide="shield"></i><span><strong>Polisen, ej akut</strong><small>Anmälan, tips och frågor</small></span></div><a href="tel:11414">Ring 114 14</a></section>
+    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="authorities" data-ad-position="1"></div>
+    <section class="portal-content authority-content">
+      <div class="portal-toolbar authority-toolbar">
+        <label>Kommun<select id="authority-municipality"></select></label>
+        <label>Område<select id="authority-group"><option value="">Alla områden</option></select></label>
+        <label>Sök med egna ord<input id="authority-search" type="search" placeholder="Exempel: VAB, socialen, skuld, flytta eller körkort"></label>
+      </div>
+      <div class="authority-search-help">Du kan söka på ett problem eller en uppgift – du behöver inte veta myndighetens namn.</div>
+      <div class="strategic-ad-slot" data-strategic-ad="authorities" data-ad-position="2"></div>
+      <section class="authority-section">
+        <div class="portal-result-heading"><div><span class="section-kicker">I din kommun</span><h2>Kommunal hjälp i <span data-authority-municipality>Åmål</span></h2></div><span id="authority-local-count"></span></div>
+        <div id="authority-local-grid" class="authority-card-grid"></div>
+      </section>
+      <section class="authority-section">
+        <div class="portal-result-heading"><div><span class="section-kicker">Hela Sverige</span><h2>Myndigheter &amp; samhällstjänster</h2></div><span id="authority-national-count"></span></div>
+        <div id="authority-national-grid" class="authority-card-grid"></div>
+      </section>
+      <div id="authority-empty" class="portal-empty" hidden>Ingen träff. Prova ett enklare ord, till exempel pension, jobb, socialen, skatt, körkort eller skuld.</div>
+      <div class="strategic-ad-slot" data-strategic-ad="authorities" data-ad-position="3"></div>
+      <section class="authority-source-note"><i data-lucide="badge-check"></i><div><strong>Källor och aktualitet</strong><p>Länkarna går till ansvarig myndighet, kommun eller tydligt märkt samhällsorganisation. Kontrollera alltid telefonnummer och öppettider på den officiella kontaktsidan.</p><small>Guiden senast strukturellt granskad 8 augusti 2026.</small></div></section>
+      <div class="strategic-ad-slot" data-strategic-ad="authorities" data-ad-position="4"></div>
+    </section>
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script><script src="municipality-engine.js?version=0.21.7"></script><script src="myndigheter-page.js?version=0.21.7"></script>
+</body>
+</html>

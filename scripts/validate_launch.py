@@ -9,16 +9,16 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.6"
+VERSION = "0.21.7"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
     "evenemang.html", "lunch.html", "matkasse.html", "sport.html",
-    "information.html", "vard.html", "service.html",
+    "information.html", "vard.html", "myndigheter.html", "service.html",
 ]
 COMPONENTS = [
     "header", "quick-strip", "navigation", "lunch-strip", "hero",
-    "premium-ad-1", "primary-cards", "transport", "sport", "health", "service",
+    "premium-ad-1", "primary-cards", "transport", "sport", "health", "authorities", "service",
     "secondary-cards", "premium-ad-2", "jobs-housing",
     "premium-ad-3", "footer",
 ]
@@ -122,7 +122,7 @@ def verify_data() -> None:
 
 
 def verify_ads() -> None:
-    for page in ["jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "service.html"]:
+    for page in ["jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "myndigheter.html", "service.html"]:
         source = (ROOT / page).read_text(encoding="utf-8")
         assert source.count("data-strategic-ad=") == 4, f"{page}: ska ha fyra annonsplatser"
     sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
@@ -158,6 +158,23 @@ def verify_service() -> None:
     assert "märks tydligt som annons" in page.lower(), "Servicemodulen skiljer inte annons från katalog"
     assert "data-municipality-name" in component and "service.html" in component, "Startsidans servicemodul är inte kommunansluten"
     assert "serviceState.populateSelect" in script and "serviceState.set" in script, "Servicesidan följer inte kommunmotorn"
+
+
+def verify_authorities() -> None:
+    data = load_json("data/authorities.json")
+    assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Myndighetsmodulen saknar någon startkommun"
+    national = {item.get("id") for item in data.get("nationalServices", [])}
+    required = {"forsakringskassan", "pensionsmyndigheten", "skatteverket", "arbetsformedlingen", "csn", "kronofogden", "polisen", "transportstyrelsen", "trafikverket", "domstolar", "lantmateriet", "migrationsverket"}
+    assert required <= national, "Myndighetsmodulen saknar centrala myndigheter"
+    local = {item.get("id") for item in data.get("municipalServices", [])}
+    assert {"socialtjanst", "ekonomiskt-bistand", "budget-skuld", "overformyndare", "bygglov"} <= local, "Kommunal samhällsservice saknas"
+    page = (ROOT / "myndigheter.html").read_text(encoding="utf-8")
+    component = (ROOT / "components" / "authorities.html").read_text(encoding="utf-8")
+    script = (ROOT / "myndigheter-page.js").read_text(encoding="utf-8")
+    assert 'href="tel:112"' in page and 'href="tel:11414"' in page, "Akuta samhällsnummer saknas"
+    assert "hanterar inga personuppgifter" in page.lower(), "Myndighetsguidens säkerhetsgräns saknas"
+    assert "data-municipality-name" in component and "myndigheter.html" in component, "Startsidans myndighetsmodul är inte kommunansluten"
+    assert "authorityState.populateSelect" in script and "authorityState.set" in script, "Myndighetssidan följer inte kommunmotorn"
 
 
 def verify_simple_sport_hub() -> None:
@@ -241,7 +258,7 @@ def verify_review_fixes() -> None:
 
 
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_service, verify_simple_sport_hub, verify_final_experience, verify_review_fixes]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_authorities, verify_service, verify_simple_sport_hub, verify_final_experience, verify_review_fixes]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")

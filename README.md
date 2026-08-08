@@ -1,4 +1,16 @@
-# DinPuls v0.21.4
+# DinPuls v0.21.7 – opublicerad testversion
+
+## Myndigheter & samhällsservice
+
+- Ny kommunanpassad startsidemodul och undersida `myndigheter.html`.
+- Uppgiftsbaserad sökning på ord som VAB, socialen, pension, flytt, skuld och körkort.
+- Samlar central statlig service och sju kommuners socialtjänst, ekonomiska bistånd, budget- och skuldrådgivning, överförmyndare, bygglov och kontaktcenter.
+- Skiljer tydligt på kommunal verksamhet, statlig myndighet och annan statlig samhällstjänst.
+- Inga personuppgifter, ansökningar eller inloggningar hanteras av DinPuls; externa länkar går till officiella aktörer.
+- Fyra tydligt märkta annonsplatser ligger avskilda från akuta kontakter och myndighetskort.
+- Versionen ligger endast på testgrenen `feature/myndigheter-samhallsservice` och är inte publicerad.
+
+# Tidigare version: DinPuls v0.21.4
 
 ## Sprint 6 – lanseringskontroll
 
