@@ -21,7 +21,7 @@ async function initializeEventPage() {
   ["#events-category", "#events-period"].forEach(selector => document.querySelector(selector).addEventListener("change", renderEventPage));
   document.querySelector("#events-search").addEventListener("input", renderEventPage);
   renderStrategicAds("evenemang", "evenemangssida", "#events-page-list");
-  const response = await fetch(`data/events.json?version=${Date.now()}`, { cache:"no-store" });
+  const response = await fetch(`data/events.json`, { cache:"no-store" });
   if (!response.ok) throw new Error(`Status ${response.status}`);
   fullEventsData = await response.json();
   renderEventPage();
@@ -100,26 +100,6 @@ function renderEventSource(source, health) {
   if (health?.status === "ok") status = imported ? `Automatisk källa · ${imported} kommande tillfällen` : "Kontrollerad kalender · öppna hela programmet";
   if (health?.status === "error") status = "Tillfälligt fel vid automatisk kontroll · länken fungerar fortfarande";
   return `<a class="event-source" href="${escapeEvent(source.url)}" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon event"><i data-lucide="${escapeEvent(source.icon || "calendar-days")}"></i></span><span><strong>${escapeEvent(source.name)}</strong><small>${escapeEvent(source.type)} · ${escapeEvent(status)}</small></span><i data-lucide="external-link"></i></a>`;
-}
-
-function renderStrategicAds(category, pageLabel, listSelector) {
-  const slots = [...document.querySelectorAll("[data-strategic-ad]")];
-  slots.forEach(slot => {
-    const position = Number(slot.dataset.adPosition || 1);
-    const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/mån</small></a>`;
-  });
-  const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");
-  const list = document.querySelector(listSelector);
-  if (!inlineSlot || !list) return;
-  const placeInline = () => {
-    const cards = [...list.children].filter(child => child !== inlineSlot);
-    if (cards.length < 4) return;
-    const anchor = cards[Math.min(cards.length - 1, Math.max(2, Math.floor(cards.length / 2)))];
-    if (anchor.previousElementSibling !== inlineSlot) list.insertBefore(inlineSlot, anchor);
-  };
-  new MutationObserver(placeInline).observe(list, { childList:true });
-  queueMicrotask(placeInline);
 }
 
 initializeEventPage().catch(error => {

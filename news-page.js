@@ -20,7 +20,7 @@ async function initializeNewsPage() {
   document.querySelector("#news-page-search").addEventListener("input", renderNewsPage);
   document.querySelector("#news-page-access").addEventListener("change", renderNewsPage);
   renderNewsAds();
-  const response = await fetch(`data/news.json?version=${Date.now()}`, { cache: "no-store" });
+  const response = await fetch(`data/news.json`, { cache: "no-cache" });
   if (!response.ok) throw new Error(`Nyhetsdata svarade ${response.status}`);
   newsPageData = await response.json();
   renderNewsPage();

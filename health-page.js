@@ -63,7 +63,7 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const response = await fetch(`data/health.json?version=0.21.5`, { cache: "no-store" });
+  const response = await fetch("data/health.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`Vårddata kunde inte laddas (${response.status})`);
   healthData = await response.json();
   const select = document.querySelector("#health-municipality");

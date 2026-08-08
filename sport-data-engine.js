@@ -71,7 +71,7 @@
   async function loadMergedSportsData(request,options){
     const [baseResponse,feedResponse]=await Promise.all([
       nativeFetch(request,options),
-      nativeFetch(`data/sport-feeds.json?version=${Date.now()}`,{cache:"no-store"}).catch(()=>null)
+      nativeFetch(`data/sport-feeds.json`,{cache:"no-store"}).catch(()=>null)
     ]);
     if(!baseResponse.ok)return baseResponse;
     const base=await baseResponse.json();

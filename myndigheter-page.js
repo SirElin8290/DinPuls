@@ -48,7 +48,7 @@ function renderAuthorityAds() {
 }
 
 async function initializeAuthoritiesPage() {
-  const response = await fetch("data/authorities.json?version=0.21.7", { cache: "no-store" });
+  const response = await fetch("data/authorities.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`Myndighetsdata kunde inte laddas (${response.status})`);
   authorityData = await response.json();
   const municipalitySelect = document.querySelector("#authority-municipality");

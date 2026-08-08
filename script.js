@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.8
+   DINPULS.SE v0.21.9
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.8";
+const DINPULS_VERSION = "0.21.9";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
@@ -35,8 +35,8 @@ const DinPulsMunicipality = {
   subscribers: new Map(),
 
   async initialize() {
-    const response = await fetch(`data/municipalities.json?version=${DINPULS_VERSION}`, {
-      cache: "no-store"
+    const response = await fetch("data/municipalities.json", {
+      cache: "no-cache"
     });
 
     if (!response.ok) {
@@ -184,9 +184,7 @@ async function loadComponent(name) {
     return;
   }
 
-  const response = await fetch(`components/${name}.html?version=${DINPULS_VERSION}`, {
-    cache: "no-store"
-  });
+  const response = await fetch(`components/${name}.html?version=${DINPULS_VERSION}`);
 
   if (!response.ok) {
     throw new Error(`Kunde inte ladda komponenten ${name}`);
@@ -199,6 +197,7 @@ async function startDinPuls() {
   try {
     initializeSeasonalTheme();
     await Promise.all(componentNames.map(loadComponent));
+    document.dispatchEvent(new CustomEvent("dinpuls:components-loaded"));
     await DinPulsMunicipality.initialize();
 
     if (window.lucide) {
@@ -238,23 +237,16 @@ async function initializeNameDay() {
     }).formatToParts(new Date()).filter(part => part.type !== "literal").map(part => [part.type, part.value])
   );
   const dateKey = `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
-  const cacheKey = `dinpuls-nameday-${dateKey}`;
   let dayData = null;
-
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) dayData = JSON.parse(cached);
-  } catch {}
 
   try {
     const response = await fetch(
       `https://sholiday.faboul.se/dagar/v2.1/${dateParts.year}/${dateParts.month}/${dateParts.day}`,
-      { cache: "no-store" }
+      { cache: "no-cache" }
     );
     if (!response.ok) throw new Error(`Namnsdags-API svarade ${response.status}`);
     const payload = await response.json();
     dayData = payload?.dagar?.[0] || dayData;
-    if (dayData) localStorage.setItem(cacheKey, JSON.stringify(dayData));
   } catch (error) {
     console.warn("Namnsdagen kunde inte uppdateras:", error);
   }
@@ -959,24 +951,16 @@ async function loadWeather(config) {
   }
 }
 
-function weatherCacheKey(key) {
-  return `dinpuls-weather-${String(key).toLocaleLowerCase("sv-SE")}`;
-}
+const weatherMemoryCache = new Map();
 
 function writeWeatherCache(key, data) {
-  try {
-    localStorage.setItem(weatherCacheKey(key), JSON.stringify({ savedAt: Date.now(), data }));
-  } catch {}
+  weatherMemoryCache.set(String(key).toLocaleLowerCase("sv-SE"), { savedAt: Date.now(), data });
 }
 
 function readWeatherCache(key) {
-  try {
-    const cached = JSON.parse(localStorage.getItem(weatherCacheKey(key)) || "null");
-    if (!cached?.data || !Number.isFinite(cached.savedAt) || Date.now() - cached.savedAt > WEATHER_CACHE_MAX_AGE) return null;
-    return cached;
-  } catch {
-    return null;
-  }
+  const cached = weatherMemoryCache.get(String(key).toLocaleLowerCase("sv-SE"));
+  if (!cached?.data || !Number.isFinite(cached.savedAt) || Date.now() - cached.savedAt > WEATHER_CACHE_MAX_AGE) return null;
+  return cached;
 }
 
 function setWeatherPanel(panel) {
@@ -1287,7 +1271,7 @@ async function loadNews() {
   if (loading) loading.hidden = false;
   if (feed) feed.hidden = true;
   try {
-    const response = await fetch(`data/news.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/news.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     const data = await response.json();
     allNewsArticles = Array.isArray(data.articles) ? data.articles : [];
@@ -1421,7 +1405,7 @@ async function initializeTraffic() {
 
 async function loadRoadTraffic() {
   try {
-    const response = await fetch(`data/road-traffic.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/road-traffic.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     roadTrafficData = await response.json();
   } catch (error) {
@@ -1480,7 +1464,7 @@ let importantData = null;
 async function initializeImportant() {
   DinPulsMunicipality.subscribe("important", renderImportant);
   try {
-    const response = await fetch(`data/important.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/important.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     importantData = await response.json();
   } catch (error) {
@@ -1591,7 +1575,7 @@ async function loadTransport() {
   const loading = document.querySelector("#transport-loading");
   if (loading) loading.hidden = false;
   try {
-    const response = await fetch(`data/transport.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/transport.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     transportData = await response.json();
     populateTransportStops();
@@ -1830,7 +1814,7 @@ async function initializeEvents() {
 
 async function loadEvents() {
   try {
-    const response = await fetch(`data/events.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/events.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     const data = await response.json();
     if (!data?.municipalities || typeof data.municipalities !== "object") throw new Error("Ogiltig evenemangsdata");
@@ -1911,7 +1895,7 @@ async function loadJobs() {
   if (loading) loading.hidden = false;
 
   try {
-    const response = await fetch(`data/jobs.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/jobs.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     const data = await response.json();
     if (!data?.municipalities || typeof data.municipalities !== "object") {
@@ -2040,7 +2024,7 @@ async function initializeHousing() {
   const loading = document.querySelector("#housing-loading");
   if (loading) loading.hidden = false;
   try {
-    const response = await fetch(`data/housing.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/housing.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     const data = await response.json();
     if (!data?.municipalities || typeof data.municipalities !== "object") {
@@ -2167,7 +2151,7 @@ let fuelData = null;
 async function initializeFuel() {
   DinPulsMunicipality.subscribe("fuel", renderFuel);
   try {
-    const response = await fetch(`data/fuel.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/fuel.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Status ${response.status}`);
     fuelData = await response.json();
     renderFuel();
@@ -2219,7 +2203,7 @@ async function initializeLunch() {
 
 async function refreshLunchTicker() {
   try {
-    const response = await fetch(`data/lunch.json?version=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`data/lunch.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(`Lunchdata kunde inte laddas: ${response.status}`);
     lunchTickerData = await response.json();
   } catch (error) {
@@ -2351,7 +2335,7 @@ function initializeRotatingAds() {
 let sportsData = null;
 
 async function initializeSports() {
-  const response = await fetch(`data/sports.json?version=${DINPULS_VERSION}`, { cache: "no-store" });
+  const response = await fetch("data/sports.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`Sportdata kunde inte laddas: ${response.status}`);
   sportsData = await response.json();
   DinPulsMunicipality.subscribe("sport", renderSportsHome);

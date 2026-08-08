@@ -239,9 +239,9 @@
 
   async function init() {
     const [sportsResponse, arenaResponse, seasonResponse] = await Promise.all([
-      fetch(`data/sports.json?version=${Date.now()}`, { cache: "no-store" }),
-      fetch(`data/arenas.json?version=${Date.now()}`, { cache: "no-store" }),
-      fetch(`data/sport-seasons.json?version=${Date.now()}`, { cache: "no-store" })
+      fetch(`data/sports.json`, { cache: "no-cache" }),
+      fetch(`data/arenas.json`, { cache: "no-cache" }),
+      fetch(`data/sport-seasons.json`, { cache: "no-cache" })
     ]);
     if (!sportsResponse.ok || !arenaResponse.ok || !seasonResponse.ok) throw new Error("Sportdata kunde inte laddas");
     sportsData = await sportsResponse.json();

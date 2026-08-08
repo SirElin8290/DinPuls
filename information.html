@@ -5,19 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Information om DinPuls, annonsering, integritet och kontakt.">
   <title>Om DinPuls.se</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{--blue:#0a57c7;--navy:#082653;--text:#10213e;--muted:#627087;--border:#dfe6ef;--bg:#f5f7fb}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.65}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.65}
     a{color:var(--blue)}header{color:#fff;background:linear-gradient(120deg,#071d43,#0b438e 55%,#0864df);padding:28px 20px}
     header div,main{max-width:960px;margin:auto}header a{color:#fff;font-weight:800;text-decoration:none}header h1{margin:28px 0 6px;font-size:clamp(30px,6vw,48px)}
     header p{margin:0;color:#dbe9ff}.info-nav{position:sticky;top:0;z-index:2;display:flex;gap:22px;overflow:auto;padding:14px 20px;background:#fff;border-bottom:1px solid var(--border)}
     .info-nav a{white-space:nowrap;font-size:13px;font-weight:800;text-decoration:none}main{padding:26px 20px 60px}
     section{scroll-margin-top:72px;margin:0 0 18px;padding:26px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(16,33,62,.06)}
     h2{margin:0 0 10px;color:var(--navy)}h3{margin:18px 0 5px}p{margin:7px 0;color:#33445f}ul{padding-left:22px}.button{display:inline-block;margin-top:12px;padding:11px 16px;border-radius:9px;color:#fff;background:var(--blue);font-weight:800;text-decoration:none}
-    .note{padding:14px;border-radius:10px;background:#eaf3ff;color:#153f78}footer{text-align:center;padding:24px;color:var(--muted);background:#fff;border-top:1px solid var(--border)}
+    .note{padding:14px;border-radius:10px;background:#eaf3ff;color:#153f78}.privacy-table{width:100%;border-collapse:collapse;margin:16px 0}.privacy-table th,.privacy-table td{padding:11px;text-align:left;vertical-align:top;border:1px solid var(--border)}.privacy-table th{background:#f2f6fc}.privacy-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}.privacy-actions button{border:0;cursor:pointer}.privacy-status{color:#176135;font-weight:700}footer{text-align:center;padding:24px;color:var(--muted);background:#fff;border-top:1px solid var(--border)}
   </style>
 </head>
 <body>
@@ -40,17 +37,29 @@
       <a class="button" href="mailto:annonser@dinpuls.se?subject=Jag%20vill%20annonsera%20på%20DinPuls">Fråga om en annonsplats</a>
     </section>
     <section id="integritet">
-      <h2>Integritet</h2>
-      <h3>Ingen inloggning krävs</h3>
-      <p>Du kan använda DinPuls utan att skapa konto. DinPuls bygger i nuläget ingen personlig profil om dig.</p>
-      <h3>Inställningar i din webbläsare</h3>
-      <p>Vald kommun, lästa notiser och valt färgtema kan sparas lokalt i din webbläsare så att sidan fungerar som du har valt nästa gång du besöker den. Du kan radera dessa uppgifter genom att rensa webbplatsdata i webbläsaren.</p>
-      <h3>Kakor och mätning</h3>
-      <p>DinPuls använder i den här versionen inga egna spårningskakor, annonsprofiler eller konton. Om statistik eller andra tjänster som kräver samtycke införs ska informationen uppdateras innan tjänsten aktiveras.</p>
-      <h3>Externa källor</h3>
-      <p>När du öppnar en artikel, myndighetssida, bostadsannons eller annan extern tjänst gäller den externa webbplatsens egna integritets- och cookieinformation.</p>
-      <h3>Kontakt</h3>
-      <p>Frågor om integritet kan skickas till <a href="mailto:kontakt@dinpuls.se?subject=Integritetsfråga">kontakt@dinpuls.se</a>.</p>
+      <h2>Integritet, kakor och lokal lagring</h2>
+      <p><strong>Senast uppdaterad: 8 augusti 2026.</strong> DinPuls drivs av Elin Karlsson, som ansvarar för behandlingen av personuppgifter på DinPuls.se. Kontakta <a href="mailto:kontakt@dinpuls.se?subject=Integritetsfråga">kontakt@dinpuls.se</a> vid frågor.</p>
+      <h3>Ingen spårning eller samtyckesruta i denna version</h3>
+      <p>DinPuls använder inte analyskakor, marknadsföringskakor, annonsprofiler eller användarkonton. Därför visas ingen ruta som ber dig godkänna valfria kakor. Om en sådan funktion införs får den inte starta före ett aktivt val, och det ska vara lika lätt att neka som att godkänna och senare återkalla valet.</p>
+      <h3>Det som sparas på din enhet</h3>
+      <p>Vissa val lagras lokalt i webbläsaren för att ge den funktion du själv har använt. Uppgifterna skickas inte till DinPuls av den lokala lagringen.</p>
+      <table class="privacy-table"><thead><tr><th>Uppgift</th><th>Varför</th><th>När och hur länge</th></tr></thead><tbody>
+        <tr><td>Vald kommun</td><td>Visar rätt lokalt innehåll nästa gång.</td><td>När du väljer eller sparar kommun, tills du rensar den.</td></tr>
+        <tr><td>Färgtema</td><td>Kommer ihåg ljust eller mörkt tema.</td><td>När du ändrar tema, tills du rensar det.</td></tr>
+        <tr><td>Lästa lokala notiser</td><td>Markerar vilka notiser du redan har öppnat.</td><td>När du läser en notis, tills du rensar dem.</td></tr>
+        <tr><td>Dölj sportresultat</td><td>Kommer ihåg ditt spoiler-val.</td><td>När du ändrar valet, tills du rensar det.</td></tr>
+        <tr><td>Matkassemarkeringar och egna prisrundor</td><td>Bevarar avprickning och priser som du själv matar in.</td><td>När du använder funktionerna, tills du rensar dem.</td></tr>
+      </tbody></table>
+      <div class="privacy-actions"><button class="button" type="button" data-clear-local-data>Rensa mina lokala inställningar</button><span class="privacy-status" data-privacy-status role="status" aria-live="polite"></span></div>
+      <h3>Automatiska anrop till externa källor</h3>
+      <p>Startsidan hämtar väder från SMHI och namnsdagsuppgifter från sholiday.faboul.se. Vid sådana internetanrop kan mottagaren tekniskt få tillgång till exempelvis din IP-adress, tidpunkt, webbläsaruppgifter och den efterfrågade resursen. DinPuls sparar inte väder eller namnsdag permanent i din webbläsare.</p>
+      <p>När du skickar en sökning i Google-fältet förs sökfrasen till Google. Inget skickas till Google innan du själv gör sökningen. När du följer andra externa länkar gäller mottagarens egna integritets- och cookieinformation.</p>
+      <h3>Drift och kontakt</h3>
+      <p>Webbplatsen publiceras via GitHub Pages. Tekniska drift- och säkerhetsloggar kan behandlas av driftleverantören. Om du mejlar DinPuls behandlas namn, e-postadress och meddelande för att besvara och hantera ärendet. Grunden är normalt DinPuls berättigade intresse av att hantera kontakten, och uppgifterna sparas bara så länge de behövs för ärendet eller enligt rättsliga skyldigheter.</p>
+      <h3>Dina rättigheter</h3>
+      <p>Du kan begära tillgång, rättelse, radering eller begränsning och invända mot behandling när reglerna ger dig rätt till det. Du kan också lämna klagomål till <a href="https://www.imy.se/privatperson/dataskydd/dina-rattigheter/" target="_blank" rel="noopener noreferrer">Integritetsskyddsmyndigheten (IMY)</a>.</p>
+      <h3>Regler och ändringar</h3>
+      <p>Information om kakor och samtycke finns hos <a href="https://pts.se/internet-och-telefoni/kakor-cookies/" target="_blank" rel="noopener noreferrer">Post- och telestyrelsen (PTS)</a>. DinPuls uppdaterar denna text innan nya analys-, marknadsförings- eller andra samtyckeskrävande tjänster aktiveras.</p>
     </section>
     <section id="kallor">
       <h2>Källor, aktualitet och ansvar</h2>
@@ -72,6 +81,7 @@
       <a class="button" href="mailto:kontakt@dinpuls.se?subject=Feedback%20till%20DinPuls">Skicka feedback</a>
     </section>
   </main>
-  <footer>© 2026 DinPuls.se</footer>
+  <footer>© 2026 DinPuls.se · <a href="#integritet">Integritet, kakor och lokal lagring</a></footer>
+  <script src="privacy-controls.js?version=0.21.9"></script>
 </body>
 </html>

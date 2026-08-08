@@ -9,12 +9,13 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.8"
+VERSION = "0.21.9"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
     "evenemang.html", "lunch.html", "matkasse.html", "sport.html",
     "information.html", "vard.html", "myndigheter.html", "service.html",
+    "nyheter.html", "drivmedel.html",
 ]
 COMPONENTS = [
     "header", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
@@ -89,7 +90,19 @@ def verify_content() -> None:
     google_search = (ROOT / "components/google-search.html").read_text(encoding="utf-8")
     assert 'action="https://www.google.se/search"' in google_search, "Google-sökningen går inte till google.se"
     assert 'name="q"' in google_search and 'method="get"' in google_search, "Google-sökningen skickar inte sökfrasen korrekt"
+    assert 'target="_blank"' in google_search, "Google-sökningen öppnas inte i en ny flik"
+    assert 'rel="noopener noreferrer"' in google_search, "Google-sökningen saknar säkert skydd för den nya fliken"
     assert 'data-component="google-search"' in index, "Google-sökningen saknas på startsidan"
+
+    all_html = "\n".join(path.read_text(encoding="utf-8") for path in ROOT.glob("*.html"))
+    assert "fonts.googleapis.com" not in all_html and "fonts.gstatic.com" not in all_html, "Google Fonts laddas fortfarande automatiskt"
+    assert "unpkg.com/lucide" not in all_html, "Lucide laddas fortfarande från tredje part"
+    assert (ROOT / "assets/vendor/lucide.min.js").is_file(), "Lokal Lucide-fil saknas"
+    assert all("privacy-controls.js" in (ROOT / page).read_text(encoding="utf-8") for page in ACTIVE_PAGES), "Integritetskontroller saknas på en aktiv sida"
+    information = (ROOT / "information.html").read_text(encoding="utf-8")
+    assert "Integritet, kakor och lokal lagring" in information
+    assert "data-clear-local-data" in information
+    assert "dinpuls-nameday-" not in script and "dinpuls-weather-" not in script, "Automatisk långtidslagring finns kvar"
 
 
 def verify_data() -> None:
@@ -261,8 +274,36 @@ def verify_review_fixes() -> None:
     assert {"Provinstidningen Dalsland", "Dalslänningen"} <= source_names, "Lokala Dalslandskällor saknas"
 
 
+def verify_optimization() -> None:
+    html_sources = {page: (ROOT / page).read_text(encoding="utf-8") for page in ACTIVE_PAGES}
+    javascript = "\n".join(path.read_text(encoding="utf-8") for path in ROOT.glob("*.js"))
+    assert "${Date.now()}" not in javascript, "Cache-busting med Date.now() finns kvar"
+    assert not (ROOT / "jobs-housing.html").exists(), "Gammal fristående komponent ligger kvar"
+
+    hero = ROOT / "assets/amal.webp"
+    icons = ROOT / "assets/vendor/lucide.min.js"
+    assert hero.is_file() and hero.stat().st_size < 200_000, "Hero-bilden är inte tillräckligt optimerad"
+    assert not (ROOT / "assets/amal.jpg").exists(), "Den tunga gamla hero-bilden ligger kvar"
+    assert icons.is_file() and icons.stat().st_size < 75_000, "Ikonpaketet innehåller fortfarande onödiga ikoner"
+
+    ad_pages = {"jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html"}
+    for page in ad_pages:
+        assert "portal-ads.js?version=" + VERSION in html_sources[page], f"{page}: gemensam annonskod saknas"
+    assert javascript.count("function renderStrategicAds(") == 1, "Annonsfunktionen är duplicerad"
+
+    for page, source in html_sources.items():
+        assert 'lang="sv"' in source, f"{page}: svenskt språk saknas"
+        assert "<title>" in source and 'name="description"' in source, f"{page}: grundläggande metadata saknas"
+        for version in re.findall(r"[?&]version=(0\.\d+\.\d+)", source):
+            assert version == VERSION, f"{page}: gammal resursversion {version}"
+    logo_markup = "\n".join(html_sources.values()) + (ROOT / "components/header.html").read_text(encoding="utf-8")
+    assert 'width="620" height="150"' in logo_markup, "Logotypen saknar stabila bildmått"
+    hero_markup = (ROOT / "components/hero.html").read_text(encoding="utf-8")
+    assert 'width="1024" height="576"' in hero_markup and 'fetchpriority="high"' in hero_markup, "Hero-bilden saknar LCP-optimering"
+
+
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_authorities, verify_service, verify_simple_sport_hub, verify_final_experience, verify_review_fixes]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_authorities, verify_service, verify_simple_sport_hub, verify_final_experience, verify_review_fixes, verify_optimization]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")

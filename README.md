@@ -1,4 +1,20 @@
-# DinPuls v0.21.8 – Google-sökning på startsidan
+# DinPuls v0.21.9 – integritet, kakor och lokal lagring
+
+## Integritetsvänlig grund
+
+- Fullständig och lättillgänglig information om integritet, lokal lagring, externa anrop och användarens rättigheter.
+- Ingen samtyckesruta visas så länge DinPuls saknar valfria analys- och marknadsföringskakor.
+- Besökaren kan rensa samtliga lokala DinPuls-inställningar med en knapp.
+- Väder och namnsdag sparas inte längre permanent i webbläsaren.
+- Google Fonts har tagits bort och Lucide-ikoner laddas lokalt för att minska automatiska tredjepartsanrop.
+- Google-sökresultat öppnas i en ny flik så att DinPuls ligger kvar som startsida.
+- Åmålsbilden är konverterad till WebP och minskad med drygt 80 procent.
+- Ikonpaketet innehåller bara de ikoner DinPuls använder och har minskats med cirka 90 procent.
+- Datafiler återvalideras utan unika tidsstämplar, vilket möjliggör webbläsarcache och mindre datatrafik.
+- Gemensam annonslogik ersätter sex separata kopior och alla aktiva resurser använder samma versionsnummer.
+- Versionen är byggd för granskning och ännu inte publicerad på huvudgrenen.
+
+# Tidigare version: DinPuls v0.21.8 – Google-sökning på startsidan
 
 ## Google-sökning på startsidan
 

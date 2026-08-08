@@ -37,7 +37,7 @@ function renderServiceAds() {
 }
 
 async function initializeServicePage() {
-  const response = await fetch("data/service.json?version=0.21.6", { cache: "no-store" });
+  const response = await fetch("data/service.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`Servicedata kunde inte laddas (${response.status})`);
   serviceData = await response.json();
   const municipalitySelect = document.querySelector("#service-municipality");
