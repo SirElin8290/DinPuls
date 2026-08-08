@@ -1,4 +1,14 @@
-# DinPuls v0.21.7 – Myndigheter & samhällsservice
+# DinPuls v0.21.8 – Google-sökning på startsidan
+
+## Google-sökning på startsidan
+
+- En ny tydligt märkt Google-sökrad ligger direkt under sidhuvudet.
+- Sökfrasen skickas med en vanlig GET-förfrågan till `https://www.google.se/search`.
+- DinPuls egen modulsökning finns kvar i sidhuvudet och har fått en tydligare platshållartext.
+- Sökningen kräver ingen egen datainsamling eller extern kod på DinPuls.
+- Versionen är publicerad på huvudgrenen och ingår på DinPuls startsida.
+
+# Tidigare version: DinPuls v0.21.7 – Myndigheter & samhällsservice
 
 ## Myndigheter & samhällsservice
 

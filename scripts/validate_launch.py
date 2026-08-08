@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.7"
+VERSION = "0.21.8"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -17,7 +17,7 @@ ACTIVE_PAGES = [
     "information.html", "vard.html", "myndigheter.html", "service.html",
 ]
 COMPONENTS = [
-    "header", "quick-strip", "navigation", "lunch-strip", "hero",
+    "header", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
     "premium-ad-1", "primary-cards", "transport", "sport", "health", "authorities", "service",
     "secondary-cards", "premium-ad-2", "jobs-housing",
     "premium-ad-3", "footer",
@@ -86,6 +86,10 @@ def verify_content() -> None:
     assert f'const DINPULS_VERSION = "{VERSION}"' in script
     assert "updateMunicipalityLinks" in script
     assert "Sök bland DinPuls moduler" in (ROOT / "components/header.html").read_text(encoding="utf-8")
+    google_search = (ROOT / "components/google-search.html").read_text(encoding="utf-8")
+    assert 'action="https://www.google.se/search"' in google_search, "Google-sökningen går inte till google.se"
+    assert 'name="q"' in google_search and 'method="get"' in google_search, "Google-sökningen skickar inte sökfrasen korrekt"
+    assert 'data-component="google-search"' in index, "Google-sökningen saknas på startsidan"
 
 
 def verify_data() -> None:
