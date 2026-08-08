@@ -221,12 +221,23 @@ def verify_review_fixes() -> None:
     news = (ROOT / "news-page.js").read_text(encoding="utf-8")
     sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
     script = (ROOT / "script.js").read_text(encoding="utf-8")
+    index = (ROOT / "index.html").read_text(encoding="utf-8")
+    styles = (ROOT / "styles.css").read_text(encoding="utf-8")
+    transport = (ROOT / "scripts/update_transport.py").read_text(encoding="utf-8")
+    sources = load_json("data/news.json").get("sources", [])
     assert "updateLunchPageChrome();" in lunch, "Lunchsidan visar inte vald kommun före dataladdning"
     assert "updatePortalChrome();" in portals, "Jobb och bostäder visar inte vald kommun före dataladdning"
     assert "formatPortalAvailability(item.available)" in portals and 'month: "long"' in portals, "Bostadsdatum är inte läsbart formaterade"
     assert "Pågår till" in script and "formatEventShortDate(events[0])" in script, "Pågående evenemang saknar tydlig märkning"
     for name, source in [("startsidan", script), ("lunch", lunch), ("jobb och bostäder", portals), ("evenemang", events), ("nyheter", news), ("sport", sport)]:
         assert "Europe/Stockholm" in source or "STOCKHOLM_TIME_ZONE" in source, f"{name}: svensk tidszon saknas"
+    assert "äldre än 45 minuter" not in script and "Försenad uppdatering" not in script, "Föråldrade statusvarningar finns kvar"
+    assert "LOOKAHEAD_OFFSETS_HOURS" in transport and "EMPTY_RETRY_MINUTES = 45" in transport, "Kollektivtrafikens återförsök är inte robusta"
+    assert "tickerRestaurants" in script, "Lunchrullen visar inte hela restaurangutbudet"
+    assert "dinpuls-ticker 42s" in styles and "lunch-airport-roll 24s" in styles, "Rullarnas hastighet är inte rättad"
+    assert index.index('data-component="secondary-cards"') < index.index('id="news-sources"') < index.index('data-component="premium-ad-2"'), "Lokala nyheter och källor ligger inte tillsammans"
+    source_names = {item.get("name") for item in sources}
+    assert {"Provinstidningen Dalsland", "Dalslänningen"} <= source_names, "Lokala Dalslandskällor saknas"
 
 
 def main() -> int:

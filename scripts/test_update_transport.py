@@ -43,6 +43,14 @@ class UpdateTransportTests(unittest.TestCase):
         self.assertEqual(departures, [])
         self.assertIsNotNone(next_search)
         self.assertEqual(fetch.call_count, 2)
+        retry_at = transport.parse_time(next_search, NOW.tzinfo)
+        self.assertEqual(retry_at, NOW + timedelta(minutes=45))
+
+    def test_future_search_uses_six_spread_windows(self):
+        windows = transport.future_query_times(NOW)
+        self.assertEqual(len(windows), 6)
+        self.assertEqual(windows[0], "2026-08-01T23:15")
+        self.assertEqual(windows[-1], "2026-08-02T22:15")
 
     def test_categorizes_train_and_bus(self):
         train = transport.normalize({"route": {"transport_mode": "TRAIN"}})

@@ -1438,7 +1438,7 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
   const municipality = roadTrafficData?.municipalities?.[config.name];
   const items = Array.isArray(municipality?.items) ? municipality.items : [];
   const generatedAt = new Date(roadTrafficData?.generatedAt || "");
-  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 40 * 60 * 1000;
+  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 60 * 60 * 1000;
   total.textContent = String(items.length);
   if (!roadTrafficData) {
     status.textContent = "Ej tillgänglig";
@@ -1447,10 +1447,10 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
     status.textContent = "Ej tillgänglig";
     list.innerHTML = '<div class="traffic-empty"><i data-lucide="cloud-off"></i><span>Trafikläget kunde inte kontrolleras. Öppna Trafikverkets vägkarta.</span></div>';
   } else if (isStale) {
-    status.textContent = "Försenad uppdatering";
+    status.textContent = `Senast kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
     list.innerHTML = items.length
       ? items.slice(0, 3).map(renderTrafficCompactItem).join("")
-      : '<div class="traffic-empty"><i data-lucide="clock-alert"></i><span>Senaste trafikuppdateringen är äldre än 40 minuter.</span></div>';
+      : `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Inga vägmeddelanden hittades i den senaste lyckade kontrollen nära ${escapeHtml(config.name)}.</span></div>`;
   } else if (!items.length) {
     status.textContent = "Inga störningar";
     list.innerHTML = `<div class="traffic-empty ok"><i data-lucide="circle-check"></i><span>Lugnt trafikläge nära ${escapeHtml(config.name)}. Inga aktuella vägmeddelanden hittades inom ${Number(roadTrafficData.radiusKm || 35)} km.</span></div>`;
@@ -1496,7 +1496,7 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
     ? municipality.items.filter(item => Number(item.priority || 0) >= 70).sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0)).slice(0, 3)
     : [];
   const generatedAt = new Date(importantData?.generatedAt || "");
-  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 45 * 60 * 1000;
+  const isStale = !Number.isNaN(generatedAt.getTime()) && Date.now() - generatedAt.getTime() > 60 * 60 * 1000;
 
   if (!importantData) {
     status.textContent = "Kunde inte uppdateras";
@@ -1512,7 +1512,9 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
       : `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
     list.innerHTML = renderImportantCalm(config.name, municipality?.sourceHealth || importantData.sources || [], isStale);
   } else {
-    status.textContent = isStale ? `${items.length} – uppdateringen är försenad` : `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
+    status.textContent = isStale
+      ? `${items.length} · senast kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`
+      : `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
     list.innerHTML = items.map(renderImportantItem).join("");
   }
 
@@ -1532,7 +1534,7 @@ function renderImportantCalm(municipality, sources, isStale = false) {
   ).join("");
   return `<article class="important-calm">
     <i class="status-icon success" data-lucide="circle-check"></i>
-    <div><strong>${isStale ? "Ingen ny kontroll har kommit in" : `Lugnt läge i ${escapeHtml(municipality)}`}</strong><small>${isStale ? "Informationen är äldre än 45 minuter. Öppna en officiell källa vid osäkerhet." : "Inga prioriterade varningar eller akuta händelser har hittats."}</small></div>
+    <div><strong>${isStale ? "Inga nya prioriterade händelser" : `Lugnt läge i ${escapeHtml(municipality)}`}</strong><small>${isStale ? "Visar resultatet från den senaste lyckade kontrollen. Källorna kontrolleras automatiskt igen." : "Inga prioriterade varningar eller akuta händelser har hittats."}</small></div>
   </article>
   <div class="important-sources"><span>Kontrollerade källor</span>${sourceLinks}</div>`;
 }
@@ -1576,6 +1578,10 @@ async function initializeTransport() {
   transportRefreshTimer = window.setInterval(() => {
     if (!document.hidden) loadTransport();
   }, 15 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) loadTransport();
+  });
+  window.addEventListener("online", loadTransport);
 }
 
 async function loadTransport() {
@@ -1590,11 +1596,21 @@ async function loadTransport() {
   } catch (error) {
     console.error("Kollektivtrafiken kunde inte laddas:", error);
     if (loading) loading.hidden = true;
+    if (transportData) {
+      renderTransport();
+      const updated = document.querySelector("#transport-updated");
+      if (updated) {
+        updated.classList.add("stale");
+        updated.innerHTML = '<i data-lucide="wifi-off"></i>Visar senast fungerande tider';
+      }
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
     const empty = document.querySelector("#transport-empty");
     if (empty) {
       empty.hidden = false;
       empty.querySelector("strong").textContent = "Tiderna kunde inte laddas";
-      empty.querySelector("span").textContent = "Öppna sidan via Live Server och försök igen.";
+      empty.querySelector("span").textContent = "Ett nytt försök görs automatiskt när anslutningen är tillbaka.";
     }
   }
 }
@@ -1648,9 +1664,9 @@ function renderTransport() {
   const updated = document.querySelector("#transport-updated");
   if (updated) {
     const timestamp = new Date(transportData.generatedAt);
-    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 35 * 60 * 1000;
+    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 50 * 60 * 1000;
     updated.classList.toggle("stale", stale);
-    updated.innerHTML = `<i data-lucide="${stale ? "triangle-alert" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast hämtad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
+    updated.innerHTML = `<i data-lucide="${stale ? "clock-3" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast fungerande kontroll ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   updateTransportSource(isDemo);
@@ -2219,14 +2235,13 @@ function getStockholmWeekday() {
 function renderLunchTicker(municipality) {
   const restaurants = lunchTickerData?.municipalities?.[municipality]?.restaurants || [];
   const weekday = getStockholmWeekday();
-  const todayRestaurants = restaurants
+  const tickerRestaurants = restaurants
     .map((restaurant) => ({
       ...restaurant,
       todayDishes: restaurant.status === "current"
         ? (restaurant.days?.[weekday] || [])
         : []
-    }))
-    .filter((restaurant) => restaurant.todayDishes.length);
+    }));
   const fallback = [{
     id: "lunch",
     name: weekday === "saturday" || weekday === "sunday"
@@ -2241,8 +2256,10 @@ function renderLunchTicker(municipality) {
     thursday: "TORSDAG", friday: "FREDAG", saturday: "LÖRDAG", sunday: "SÖNDAG"
   };
 
-  const markup = (todayRestaurants.length ? todayRestaurants : fallback).map((restaurant) => {
-    const detail = restaurant.todayDishes.slice(0, 3).join(" · ");
+  const markup = (tickerRestaurants.length ? tickerRestaurants : fallback).map((restaurant) => {
+    const detail = restaurant.todayDishes.length
+      ? restaurant.todayDishes.slice(0, 3).join(" · ")
+      : "Öppna restaurangens aktuella meny och kontrollera dagens utbud";
     const restaurantQuery = restaurant.id && restaurant.id !== "lunch"
       ? `&restaurang=${encodeURIComponent(restaurant.id)}`
       : "";

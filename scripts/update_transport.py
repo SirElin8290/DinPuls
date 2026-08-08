@@ -18,8 +18,8 @@ MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 API_URL = "https://realtime-api.trafiklab.se/v1/departures"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
 MAX_DEPARTURES = 20
-MAX_LOOKAHEAD_HOURS = 30
-EMPTY_RETRY_HOURS = 3
+LOOKAHEAD_OFFSETS_HOURS = (1, 2, 4, 8, 12, 24)
+EMPTY_RETRY_MINUTES = 45
 
 
 def load_json(path: Path, fallback):
@@ -89,10 +89,10 @@ def fetch(api_key, area_id, query_time=None):
     return payload
 
 
-def future_query_times(now, hours=MAX_LOOKAHEAD_HOURS):
-    """API:t visar alltid 60 minuter, därför söks sammanhängande timfönster."""
+def future_query_times(now, offsets=LOOKAHEAD_OFFSETS_HOURS):
+    """Sök ett fåtal spridda fönster så att nattuppehåll hittas utan onödiga API-anrop."""
     first = now.replace(second=0, microsecond=0) + timedelta(hours=1)
-    return [(first + timedelta(hours=offset)).strftime("%Y-%m-%dT%H:%M") for offset in range(hours)]
+    return [(first + timedelta(hours=offset - 1)).strftime("%Y-%m-%dT%H:%M") for offset in offsets]
 
 
 def should_deep_search(previous_stop, now):
@@ -161,7 +161,7 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
         if departures:
             return departures, query_time, False, None, payload
 
-    next_search = (now + timedelta(hours=EMPTY_RETRY_HOURS)).isoformat(timespec="minutes")
+    next_search = (now + timedelta(minutes=EMPTY_RETRY_MINUTES)).isoformat(timespec="minutes")
     return [], None, False, next_search, None
 
 
