@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.9"
+VERSION = "0.21.11"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -20,7 +20,7 @@ ACTIVE_PAGES = [
 COMPONENTS = [
     "header", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
     "premium-ad-1", "primary-cards", "transport", "sport", "health", "authorities", "service",
-    "secondary-cards", "premium-ad-2", "jobs-housing",
+    "cinema", "secondary-cards", "premium-ad-2", "jobs-housing",
     "premium-ad-3", "footer",
 ]
 
@@ -93,6 +93,10 @@ def verify_content() -> None:
     assert 'target="_blank"' in google_search, "Google-sökningen öppnas inte i en ny flik"
     assert 'rel="noopener noreferrer"' in google_search, "Google-sökningen saknar säkert skydd för den nya fliken"
     assert 'data-component="google-search"' in index, "Google-sökningen saknas på startsidan"
+    cinema = (ROOT / "components/cinema.html").read_text(encoding="utf-8")
+    assert 'data-component="cinema"' in index, "Biomodulen saknas på startsidan"
+    assert 'id="cinema-home-grid"' in cinema, "Biomodulens filmlista saknas"
+    assert "initializeCinemaHome()" in script, "Biomodulen initieras inte"
 
     all_html = "\n".join(path.read_text(encoding="utf-8") for path in ROOT.glob("*.html"))
     assert "fonts.googleapis.com" not in all_html and "fonts.gstatic.com" not in all_html, "Google Fonts laddas fortfarande automatiskt"
