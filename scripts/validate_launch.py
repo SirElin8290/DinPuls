@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.23.3"
+VERSION = "0.23.4"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -58,6 +58,8 @@ def verify_assets() -> None:
     for page in ACTIVE_PAGES:
         source = (ROOT / page).read_text(encoding="utf-8")
         assert f'dp-safety.js?version={VERSION}' in source, f"{page}: den centrala säkerhetsmodulen saknas"
+        assert 'rel="icon"' in source and 'rel="apple-touch-icon"' in source, f"{page}: favicon eller Apple-ikon saknas"
+        assert 'rel="manifest"' in source, f"{page}: webbmanifest saknas"
         parser = AssetParser()
         parser.feed(source)
         for value in parser.assets:
@@ -65,6 +67,12 @@ def verify_assets() -> None:
             if not clean or clean.startswith(("http://", "https://", "mailto:", "tel:")):
                 continue
             assert (ROOT / clean).is_file(), f"{page}: filen {clean} saknas"
+
+    manifest = load_json("site.webmanifest")
+    assert manifest.get("short_name") == "DinPuls", "Webbmanifestet har fel appnamn"
+    assert {icon.get("sizes") for icon in manifest.get("icons", [])} >= {"192x192", "512x512"}, "Webbmanifestet saknar appikoner"
+    for asset in ("favicon.ico", "assets/favicon-32x32.png", "assets/apple-touch-icon.png", "assets/icon-192.png", "assets/icon-512.png"):
+        assert (ROOT / asset).is_file() and (ROOT / asset).stat().st_size > 0, f"Ikonfilen {asset} saknas eller är tom"
 
     assembled = (ROOT / "index.html").read_text(encoding="utf-8")
     assembled += "".join((ROOT / "components" / f"{name}.html").read_text(encoding="utf-8") for name in COMPONENTS)
