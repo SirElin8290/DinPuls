@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.23.0"
+VERSION = "0.23.1"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -103,6 +103,11 @@ def verify_content() -> None:
         assert helper not in script, f"Duplicerad hjälpfunktion finns kvar i script.js: {helper}"
     assert "updateMunicipalityLinks" in script
     assert "Sök bland DinPuls moduler" in (ROOT / "components/header.html").read_text(encoding="utf-8")
+    header = (ROOT / "components/header.html").read_text(encoding="utf-8")
+    styles = (ROOT / "styles.css").read_text(encoding="utf-8")
+    assert "header-utility-actions" in header, "Mobilhuvudets verktyg är inte samlade"
+    assert "Gör till startsida" in header, "Mobilens startsideknapp saknar förklarande text"
+    assert "Mobilheader" in styles, "Den professionella mobilheadern saknas"
     google_search = (ROOT / "components/google-search.html").read_text(encoding="utf-8")
     assert 'action="https://www.google.se/search"' in google_search, "Google-sökningen går inte till google.se"
     assert 'name="q"' in google_search and 'method="get"' in google_search, "Google-sökningen skickar inte sökfrasen korrekt"
