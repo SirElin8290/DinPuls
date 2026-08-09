@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.18"
+VERSION = "0.21.19"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -18,7 +18,7 @@ ACTIVE_PAGES = [
     "nyheter.html", "drivmedel.html", "bio.html",
 ]
 COMPONENTS = [
-    "header", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
+    "header", "homepage-guide", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
     "premium-ad-1", "primary-cards", "transport", "sport", "health", "authorities", "service",
     "cinema", "secondary-cards", "premium-ad-2", "jobs-housing",
     "premium-ad-3", "footer",
@@ -316,7 +316,7 @@ def verify_optimization() -> None:
     assert not (ROOT / "assets/amal.jpg").exists(), "Den tunga gamla hero-bilden ligger kvar"
     assert icons.is_file() and icons.stat().st_size < 75_000, "Ikonpaketet innehåller fortfarande onödiga ikoner"
 
-    ad_pages = {"jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html", "bio.html"}
+    ad_pages = ["jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html", "bio.html"]
     for page in ad_pages:
         assert "portal-ads.js?version=" + VERSION in html_sources[page], f"{page}: gemensam annonskod saknas"
     assert javascript.count("function renderStrategicAds(") == 1, "Annonsfunktionen är duplicerad"
