@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="brand" href="index.html" aria-label="DinPuls startsida">
-      <img class="brand-logo" src="assets/logo.svg?version=0.21.9" alt="DinPuls.se" width="620" height="150">
+      <img class="brand-logo" src="assets/logo.svg?version=0.21.11" alt="DinPuls.se" width="620" height="150">
     </a>
 
     <form class="search" role="search">
@@ -12,8 +12,10 @@
     </form>
 
     <div class="header-actions">
-      <button class="municipality-button" id="municipality-button" type="button">
-        <i data-lucide="map-pin"></i><span id="selected-municipality">Åmål</span>
+      <button class="municipality-button" id="municipality-button" type="button" aria-label="Byt kommun">
+        <i data-lucide="map-pin"></i>
+        <span class="municipality-button-copy"><small>Byt kommun</small><strong id="selected-municipality">Åmål</strong></span>
+        <i class="municipality-chevron" data-lucide="chevron-down"></i>
       </button>
       <span class="seasonal-theme-badge" id="seasonal-theme-badge" title="DinPuls aktuella tema">
         <i data-lucide="sun"></i><span>Sommar</span>
