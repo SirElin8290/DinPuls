@@ -1,14 +1,15 @@
 /* =========================================================
-   DINPULS.SE v0.21.14
+   DINPULS.SE v0.21.15
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.14";
+const DINPULS_VERSION = "0.21.15";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
 const componentNames = [
   "header",
+  "homepage-guide",
   "google-search",
   "quick-strip",
   "navigation",
@@ -207,6 +208,7 @@ async function startDinPuls() {
 
     initializeTabs();
     initializeSearch();
+    initializeHomepageGuide();
     initializeClock();
     await initializeNameDay();
     initializeTheme();
@@ -225,6 +227,70 @@ async function startDinPuls() {
   } catch (error) {
     console.error("DinPuls kunde inte starta:", error);
   }
+}
+
+function initializeHomepageGuide() {
+  const dialog = document.querySelector("#homepage-dialog");
+  const openButton = document.querySelector("[data-homepage-guide-open]");
+  const closeButton = document.querySelector("[data-homepage-guide-close]");
+  const instructions = document.querySelector("[data-homepage-instructions]");
+  const browserButtons = [...document.querySelectorAll("[data-homepage-browser]")];
+  const copyButton = document.querySelector("[data-copy-homepage-url]");
+  const copyStatus = document.querySelector("[data-homepage-copy-status]");
+  if (!dialog || !openButton || !instructions) return;
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const instructionSets = {
+    chrome: isMobile
+      ? ["Öppna menyn med de tre punkterna.", "Välj Inställningar och sedan Startsida.", "Välj en anpassad webbadress och skriv https://dinpuls.se."]
+      : ["Öppna menyn med de tre punkterna och välj Inställningar.", "Välj Vid start.", "Välj Öppna en särskild sida eller en uppsättning sidor.", "Klicka på Lägg till en ny sida och ange https://dinpuls.se."],
+    edge: isMobile
+      ? ["Öppna menyn och välj Inställningar.", "Välj Allmänt och sedan Startsida.", "Välj En specifik sida och ange https://dinpuls.se."]
+      : ["Öppna menyn med de tre punkterna och välj Inställningar.", "Välj Start, hem och nya flikar.", "Under När Microsoft Edge startar väljer du Öppna dessa sidor.", "Lägg till https://dinpuls.se."],
+    firefox: isMobile
+      ? ["Öppna menyn och välj Inställningar.", "Välj Startsida.", "Välj en anpassad webbadress och ange https://dinpuls.se. Om valet saknas stöder din mobilversion inte en egen startsida."]
+      : ["Öppna menyn och välj Inställningar.", "Välj Hem.", "Vid Startsida och nya fönster väljer du Anpassade webbadresser.", "Ange https://dinpuls.se."],
+    safari: isMobile
+      ? ["Safari på iPhone och iPad kan inte ställas in så att en bestämd webbplats alltid öppnas när Safari startar.", "DinPuls kan därför inte göras till automatisk startsida i Safari på mobilen."]
+      : ["Öppna Safari och välj Safari > Inställningar.", "Välj Allmänt.", "Skriv https://dinpuls.se vid Startsida.", "Välj Startsida vid Nya fönster öppnas med."]
+  };
+
+  function detectedBrowser() {
+    const agent = navigator.userAgent;
+    if (/Edg|EdgiOS|EdgA/i.test(agent)) return "edge";
+    if (/Firefox|FxiOS/i.test(agent)) return "firefox";
+    if (/Chrome|CriOS/i.test(agent)) return "chrome";
+    if (/Safari/i.test(agent)) return "safari";
+    return "chrome";
+  }
+
+  function showBrowser(browser) {
+    const steps = instructionSets[browser] || instructionSets.chrome;
+    instructions.innerHTML = `<ol>${steps.map(step => `<li>${step}</li>`).join("")}</ol>`;
+    browserButtons.forEach(button => {
+      const selected = button.dataset.homepageBrowser === browser;
+      button.setAttribute("aria-selected", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+  }
+
+  openButton.addEventListener("click", () => {
+    showBrowser(detectedBrowser());
+    dialog.showModal();
+  });
+  closeButton?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", event => {
+    if (event.target === dialog) dialog.close();
+  });
+  browserButtons.forEach(button => button.addEventListener("click", () => showBrowser(button.dataset.homepageBrowser)));
+  copyButton?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText("https://dinpuls.se");
+      copyStatus.textContent = "Adressen är kopierad.";
+    } catch {
+      copyStatus.textContent = "Markera och kopiera adressen ovan.";
+    }
+  });
 }
 
 
