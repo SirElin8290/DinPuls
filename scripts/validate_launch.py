@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.22.0"
+VERSION = "0.22.1"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
