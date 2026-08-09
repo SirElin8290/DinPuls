@@ -34,4 +34,4 @@ jobs:
       - name: Kontrollera JavaScript
         run: |
           for file in *.js scripts/*.js; do node --check "$file"; done
-          node scripts/test_security.js
+          for test in scripts/test_*.js; do node "$test"; done

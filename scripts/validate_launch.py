@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.22.1"
+VERSION = "0.23.0"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -86,8 +86,21 @@ def verify_content() -> None:
     assert f'data-version="{VERSION}"' in index
     assert f'content="{VERSION}"' in index
     assert f'const DINPULS_VERSION = "{VERSION}"' in script
-    assert "DinPulsSecurity.safeExternalUrl" in script, "Startsidan använder inte central länkkontroll"
+    assert "safeExternalUrl" in script and "DinPulsCore" in script, "Startsidan använder inte central länkkontroll"
     assert (ROOT / "dp-safety.js").is_file(), "Den centrala säkerhetsmodulen saknas"
+    assert (ROOT / "dp-core.js").is_file(), "Den gemensamma JavaScript-kärnan saknas"
+    safety_position = index.index(f'dp-safety.js?version={VERSION}')
+    core_position = index.index(f'dp-core.js?version={VERSION}')
+    app_position = index.index(f'script.js?version={VERSION}')
+    assert safety_position < core_position < app_position, "JavaScript-modulerna laddas i fel ordning"
+    assert "window.DinPulsCore" in script, "script.js använder inte den gemensamma kärnmodulen"
+    for helper in (
+        "function cleanNumber(",
+        "function formatRelativeNewsTime(",
+        "function formatHousingAvailability(",
+        "function getStockholmWeekday(",
+    ):
+        assert helper not in script, f"Duplicerad hjälpfunktion finns kvar i script.js: {helper}"
     assert "updateMunicipalityLinks" in script
     assert "Sök bland DinPuls moduler" in (ROOT / "components/header.html").read_text(encoding="utf-8")
     google_search = (ROOT / "components/google-search.html").read_text(encoding="utf-8")

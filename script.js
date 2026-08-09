@@ -1,11 +1,28 @@
 /* =========================================================
-   DINPULS.SE v0.22.1
+   DINPULS.SE v0.23.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.22.1";
+const DINPULS_VERSION = "0.23.0";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
+const {
+  stockholmDateKey,
+  cleanNumber,
+  formatSwedishTime,
+  formatRelativeTime: formatRelativeNewsTime,
+  getInitials: getNewsSourceInitials,
+  formatEventDate,
+  formatJobDate,
+  formatHousingNumber,
+  formatHousingAvailability,
+  stockholmWeekday: getStockholmWeekday,
+  setText,
+  escapeHtml,
+  escapeAttribute,
+  safeExternalUrl,
+  safeHref
+} = window.DinPulsCore;
 
 const componentNames = [
   "header",
@@ -167,18 +184,6 @@ const STOCKHOLM_DATE_FORMAT = new Intl.DateTimeFormat("sv-SE", {
   month: "2-digit",
   day: "2-digit"
 });
-const STOCKHOLM_DATE_KEY_FORMAT = new Intl.DateTimeFormat("en-CA", {
-  timeZone: STOCKHOLM_TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit"
-});
-
-function stockholmDateKey(value = new Date()) {
-  return STOCKHOLM_DATE_KEY_FORMAT.format(value);
-}
-
-
 async function loadComponent(name) {
   const target = document.querySelector(`[data-component="${name}"]`);
 
@@ -1199,16 +1204,6 @@ function findLegacyParameter(entry, name) {
   return parameter?.values?.[0];
 }
 
-function cleanNumber(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number === 9999) {
-    return NaN;
-  }
-
-  return number;
-}
-
 function chooseForecastEntries(entries, now, count) {
   const futureEntries = entries.filter(
     (entry) => new Date(entry.time).getTime() >= now
@@ -1282,24 +1277,6 @@ function updateHeaderWeather(temperature, emoji) {
   compact.innerHTML =
     `<span aria-hidden="true">${emoji}</span>` +
     `<span>${Math.round(temperature)}°C</span>`;
-}
-
-function formatSwedishTime(value) {
-  return new Date(value).toLocaleString("sv-SE", {
-    timeZone: STOCKHOLM_TIME_ZONE,
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "numeric",
-    month: "short"
-  });
-}
-
-function setText(selector, value) {
-  const element = document.querySelector(selector);
-
-  if (element) {
-    element.textContent = value;
-  }
 }
 
 startDinPuls();
@@ -1449,13 +1426,6 @@ function updateNewsTimestamp(value) {
   const el=document.querySelector("#news-updated"); if(!el)return; const date=new Date(value);
   el.innerHTML=`<i data-lucide="refresh-cw"></i>${Number.isNaN(date.getTime())?'Källor kontrollerade':`Uppdaterad ${date.toLocaleString('sv-SE',{timeZone:STOCKHOLM_TIME_ZONE,day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`}`;
 }
-function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNaN(d.getTime()))return"Tid saknas"; const m=Math.max(0,Math.floor((Date.now()-d)/60000)); if(m<2)return"nyss"; if(m<60)return`${m} min sedan`; const h=Math.floor(m/60); if(h<24)return`${h} tim sedan`; const days=Math.floor(h/24); if(days===1)return"igår"; if(days<7)return`${days} dagar sedan`; return d.toLocaleDateString('sv-SE',{timeZone:STOCKHOLM_TIME_ZONE,day:'numeric',month:'short'}); }
-function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
-function escapeHtml(value){return window.DinPulsSecurity.escapeHtml(value);}
-function escapeAttribute(value){return window.DinPulsSecurity.escapeAttribute(value);}
-function safeExternalUrl(value){return window.DinPulsSecurity.safeExternalUrl(value);}
-function safeHref(value){return window.DinPulsSecurity.safeHref(value);}
-
 /* =========================================================
 
 /* =========================================================
@@ -1939,11 +1909,6 @@ function formatEventShortDate(item) {
     : formatEventDate(item?.startDate);
 }
 
-function formatEventDate(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "Kommande" : date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short" });
-}
-
 /* =========================================================
    DINPULS v0.8.0 – LEDIGA JOBB
 ========================================================= */
@@ -2047,12 +2012,6 @@ function renderJob(job) {
     </span>
     <i class="job-open" data-lucide="arrow-up-right"></i>
   </a>`;
-}
-
-function formatJobDate(value, prefix) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${prefix} ${date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short" })}`;
 }
 
 function updateQuickJobs(municipalityData, municipality) {
@@ -2167,19 +2126,6 @@ function renderHousingItem(item) {
     </span>
     <i class="housing-open" data-lucide="arrow-up-right"></i>
   </a>`;
-}
-
-function formatHousingNumber(value) {
-  return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
-}
-
-function formatHousingAvailability(value) {
-  if (!value) return "Tillgänglighet hos hyresvärden";
-  if (String(value).toLocaleLowerCase("sv-SE") === "nu") return "Tillgänglig nu";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? `Tillgänglig ${value}`
-    : `Tillgänglig ${date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", year: "numeric" })}`;
 }
 
 function updateQuickHousing(municipalityData, municipality) {
@@ -2340,13 +2286,6 @@ async function refreshLunchTicker() {
     console.error(error);
   }
   renderLunchTicker(DinPulsMunicipality.getName());
-}
-
-function getStockholmWeekday() {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    timeZone: "Europe/Stockholm"
-  }).format(new Date()).toLowerCase();
 }
 
 function renderLunchTicker(municipality) {
