@@ -123,6 +123,13 @@ def verify_content() -> None:
     assert "Integritet, kakor och lokal lagring" in information
     assert "data-clear-local-data" in information
     assert "dinpuls-nameday-" not in script and "dinpuls-weather-" not in script, "Automatisk långtidslagring finns kvar"
+    technical_guide = (ROOT / "docs/TEKNISK-HANDBOK.md").read_text(encoding="utf-8")
+    publishing_guide = (ROOT / "docs/PUBLICERING.md").read_text(encoding="utf-8")
+    assert "dp-core.js" in technical_guide and "dp-safety.js" in technical_guide, "Tekniska handboken saknar kärnarkitekturen"
+    assert "scripts/validate_launch.py" in technical_guide, "Tekniska handboken saknar testinstruktioner"
+    assert "git revert" in publishing_guide, "Publiceringsguiden saknar återställningsrutin"
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "docs/TEKNISK-HANDBOK.md" in readme and "docs/PUBLICERING.md" in readme, "README länkar inte till driftdokumentationen"
 
 
 def verify_data() -> None:
