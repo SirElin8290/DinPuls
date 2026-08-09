@@ -1795,6 +1795,41 @@ linear-gradient(0deg,rgba(84,161,76,.18),transparent 62%)}
 .ticker-nameday strong{font-size:13px}
 .ticker-nameday small{margin-top:4px;font-size:10px}
 [data-theme="dark"] .ticker-nameday{background:linear-gradient(135deg,#2b2518,#0d2039);border-color:#263957}
+
+/* Bio på startsidan v0.21.11 */
+.cinema-home{max-width:var(--max);margin:28px auto;padding:26px;color:#f5f7ff;background:radial-gradient(circle at 90% 0%,rgba(104,71,214,.42),transparent 32%),linear-gradient(135deg,#101327,#20224b 55%,#171a35);border:1px solid rgba(255,255,255,.12);border-radius:20px;box-shadow:0 18px 44px rgba(9,14,39,.2)}
+.cinema-home .section-kicker{color:#b9a9ff}.cinema-home-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.cinema-home-head h2{margin:5px 0 7px;font-size:26px}.cinema-home-head p{margin:0;color:#c0c5d8;font-size:11px}.cinema-home-badge{display:flex;align-items:center;gap:7px;padding:8px 11px;color:#efeaff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;font-size:9px;font-weight:800}.cinema-home-badge svg{width:15px}.cinema-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}.cinema-home-film{display:grid;grid-template-columns:36px minmax(0,1fr) 20px;align-items:center;gap:11px;padding:14px;color:#f7f8ff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:13px;transition:.2s}.cinema-home-film:hover{transform:translateY(-2px);background:rgba(255,255,255,.12);border-color:rgba(185,169,255,.55)}.cinema-home-film>span:nth-child(2){display:grid;gap:3px;min-width:0}.cinema-home-film small{overflow:hidden;color:#abaed0;font-size:8px;text-transform:uppercase;letter-spacing:.06em;text-overflow:ellipsis;white-space:nowrap}.cinema-home-film strong{overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.cinema-home-film em{overflow:hidden;color:#d4d7e6;font-size:9px;font-style:normal;text-overflow:ellipsis;white-space:nowrap}.cinema-home-film>svg{width:17px;color:#cbbfff}.cinema-home-number{width:36px;height:36px;display:grid;place-items:center;color:#d7ceff;background:#3b3375;border-radius:10px;font-size:10px;font-weight:900}.cinema-home-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:17px;padding-top:14px;color:#b8bdd0;border-top:1px solid rgba(255,255,255,.12);font-size:9px}.cinema-home-footer span,.cinema-home-footer a{display:flex;align-items:center;gap:6px}.cinema-home-footer svg{width:14px}.cinema-home-footer a{color:#d9d1ff;font-weight:800}.cinema-home-loading,.cinema-home-empty{grid-column:1/-1;padding:24px;color:#c0c5d8;text-align:center}
+@media(max-width:720px){.cinema-home{margin:18px 12px;padding:19px}.cinema-home-head,.cinema-home-footer{align-items:flex-start;flex-direction:column}.cinema-home-badge{display:none}.cinema-home-grid{grid-template-columns:1fr}.cinema-home-film{padding:12px}}
+
+/* v0.21.10 – tydligt kommunval permanent i sidhuvudet */
+.municipality-button{display:flex!important;min-height:48px;align-items:center;gap:9px;padding:7px 11px!important;text-align:left;white-space:nowrap;border:1px solid rgba(255,255,255,.48)!important;background:rgba(255,255,255,.14)!important;box-shadow:0 5px 16px rgba(3,17,42,.16);cursor:pointer}
+.municipality-button:hover{background:rgba(255,255,255,.23)!important;border-color:rgba(255,255,255,.72)!important}
+.municipality-button-copy{display:grid;gap:1px;line-height:1.05}
+.municipality-button-copy small{font-size:8px;font-weight:600;opacity:.82}
+.municipality-button-copy strong{font-size:12px;font-weight:800}
+.municipality-button .municipality-chevron{width:14px;height:14px;opacity:.8}
+@media(max-width:1100px){
+  .header-inner{grid-template-columns:minmax(240px,1fr) minmax(260px,480px) auto;gap:14px}
+  .brand-logo{width:min(290px,100%)}
+  .municipality-button-copy small{display:none}
+}
+@media(max-width:760px){
+  .header-inner{grid-template-columns:minmax(120px,1fr) auto;gap:9px;padding:9px 10px 11px}
+  .brand-logo{width:min(190px,100%)}
+  .header-actions{gap:4px}
+  .municipality-button{min-height:38px;padding:5px 8px!important;gap:5px}
+  .municipality-button>svg:first-child{width:17px;height:17px}
+  .municipality-button-copy strong{font-size:11px}
+  .municipality-button .municipality-chevron{width:12px;height:12px}
+  .icon-button{width:36px;height:36px}
+}
+@media(max-width:430px){
+  .brand-logo{width:min(135px,100%)}
+  .municipality-button{max-width:100px}
+  .municipality-button-copy strong{max-width:52px;overflow:hidden;text-overflow:ellipsis}
+  .header-actions{gap:2px}
+  .icon-button{width:34px;height:34px}
+}
 /* Vård och hälsa v0.21.5 */
 .health-home{max-width:var(--max);margin:28px auto;padding:24px}.health-home-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}.health-home-head h2{margin:5px 0 7px}.health-home-head p{margin:0;color:var(--muted);font-size:12px}.health-source-badge{display:flex;align-items:center;gap:7px;padding:8px 11px;color:#177046;background:#edf9f2;border:1px solid #bee3cd;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap}.health-source-badge svg{width:14px}.health-home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.health-home-action{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:10px;padding:14px;color:inherit;background:var(--card);border:1px solid var(--border);border-radius:13px}.health-home-action>svg{width:22px;color:#08744c}.health-home-action span{display:grid;gap:3px}.health-home-action strong{font-size:11px}.health-home-action small{color:var(--muted);font-size:9px;line-height:1.4}.health-home-action.emergency{color:#8f1f25;background:#fff1f1;border-color:#efc5c7}.health-home-action.emergency>svg{color:#c52832}.health-home-action.advice{color:#0d4f87;background:#eff7ff;border-color:#c8dff2}.health-home-action.advice>svg{color:#0b69ad}.health-home-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:10px}.health-home-footer a{display:flex;align-items:center;gap:6px;color:#08744c;font-weight:800}.health-home-footer svg{width:14px}@media(max-width:900px){.health-home-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.health-home{margin:18px 12px;padding:18px}.health-home-head,.health-home-footer{align-items:flex-start;flex-direction:column}.health-source-badge{white-space:normal}.health-home-grid{grid-template-columns:1fr;width:100%}}
 /* Service & hantverk v0.21.6 */
