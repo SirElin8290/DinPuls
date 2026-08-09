@@ -10,7 +10,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -326,7 +326,7 @@ def road_items(road_data: dict, name: str) -> list[dict]:
             "priority": 80 if item.get("severity") == "danger" else 74,
             "title": title or item.get("message") or "Allvarlig trafikstörning",
             "publishedAt": item.get("updatedAt") or road_data.get("generatedAt"),
-            "source": "Trafikverket", "url": item.get("sourceUrl") or "https://www.trafikverket.se/trafikinformation/vag/",
+            "source": "Trafikverket", "url": f"trafik.html?kommun={quote(name)}&event={quote(str(item.get('id') or ''))}",
         })
     return result
 

@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.23.1
+   DINPULS.SE v0.23.2
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.1";
+const DINPULS_VERSION = "0.23.2";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 const {
@@ -1542,7 +1542,7 @@ function renderImportant(config = DinPulsMunicipality.getConfig()) {
     status.textContent = isStale
       ? `${items.length} · senast kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`
       : `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
-    list.innerHTML = items.map(renderImportantItem).join("");
+    list.innerHTML = items.map(item => renderImportantItem(item, config.name)).join("");
   }
 
   if (window.lucide) lucide.createIcons();
@@ -1566,15 +1566,22 @@ function renderImportantCalm(municipality, sources, isStale = false) {
   <div class="important-sources"><span>Kontrollerade källor</span>${sourceLinks}</div>`;
 }
 
-function renderImportantItem(item) {
+function renderImportantItem(item, municipality) {
   const severity = ["danger", "warning", "info"].includes(item.severity) ? item.severity : "info";
   const icons = { crisis: "triangle-alert", police: "shield-alert", traffic: "bus-front", road: "car-front", weather: "cloud-lightning", municipal: "wrench" };
   const icon = icons[item.category] || "info";
   const published = formatRelativeNewsTime(item.publishedAt);
   const source = item.source || "Officiell källa";
   const body = `<i class="status-icon ${severity}" data-lucide="${icon}"></i><div><strong>${escapeHtml(item.title || "Viktig information")}</strong><small>${escapeHtml(source)} · ${escapeHtml(published)}</small></div>`;
-  return item.url
-    ? `<article class="important-item">${body}<a href="${escapeAttribute(safeHref(item.url))}" target="_blank" rel="noopener noreferrer" aria-label="Läs mer hos ${escapeAttribute(source)}"><i data-lucide="arrow-up-right"></i></a></article>`
+  const roadEventId = item.category === "road" && String(item.id || "").startsWith("road-")
+    ? String(item.id).slice(5)
+    : "";
+  const detailUrl = roadEventId
+    ? `trafik.html?kommun=${encodeURIComponent(municipality)}&event=${encodeURIComponent(roadEventId)}`
+    : item.url;
+  const opensNewTab = !roadEventId;
+  return detailUrl
+    ? `<article class="important-item">${body}<a href="${escapeAttribute(safeHref(detailUrl))}"${opensNewTab ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="${roadEventId ? "Visa trafikhändelsen" : `Läs mer hos ${escapeAttribute(source)}`}"><i data-lucide="arrow-up-right"></i></a></article>`
     : `<article class="important-item">${body}</article>`;
 }
 

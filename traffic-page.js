@@ -2,6 +2,7 @@ const municipalityState = window.DinPulsMunicipalityState;
 const TRAFFIC_STALE_MINUTES = 40;
 let trafficMunicipality = municipalityState.getInitial();
 let fullRoadTrafficData = null;
+let requestedTrafficEventId = new URLSearchParams(location.search).get("event") || "";
 const municipalityWebsites = {
   "Åmål": "https://www.amal.se/", "Säffle": "https://www.saffle.se/",
   "Bengtsfors": "https://www.bengtsfors.se/", "Mellerud": "https://www.mellerud.se/",
@@ -15,6 +16,10 @@ async function initializeTrafficPage() {
   const select = document.querySelector("#traffic-municipality");
   municipalityState.populateSelect(select, trafficMunicipality);
   select.addEventListener("change", () => {
+    requestedTrafficEventId = "";
+    const url = new URL(location.href);
+    url.searchParams.delete("event");
+    history.replaceState(null, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
     trafficMunicipality = municipalityState.set(select.value);
     renderTrafficPage();
   });
@@ -57,7 +62,7 @@ function renderTrafficPage() {
     const typeMatches = type === "all" || item.category === type;
     const searchable = [item.title, item.message, item.road, item.location].join(" ").toLocaleLowerCase("sv-SE");
     return typeMatches && (!query || searchable.includes(query));
-  });
+  }).sort((a, b) => Number(b.id === requestedTrafficEventId) - Number(a.id === requestedTrafficEventId));
 
   const stale = trafficDataAgeMinutes() > TRAFFIC_STALE_MINUTES;
   const total = document.querySelector("#traffic-page-total");
@@ -88,6 +93,11 @@ function renderTrafficPage() {
     hideTrafficEmpty();
   }
   if (window.lucide) lucide.createIcons();
+  const focusedEvent = list.querySelector('[data-traffic-event="focused"]');
+  if (focusedEvent) {
+    focusedEvent.setAttribute("tabindex", "-1");
+    requestAnimationFrame(() => focusedEvent.scrollIntoView({ behavior: "smooth", block: "center" }));
+  }
 }
 
 function renderTrafficEmpty(icon, title, detail, state) {
@@ -113,13 +123,21 @@ function renderTrafficMessage(item) {
   const time = new Date(item.updatedAt || item.startTime || "");
   const source = item.source || "Trafikverket";
   const status = item.status === "planned" ? "Planerad" : item.categoryLabel;
-  return `<article class="portal-card traffic-message">
+  const isFocused = requestedTrafficEventId && item.id === requestedTrafficEventId;
+  const latitude = Number(item.latitude);
+  const longitude = Number(item.longitude);
+  const hasPosition = Number.isFinite(latitude) && Number.isFinite(longitude);
+  const mapUrl = hasPosition
+    ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(latitude)}&mlon=${encodeURIComponent(longitude)}#map=15/${encodeURIComponent(latitude)}/${encodeURIComponent(longitude)}`
+    : "";
+  return `<article class="portal-card traffic-message${isFocused ? " selected" : ""}"${isFocused ? ' data-traffic-event="focused"' : ""}>
     <span class="portal-card-icon traffic ${escapeTraffic(item.severity)}"><i data-lucide="${icons[item.category] || "car-front"}"></i></span>
     <div>
       <h3>${escapeTraffic(item.title)}</h3>
       ${item.message ? `<p>${escapeTraffic(item.message)}</p>` : ""}
       <div class="portal-tags">${[item.road, item.location, status].filter(Boolean).map((value) => `<span>${escapeTraffic(value)}</span>`).join("")}</div>
-      <div class="traffic-source"><span>Källa: ${escapeTraffic(source)}</span><a href="${escapeTraffic(safeTrafficUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer">Öppna trafikkartan</a></div>
+      ${isFocused ? '<strong class="traffic-selected-label"><i data-lucide="map-pin"></i> Händelsen du valde</strong>' : ""}
+      <div class="traffic-source"><span>Källa: ${escapeTraffic(source)}</span><div class="traffic-source-actions">${hasPosition ? `<a href="${escapeTraffic(safeTrafficUrl(mapUrl))}" target="_blank" rel="noopener noreferrer">Visa exakt plats</a>` : ""}<a href="${escapeTraffic(safeTrafficUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer">Trafikverkets vägkarta</a></div></div>
     </div>
     <time>${Number.isNaN(time.getTime()) ? "Tid saknas" : time.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
   </article>`;

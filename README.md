@@ -1,4 +1,4 @@
-# DinPuls v0.23.1
+# DinPuls v0.23.2
 
 DinPuls är en lokal webbportal för Åmål, Säffle, Bengtsfors, Mellerud, Årjäng, Arvika och Grums. Den publicerade webbplatsen finns på [dinpuls.se](https://dinpuls.se/).
 
@@ -7,7 +7,7 @@ DinPuls är en lokal webbportal för Åmål, Säffle, Bengtsfors, Mellerud, Årj
 - [Teknisk handbok](docs/TEKNISK-HANDBOK.md) – arkitektur, kodansvar, säkerhet, testning och versionshantering.
 - [Publicering och återställning](docs/PUBLICERING.md) – checklista för säker publicering, produktionskontroll och rollback.
 
-Version 0.23.1 avslutar webbplatsens första stabiliseringsomgång: säkerhetsfunktioner och gemensamma hjälpfunktioner är centraliserade, CSS använder en gemensam palett och testerna körs automatiskt före lansering.
+Version 0.23.2 avslutar webbplatsens första stabiliseringsomgång: säkerhetsfunktioner och gemensamma hjälpfunktioner är centraliserade, CSS använder en gemensam palett och testerna körs automatiskt före lansering.
 
 ## Versionshistorik
 

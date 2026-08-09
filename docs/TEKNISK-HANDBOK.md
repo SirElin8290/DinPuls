@@ -1,6 +1,6 @@
 # Teknisk handbok för DinPuls
 
-Den här handboken beskriver den publicerade strukturen i DinPuls 0.23.1. Målet är att en ny utvecklare ska kunna förstå projektet, göra en säker ändring och kontrollera den utan muntlig överlämning.
+Den här handboken beskriver den publicerade strukturen i DinPuls 0.23.2. Målet är att en ny utvecklare ska kunna förstå projektet, göra en säker ändring och kontrollera den utan muntlig överlämning.
 
 ## Teknisk grund
 

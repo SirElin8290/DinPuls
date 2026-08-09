@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.23.1"
+VERSION = "0.23.2"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -128,6 +128,9 @@ def verify_content() -> None:
     assert "Integritet, kakor och lokal lagring" in information
     assert "data-clear-local-data" in information
     assert "dinpuls-nameday-" not in script and "dinpuls-weather-" not in script, "Automatisk långtidslagring finns kvar"
+    assert "Visa trafikhändelsen" in script and "trafik.html?kommun=" in script, "Dagens viktigaste saknar länk till vald trafikhändelse"
+    traffic_page = (ROOT / "traffic-page.js").read_text(encoding="utf-8")
+    assert "requestedTrafficEventId" in traffic_page and "Visa exakt plats" in traffic_page, "Trafiksidan saknar händelsefokus eller exakt kartposition"
     technical_guide = (ROOT / "docs/TEKNISK-HANDBOK.md").read_text(encoding="utf-8")
     publishing_guide = (ROOT / "docs/PUBLICERING.md").read_text(encoding="utf-8")
     assert "dp-core.js" in technical_guide and "dp-safety.js" in technical_guide, "Tekniska handboken saknar kärnarkitekturen"
