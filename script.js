@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.16
+   DINPULS.SE v0.21.17
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.16";
+const DINPULS_VERSION = "0.21.17";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
