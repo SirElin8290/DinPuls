@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.19"
+VERSION = "0.21.20"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -299,6 +299,9 @@ def verify_review_fixes() -> None:
     assert "LOOKAHEAD_OFFSETS_HOURS" in transport and "EMPTY_RETRY_MINUTES = 45" in transport, "Kollektivtrafikens återförsök är inte robusta"
     assert "tickerRestaurants" in script, "Lunchrullen visar inte hela restaurangutbudet"
     assert "dinpuls-ticker 42s" in styles and "lunch-airport-roll 24s" in styles, "Rullarnas hastighet är inte rättad"
+    assert '[data-theme="dark"][data-season]{--bg:#071426}' in styles, "Årstidstemat skriver över nattlägets bakgrund"
+    assert '[data-theme="dark"] .notification-panel-heading button' in styles, "Notisrutans stängknapp saknar tydligt nattläge"
+    assert '[data-theme="dark"] .dialog-close' in styles, "Kommunrutans stängknapp saknar tydligt nattläge"
     assert index.index('data-component="secondary-cards"') < index.index('id="news-sources"') < index.index('data-component="premium-ad-2"'), "Lokala nyheter och källor ligger inte tillsammans"
     source_names = {item.get("name") for item in sources}
     assert {"Provinstidningen Dalsland", "Dalslänningen"} <= source_names, "Lokala Dalslandskällor saknas"
