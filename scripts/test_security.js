@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict");
-const security = require("../security.js");
+const security = require("../dp-safety.js");
 
 assert.equal(security.escapeHtml(`<img src=x onerror="alert('x')">`), "&lt;img src=x onerror=&quot;alert(&#39;x&#39;)&quot;&gt;");
 assert.equal(security.safeExternalUrl("https://www.svt.se/nyheter"), "https://www.svt.se/nyheter");
