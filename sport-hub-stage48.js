@@ -13,7 +13,9 @@
   let activeTab = "matches";
   let hideResults = localStorage.getItem("dinpuls-hide-sport-results") === "true";
 
-  const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const esc = window.DinPulsSecurity.escapeHtml;
+  const safeSportUrl = window.DinPulsSecurity.safeExternalUrl;
+  const safeSportHref = window.DinPulsSecurity.safeHref;
   const current = () => sportsData?.municipalities?.[municipality] || { clubs: [], liveSources: [], matches: [] };
   const seasons = () => seasonData?.municipalities?.[municipality] || [];
   const arenas = () => arenaData?.municipalities?.[municipality]?.arenas || [];
@@ -89,7 +91,7 @@
   }
 
   function sourceButtons(sport) {
-    return providersFor(sport).map(source => `<a class="sport-hub-source" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title || source.provider || "Officiell källa")} ↗</a>`).join("");
+    return providersFor(sport).map(source => `<a class="sport-hub-source" href="${esc(safeSportUrl(source.url))}" target="_blank" rel="noopener noreferrer">${esc(source.title || source.provider || "Officiell källa")} ↗</a>`).join("");
   }
 
   function setTab(tab) {
@@ -137,7 +139,7 @@
   function matchRow(match) {
     const finished = matchFinished(match);
     const score = finished && hasScore(match) ? `${match.homeScore}–${match.awayScore}` : (new Date(match.startTime) < new Date() ? "Resultat väntar" : "–");
-    return `<article class="sport-hub-match"><time>${esc(dateTime(match.startTime))}</time><div><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc([match.competition, match.venue].filter(Boolean).join(" · "))}</small></div><span class="sport-hub-result">${esc(score)}</span>${match.sourceUrl ? `<a href="${esc(match.sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Öppna originalkällan">↗</a>` : ""}</article>`;
+    return `<article class="sport-hub-match"><time>${esc(dateTime(match.startTime))}</time><div><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc([match.competition, match.venue].filter(Boolean).join(" · "))}</small></div><span class="sport-hub-result">${esc(score)}</span>${match.sourceUrl ? `<a href="${esc(safeSportUrl(match.sourceUrl))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna originalkällan">↗</a>` : ""}</article>`;
   }
 
   function sportDirectory(items = sports()) {
@@ -156,7 +158,7 @@
     if (!items.length) return "";
     return `<section class="sport-hub-season-overview"><header><span class="section-kicker">Säsongsläge</span><h2>Aktivt och på väg att starta</h2><p>Öppna alltid originalkällan för senast publicerade spelschema.</p></header><div class="sport-hub-season-grid">${items.map(item => {
       const next = validDate(item.nextStart) && new Date(item.nextStart) > new Date() ? `<b>${esc(dateTime(item.nextStart))}: ${esc(item.nextMatch)}</b>` : "";
-      return `<a class="sport-hub-season ${esc(item.status)}" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener noreferrer"><i data-lucide="${item.status === "active" ? "activity" : "calendar-clock"}"></i><span><small>${esc(item.sport)} · ${esc(item.team)}</small><strong>${esc(item.statusLabel)}</strong><span>${esc(item.competition)}</span>${next}</span><em>Officiell källa ↗</em></a>`;
+      return `<a class="sport-hub-season ${esc(item.status)}" href="${esc(safeSportUrl(item.sourceUrl))}" target="_blank" rel="noopener noreferrer"><i data-lucide="${item.status === "active" ? "activity" : "calendar-clock"}"></i><span><small>${esc(item.sport)} · ${esc(item.team)}</small><strong>${esc(item.statusLabel)}</strong><span>${esc(item.competition)}</span>${next}</span><em>Officiell källa ↗</em></a>`;
     }).join("")}</div></section>`;
   }
 
@@ -184,7 +186,7 @@
         const local = providersFor(sport);
         const primary = local[0] || provider;
         const label = TEAM_SPORTS.has(sport) ? "Tabell, matcher och resultat" : "Tävlingskalender och resultat";
-        return `<article class="sport-hub-result-card"><span class="section-kicker">${esc(sport)}</span><h3>${esc(label)}</h3><p>${TEAM_SPORTS.has(sport) ? "Placering och poäng visas hos ansvarigt förbund så att tabellen alltid är aktuell." : "Individuella sporter hänvisar till officiell kalender, resultatlista eller ranking."}</p>${primary ? `<a href="${esc(primary.url)}" target="_blank" rel="noopener noreferrer">Öppna ${esc(primary.provider || "officiell källa")} ↗</a>` : ""}</article>`;
+        return `<article class="sport-hub-result-card"><span class="section-kicker">${esc(sport)}</span><h3>${esc(label)}</h3><p>${TEAM_SPORTS.has(sport) ? "Placering och poäng visas hos ansvarigt förbund så att tabellen alltid är aktuell." : "Individuella sporter hänvisar till officiell kalender, resultatlista eller ranking."}</p>${primary ? `<a href="${esc(safeSportUrl(primary.url))}" target="_blank" rel="noopener noreferrer">Öppna ${esc(primary.provider || "officiell källa")} ↗</a>` : ""}</article>`;
       }).join("")}</div></section>`);
     }
     return pageWithAds(blocks);
@@ -195,9 +197,9 @@
     const items = (selected === "all" ? sports() : [selected]).filter(Boolean);
     const blocks = items.map(sport => {
       const clubs = (current().clubs || []).filter(club => (club.sports || []).includes(sport));
-      return `<section class="sport-hub-section"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(sport)}</span><h2>Föreningar och källor</h2></div><div class="sport-hub-source-stack">${sourceButtons(sport)}</div></header><div class="sport-hub-club-grid">${clubs.map(club => `<a href="${esc(club.url)}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${esc(club.source || "Föreningen")}</small></span><i data-lucide="external-link"></i></a>`).join("") || `<div class="sport-hub-empty"><span>Ingen namngiven förening har verifierats ännu.</span></div>`}</div></section>`;
+      return `<section class="sport-hub-section"><header class="sport-hub-section-head"><div><span class="section-kicker">${esc(sport)}</span><h2>Föreningar och källor</h2></div><div class="sport-hub-source-stack">${sourceButtons(sport)}</div></header><div class="sport-hub-club-grid">${clubs.map(club => `<a href="${esc(safeSportUrl(club.url))}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${esc(club.source || "Föreningen")}</small></span><i data-lucide="external-link"></i></a>`).join("") || `<div class="sport-hub-empty"><span>Ingen namngiven förening har verifierats ännu.</span></div>`}</div></section>`;
     });
-    const directory = current().directoryUrl ? `<section class="sport-hub-register"><span><strong>Saknas din förening?</strong><br>Kontrollera kommunens föreningsregister eller tipsa DinPuls.</span><a href="${esc(current().directoryUrl)}" target="_blank" rel="noopener noreferrer">Kommunens föreningsregister ↗</a></section>` : "";
+    const directory = current().directoryUrl ? `<section class="sport-hub-register"><span><strong>Saknas din förening?</strong><br>Kontrollera kommunens föreningsregister eller tipsa DinPuls.</span><a href="${esc(safeSportUrl(current().directoryUrl))}" target="_blank" rel="noopener noreferrer">Kommunens föreningsregister ↗</a></section>` : "";
     return pageWithAds(blocks, directory);
   }
 
@@ -206,7 +208,7 @@
       const names = [arena.name, ...(arena.aliases || [])].map(name => name.toLocaleLowerCase("sv-SE"));
       const count = matches.filter(match => { const venue = String(match.venue || "").toLocaleLowerCase("sv-SE"); return venue && names.some(name => venue.includes(name) || name.includes(venue)); }).length;
       const map = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${arena.name}, ${arena.address || municipality}`)}`;
-      return `<article class="sport-hub-arena"><span class="section-kicker">${esc(arena.type)}</span><h3>${esc(arena.name)}</h3><p>${esc((arena.sports || []).join(" · "))}</p><p><strong>Adress:</strong> ${esc(arena.address || municipality)}</p>${arena.phone ? `<p><strong>Telefon:</strong> <a href="tel:${esc(arena.phone)}">${esc(arena.phone)}</a></p>` : ""}<p>${count} inlästa matcher på anläggningen</p><div class="sport-hub-arena-links"><a href="${map}" target="_blank" rel="noopener noreferrer">Hitta hit ↗</a><a href="${esc(arena.sourceUrl)}" target="_blank" rel="noopener noreferrer">Officiell information ↗</a></div></article>`;
+      return `<article class="sport-hub-arena"><span class="section-kicker">${esc(arena.type)}</span><h3>${esc(arena.name)}</h3><p>${esc((arena.sports || []).join(" · "))}</p><p><strong>Adress:</strong> ${esc(arena.address || municipality)}</p>${arena.phone ? `<p><strong>Telefon:</strong> <a href="tel:${esc(safeSportHref(arena.phone))}">${esc(safeSportHref(arena.phone))}</a></p>` : ""}<p>${count} inlästa matcher på anläggningen</p><div class="sport-hub-arena-links"><a href="${map}" target="_blank" rel="noopener noreferrer">Hitta hit ↗</a><a href="${esc(safeSportUrl(arena.sourceUrl))}" target="_blank" rel="noopener noreferrer">Officiell information ↗</a></div></article>`;
     }).join("");
   }
 

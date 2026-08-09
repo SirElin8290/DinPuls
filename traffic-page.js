@@ -8,10 +8,8 @@ const municipalityWebsites = {
   "Årjäng": "https://www.arjang.se/", "Arvika": "https://www.arvika.se/", "Grums": "https://www.grums.se/"
 };
 
-const escapeTraffic = (value) => String(value ?? "").replace(
-  /[&<>"']/g,
-  (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]
-);
+const escapeTraffic = window.DinPulsSecurity.escapeHtml;
+const safeTrafficUrl = window.DinPulsSecurity.safeExternalUrl;
 
 async function initializeTrafficPage() {
   const select = document.querySelector("#traffic-municipality");
@@ -121,7 +119,7 @@ function renderTrafficMessage(item) {
       <h3>${escapeTraffic(item.title)}</h3>
       ${item.message ? `<p>${escapeTraffic(item.message)}</p>` : ""}
       <div class="portal-tags">${[item.road, item.location, status].filter(Boolean).map((value) => `<span>${escapeTraffic(value)}</span>`).join("")}</div>
-      <div class="traffic-source"><span>Källa: ${escapeTraffic(source)}</span><a href="${escapeTraffic(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/")}" target="_blank" rel="noopener noreferrer">Öppna trafikkartan</a></div>
+      <div class="traffic-source"><span>Källa: ${escapeTraffic(source)}</span><a href="${escapeTraffic(safeTrafficUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer">Öppna trafikkartan</a></div>
     </div>
     <time>${Number.isNaN(time.getTime()) ? "Tid saknas" : time.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
   </article>`;

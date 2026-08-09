@@ -3,7 +3,8 @@ let newsMunicipality = newsState.getInitial();
 let newsPageData = { articles: [], sources: [] };
 let newsPageScope = "local";
 
-const newsEscape = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const newsEscape = window.DinPulsSecurity.escapeHtml;
+const safeNewsUrl = window.DinPulsSecurity.safeExternalUrl;
 
 async function initializeNewsPage() {
   const municipalitySelect = document.querySelector("#news-municipality");
@@ -60,19 +61,19 @@ function renderNewsPage() {
 function renderNewsPageArticle(article) {
   const locked = article.access === "subscription";
   const published = new Date(article.publishedAt);
-  return `<article class="news-page-card ${article.important ? "important" : ""}"><div class="news-page-card-meta"><strong>${newsEscape(article.source)}</strong><time>${Number.isNaN(published.getTime()) ? "" : published.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></div><h2>${newsEscape(article.title)}</h2><p>${newsEscape(article.summary || "")}</p><div class="news-page-card-footer"><span class="news-access ${locked ? "subscription" : "free"}"><i data-lucide="${locked ? "lock" : "unlock"}"></i>${locked ? "Låst artikel" : "Fri artikel"}</span><span>${newsEscape(article.category || article.region || "Nyhet")}</span><a href="${newsEscape(article.url)}" target="_blank" rel="noopener noreferrer">Läs hos ${newsEscape(article.source)} <i data-lucide="arrow-up-right"></i></a></div></article>`;
+  return `<article class="news-page-card ${article.important ? "important" : ""}"><div class="news-page-card-meta"><strong>${newsEscape(article.source)}</strong><time>${Number.isNaN(published.getTime()) ? "" : published.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></div><h2>${newsEscape(article.title)}</h2><p>${newsEscape(article.summary || "")}</p><div class="news-page-card-footer"><span class="news-access ${locked ? "subscription" : "free"}"><i data-lucide="${locked ? "lock" : "unlock"}"></i>${locked ? "Låst artikel" : "Fri artikel"}</span><span>${newsEscape(article.category || article.region || "Nyhet")}</span><a href="${newsEscape(safeNewsUrl(article.url))}" target="_blank" rel="noopener noreferrer">Läs hos ${newsEscape(article.source)} <i data-lucide="arrow-up-right"></i></a></div></article>`;
 }
 
 function renderNewsPageImportant(articles) {
   const box = document.querySelector("#news-page-important");
   const important = articles.filter(article => article.important || Number(article.impact) >= 85).slice(0, 3);
   box.hidden = !important.length;
-  box.innerHTML = important.length ? `<h2><i data-lucide="triangle-alert"></i> Viktiga lokala händelser</h2>${important.map(article => `<a href="${newsEscape(article.url)}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(article.title)}</strong><span>${newsEscape(article.source)}</span></a>`).join("")}` : "";
+  box.innerHTML = important.length ? `<h2><i data-lucide="triangle-alert"></i> Viktiga lokala händelser</h2>${important.map(article => `<a href="${newsEscape(safeNewsUrl(article.url))}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(article.title)}</strong><span>${newsEscape(article.source)}</span></a>`).join("")}` : "";
 }
 
 function renderNewsPageSources() {
   const sources = (newsPageData.sources || []).filter(source => source.scope === newsPageScope && (newsPageScope !== "local" || (source.municipalities || []).includes(newsMunicipality)));
-  document.querySelector("#news-page-sources").innerHTML = sources.map(source => `<a href="${newsEscape(source.url)}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(source.name)}</strong><span>${newsEscape(source.type)}</span><small><i data-lucide="${source.access === "subscription" ? "lock" : "check"}"></i>${source.access === "subscription" ? "Delvis låst" : "Fri"}</small></a>`).join("");
+  document.querySelector("#news-page-sources").innerHTML = sources.map(source => `<a href="${newsEscape(safeNewsUrl(source.url))}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(source.name)}</strong><span>${newsEscape(source.type)}</span><small><i data-lucide="${source.access === "subscription" ? "lock" : "check"}"></i>${source.access === "subscription" ? "Delvis låst" : "Fri"}</small></a>`).join("");
 }
 
 function renderNewsAds() {

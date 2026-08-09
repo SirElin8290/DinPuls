@@ -27,15 +27,11 @@ jobs:
           python-version: "3.12"
 
       - name: Kontrollera sidor, kommuner och data
-        run: python scripts/validate_launch.py
+        run: |
+          for test in scripts/test_*.py; do python "$test"; done
+          python scripts/validate_launch.py
 
       - name: Kontrollera JavaScript
         run: |
-          node --check script.js
-          node --check portal-pages.js
-          node --check traffic-page.js
-          node --check event-page.js
-          node --check lunch-page.js
-          node --check grocery-page.js
-          node --check sport-data-engine.js
-          node --check sport-hub-stage48.js
+          for file in *.js scripts/*.js; do node --check "$file"; done
+          node scripts/test_security.js

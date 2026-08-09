@@ -1,7 +1,8 @@
 const municipalityState = window.DinPulsMunicipalityState;
 let fuelMunicipality = municipalityState.getInitial();
 let fullFuelData;
-const escapeFuel = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
+const escapeFuel = window.DinPulsSecurity.escapeHtml;
+const safeFuelUrl = window.DinPulsSecurity.safeExternalUrl;
 const fuelNumber = value => new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 }).format(Number(value));
 
 async function initializeFuelPage() {
@@ -41,7 +42,7 @@ function renderFuelStation(station) {
   const isPriced = Number(station.price) > 0;
   const attributes = station.type === "charging" ? [...(station.connectors||[]), station.maxPower].filter(Boolean) : (station.products||[]);
   const distance = Number(station.distanceKm) > 0 ? `${fuelNumber(station.distanceKm)} km` : `i ${fuelMunicipality}`;
-  return `<article class="portal-card fuel-station"><span class="portal-card-icon ${station.type === "charging" ? "charging" : "fuel"}"><i data-lucide="${station.type === "charging" ? "plug-zap" : "fuel"}"></i></span><div><h3>${escapeFuel(station.name)}</h3><p>${escapeFuel(station.address)} · ${distance}</p><div class="portal-tags">${attributes.slice(0,5).map(value=>`<span>${escapeFuel(value)}</span>`).join("")}</div><small>${escapeFuel(station.openingHours || "Öppettid saknas")} · Källa: ${escapeFuel(station.dataSource || "OpenStreetMap")}</small></div><div class="fuel-price ${isPriced ? "verified" : "missing"}"><strong>${isPriced ? `${fuelNumber(station.price)} ${escapeFuel(station.unit)}` : "Pris saknas"}</strong><small>${escapeFuel(station.priceLabel || "Lokalt pris ej verifierat")}</small>${station.priceCheckedAt ? `<time>Kontrollerat ${new Date(station.priceCheckedAt).toLocaleDateString("sv-SE")}</time>` : ""}</div><div class="fuel-actions"><a href="${escapeFuel(station.directionsUrl)}" target="_blank" rel="noopener noreferrer">Vägbeskrivning</a><a href="${escapeFuel(station.sourceUrl)}" target="_blank" rel="noopener noreferrer">Kontrollera källa</a></div></article>`;
+  return `<article class="portal-card fuel-station"><span class="portal-card-icon ${station.type === "charging" ? "charging" : "fuel"}"><i data-lucide="${station.type === "charging" ? "plug-zap" : "fuel"}"></i></span><div><h3>${escapeFuel(station.name)}</h3><p>${escapeFuel(station.address)} · ${distance}</p><div class="portal-tags">${attributes.slice(0,5).map(value=>`<span>${escapeFuel(value)}</span>`).join("")}</div><small>${escapeFuel(station.openingHours || "Öppettid saknas")} · Källa: ${escapeFuel(station.dataSource || "OpenStreetMap")}</small></div><div class="fuel-price ${isPriced ? "verified" : "missing"}"><strong>${isPriced ? `${fuelNumber(station.price)} ${escapeFuel(station.unit)}` : "Pris saknas"}</strong><small>${escapeFuel(station.priceLabel || "Lokalt pris ej verifierat")}</small>${station.priceCheckedAt ? `<time>Kontrollerat ${new Date(station.priceCheckedAt).toLocaleDateString("sv-SE")}</time>` : ""}</div><div class="fuel-actions"><a href="${escapeFuel(safeFuelUrl(station.directionsUrl))}" target="_blank" rel="noopener noreferrer">Vägbeskrivning</a><a href="${escapeFuel(safeFuelUrl(station.sourceUrl))}" target="_blank" rel="noopener noreferrer">Kontrollera källa</a></div></article>`;
 }
 
 initializeFuelPage().catch(error => { console.error(error); document.querySelector("#fuel-total").textContent="Stationerna kunde inte laddas"; document.querySelector("#fuel-empty").hidden=false; });

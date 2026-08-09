@@ -8,7 +8,8 @@ let lunchMunicipality=municipalityState.getInitial();
 let selectedRestaurant=lunchParams.get("restaurang")||"";
 let lunchData;
 let lunchSelectionScrolled=false;
-const escapeLunch=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
+const escapeLunch = window.DinPulsSecurity.escapeHtml;
+const safeLunchUrl = window.DinPulsSecurity.safeExternalUrl;
 const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Europe/Stockholm"}).format(new Date()).toLowerCase();
 
 function updateLunchPageChrome(){
@@ -81,7 +82,7 @@ function renderLunchCard(item,day,isSelected=false){
   return `<article class="portal-card lunch-card ${isSelected?"selected":""}" id="lunch-${escapeLunch(item.id)}">
     <span class="portal-card-icon lunch"><i data-lucide="utensils"></i></span>
     <div><span class="lunch-status ${dishes.length?"verified":""}">${escapeLunch(status)}</span><h3>${escapeLunch(item.name)}</h3><p>${escapeLunch(item.address)} · ${escapeLunch(item.hours)}</p>${menu}</div>
-    <a class="portal-source-button" href="${escapeLunch(item.url)}" target="_blank" rel="noopener noreferrer">${dishes.length?"Kontrollera menyn":"Öppna menyn"} <i data-lucide="external-link"></i></a>
+    <a class="portal-source-button" href="${escapeLunch(safeLunchUrl(item.url))}" target="_blank" rel="noopener noreferrer">${dishes.length?"Kontrollera menyn":"Öppna menyn"} <i data-lucide="external-link"></i></a>
   </article>`;
 }
 

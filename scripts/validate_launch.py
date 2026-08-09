@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.21"
+VERSION = "0.22.0"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -57,6 +57,7 @@ def municipality_map(path: str) -> dict:
 def verify_assets() -> None:
     for page in ACTIVE_PAGES:
         source = (ROOT / page).read_text(encoding="utf-8")
+        assert f'security.js?version={VERSION}' in source, f"{page}: den centrala säkerhetsmodulen saknas"
         parser = AssetParser()
         parser.feed(source)
         for value in parser.assets:
@@ -85,6 +86,8 @@ def verify_content() -> None:
     assert f'data-version="{VERSION}"' in index
     assert f'content="{VERSION}"' in index
     assert f'const DINPULS_VERSION = "{VERSION}"' in script
+    assert "DinPulsSecurity.safeExternalUrl" in script, "Startsidan använder inte central länkkontroll"
+    assert (ROOT / "security.js").is_file(), "Den centrala säkerhetsmodulen saknas"
     assert "updateMunicipalityLinks" in script
     assert "Sök bland DinPuls moduler" in (ROOT / "components/header.html").read_text(encoding="utf-8")
     google_search = (ROOT / "components/google-search.html").read_text(encoding="utf-8")

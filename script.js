@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.21
+   DINPULS.SE v0.22.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.21";
+const DINPULS_VERSION = "0.22.0";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
@@ -664,7 +664,7 @@ function renderNotifications(municipality) {
   if (markRead) markRead.hidden = unread.length === 0;
   list.innerHTML = currentNotificationItems.map((item) => `
     <a class="notification-item ${seen.has(item.key) ? "read" : "unread"}"
-       href="${escapeAttribute(item.url)}"
+       href="${escapeAttribute(safeHref(item.url))}"
        ${item.external ? 'target="_blank" rel="noopener noreferrer"' : ""}
        data-notification-key="${escapeAttribute(item.key)}">
       <span class="notification-icon ${escapeAttribute(item.kind)}"><i data-lucide="${escapeAttribute(item.icon)}"></i></span>
@@ -1431,18 +1431,18 @@ function renderImportantNews(articles) {
   const box=document.querySelector("#important-news"); if(!box)return;
   const important=articles.filter(a=>a.important || Number(a.impact)>=85).slice(0,2);
   box.hidden=!important.length;
-  box.innerHTML=important.length?`<div class="important-news-title"><i data-lucide="triangle-alert"></i><strong>Viktiga händelser</strong></div>${important.map(a=>`<a href="${escapeAttribute(a.url)}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(a.source)}</span><b>${escapeHtml(a.title)}</b><i data-lucide="arrow-up-right"></i></a>`).join("")}`:"";
+  box.innerHTML=important.length?`<div class="important-news-title"><i data-lucide="triangle-alert"></i><strong>Viktiga händelser</strong></div>${important.map(a=>`<a href="${escapeAttribute(safeExternalUrl(a.url))}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(a.source)}</span><b>${escapeHtml(a.title)}</b><i data-lucide="arrow-up-right"></i></a>`).join("")}`:"";
 }
 function renderNewsArticle(article) {
   const access=article.access==="subscription"?'<span class="news-access subscription"><i data-lucide="lock"></i>Prenumeration</span>':'<span class="news-access free"><i data-lucide="unlock"></i>Fri</span>';
   const sourceClass=article.sourceType==="authority"?"authority":article.sourceType==="municipality"?"municipality":"media";
   const score=Math.round(calculateNewsScore(article));
-  return `<a class="news-item" href="${escapeAttribute(article.url)}" target="_blank" rel="noopener noreferrer"><span class="news-source-mark ${sourceClass}">${getNewsSourceInitials(article.source)}</span><span class="news-item-content"><span class="news-meta"><strong>${escapeHtml(article.source)}</strong><span>•</span><time datetime="${escapeAttribute(article.publishedAt)}">${formatRelativeNewsTime(article.publishedAt)}</time></span><b class="news-title">${escapeHtml(article.title)}</b><span class="news-summary">${escapeHtml(article.summary||"")}</span><span class="news-labels">${access}<span class="news-region">${escapeHtml(article.category||article.region||"Nyheter")}</span><span class="news-score" title="DinPuls-index">DP ${score}</span></span></span><i class="news-open-icon" data-lucide="arrow-up-right"></i></a>`;
+  return `<a class="news-item" href="${escapeAttribute(safeExternalUrl(article.url))}" target="_blank" rel="noopener noreferrer"><span class="news-source-mark ${sourceClass}">${getNewsSourceInitials(article.source)}</span><span class="news-item-content"><span class="news-meta"><strong>${escapeHtml(article.source)}</strong><span>•</span><time datetime="${escapeAttribute(article.publishedAt)}">${formatRelativeNewsTime(article.publishedAt)}</time></span><b class="news-title">${escapeHtml(article.title)}</b><span class="news-summary">${escapeHtml(article.summary||"")}</span><span class="news-labels">${access}<span class="news-region">${escapeHtml(article.category||article.region||"Nyheter")}</span><span class="news-score" title="DinPuls-index">DP ${score}</span></span></span><i class="news-open-icon" data-lucide="arrow-up-right"></i></a>`;
 }
 function renderNewsSources(municipality) {
   const grid=document.querySelector("#news-source-grid"); if(!grid)return;
   const relevant=allNewsSources.filter(s=>s.scope==="local" && (s.municipalities||[]).includes(municipality));
-  grid.innerHTML=relevant.map(source=>`<a class="news-source-card" href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer"><span class="news-source-logo">${getNewsSourceInitials(source.name)}</span><span><strong>${escapeHtml(source.name)}</strong><small>${escapeHtml(source.type)}</small></span><span class="source-access ${source.access==='subscription'?'subscription':'free'}"><i data-lucide="${source.access==='subscription'?'lock':'check'}"></i>${source.access==='subscription'?'Delvis låst':'Fri'}</span></a>`).join("");
+  grid.innerHTML=relevant.map(source=>`<a class="news-source-card" href="${escapeAttribute(safeExternalUrl(source.url))}" target="_blank" rel="noopener noreferrer"><span class="news-source-logo">${getNewsSourceInitials(source.name)}</span><span><strong>${escapeHtml(source.name)}</strong><small>${escapeHtml(source.type)}</small></span><span class="source-access ${source.access==='subscription'?'subscription':'free'}"><i data-lucide="${source.access==='subscription'?'lock':'check'}"></i>${source.access==='subscription'?'Delvis låst':'Fri'}</span></a>`).join("");
   if(window.lucide)lucide.createIcons();
 }
 function updateNewsTimestamp(value) {
@@ -1451,8 +1451,10 @@ function updateNewsTimestamp(value) {
 }
 function formatRelativeNewsTime(value) { const d=new Date(value); if(Number.isNaN(d.getTime()))return"Tid saknas"; const m=Math.max(0,Math.floor((Date.now()-d)/60000)); if(m<2)return"nyss"; if(m<60)return`${m} min sedan`; const h=Math.floor(m/60); if(h<24)return`${h} tim sedan`; const days=Math.floor(h/24); if(days===1)return"igår"; if(days<7)return`${days} dagar sedan`; return d.toLocaleDateString('sv-SE',{timeZone:STOCKHOLM_TIME_ZONE,day:'numeric',month:'short'}); }
 function getNewsSourceInitials(source){return String(source||"DP").split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toLocaleUpperCase('sv-SE');}
-function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
-function escapeAttribute(value){return escapeHtml(value);}
+function escapeHtml(value){return window.DinPulsSecurity.escapeHtml(value);}
+function escapeAttribute(value){return window.DinPulsSecurity.escapeAttribute(value);}
+function safeExternalUrl(value){return window.DinPulsSecurity.safeExternalUrl(value);}
+function safeHref(value){return window.DinPulsSecurity.safeHref(value);}
 
 /* =========================================================
 
@@ -1517,7 +1519,7 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
 }
 
 function renderTrafficCompactItem(item) {
-  return `<a href="${escapeAttribute(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/")}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`;
+  return `<a href="${escapeAttribute(safeExternalUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`;
 }
 
 function trafficIcon(category) {
@@ -1585,7 +1587,7 @@ function renderImportantCalm(municipality, sources, isStale = false) {
     .filter(source => source.status !== "error" && source.automated !== false)
     .slice(0, 4);
   const sourceLinks = selectedSources.map(source =>
-    `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}<i data-lucide="arrow-up-right"></i></a>`
+    `<a href="${escapeAttribute(safeExternalUrl(source.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}<i data-lucide="arrow-up-right"></i></a>`
   ).join("");
   return `<article class="important-calm">
     <i class="status-icon success" data-lucide="circle-check"></i>
@@ -1602,7 +1604,7 @@ function renderImportantItem(item) {
   const source = item.source || "Officiell källa";
   const body = `<i class="status-icon ${severity}" data-lucide="${icon}"></i><div><strong>${escapeHtml(item.title || "Viktig information")}</strong><small>${escapeHtml(source)} · ${escapeHtml(published)}</small></div>`;
   return item.url
-    ? `<article class="important-item">${body}<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer" aria-label="Läs mer hos ${escapeAttribute(source)}"><i data-lucide="arrow-up-right"></i></a></article>`
+    ? `<article class="important-item">${body}<a href="${escapeAttribute(safeHref(item.url))}" target="_blank" rel="noopener noreferrer" aria-label="Läs mer hos ${escapeAttribute(source)}"><i data-lucide="arrow-up-right"></i></a></article>`
     : `<article class="important-item">${body}</article>`;
 }
 
@@ -2136,7 +2138,7 @@ function renderHousing() {
     updated.innerHTML = `<i data-lucide="refresh-cw"></i>${label}`;
   }
 
-  providersBox.innerHTML = providers.map((provider) => `<a class="housing-provider" href="${escapeAttribute(provider.url)}" target="_blank" rel="noopener noreferrer"><span><i data-lucide="building-2"></i><strong>${escapeHtml(provider.name)}</strong></span><small>Officiell bostadskö <i data-lucide="arrow-up-right"></i></small></a>`).join("");
+  providersBox.innerHTML = providers.map((provider) => `<a class="housing-provider" href="${escapeAttribute(safeExternalUrl(provider.url))}" target="_blank" rel="noopener noreferrer"><span><i data-lucide="building-2"></i><strong>${escapeHtml(provider.name)}</strong></span><small>Officiell bostadskö <i data-lucide="arrow-up-right"></i></small></a>`).join("");
 
   const sourceLink = document.querySelector("#housing-source-link");
   if (sourceLink) {
@@ -2259,7 +2261,7 @@ function renderCinemaHome() {
 
   const grid = document.querySelector("#cinema-home-grid");
   if (grid) {
-    grid.innerHTML = films.length ? films.map((film, index) => `<a class="cinema-home-film" href="${escapeAttribute(film.url)}" target="_blank" rel="noopener noreferrer">
+    grid.innerHTML = films.length ? films.map((film, index) => `<a class="cinema-home-film" href="${escapeAttribute(safeExternalUrl(film.url))}" target="_blank" rel="noopener noreferrer">
       <span class="cinema-home-number">${String(index + 1).padStart(2, "0")}</span>
       <span><small>${escapeHtml(film.verifiedLocal ? film.cinema : "Filmer på bio just nu")}</small><strong>${escapeHtml(film.title)}</strong><em>${escapeHtml(film.label || "Se program och visningstider")}</em></span>
       <i data-lucide="ticket"></i>

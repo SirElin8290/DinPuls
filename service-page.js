@@ -13,7 +13,8 @@ const serviceAdvertisers = {
   }
 };
 
-const escapeService = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+const escapeService = window.DinPulsSecurity.escapeHtml;
+const safeServiceUrl = window.DinPulsSecurity.safeExternalUrl;
 
 function serviceSearchUrl(category, municipality) {
   return `https://www.google.com/maps/search/${encodeURIComponent(`${category.query} ${municipality}`)}`;
@@ -28,7 +29,7 @@ function renderServicePage() {
   document.querySelectorAll("[data-service-municipality]").forEach(element => { element.textContent = serviceMunicipality; });
   document.querySelector("#service-result-count").textContent = `${categories.length} kategorier`;
   document.querySelector("#service-category-grid").innerHTML = categories.map(category => `
-    <a class="service-category-card" href="${escapeService(serviceSearchUrl(category, serviceMunicipality))}" target="_blank" rel="noopener noreferrer">
+    <a class="service-category-card" href="${escapeService(safeServiceUrl(serviceSearchUrl(category, serviceMunicipality)))}" target="_blank" rel="noopener noreferrer">
       <span class="portal-card-icon service"><i data-lucide="${escapeService(category.icon)}"></i></span>
       <span><em>${escapeService(category.group)}</em><strong>${escapeService(category.name)}</strong><small>${escapeService(category.description)}</small></span>
       <i data-lucide="external-link"></i>
@@ -45,7 +46,7 @@ function renderServiceAds() {
     const advertiser = serviceAdvertisers[serviceMunicipality]?.[position];
     if (advertiser) {
       slot.innerHTML = `
-        <a class="secondary-ad strategic-ad strategic-image-ad" href="${escapeService(advertiser.url)}" target="_blank" rel="noopener noreferrer" aria-label="Annons: ${escapeService(advertiser.name)} – öppna Facebooksidan i en ny flik">
+        <a class="secondary-ad strategic-ad strategic-image-ad" href="${escapeService(safeServiceUrl(advertiser.url))}" target="_blank" rel="noopener noreferrer" aria-label="Annons: ${escapeService(advertiser.name)} – öppna Facebooksidan i en ny flik">
           <span class="strategic-image-ad-label">Annons</span>
           <img src="${escapeService(advertiser.image)}" alt="${escapeService(advertiser.alt)}" width="1536" height="1024">
         </a>`;

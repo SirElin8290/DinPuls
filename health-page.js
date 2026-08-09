@@ -2,7 +2,9 @@ const healthState = window.DinPulsMunicipalityState;
 let healthMunicipality = healthState.getInitial();
 let healthData;
 
-const escapeHealth = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+const escapeHealth = window.DinPulsSecurity.escapeHtml;
+const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
+const safeHealthIcon = window.DinPulsSecurity.safeIconName;
 
 function regionDetails(county) {
   return county === "Värmlands län"
@@ -43,8 +45,8 @@ function renderHealthPage() {
   document.querySelector("#health-1177-link").href = healthData.officialCareUrl;
   document.querySelector("#health-result-count").textContent = `${categories.length} kategorier`;
   document.querySelector("#health-category-grid").innerHTML = categories.map(category => `
-    <a class="health-category-card" href="${escapeHealth(externalSearchUrl(category.id, healthMunicipality))}" target="_blank" rel="noopener noreferrer">
-      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(category.icon)}"></i></span>
+    <a class="health-category-card" href="${escapeHealth(safeHealthUrl(externalSearchUrl(category.id, healthMunicipality)))}" target="_blank" rel="noopener noreferrer">
+      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(safeHealthIcon(category.icon))}"></i></span>
       <span><strong>${escapeHealth(category.name)}</strong><small>${escapeHealth(category.description)}</small>${category.official ? "<em>Kontrollera hos 1177</em>" : "<em>Lokalt sökresultat</em>"}</span>
       <i data-lucide="external-link"></i>
     </a>`).join("");

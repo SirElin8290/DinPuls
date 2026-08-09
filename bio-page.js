@@ -1,7 +1,8 @@
 const cinemaState = window.DinPulsMunicipalityState;
 let cinemaMunicipality = cinemaState.getInitial();
 let cinemaData = null;
-const escapeCinema = value => String(value ?? "").replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
+const escapeCinema = window.DinPulsSecurity.escapeHtml;
+const safeCinemaUrl = window.DinPulsSecurity.safeExternalUrl;
 function updateCinemaChrome() {
   document.querySelectorAll("[data-cinema-municipality]").forEach(element => element.textContent = cinemaMunicipality);
   document.title = `Bio i ${cinemaMunicipality} – DinPuls`;
@@ -14,7 +15,7 @@ function renderCinemaPage() {
   document.querySelector("#cinema-total").textContent = `${cinemas.length} ${cinemas.length === 1 ? "biograf" : "biografer"} i ${cinemaMunicipality}`;
   document.querySelector("#cinema-updated").textContent = `Källor kontrollerade ${cinemaData.updatedAt || ""}`;
   const list = document.querySelector("#cinema-list");
-  list.innerHTML = cinemas.map(cinema => `<article class="cinema-card"><span class="portal-card-icon cinema"><i data-lucide="ticket"></i></span><div class="cinema-card-copy"><small>${escapeCinema(cinema.place)}</small><h3>${escapeCinema(cinema.name)}</h3><p><i data-lucide="map-pin"></i>${escapeCinema(cinema.address)}</p><div class="portal-tags">${(cinema.features || []).map(feature => `<span>${escapeCinema(feature)}</span>`).join("")}</div>${cinema.notice ? `<div class="cinema-notice"><i data-lucide="info"></i>${escapeCinema(cinema.notice)}</div>` : ""}</div><div class="cinema-actions"><a class="portal-source-button" href="${escapeCinema(cinema.programUrl)}" target="_blank" rel="noopener noreferrer">Se filmprogram <i data-lucide="external-link"></i></a><a href="${escapeCinema(cinema.bookingUrl)}" target="_blank" rel="noopener noreferrer">Biljetter och tider <i data-lucide="ticket"></i></a></div></article>`).join("");
+  list.innerHTML = cinemas.map(cinema => `<article class="cinema-card"><span class="portal-card-icon cinema"><i data-lucide="ticket"></i></span><div class="cinema-card-copy"><small>${escapeCinema(cinema.place)}</small><h3>${escapeCinema(cinema.name)}</h3><p><i data-lucide="map-pin"></i>${escapeCinema(cinema.address)}</p><div class="portal-tags">${(cinema.features || []).map(feature => `<span>${escapeCinema(feature)}</span>`).join("")}</div>${cinema.notice ? `<div class="cinema-notice"><i data-lucide="info"></i>${escapeCinema(cinema.notice)}</div>` : ""}</div><div class="cinema-actions"><a class="portal-source-button" href="${escapeCinema(safeCinemaUrl(cinema.programUrl))}" target="_blank" rel="noopener noreferrer">Se filmprogram <i data-lucide="external-link"></i></a><a href="${escapeCinema(safeCinemaUrl(cinema.bookingUrl))}" target="_blank" rel="noopener noreferrer">Biljetter och tider <i data-lucide="ticket"></i></a></div></article>`).join("");
   list.hidden = !cinemas.length;
   document.querySelector("#cinema-empty").hidden = Boolean(cinemas.length);
   if (window.lucide) lucide.createIcons();

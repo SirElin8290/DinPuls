@@ -2,7 +2,9 @@ const municipalityState = window.DinPulsMunicipalityState;
 let eventMunicipality = municipalityState.getInitial();
 let fullEventsData = null;
 
-const escapeEvent = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
+const escapeEvent = window.DinPulsSecurity.escapeHtml;
+const safeEventUrl = window.DinPulsSecurity.safeExternalUrl;
+const safeEventIcon = window.DinPulsSecurity.safeIconName;
 const eventIcons = { culture:"palette", music:"music", family:"baby", church:"church", sport:"trophy", community:"users", motor:"car-front" };
 
 function updateEventPageChrome() {
@@ -91,7 +93,7 @@ function renderEventCard(item) {
   const dateLabel = Number.isNaN(start.getTime()) ? "Datum saknas" : same
     ? start.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", weekday:"short", day:"numeric", month:"short" })
     : `${start.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", day:"numeric", month:"short" })}–${end.toLocaleDateString("sv-SE", { timeZone:"Europe/Stockholm", day:"numeric", month:"short" })}`;
-  return `<article class="portal-card event-message"><span class="portal-card-icon event"><i data-lucide="${eventIcons[item.category] || "calendar-days"}"></i></span><div><span class="event-date">${escapeEvent(dateLabel)}${item.time ? ` · ${escapeEvent(item.time)}` : ""}</span><h3>${escapeEvent(item.title)}</h3><p>${escapeEvent(item.venue || eventMunicipality)}</p><div class="portal-tags"><span>${escapeEvent(item.categoryLabel || "Evenemang")}</span><span>${escapeEvent(item.sourceName || "Lokal källa")}</span>${item.verified ? '<span><i data-lucide="badge-check"></i> Verifierad källa</span>' : ""}</div></div><a class="portal-source-button" href="${escapeEvent(item.url)}" target="_blank" rel="noopener noreferrer">Tid och detaljer <i data-lucide="external-link"></i></a></article>`;
+  return `<article class="portal-card event-message"><span class="portal-card-icon event"><i data-lucide="${eventIcons[item.category] || "calendar-days"}"></i></span><div><span class="event-date">${escapeEvent(dateLabel)}${item.time ? ` · ${escapeEvent(item.time)}` : ""}</span><h3>${escapeEvent(item.title)}</h3><p>${escapeEvent(item.venue || eventMunicipality)}</p><div class="portal-tags"><span>${escapeEvent(item.categoryLabel || "Evenemang")}</span><span>${escapeEvent(item.sourceName || "Lokal källa")}</span>${item.verified ? '<span><i data-lucide="badge-check"></i> Verifierad källa</span>' : ""}</div></div><a class="portal-source-button" href="${escapeEvent(safeEventUrl(item.url))}" target="_blank" rel="noopener noreferrer">Tid och detaljer <i data-lucide="external-link"></i></a></article>`;
 }
 
 function renderEventSource(source, health) {
@@ -99,7 +101,7 @@ function renderEventSource(source, health) {
   let status = "Verifierad lokal källa";
   if (health?.status === "ok") status = imported ? `Automatisk källa · ${imported} kommande tillfällen` : "Kontrollerad kalender · öppna hela programmet";
   if (health?.status === "error") status = "Tillfälligt fel vid automatisk kontroll · länken fungerar fortfarande";
-  return `<a class="event-source" href="${escapeEvent(source.url)}" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon event"><i data-lucide="${escapeEvent(source.icon || "calendar-days")}"></i></span><span><strong>${escapeEvent(source.name)}</strong><small>${escapeEvent(source.type)} · ${escapeEvent(status)}</small></span><i data-lucide="external-link"></i></a>`;
+  return `<a class="event-source" href="${escapeEvent(safeEventUrl(source.url))}" target="_blank" rel="noopener noreferrer"><span class="portal-card-icon event"><i data-lucide="${escapeEvent(safeEventIcon(source.icon, "calendar-days"))}"></i></span><span><strong>${escapeEvent(source.name)}</strong><small>${escapeEvent(source.type)} · ${escapeEvent(status)}</small></span><i data-lucide="external-link"></i></a>`;
 }
 
 initializeEventPage().catch(error => {
