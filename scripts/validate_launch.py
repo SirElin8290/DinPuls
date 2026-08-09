@@ -9,7 +9,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.21.20"
+VERSION = "0.21.21"
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -286,6 +286,7 @@ def verify_review_fixes() -> None:
     sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
     script = (ROOT / "script.js").read_text(encoding="utf-8")
     index = (ROOT / "index.html").read_text(encoding="utf-8")
+    header = (ROOT / "components/header.html").read_text(encoding="utf-8")
     styles = (ROOT / "styles.css").read_text(encoding="utf-8")
     transport = (ROOT / "scripts/update_transport.py").read_text(encoding="utf-8")
     sources = load_json("data/news.json").get("sources", [])
@@ -302,6 +303,8 @@ def verify_review_fixes() -> None:
     assert '[data-theme="dark"][data-season]{--bg:#071426}' in styles, "Årstidstemat skriver över nattlägets bakgrund"
     assert '[data-theme="dark"] .notification-panel-heading button' in styles, "Notisrutans stängknapp saknar tydligt nattläge"
     assert '[data-theme="dark"] .dialog-close' in styles, "Kommunrutans stängknapp saknar tydligt nattläge"
+    assert 'placeholder="Sök jobb, vård, myndigheter…"' in header, "Mobilens söktext är för lång"
+    assert '.search>svg{width:20px;height:20px' in styles and 'align-items:center' in styles, "Sökikonen är inte centrerad"
     assert index.index('data-component="secondary-cards"') < index.index('id="news-sources"') < index.index('data-component="premium-ad-2"'), "Lokala nyheter och källor ligger inte tillsammans"
     source_names = {item.get("name") for item in sources}
     assert {"Provinstidningen Dalsland", "Dalslänningen"} <= source_names, "Lokala Dalslandskällor saknas"
