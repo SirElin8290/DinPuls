@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.21.9
+   DINPULS.SE v0.21.11
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.21.9";
+const DINPULS_VERSION = "0.21.11";
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
@@ -21,6 +21,7 @@ const componentNames = [
   "health",
   "authorities",
   "service",
+  "cinema",
   "secondary-cards",
   "premium-ad-2",
   "jobs-housing",
@@ -215,7 +216,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch()]);
+    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -2141,6 +2142,66 @@ function showHousingError() {
   document.querySelectorAll("[data-quick-housing-detail]").forEach((element) => {
     element.textContent = "Bostadsdata är tillfälligt otillgänglig";
   });
+  if (window.lucide) lucide.createIcons();
+}
+
+/* =========================================================
+   DINPULS v0.21.11 – BIO PÅ STARTSIDAN
+========================================================= */
+let cinemaHomeData = null;
+
+async function initializeCinemaHome() {
+  DinPulsMunicipality.subscribe("cinema-home", renderCinemaHome);
+  try {
+    const response = await fetch("data/cinemas.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    cinemaHomeData = await response.json();
+    renderCinemaHome();
+  } catch (error) {
+    console.error("Biomodulen kunde inte laddas:", error);
+    const grid = document.querySelector("#cinema-home-grid");
+    if (grid) grid.innerHTML = `<span class="cinema-home-empty">Bioinformationen är tillfälligt otillgänglig.</span>`;
+  }
+}
+
+function renderCinemaHome() {
+  if (!cinemaHomeData) return;
+  const municipality = DinPulsMunicipality.getName();
+  const cinemas = cinemaHomeData.municipalities?.[municipality] || [];
+  const localFilms = cinemas.flatMap(cinema => (cinema.films || []).map(film => ({
+    ...film,
+    cinema: cinema.name,
+    url: cinema.programUrl,
+    verifiedLocal: true
+  })));
+  const fallbackUrl = cinemas[0]?.programUrl || `bio.html?kommun=${encodeURIComponent(municipality)}`;
+  const films = (localFilms.length ? localFilms : (cinemaHomeData.featuredFilms || []).map(film => ({
+    ...film,
+    cinema: cinemas[0]?.name || `Bio i ${municipality}`,
+    url: fallbackUrl,
+    verifiedLocal: false
+  }))).slice(0, 4);
+
+  const subtitle = document.querySelector("#cinema-home-subtitle");
+  if (subtitle) {
+    subtitle.textContent = localFilms.length
+      ? `${localFilms.length} publicerade filmer hos ${cinemas.map(cinema => cinema.name).join(" och ")}.`
+      : cinemas.length
+        ? `Aktuella biotitlar – kontrollera vilka som visas hos ${cinemas.map(cinema => cinema.name).join(" och ")}.`
+        : "Aktuella biotitlar – kontrollera lokal visning och bokning.";
+  }
+
+  const grid = document.querySelector("#cinema-home-grid");
+  if (grid) {
+    grid.innerHTML = films.length ? films.map((film, index) => `<a class="cinema-home-film" href="${escapeAttribute(film.url)}" target="_blank" rel="noopener noreferrer">
+      <span class="cinema-home-number">${String(index + 1).padStart(2, "0")}</span>
+      <span><small>${escapeHtml(film.verifiedLocal ? film.cinema : "Filmer på bio just nu")}</small><strong>${escapeHtml(film.title)}</strong><em>${escapeHtml(film.label || "Se program och visningstider")}</em></span>
+      <i data-lucide="ticket"></i>
+    </a>`).join("") : `<span class="cinema-home-empty">Inga aktuella filmtitlar är publicerade. Öppna biografens program för senaste uppgifterna.</span>`;
+  }
+
+  const link = document.querySelector("#cinema-home-link");
+  if (link) link.href = `bio.html?kommun=${encodeURIComponent(municipality)}`;
   if (window.lucide) lucide.createIcons();
 }
 
