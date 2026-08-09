@@ -297,6 +297,7 @@ function initializeSearch() {
       { terms: ["jobb", "arbete", "lediga jobb", "platsbanken"], url: `jobb.html?kommun=${municipality}` },
       { terms: ["bostad", "bostäder", "lägenhet", "hyresrätt", "ledig bostad"], url: `bostader.html?kommun=${municipality}` },
       { terms: ["lunch", "restaurang", "dagens lunch"], url: `lunch.html?kommun=${municipality}` },
+      { terms: ["bio", "biograf", "film", "filmer", "filmprogram"], url: `bio.html?kommun=${municipality}` },
       { terms: ["evenemang", "event", "kalender", "festival", "konsert"], url: `evenemang.html?kommun=${municipality}` },
       { terms: ["sport", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf"], url: `sport.html?kommun=${municipality}` },
       { terms: ["vård", "hälsa", "vårdcentral", "1177", "apotek", "tandläkare", "fysioterapeut", "fysioterapi", "kiropraktor", "naprapat", "massage", "fotvård", "psykolog"], url: `vard.html?kommun=${municipality}` },
@@ -823,7 +824,7 @@ function applyMunicipality(config) {
 }
 
 function updateMunicipalityLinks(municipality) {
-  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "sport.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "bio.html", "sport.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
   document.querySelectorAll("a[href]").forEach(link => {
     const raw = link.getAttribute("href");
     if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;

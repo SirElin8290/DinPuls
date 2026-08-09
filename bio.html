@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="sv" data-portal="cinema">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Biografer, filmprogram och biljettlänkar i din kommun.">
+  <title>Bio – DinPuls</title>
+  <link rel="stylesheet" href="styles.css?version=0.21.9"><link rel="stylesheet" href="portal-pages.css?version=0.21.9">
+</head>
+<body>
+  <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg?version=0.21.9" alt="DinPuls" width="620" height="150"></a><a href="evenemang.html">← Till evenemang</a></header>
+  <main class="portal-main">
+    <section class="portal-hero cinema-page"><span class="section-kicker">Evenemang · Bio</span><h1>Bio i <span data-cinema-municipality>Åmål</span></h1><p>Hitta den lokala biografen, öppna aktuellt filmprogram och gå direkt till biljettbokningen.</p></section>
+    <nav class="event-area-tabs" aria-label="Evenemang och bio"><a href="evenemang.html"><i data-lucide="calendar-days"></i> Alla evenemang</a><a class="active" href="bio.html"><i data-lucide="clapperboard"></i> Bio</a></nav>
+    <div class="cinema-principle"><i data-lucide="badge-check"></i><span>Program och tider visas hos biografens egen eller anslutna bokningssida. Kontrollera alltid uppgifterna där innan besöket.</span></div>
+    <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="bio" data-ad-position="1"></div>
+    <section class="portal-content cinema-content">
+      <div class="portal-toolbar two"><label>Kommun<select id="cinema-municipality"></select></label><label>Sök biograf eller ort<input id="cinema-search" type="search" placeholder="Till exempel Palladium eller Åsensbruk"></label></div>
+      <div class="strategic-ad-slot" data-strategic-ad="bio" data-ad-position="2"></div>
+      <div class="portal-result-heading"><div><span class="section-kicker">Lokala biografer</span><h2 id="cinema-total">Hämtar biografer…</h2></div><span id="cinema-updated"></span></div>
+      <div id="cinema-list" class="cinema-grid"></div>
+      <div class="strategic-ad-slot" data-strategic-ad="bio" data-ad-position="3"></div>
+      <div id="cinema-empty" class="portal-empty" hidden>Ingen biograf matchar sökningen.</div>
+      <div class="strategic-ad-slot" data-strategic-ad="bio" data-ad-position="4"></div>
+    </section>
+  </main>
+  <script src="assets/vendor/lucide.min.js"></script><script src="portal-ads.js?version=0.21.9"></script><script src="municipality-engine.js?version=0.21.9"></script><script src="bio-page.js?version=0.21.9"></script>
+  <script src="privacy-controls.js?version=0.21.9"></script>
+</body></html>

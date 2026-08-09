@@ -15,7 +15,7 @@ ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
     "evenemang.html", "lunch.html", "matkasse.html", "sport.html",
     "information.html", "vard.html", "myndigheter.html", "service.html",
-    "nyheter.html", "drivmedel.html",
+    "nyheter.html", "drivmedel.html", "bio.html",
 ]
 COMPONENTS = [
     "header", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
@@ -139,7 +139,7 @@ def verify_data() -> None:
 
 
 def verify_ads() -> None:
-    four_slot_pages = ["jobb.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "myndigheter.html", "service.html", "nyheter.html"]
+    four_slot_pages = ["jobb.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "vard.html", "myndigheter.html", "service.html", "nyheter.html", "bio.html"]
     for page in four_slot_pages:
         source = (ROOT / page).read_text(encoding="utf-8")
         assert source.count("data-strategic-ad=") == 4, f"{page}: ska ha fyra annonsplatser"
@@ -200,6 +200,24 @@ def verify_authorities() -> None:
     assert "hanterar inga personuppgifter" in page.lower(), "Myndighetsguidens säkerhetsgräns saknas"
     assert "data-municipality-name" in component and "myndigheter.html" in component, "Startsidans myndighetsmodul är inte kommunansluten"
     assert "authorityState.populateSelect" in script and "authorityState.set" in script, "Myndighetssidan följer inte kommunmotorn"
+
+
+def verify_cinema() -> None:
+    data = load_json("data/cinemas.json")
+    municipalities = data.get("municipalities", {})
+    assert list(municipalities) == MUNICIPALITIES, "Biomodulen saknar någon startkommun"
+    assert all(municipalities[name] for name in MUNICIPALITIES), "Någon kommun saknar biograf"
+    assert len(municipalities["Mellerud"]) == 2, "Melleruds två biografer ska visas"
+    for name, cinemas in municipalities.items():
+        for cinema in cinemas:
+            assert cinema.get("programUrl", "").startswith("https://"), f"{name}: programlänk saknas"
+            assert cinema.get("bookingUrl", "").startswith("https://"), f"{name}: biljettlänk saknas"
+    page = (ROOT / "bio.html").read_text(encoding="utf-8")
+    script = (ROOT / "bio-page.js").read_text(encoding="utf-8")
+    navigation = (ROOT / "components/navigation.html").read_text(encoding="utf-8")
+    assert "Evenemang · Bio" in page and "evenemang.html" in page, "Bio är inte sammankopplat med Evenemang"
+    assert "cinemaState.populateSelect" in script and "cinemaState.set" in script, "Biosidan följer inte kommunmotorn"
+    assert 'href="bio.html"' in navigation, "Bio saknas i navigationen"
 
 
 def verify_simple_sport_hub() -> None:
@@ -294,7 +312,7 @@ def verify_optimization() -> None:
     assert not (ROOT / "assets/amal.jpg").exists(), "Den tunga gamla hero-bilden ligger kvar"
     assert icons.is_file() and icons.stat().st_size < 75_000, "Ikonpaketet innehåller fortfarande onödiga ikoner"
 
-    ad_pages = {"jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html"}
+    ad_pages = {"jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html", "bio.html"}
     for page in ad_pages:
         assert "portal-ads.js?version=" + VERSION in html_sources[page], f"{page}: gemensam annonskod saknas"
     assert javascript.count("function renderStrategicAds(") == 1, "Annonsfunktionen är duplicerad"
@@ -311,7 +329,7 @@ def verify_optimization() -> None:
 
 
 def main() -> int:
-    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_authorities, verify_service, verify_simple_sport_hub, verify_final_experience, verify_review_fixes, verify_optimization]
+    checks = [verify_assets, verify_content, verify_data, verify_ads, verify_health, verify_authorities, verify_service, verify_cinema, verify_simple_sport_hub, verify_final_experience, verify_review_fixes, verify_optimization]
     for check in checks:
         check()
         print(f"✓ {check.__name__}")
