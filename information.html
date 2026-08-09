@@ -15,6 +15,7 @@
     section{scroll-margin-top:72px;margin:0 0 18px;padding:26px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(16,33,62,.06)}
     h2{margin:0 0 10px;color:var(--navy)}h3{margin:18px 0 5px}p{margin:7px 0;color:#33445f}ul{padding-left:22px}.button{display:inline-block;margin-top:12px;padding:11px 16px;border-radius:9px;color:#fff;background:var(--blue);font-weight:800;text-decoration:none}
     .note{padding:14px;border-radius:10px;background:#eaf3ff;color:#153f78}.privacy-table{width:100%;border-collapse:collapse;margin:16px 0}.privacy-table th,.privacy-table td{padding:11px;text-align:left;vertical-align:top;border:1px solid var(--border)}.privacy-table th{background:#f2f6fc}.privacy-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}.privacy-actions button{border:0;cursor:pointer}.privacy-status{color:#176135;font-weight:700}footer{text-align:center;padding:24px;color:var(--muted);background:#fff;border-top:1px solid var(--border)}
+    @media(max-width:640px){main{padding-inline:12px}section{padding:20px 16px}.privacy-table,.privacy-table tbody,.privacy-table tr,.privacy-table td{display:block;width:100%}.privacy-table{border:0;border-collapse:separate}.privacy-table thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.privacy-table tr{margin-bottom:12px;padding:14px;background:#f8faff;border:1px solid var(--border);border-radius:12px}.privacy-table td{padding:0 0 11px;border:0}.privacy-table td:last-child{padding-bottom:0}.privacy-table td::before{display:block;margin-bottom:2px;color:var(--navy);font-size:12px;font-weight:800;content:attr(data-label)}.privacy-actions .button{width:100%;text-align:center}}
   </style>
 </head>
 <body>
@@ -44,11 +45,11 @@
       <h3>Det som sparas på din enhet</h3>
       <p>Vissa val lagras lokalt i webbläsaren för att ge den funktion du själv har använt. Uppgifterna skickas inte till DinPuls av den lokala lagringen.</p>
       <table class="privacy-table"><thead><tr><th>Uppgift</th><th>Varför</th><th>När och hur länge</th></tr></thead><tbody>
-        <tr><td>Vald kommun</td><td>Visar rätt lokalt innehåll nästa gång.</td><td>När du väljer eller sparar kommun, tills du rensar den.</td></tr>
-        <tr><td>Färgtema</td><td>Kommer ihåg ljust eller mörkt tema.</td><td>När du ändrar tema, tills du rensar det.</td></tr>
-        <tr><td>Lästa lokala notiser</td><td>Markerar vilka notiser du redan har öppnat.</td><td>När du läser en notis, tills du rensar dem.</td></tr>
-        <tr><td>Dölj sportresultat</td><td>Kommer ihåg ditt spoiler-val.</td><td>När du ändrar valet, tills du rensar det.</td></tr>
-        <tr><td>Matkassemarkeringar och egna prisrundor</td><td>Bevarar avprickning och priser som du själv matar in.</td><td>När du använder funktionerna, tills du rensar dem.</td></tr>
+        <tr><td data-label="Uppgift">Vald kommun</td><td data-label="Varför">Visar rätt lokalt innehåll nästa gång.</td><td data-label="När och hur länge">När du väljer eller sparar kommun, tills du rensar den.</td></tr>
+        <tr><td data-label="Uppgift">Färgtema</td><td data-label="Varför">Kommer ihåg ljust eller mörkt tema.</td><td data-label="När och hur länge">När du ändrar tema, tills du rensar det.</td></tr>
+        <tr><td data-label="Uppgift">Lästa lokala notiser</td><td data-label="Varför">Markerar vilka notiser du redan har öppnat.</td><td data-label="När och hur länge">När du läser en notis, tills du rensar dem.</td></tr>
+        <tr><td data-label="Uppgift">Dölj sportresultat</td><td data-label="Varför">Kommer ihåg ditt spoiler-val.</td><td data-label="När och hur länge">När du ändrar valet, tills du rensar det.</td></tr>
+        <tr><td data-label="Uppgift">Matkassemarkeringar och egna prisrundor</td><td data-label="Varför">Bevarar avprickning och priser som du själv matar in.</td><td data-label="När och hur länge">När du använder funktionerna, tills du rensar dem.</td></tr>
       </tbody></table>
       <div class="privacy-actions"><button class="button" type="button" data-clear-local-data>Rensa mina lokala inställningar</button><span class="privacy-status" data-privacy-status role="status" aria-live="polite"></span></div>
       <h3>Automatiska anrop till externa källor</h3>
