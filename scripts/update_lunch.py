@@ -32,6 +32,8 @@ STOP_MARKERS = (
     "catering", "ring oss", "galleri", "adress", "bordsbokning",
     "öppet för", "veckans meny", "inkl.", "sommarerbjudanden",
     "ladda ner", "med goda drycker", "övrigt",
+    "ta en titt på vår meny", "kunden har alltid rätt",
+    "det här tycker våra kunder",
 )
 NON_DISH_LINES = {
     "stängt", "lunchbuffé", "lunchbuffe", "helgbuffé",
@@ -172,6 +174,11 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
             if source.get("parser") == "weekday-headings":
                 try:
                     week, days = parse_weekday_menu(fetcher(source["url"]))
+                    if source.get("id") == "mickans-grill":
+                        days = {
+                            day: ["Från 100 kr" if dish == "$9.95" else dish for dish in dishes]
+                            for day, dishes in days.items()
+                        }
                     item["weekNumber"] = week
                     item["days"] = days if week == current_week else {}
                     item["status"] = "current" if week == current_week and any(days.values()) else "outdated"
