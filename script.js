@@ -1344,26 +1344,22 @@ function renderNewsForMunicipality(municipality) {
     .filter((article) => article.scope === "local")
     .filter((article) => (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
     .filter(matchesNewsFilter);
-  const exactLocal = scoped.filter((article) => isLocallyRelevantNews(article, municipality));
-  const usesRegionalFallback = exactLocal.length === 0;
-  const relevant = (usesRegionalFallback
-    ? scoped.map((article) => ({ ...article, category: `Regionalt · ${article.region || "nära dig"}` }))
-    : exactLocal)
+  const relevant = scoped
     .sort(compareNewsQuality)
     .slice(0, 5);
   feed.innerHTML = relevant.map(renderNewsArticle).join("");
   loading.hidden = true;
   feed.hidden = relevant.length === 0;
   empty.hidden = relevant.length > 0;
-  if (count) count.textContent = usesRegionalFallback
-    ? `${relevant.length} regionala nyheter – inga nya kommunträffar`
-    : `${relevant.length} ${relevant.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
+  if (count) count.textContent = `${relevant.length} ${relevant.length === 1 ? "lokal nyhet" : "lokala nyheter"}`;
   const subheading = document.querySelector("#news-subheading");
-  if (subheading && usesRegionalFallback) {
-    subheading.textContent = `Regionalt urval för ${municipality}`;
-  }
+  if (subheading) subheading.textContent = `Artiklar som handlar om ${municipality}`;
+  const emptyStrong = empty.querySelector("strong");
+  const emptyText = empty.querySelector("span");
+  if (emptyStrong) emptyStrong.textContent = `Inga nya lokala artiklar från ${municipality}`;
+  if (emptyText) emptyText.textContent = "Öppna nyhetssidan för att gå till kommunens lokala källor.";
   document.querySelectorAll("[data-quick-news-title]").forEach((element) => {
-    element.textContent = relevant.length ? `${relevant.length} lokala nyheter` : `Nyheter nära ${municipality}`;
+    element.textContent = relevant.length ? `${relevant.length} lokala nyheter` : `Inga nya lokala nyheter`;
   });
   document.querySelectorAll("[data-quick-news-detail]").forEach((element) => {
     element.textContent = relevant[0]?.title || "Öppna den lokala nyhetssidan";
@@ -1371,22 +1367,6 @@ function renderNewsForMunicipality(municipality) {
   renderImportantNews(relevant);
   renderNewsSources(municipality);
   if (window.lucide) lucide.createIcons();
-}
-
-function isLocallyRelevantNews(article, municipality) {
-  if (article.sourceType === "municipality") return true;
-  const localTerms = {
-    "Åmål": ["åmål", "tösse", "fengersfors", "edsleskog", "dalsland"],
-    "Säffle": ["säffle", "svanskog", "värmlandsnäs", "värmlandsbro"],
-    "Bengtsfors": ["bengtsfors", "billingsfors", "dals långed", "bäckefors"],
-    "Mellerud": ["mellerud", "dals rostock", "åsensbruk", "brålanda"],
-    "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal"],
-    "Arvika": ["arvika", "gunnarskog", "edane", "klässbol"],
-    "Grums": ["grums", "slottsbron", "segelmon", "vålberg"]
-  };
-  const haystack = `${article.title || ""} ${article.summary || ""} ${article.region || ""}`.toLocaleLowerCase("sv-SE");
-  return (localTerms[municipality] || [municipality.toLocaleLowerCase("sv-SE")])
-    .some((term) => haystack.includes(term));
 }
 
 function matchesNewsFilter(article) {
@@ -1414,7 +1394,7 @@ function renderNewsArticle(article) {
   const access=article.access==="subscription"?'<span class="news-access subscription"><i data-lucide="lock"></i>Prenumeration</span>':'<span class="news-access free"><i data-lucide="unlock"></i>Fri</span>';
   const sourceClass=article.sourceType==="authority"?"authority":article.sourceType==="municipality"?"municipality":"media";
   const score=Math.round(calculateNewsScore(article));
-  return `<a class="news-item" href="${escapeAttribute(safeExternalUrl(article.url))}" target="_blank" rel="noopener noreferrer"><span class="news-source-mark ${sourceClass}">${getNewsSourceInitials(article.source)}</span><span class="news-item-content"><span class="news-meta"><strong>${escapeHtml(article.source)}</strong><span>•</span><time datetime="${escapeAttribute(article.publishedAt)}">${formatRelativeNewsTime(article.publishedAt)}</time></span><b class="news-title">${escapeHtml(article.title)}</b><span class="news-summary">${escapeHtml(article.summary||"")}</span><span class="news-labels">${access}<span class="news-region">${escapeHtml(article.category||article.region||"Nyheter")}</span><span class="news-score" title="DinPuls-index">DP ${score}</span></span></span><i class="news-open-icon" data-lucide="arrow-up-right"></i></a>`;
+  return `<a class="news-item" href="${escapeAttribute(safeExternalUrl(article.url))}" target="_blank" rel="noopener noreferrer" aria-label="Läs ${escapeAttribute(article.title)} hos ${escapeAttribute(article.source)}"><span class="news-source-mark ${sourceClass}">${getNewsSourceInitials(article.source)}</span><span class="news-item-content"><span class="news-meta"><strong>${escapeHtml(article.source)}</strong><span>•</span><time datetime="${escapeAttribute(article.publishedAt)}">${formatRelativeNewsTime(article.publishedAt)}</time></span><b class="news-title">${escapeHtml(article.title)}</b><span class="news-summary">${escapeHtml(article.summary||"")}</span><span class="news-labels">${access}<span class="news-region">${escapeHtml(article.category||article.region||"Lokal nyhet")}</span><span class="news-score" title="DinPuls-index">DP ${score}</span><span class="news-direct-link">Läs originalartikeln</span></span></span><i class="news-open-icon" data-lucide="arrow-up-right"></i></a>`;
 }
 function renderNewsSources(municipality) {
   const grid=document.querySelector("#news-source-grid"); if(!grid)return;
