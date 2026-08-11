@@ -18,25 +18,69 @@ NEWS = ROOT / "data" / "news.json"
 USER_AGENT = "DinPuls.se/0.21 (lokal nyhetsaggregator; https://sirelin8290.github.io/DinPuls/)"
 
 MUNICIPALITIES = {
-    "Åmål": ["åmål", "tösse", "fengersfors", "edsleskog", "dalsland"],
-    "Säffle": ["säffle", "svanskog", "värmlandsnäs", "värmlandsbro"],
-    "Bengtsfors": ["bengtsfors", "billingsfors", "dals långed", "bäckefors"],
-    "Mellerud": ["mellerud", "dals rostock", "åsensbruk", "brålanda"],
-    "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal"],
-    "Arvika": ["arvika", "gunnarskog", "edane", "klässbol"],
-    "Grums": ["grums", "slottsbron", "segelmon", "vålberg"],
+    "Åmål": ["åmål", "tösse", "fengersfors", "edsleskog", "ånimskog", "fröskog"],
+    "Säffle": ["säffle", "svanskog", "värmlandsnäs", "värmlandsbro", "nysäter"],
+    "Bengtsfors": ["bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"],
+    "Mellerud": ["mellerud", "dals rostock", "åsensbruk", "håverud", "dalskog", "köpmannebro"],
+    "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal", "lennartsfors", "blomskog", "trankil"],
+    "Arvika": ["arvika", "gunnarskog", "edane", "klässbol", "glava", "mangskog", "sulvik"],
+    "Grums": ["grums", "slottsbron", "segmon", "borgvik"],
 }
 
 FEEDS = [
-    dict(url="https://www.svt.se/nyheter/lokalt/varmland/rss.xml", scope="local", source="SVT Nyheter Värmland", sourceType="media", quality=98, impact=65, category="Lokalt", region="Värmland", municipalities=["Säffle", "Årjäng", "Arvika", "Grums"]),
-    dict(url="https://www.svt.se/nyheter/lokalt/vast/rss.xml", scope="local", source="SVT Nyheter Väst", sourceType="media", quality=98, impact=65, category="Lokalt", region="Västra Götaland", municipalities=["Åmål", "Bengtsfors", "Mellerud"]),
+    dict(url="https://www.svt.se/nyheter/lokalt/varmland/rss.xml", scope="regional", source="SVT Nyheter Värmland", sourceType="media", quality=98, impact=65, category="Regionalt", region="Värmland", municipalities=[]),
+    dict(url="https://www.svt.se/nyheter/lokalt/vast/rss.xml", scope="regional", source="SVT Nyheter Väst", sourceType="media", quality=98, impact=65, category="Regionalt", region="Västra Götaland", municipalities=[]),
+    dict(url="https://arvikamagasinet.se/feed/", scope="regional", source="Arvikamagasinet", sourceType="media", quality=85, impact=55, category="Lokalt", region="Västra Värmland", municipalities=[]),
     dict(url="https://www.svt.se/nyheter/rss.xml", scope="sweden", source="SVT Nyheter", sourceType="media", quality=99, impact=75, category="Sverige", region="Sverige", municipalities=[]),
     dict(url="https://rss.dw.com/rdf/rss-en-world", scope="world", source="Deutsche Welle", sourceType="media", quality=96, impact=70, category="Världen", region="Världen", municipalities=[]),
+]
+
+SOURCE_DIRECTORY = [
+    dict(name="Provinstidningen Dalsland", type="Lokaltidning", access="subscription", scope="local", municipalities=["Åmål", "Mellerud"], url="https://www.provinstidningen.se/"),
+    dict(name="Åmåls kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Åmål"], url="https://amal.se/arkiv/nyheter"),
+    dict(name="Säffle-Tidningen", type="Lokaltidning", access="subscription", scope="local", municipalities=["Säffle"], url="https://www.saffletidningen.se/"),
+    dict(name="Säffle kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Säffle"], url="https://saffle.se/kommun-och-politik/nyheter.html"),
+    dict(name="Dalslänningen", type="Lokaltidning", access="subscription", scope="local", municipalities=["Bengtsfors"], url="https://www.dalslanningen.se/"),
+    dict(name="Bengtsfors kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Bengtsfors"], url="https://www.bengtsfors.se/arkiv/nyheter"),
+    dict(name="Melleruds Nyheter", type="Lokaltidning", access="subscription", scope="local", municipalities=["Mellerud"], url="https://www.mellerudsnyheter.se/"),
+    dict(name="Melleruds kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Mellerud"], url="https://mellerud.se/kommun-och-politik/nyheter/"),
+    dict(name="Nordmarksbygden", type="Lokal tidning", access="free", scope="local", municipalities=["Årjäng"], url="https://www.nordmarksbygden.se/nb/"),
+    dict(name="Arvikamagasinet", type="Lokal nyhetskälla", access="free", scope="local", municipalities=["Årjäng", "Arvika"], url="https://arvikamagasinet.se/"),
+    dict(name="Årjängs kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Årjäng"], url="https://www.arjang.se/"),
+    dict(name="Arvika Nyheter", type="Lokaltidning", access="subscription", scope="local", municipalities=["Arvika"], url="https://www.arvikanyheter.se/"),
+    dict(name="Arvika kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Arvika"], url="https://www.arvika.se/nyheter.2932.html"),
+    dict(name="Grums kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Grums"], url="https://www.grums.se/omwebbplatsen/sidorutanformeny/nyheter.2205.html"),
+    dict(name="SVT Nyheter Grums", type="Lokal ämnessida", access="free", scope="local", municipalities=["Grums"], url="https://www.svt.se/nyheter/om/grums"),
+    dict(name="Polisen", type="Lokala händelser", access="free", scope="local", municipalities=list(MUNICIPALITIES), url="https://polisen.se/aktuellt/polisens-nyheter/"),
+    dict(name="SVT Nyheter", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.svt.se/nyheter/"),
+    dict(name="Sveriges Radio Ekot", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.sverigesradio.se/ekot"),
+    dict(name="Omni", type="Nationell nyhetsöversikt", access="free", scope="sweden", municipalities=[], url="https://omni.se/"),
+    dict(name="Dagens Nyheter", type="Nationella nyheter", access="subscription", scope="sweden", municipalities=[], url="https://www.dn.se/"),
+    dict(name="Aftonbladet", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.aftonbladet.se/nyheter"),
+    dict(name="Expressen", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.expressen.se/nyheter/"),
+    dict(name="Reuters", type="Internationella nyheter", access="free", scope="world", municipalities=[], url="https://www.reuters.com/world/"),
+    dict(name="BBC News", type="Internationella nyheter", access="free", scope="world", municipalities=[], url="https://www.bbc.com/news/world"),
+    dict(name="AP News", type="Internationella nyheter", access="free", scope="world", municipalities=[], url="https://apnews.com/world-news"),
+    dict(name="Deutsche Welle", type="Internationella nyheter", access="free", scope="world", municipalities=[], url="https://www.dw.com/en/top-stories/s-9097"),
+    dict(name="Euronews", type="Internationella nyheter", access="free", scope="world", municipalities=[], url="https://www.euronews.com/news/international"),
 ]
 
 
 def clean_text(value: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", value or "")).strip()
+
+
+def contains_term(text: str, term: str) -> bool:
+    """Matcha ortnamn som hela uttryck, inte som delar av andra ord."""
+    return re.search(rf"(?<!\w){re.escape(term.casefold())}(?!\w)", text.casefold()) is not None
+
+
+def article_municipalities(article):
+    haystack = clean_text(" ".join([
+        str(article.get("title") or ""), str(article.get("summary") or ""),
+        urllib.parse.unquote(str(article.get("url") or "")),
+    ]))
+    return [name for name, terms in MUNICIPALITIES.items() if any(contains_term(haystack, term) for term in terms)]
 
 
 def node_text(node, names):
@@ -91,6 +135,10 @@ def fetch_feed(feed):
             url=link,
             important=False,
         )
+        if row["scope"] == "regional":
+            municipalities = article_municipalities(row)
+            if municipalities:
+                row.update(scope="local", category="Lokalt", municipalities=municipalities)
         items.append(row)
     return items[:24]
 
@@ -101,7 +149,7 @@ def event_municipalities(event):
         str(location.get("name") or ""), str(event.get("name") or ""),
         str(event.get("summary") or ""), str(event.get("description") or ""),
     ])).casefold()
-    return [name for name, terms in MUNICIPALITIES.items() if any(term.casefold() in haystack for term in terms)]
+    return [name for name, terms in MUNICIPALITIES.items() if any(contains_term(haystack, term) for term in terms)]
 
 
 def fetch_police_events():
@@ -183,7 +231,7 @@ def main():
         "generatedAt": now.isoformat(timespec="seconds"),
         "sourceStatus": {"errors": errors, "successful": sorted(successful_sources)},
         "articles": articles,
-        "sources": previous_data.get("sources", []),
+        "sources": SOURCE_DIRECTORY,
     }
     NEWS.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Skrev {len(articles)} aktuella artiklar")
