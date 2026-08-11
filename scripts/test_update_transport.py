@@ -20,13 +20,22 @@ def api_departure(hours=0):
 
 
 class UpdateTransportTests(unittest.TestCase):
-    def test_keeps_future_cached_departure_before_new_search(self):
+    def test_new_search_replaces_later_cached_departure(self):
         previous = {"departures": [transport.normalize(api_departure(5)["departures"][0])]}
-        with patch.object(transport, "fetch") as fetch:
+        with patch.object(transport, "fetch", return_value=api_departure(1)) as fetch:
+            departures, _, retained, _, _ = transport.find_next_departures("key", "stop", NOW, previous, {"departures": []})
+        self.assertFalse(retained)
+        self.assertEqual(len(departures), 1)
+        self.assertEqual(departures[0]["scheduled"], api_departure(1)["departures"][0]["scheduled"])
+        fetch.assert_called_once()
+
+    def test_cached_departure_is_fallback_after_empty_search(self):
+        previous = {"departures": [transport.normalize(api_departure(5)["departures"][0])]}
+        with patch.object(transport, "fetch", return_value={"departures": []}) as fetch:
             departures, _, retained, _, _ = transport.find_next_departures("key", "stop", NOW, previous, {"departures": []})
         self.assertTrue(retained)
         self.assertEqual(len(departures), 1)
-        fetch.assert_not_called()
+        self.assertEqual(fetch.call_count, len(transport.LOOKAHEAD_OFFSETS_HOURS))
 
     def test_searches_until_a_later_departure_is_found(self):
         responses = [{"departures": []}, {"departures": []}, api_departure(3)]
