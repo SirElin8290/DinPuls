@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Lokala nyheter och viktiga händelser i din kommun, kompletterat med Sverige och världen.">
   <title>Lokala nyheter – DinPuls</title>
-  <link rel="stylesheet" href="styles.css?version=0.23.4"><link rel="stylesheet" href="portal-pages.css?version=0.23.4"><link rel="stylesheet" href="news-page.css?version=0.23.4">
+  <link rel="stylesheet" href="styles.css?version=0.23.4-news-1"><link rel="stylesheet" href="portal-pages.css?version=0.23.4"><link rel="stylesheet" href="news-page.css?version=0.23.4-news-1">
   <link rel="icon" href="favicon.ico?version=0.23.4" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.4">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.4">
@@ -14,15 +14,11 @@
 <body>
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg?version=0.23.4" alt="DinPuls" width="620" height="150"></a><a href="index.html#nyheter">← Till startsidan</a></header>
   <main class="portal-main news-page">
-    <section class="portal-hero"><span class="section-kicker">DinPuls Nyheter</span><h1>Nyheter för <span data-news-municipality>Åmål</span></h1><p>Lokalt först. Sverige och världen finns som komplement längre ner.</p></section>
+    <section class="portal-hero"><span class="section-kicker">DinPuls Nyheter</span><h1>Lokala nyheter för <span data-news-municipality>Åmål</span></h1><p>Välj en lokal artikel och läs den direkt hos originalkällan. Längre ner finns tydliga vägar till svenska och internationella nyhetskällor.</p></section>
     <div class="strategic-ad-slot strategic-ad-top" data-strategic-ad="nyheter" data-ad-position="1"></div>
     <section class="news-page-toolbar" aria-label="Nyhetsfilter">
       <label>Kommun<select id="news-municipality"></select></label>
-      <div class="news-page-scopes" role="tablist">
-        <button class="active" type="button" data-page-scope="local"><i data-lucide="map-pin"></i>Lokalt</button>
-        <button type="button" data-page-scope="sweden"><i data-lucide="landmark"></i>Sverige</button>
-        <button type="button" data-page-scope="world"><i data-lucide="globe-2"></i>Världen</button>
-      </div>
+      <div class="news-page-local-label"><i data-lucide="map-pin"></i><span>Endast artiklar från <strong data-news-municipality>Åmål</strong></span></div>
       <label>Sök nyhet<input id="news-page-search" type="search" placeholder="Sök rubrik eller källa"></label>
       <label>Åtkomst<select id="news-page-access"><option value="all">Alla</option><option value="free">Fria artiklar</option><option value="subscription">Låsta artiklar</option></select></label>
     </section>
@@ -32,9 +28,13 @@
     <section id="news-page-list" class="news-page-list"></section>
     <div class="strategic-ad-slot" data-strategic-ad="nyheter" data-ad-position="3"></div>
     <div id="news-page-empty" class="portal-empty" hidden>Inga aktuella nyheter matchar urvalet.</div>
-    <section class="news-page-sources"><h2>Källor</h2><p>DinPuls visar rubrik och kort sammanfattning. Artikeln läses alltid hos originalkällan och betalväggar kringgås aldrig.</p><div id="news-page-sources"></div></section>
+    <section class="news-page-sources"><h2>Lokala nyhetskällor för <span data-news-municipality>Åmål</span></h2><p>DinPuls visar rubrik och kort sammanfattning. Artikeln läses alltid hos originalkällan och betalväggar kringgås aldrig.</p><div id="news-page-local-sources"></div></section>
+    <section class="news-page-source-groups" aria-label="Fler nyhetskällor">
+      <article><h2><i data-lucide="landmark"></i> Svenska nyhetskällor</h2><p>Gå direkt till etablerade källor för nationella nyheter.</p><div id="news-page-sweden-sources"></div></article>
+      <article><h2><i data-lucide="globe-2"></i> Internationella nyhetskällor</h2><p>Gå direkt till källor som bevakar världen.</p><div id="news-page-world-sources"></div></article>
+    </section>
     <div class="strategic-ad-slot" data-strategic-ad="nyheter" data-ad-position="4"></div>
   </main>
-  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.23.4"></script><script src="municipality-engine.js?version=0.23.4"></script><script src="news-page.js?version=0.23.4"></script>
+  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.23.4"></script><script src="municipality-engine.js?version=0.23.4"></script><script src="news-page.js?version=0.23.4-news-1"></script>
   <script src="privacy-controls.js?version=0.23.4"></script>
 </body></html>
