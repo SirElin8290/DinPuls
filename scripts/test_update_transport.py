@@ -67,6 +67,15 @@ class UpdateTransportTests(unittest.TestCase):
         self.assertEqual(train["mode"], "train")
         self.assertEqual(bus["mode"], "bus")
 
+    def test_naive_api_times_are_saved_with_stockholm_timezone(self):
+        departure = transport.normalize({
+            "scheduled": "2026-08-11T08:20:00",
+            "realtime": "2026-08-11T08:22:00",
+            "route": {"transport_mode": "BUS"},
+        })
+        self.assertEqual(departure["scheduled"], "2026-08-11T08:20:00+02:00")
+        self.assertEqual(departure["realtime"], "2026-08-11T08:22:00+02:00")
+
 
 if __name__ == "__main__":
     unittest.main()
