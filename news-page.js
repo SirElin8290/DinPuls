@@ -39,11 +39,23 @@ function renderNewsPage() {
   articles = articles.filter(article => access === "all" || article.access === access)
     .filter(article => !query || `${article.title} ${article.summary} ${article.source}`.toLocaleLowerCase("sv-SE").includes(query))
     .sort((a, b) => newsPageScore(b) - newsPageScore(a) || new Date(b.publishedAt) - new Date(a.publishedAt));
+  const sourceFallback = !articles.length && !query && access === "all";
+  if (sourceFallback) {
+    articles = (newsPageData.sources || [])
+      .filter(source => source.scope === "local" && (source.municipalities || []).includes(newsMunicipality))
+      .map((source, index) => ({
+        id: `local-source-${index}`, source: source.name, sourceType: "media",
+        title: `Senaste nytt från ${source.name}`,
+        summary: `Öppna ${source.name} för de senaste lokala nyheterna från ${newsMunicipality}.`,
+        access: source.access, category: "Lokal källa", publishedAt: "", url: source.url,
+        sourceFallback: true,
+      }));
+  }
   const list = document.querySelector("#news-page-list");
   list.innerHTML = articles.map(renderNewsPageArticle).join("");
   list.hidden = !articles.length;
   document.querySelector("#news-page-empty").hidden = Boolean(articles.length);
-  document.querySelector("#news-page-total").textContent = `${articles.length} ${articles.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
+  document.querySelector("#news-page-total").textContent = sourceFallback ? `${articles.length} lokala källor` : `${articles.length} ${articles.length === 1 ? "aktuell nyhet" : "aktuella nyheter"}`;
   const generated = new Date(newsPageData.generatedAt || "");
   document.querySelector("#news-page-updated").textContent = Number.isNaN(generated.getTime()) ? "" : `Uppdaterad ${generated.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   renderNewsPageImportant(articles);
