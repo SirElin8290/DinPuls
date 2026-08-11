@@ -1,7 +1,6 @@
 const newsState = window.DinPulsMunicipalityState;
 let newsMunicipality = newsState.getInitial();
 let newsPageData = { articles: [], sources: [] };
-let newsPageScope = "local";
 
 const newsEscape = window.DinPulsSecurity.escapeHtml;
 const safeNewsUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -13,11 +12,6 @@ async function initializeNewsPage() {
     newsMunicipality = newsState.set(municipalitySelect.value);
     renderNewsPage();
   });
-  document.querySelectorAll("[data-page-scope]").forEach(button => button.addEventListener("click", () => {
-    newsPageScope = button.dataset.pageScope;
-    document.querySelectorAll("[data-page-scope]").forEach(item => item.classList.toggle("active", item === button));
-    renderNewsPage();
-  }));
   document.querySelector("#news-page-search").addEventListener("input", renderNewsPage);
   document.querySelector("#news-page-access").addEventListener("change", renderNewsPage);
   renderNewsAds();
@@ -41,8 +35,7 @@ function renderNewsPage() {
   document.title = `Nyheter i ${newsMunicipality} – DinPuls`;
   const query = document.querySelector("#news-page-search").value.trim().toLocaleLowerCase("sv-SE");
   const access = document.querySelector("#news-page-access").value;
-  let articles = (newsPageData.articles || []).filter(article => article.scope === newsPageScope);
-  if (newsPageScope === "local") articles = articles.filter(newsLocalMatch);
+  let articles = (newsPageData.articles || []).filter(article => article.scope === "local" && newsLocalMatch(article));
   articles = articles.filter(article => access === "all" || article.access === access)
     .filter(article => !query || `${article.title} ${article.summary} ${article.source}`.toLocaleLowerCase("sv-SE").includes(query))
     .sort((a, b) => newsPageScore(b) - newsPageScore(a) || new Date(b.publishedAt) - new Date(a.publishedAt));
@@ -72,8 +65,15 @@ function renderNewsPageImportant(articles) {
 }
 
 function renderNewsPageSources() {
-  const sources = (newsPageData.sources || []).filter(source => source.scope === newsPageScope && (newsPageScope !== "local" || (source.municipalities || []).includes(newsMunicipality)));
-  document.querySelector("#news-page-sources").innerHTML = sources.map(source => `<a href="${newsEscape(safeNewsUrl(source.url))}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(source.name)}</strong><span>${newsEscape(source.type)}</span><small><i data-lucide="${source.access === "subscription" ? "lock" : "check"}"></i>${source.access === "subscription" ? "Delvis låst" : "Fri"}</small></a>`).join("");
+  const sources = newsPageData.sources || [];
+  const local = sources.filter(source => source.scope === "local" && (source.municipalities || []).includes(newsMunicipality));
+  const sweden = sources.filter(source => source.scope === "sweden");
+  const world = sources.filter(source => source.scope === "world");
+  const renderLocalSource = source => `<a href="${newsEscape(safeNewsUrl(source.url))}" target="_blank" rel="noopener noreferrer"><strong>${newsEscape(source.name)}</strong><span>${newsEscape(source.type)}</span><small><i data-lucide="${source.access === "subscription" ? "lock" : "check"}"></i>${source.access === "subscription" ? "Delvis låst" : "Fri"}</small></a>`;
+  const renderDirectorySource = source => `<a href="${newsEscape(safeNewsUrl(source.url))}" target="_blank" rel="noopener noreferrer"><span>${newsEscape(source.name)}</span><i data-lucide="arrow-up-right"></i></a>`;
+  document.querySelector("#news-page-local-sources").innerHTML = local.map(renderLocalSource).join("");
+  document.querySelector("#news-page-sweden-sources").innerHTML = sweden.map(renderDirectorySource).join("");
+  document.querySelector("#news-page-world-sources").innerHTML = world.map(renderDirectorySource).join("");
 }
 
 function renderNewsAds() {
