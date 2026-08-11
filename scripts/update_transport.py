@@ -125,13 +125,15 @@ def normalize(item):
     route = item.get("route") or {}
     platform = item.get("realtime_platform") or item.get("scheduled_platform") or {}
     mode = str(route.get("transport_mode", "BUS")).lower()
+    scheduled = parse_time(item.get("scheduled"), STOCKHOLM)
+    realtime = parse_time(item.get("realtime") or item.get("scheduled"), STOCKHOLM)
     return {
         "mode": "train" if mode == "train" else "bus",
         "line": route.get("designation") or route.get("name") or "–",
         "direction": route.get("direction") or (route.get("destination") or {}).get("name") or "",
         "operator": (item.get("agency") or {}).get("name") or "",
-        "scheduled": item.get("scheduled"),
-        "realtime": item.get("realtime") or item.get("scheduled"),
+        "scheduled": scheduled.isoformat() if scheduled else item.get("scheduled"),
+        "realtime": realtime.isoformat() if realtime else item.get("realtime") or item.get("scheduled"),
         "delayMinutes": round((item.get("delay") or 0) / 60),
         "isRealtime": bool(item.get("is_realtime")),
         "canceled": bool(item.get("canceled")),
