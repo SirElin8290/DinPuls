@@ -1344,22 +1344,39 @@ function renderNewsForMunicipality(municipality) {
     .filter((article) => article.scope === "local")
     .filter((article) => (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
     .filter(matchesNewsFilter);
-  const relevant = scoped
+  let relevant = scoped
     .sort(compareNewsQuality)
     .slice(0, 5);
+  const sourceFallback = relevant.length === 0;
+  if (sourceFallback) {
+    relevant = allNewsSources
+      .filter((source) => source.scope === "local" && (source.municipalities || []).includes(municipality))
+      .slice(0, 5)
+      .map((source, index) => ({
+        id: `local-source-${municipality}-${index}`,
+        scope: "local", source: source.name,
+        sourceType: source.type?.includes("Kommun") ? "municipality" : "media",
+        quality: 80, impact: 40, category: "Lokal källa", region: municipality,
+        municipalities: [municipality],
+        title: `Senaste nytt från ${source.name}`,
+        summary: `Öppna ${source.name} för de senaste lokala nyheterna från ${municipality}.`,
+        access: source.access, publishedAt: new Date().toISOString(), url: source.url,
+        important: false, sourceFallback: true,
+      }));
+  }
   feed.innerHTML = relevant.map(renderNewsArticle).join("");
   loading.hidden = true;
   feed.hidden = relevant.length === 0;
   empty.hidden = relevant.length > 0;
-  if (count) count.textContent = `${relevant.length} ${relevant.length === 1 ? "lokal nyhet" : "lokala nyheter"}`;
+  if (count) count.textContent = sourceFallback ? `${relevant.length} lokala källor` : `${relevant.length} ${relevant.length === 1 ? "lokal nyhet" : "lokala nyheter"}`;
   const subheading = document.querySelector("#news-subheading");
-  if (subheading) subheading.textContent = `Artiklar som handlar om ${municipality}`;
+  if (subheading) subheading.textContent = sourceFallback ? `Lokala källor för ${municipality} medan nya artiklar hämtas` : `Artiklar som handlar om ${municipality}`;
   const emptyStrong = empty.querySelector("strong");
   const emptyText = empty.querySelector("span");
   if (emptyStrong) emptyStrong.textContent = `Inga nya lokala artiklar från ${municipality}`;
   if (emptyText) emptyText.textContent = "Öppna nyhetssidan för att gå till kommunens lokala källor.";
   document.querySelectorAll("[data-quick-news-title]").forEach((element) => {
-    element.textContent = relevant.length ? `${relevant.length} lokala nyheter` : `Inga nya lokala nyheter`;
+    element.textContent = sourceFallback ? `Lokala nyhetskällor` : `${relevant.length} lokala nyheter`;
   });
   document.querySelectorAll("[data-quick-news-detail]").forEach((element) => {
     element.textContent = relevant[0]?.title || "Öppna den lokala nyhetssidan";
