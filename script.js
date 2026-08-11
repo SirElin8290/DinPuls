@@ -1683,7 +1683,7 @@ function renderTransport() {
     updated.innerHTML = `<i data-lucide="${stale ? "clock-3" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast fungerande kontroll ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
-  updateTransportSource(isDemo);
+  updateTransportSource(isDemo, stop, departures);
   renderCompactTransport(departures, isDemo);
   updateQuickTransport();
   if (window.lucide) lucide.createIcons();
@@ -1702,7 +1702,7 @@ function renderDeparture(item, isDemo = false) {
     : delayMinutes > 0
       ? `<span class="departure-status delayed">+${delayMinutes} min</span>`
       : item.stale
-        ? '<span class="departure-status planned">Sparad tidtabell</span>'
+        ? '<span class="departure-status planned">Senast verifierad</span>'
       : item.isRealtime
         ? '<span class="departure-status realtime">Realtid</span>'
         : '<span class="departure-status planned">Tidtabell</span>';
@@ -1717,12 +1717,15 @@ function renderDeparture(item, isDemo = false) {
   </article>`;
 }
 
-function updateTransportSource(isDemo) {
+function updateTransportSource(isDemo, stop, departures) {
   const note = document.querySelector("#transport-source-note");
   const link = document.querySelector("#transport-source-link");
+  const retained = Boolean(stop?.retained) || departures.some((item) => item.stale);
   if (note) {
     note.textContent = isDemo
       ? "Exempeltider – inte liveinformation"
+      : retained
+        ? "Trafiklab – visar senast verifierade framtida avgångar medan nya tider hämtas"
       : transportData.partial
         ? "Trafiklab – vissa hållplatser kunde inte uppdateras"
         : "Aktuella avgångar från Trafiklab";
@@ -1738,7 +1741,8 @@ function renderCompactTransport(departures, isDemo) {
   if (!list) return;
 
   if (label) {
-    label.textContent = isDemo ? "Demonstrationsdata" : "Aktuella avgångar";
+    const retained = departures.some((item) => item.stale);
+    label.textContent = isDemo ? "Demonstrationsdata" : retained ? "Senast verifierade avgångar" : "Aktuella avgångar";
   }
 
   if (departures.length === 0) {
@@ -1751,7 +1755,7 @@ function renderCompactTransport(departures, isDemo) {
     const displayTime = Number.isNaN(time.getTime())
       ? "--:--"
       : time.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
-    return `<li><i data-lucide="${item.mode === "train" ? "train-front" : "bus-front"}"></i><time>${displayTime}</time><span><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(item.line || item.operator || "")}${isDemo ? " · demo" : ""}</small></span></li>`;
+    return `<li><i data-lucide="${item.mode === "train" ? "train-front" : "bus-front"}"></i><time>${displayTime}</time><span><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(item.line || item.operator || "")}${isDemo ? " · demo" : item.stale ? " · senast verifierad" : ""}</small></span></li>`;
   }).join("");
 }
 
