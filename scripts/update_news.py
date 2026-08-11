@@ -11,6 +11,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +34,20 @@ FEEDS = [
     dict(url="https://arvikamagasinet.se/feed/", scope="regional", source="Arvikamagasinet", sourceType="media", quality=85, impact=55, category="Lokalt", region="Västra Värmland", municipalities=[]),
     dict(url="https://www.svt.se/nyheter/rss.xml", scope="sweden", source="SVT Nyheter", sourceType="media", quality=99, impact=75, category="Sverige", region="Sverige", municipalities=[]),
     dict(url="https://rss.dw.com/rdf/rss-en-world", scope="world", source="Deutsche Welle", sourceType="media", quality=96, impact=70, category="Världen", region="Världen", municipalities=[]),
+]
+
+LOCAL_LISTINGS = [
+    dict(
+        url="https://amal.se/arkiv/nyheter",
+        source="Åmåls kommun",
+        sourceType="municipality",
+        municipalities=["Åmål"],
+        pathContains="/arkiv/nyheter/20",
+        quality=96,
+        impact=55,
+        category="Kommunalt",
+        region="Åmål",
+    ),
 ]
 
 SOURCE_DIRECTORY = [
@@ -106,6 +121,60 @@ def request_json(url):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
     with urllib.request.urlopen(request, timeout=25) as response:
         return json.load(response)
+
+
+class ListingLinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+        self.current = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag.casefold() == "a":
+            href = dict(attrs).get("href")
+            self.current = {"href": href, "text": []} if href else None
+
+    def handle_data(self, data):
+        if self.current:
+            self.current["text"].append(data)
+
+    def handle_endtag(self, tag):
+        if tag.casefold() == "a" and self.current:
+            self.links.append((self.current["href"], clean_text(" ".join(self.current["text"]))))
+            self.current = None
+
+
+def listing_date(url):
+    match = re.search(r"/(20\d{2})-(\d{2})-(\d{2})-", url)
+    if not match:
+        return datetime.now(timezone.utc).isoformat()
+    return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)), 12, tzinfo=timezone.utc).isoformat()
+
+
+def fetch_local_listing(listing):
+    request = urllib.request.Request(listing["url"], headers={"User-Agent": USER_AGENT, "Accept": "text/html"})
+    with urllib.request.urlopen(request, timeout=25) as response:
+        parser = ListingLinkParser()
+        parser.feed(response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace"))
+    rows, seen = [], set()
+    for href, title in parser.links:
+        link = urllib.parse.urljoin(listing["url"], href)
+        if listing["pathContains"] not in urllib.parse.urlparse(link).path or not title or link in seen:
+            continue
+        title = re.sub(r"^\d{1,2}\s+[a-zåäö]{3}\s+", "", title, flags=re.IGNORECASE)
+        if len(title) > 160:
+            sentence = re.match(r"^(.{30,160}?[.!?])(?:\s|$)", title)
+            if sentence:
+                title = sentence.group(1)
+        seen.add(link)
+        row = {key: value for key, value in listing.items() if key not in ("url", "pathContains")}
+        row.update(
+            id="listing-" + hashlib.sha1((listing["source"] + link).encode()).hexdigest()[:14],
+            scope="local", title=title, summary="", access="free",
+            publishedAt=listing_date(link), url=link, important=False,
+        )
+        rows.append(row)
+    return sorted(rows, key=parse_date, reverse=True)[:20]
 
 
 def fetch_feed(feed):
@@ -198,6 +267,17 @@ def main():
         except Exception as exc:
             errors.append(f"{feed['source']}: {exc}")
             print("VARNING", errors[-1])
+    for listing in LOCAL_LISTINGS:
+        try:
+            rows = fetch_local_listing(listing)
+            if not rows:
+                raise ValueError("inga artikellänkar hittades")
+            fetched.extend(rows)
+            successful_sources.add(listing["source"])
+            print(listing["source"], len(rows))
+        except Exception as exc:
+            errors.append(f"{listing['source']}: {exc}")
+            print("VARNING", errors[-1])
     try:
         police = fetch_police_events()
         fetched.extend(police)
@@ -211,10 +291,10 @@ def main():
     retained = []
     for article in previous:
         source = article.get("source")
-        is_automatic = str(article.get("id", "")).startswith(("feed-", "police-"))
+        is_automatic = str(article.get("id", "")).startswith(("feed-", "police-", "listing-"))
         if source in successful_sources and is_automatic:
             continue
-        max_age = timedelta(days=14 if article.get("scope") == "local" else 5)
+        max_age = timedelta(days=45 if article.get("scope") == "local" else 5)
         if parse_date(article) >= now - max_age:
             retained.append(article)
 
