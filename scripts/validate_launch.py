@@ -19,8 +19,8 @@ ACTIVE_PAGES = [
 ]
 COMPONENTS = [
     "header", "homepage-guide", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
-    "premium-ad-1", "primary-cards", "transport", "sport", "health", "authorities", "service",
-    "cinema", "secondary-cards", "premium-ad-2", "jobs-housing",
+    "secondary-cards", "primary-cards", "transport", "premium-ad-1", "jobs-housing", "premium-ad-2",
+    "health", "sport", "cinema", "service", "authorities",
     "premium-ad-3", "footer",
 ]
 
@@ -345,7 +345,24 @@ def verify_review_fixes() -> None:
     assert '[data-theme="dark"] .dialog-close' in styles, "Kommunrutans stängknapp saknar tydligt nattläge"
     assert 'placeholder="Sök jobb, vård, myndigheter…"' in header, "Mobilens söktext är för lång"
     assert '.search>svg{width:20px;height:20px' in styles and 'align-items:center' in styles, "Sökikonen är inte centrerad"
-    assert index.index('data-component="secondary-cards"') < index.index('id="news-sources"') < index.index('data-component="premium-ad-2"'), "Lokala nyheter och källor ligger inte tillsammans"
+    homepage_order = [
+        'data-component="hero"',
+        'data-component="secondary-cards"',
+        'data-component="primary-cards"',
+        'data-component="transport"',
+        'data-component="premium-ad-1"',
+        'data-component="jobs-housing"',
+        'data-component="premium-ad-2"',
+        'data-component="health"',
+        'data-component="sport"',
+        'data-component="cinema"',
+        'data-component="service"',
+        'data-component="authorities"',
+        'id="news-sources"',
+        'data-component="premium-ad-3"',
+    ]
+    positions = [index.index(marker) for marker in homepage_order]
+    assert positions == sorted(positions), "Startsidans moduler följer inte den beslutade viktighetsordningen"
     source_names = {item.get("name") for item in sources}
     assert {"Provinstidningen Dalsland", "Dalslänningen"} <= source_names, "Lokala Dalslandskällor saknas"
 
