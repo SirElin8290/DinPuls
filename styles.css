@@ -1868,6 +1868,14 @@ linear-gradient(0deg,rgba(84,161,76,.18),transparent 62%)}
 /* Integritet och lokal lagring */
 .site-header,main,.google-search-band,footer{max-width:100%}
 html,body{max-width:100%;overflow-x:clip}
+
+/* En gemensam kantlinje för startsidans stora desktopmoduler. */
+.transport-section,.sport-home,.health-home,.cinema-home,.service-home,.authorities-home,.news-sources-section{
+  width:auto;
+  max-width:none;
+  margin-left:20px;
+  margin-right:20px;
+}
 @media (min-width:1101px) and (max-width:1500px){
   .header-inner{grid-template-columns:minmax(240px,300px) minmax(280px,1fr) auto;gap:12px;padding-left:18px;padding-right:18px}
   .brand-logo{width:min(290px,100%)}
@@ -1875,6 +1883,12 @@ html,body{max-width:100%;overflow-x:clip}
   .header-utility-actions{gap:6px}
   .weather-compact,.live-clock{display:none}
   .homepage-header-button{padding-left:10px!important;padding-right:10px!important}
+}
+@media(max-width:760px){
+  .transport-section,.sport-home,.health-home,.cinema-home,.service-home,.authorities-home,.news-sources-section{
+    margin-left:12px;
+    margin-right:12px;
+  }
 }
 .footer-privacy-clear{border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:7px 10px;background:transparent;color:inherit;font:inherit;cursor:pointer}.footer-privacy-clear:hover{background:rgba(255,255,255,.08)}.footer-privacy-status{display:block;min-height:1.4em;font-size:12px}
 @media(max-width:760px){
