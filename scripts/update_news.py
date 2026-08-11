@@ -48,6 +48,26 @@ LOCAL_LISTINGS = [
         category="Kommunalt",
         region="Åmål",
     ),
+    dict(url="https://saffle.se/", source="Säffle kommun", sourceType="municipality",
+         municipalities=["Säffle"], pathContains="/arkiv/nyhetsarkiv/2026/",
+         quality=96, impact=55, category="Kommunalt", region="Säffle"),
+    dict(url="https://www.bengtsfors.se/arkiv/nyheter", source="Bengtsfors kommun", sourceType="municipality",
+         municipalities=["Bengtsfors"], pathContains="/arkiv/nyheter/nyheter/20",
+         quality=96, impact=55, category="Kommunalt", region="Bengtsfors"),
+    dict(url="https://mellerud.se/nyheter/aktuella-nyheter/", source="Melleruds kommun", sourceType="municipality",
+         municipalities=["Mellerud"], pathContains="/nyheter/aktuella-nyheter/",
+         quality=96, impact=55, category="Kommunalt", region="Mellerud"),
+    dict(url="https://www.arjang.se/kommunalservice/startsida/arkiv/upplevaochgora/nyheter.4722.html",
+         source="Årjängs kommun", sourceType="municipality", municipalities=["Årjäng"],
+         pathContains="/nyheter/nyheter/", quality=96, impact=55,
+         category="Kommunalt", region="Årjäng"),
+    dict(url="https://www.arvika.se/nyheter.2932.html", source="Arvika kommun", sourceType="municipality",
+         municipalities=["Arvika"], pathContains="/nyheter/nyhetsarkiv/",
+         quality=96, impact=55, category="Kommunalt", region="Arvika"),
+    dict(url="https://www.grums.se/omwebbplatsen/sidorutanformeny/nyheter.2205.html",
+         source="Grums kommun", sourceType="municipality", municipalities=["Grums"],
+         pathContains="/nyheter/startsida/", quality=96, impact=55,
+         category="Kommunalt", region="Grums"),
 ]
 
 SOURCE_DIRECTORY = [
@@ -58,10 +78,10 @@ SOURCE_DIRECTORY = [
     dict(name="Dalslänningen", type="Lokaltidning", access="subscription", scope="local", municipalities=["Bengtsfors"], url="https://www.dalslanningen.se/"),
     dict(name="Bengtsfors kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Bengtsfors"], url="https://www.bengtsfors.se/arkiv/nyheter"),
     dict(name="Melleruds Nyheter", type="Lokaltidning", access="subscription", scope="local", municipalities=["Mellerud"], url="https://www.mellerudsnyheter.se/"),
-    dict(name="Melleruds kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Mellerud"], url="https://mellerud.se/kommun-och-politik/nyheter/"),
+    dict(name="Melleruds kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Mellerud"], url="https://mellerud.se/nyheter/aktuella-nyheter/"),
     dict(name="Nordmarksbygden", type="Lokal tidning", access="free", scope="local", municipalities=["Årjäng"], url="https://www.nordmarksbygden.se/nb/"),
     dict(name="Arvikamagasinet", type="Lokal nyhetskälla", access="free", scope="local", municipalities=["Årjäng", "Arvika"], url="https://arvikamagasinet.se/"),
-    dict(name="Årjängs kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Årjäng"], url="https://www.arjang.se/"),
+    dict(name="Årjängs kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Årjäng"], url="https://www.arjang.se/kommunalservice/startsida/arkiv/upplevaochgora/nyheter.4722.html"),
     dict(name="Arvika Nyheter", type="Lokaltidning", access="subscription", scope="local", municipalities=["Arvika"], url="https://www.arvikanyheter.se/"),
     dict(name="Arvika kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Arvika"], url="https://www.arvika.se/nyheter.2932.html"),
     dict(name="Grums kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Grums"], url="https://www.grums.se/omwebbplatsen/sidorutanformeny/nyheter.2205.html"),
@@ -131,8 +151,9 @@ class ListingLinkParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag.casefold() == "a":
-            href = dict(attrs).get("href")
-            self.current = {"href": href, "text": []} if href else None
+            attributes = dict(attrs)
+            href = attributes.get("href")
+            self.current = {"href": href, "text": [], "label": attributes.get("aria-label") or attributes.get("title") or ""} if href else None
 
     def handle_data(self, data):
         if self.current:
@@ -140,14 +161,15 @@ class ListingLinkParser(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag.casefold() == "a" and self.current:
-            self.links.append((self.current["href"], clean_text(" ".join(self.current["text"]))))
+            title = self.current["label"] or " ".join(self.current["text"])
+            self.links.append((self.current["href"], clean_text(title)))
             self.current = None
 
 
-def listing_date(url):
+def listing_date(url, fallback_rank=0):
     match = re.search(r"/(20\d{2})-(\d{2})-(\d{2})-", url)
     if not match:
-        return datetime.now(timezone.utc).isoformat()
+        return (datetime.now(timezone.utc) - timedelta(minutes=fallback_rank)).isoformat()
     return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)), 12, tzinfo=timezone.utc).isoformat()
 
 
@@ -159,9 +181,13 @@ def fetch_local_listing(listing):
     rows, seen = [], set()
     for href, title in parser.links:
         link = urllib.parse.urljoin(listing["url"], href)
-        if listing["pathContains"] not in urllib.parse.urlparse(link).path or not title or link in seen:
+        link_path = urllib.parse.urlparse(link).path.rstrip("/")
+        listing_path = urllib.parse.urlparse(listing["url"]).path.rstrip("/")
+        if (listing["pathContains"] not in link_path or not title or link in seen
+                or link_path == listing_path):
             continue
-        title = re.sub(r"^\d{1,2}\s+[a-zåäö]{3}\s+", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"^Läs mer om\s+", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"^\d{1,2}\s+(?:[a-zåäö]{3}|[a-zåäö]+)(?:\s+20\d{2})?\s+", "", title, flags=re.IGNORECASE)
         if len(title) > 160:
             sentence = re.match(r"^(.{30,160}?[.!?])(?:\s|$)", title)
             if sentence:
@@ -171,7 +197,7 @@ def fetch_local_listing(listing):
         row.update(
             id="listing-" + hashlib.sha1((listing["source"] + link).encode()).hexdigest()[:14],
             scope="local", title=title, summary="", access="free",
-            publishedAt=listing_date(link), url=link, important=False,
+            publishedAt=listing_date(link, len(rows)), url=link, important=False,
         )
         rows.append(row)
     return sorted(rows, key=parse_date, reverse=True)[:20]
