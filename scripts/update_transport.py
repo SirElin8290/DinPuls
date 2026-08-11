@@ -149,17 +149,20 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
         return current, None, False, None, current_payload
 
     retained = future_departures(previous_stop, now)
-    if retained:
-        return retained, previous_stop.get("lookupTime"), True, previous_stop.get("nextSearchAfter"), None
-
     if not should_deep_search(previous_stop, now):
-        return [], previous_stop.get("lookupTime"), False, previous_stop.get("nextSearchAfter"), None
+        return retained, previous_stop.get("lookupTime"), bool(retained), previous_stop.get("nextSearchAfter"), None
 
     for query_time in future_query_times(now):
         payload = fetch(api_key, area_id, query_time)
         departures = normalize_departures(payload)
         if departures:
             return departures, query_time, False, None, payload
+
+    # Sparade framtida tider är endast reservdata. De får aldrig stoppa en ny
+    # sökning, eftersom en gammal kvällsavgång annars kan dölja en tidigare tur
+    # som har tillkommit i Trafiklabs aktuella tidtabell.
+    if retained:
+        return retained, previous_stop.get("lookupTime"), True, previous_stop.get("nextSearchAfter"), None
 
     next_search = (now + timedelta(minutes=EMPTY_RETRY_MINUTES)).isoformat(timespec="minutes")
     return [], None, False, next_search, None
