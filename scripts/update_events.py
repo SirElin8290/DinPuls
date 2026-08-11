@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
 SOURCE_CATALOG = ROOT / "data" / "event-sources.json"
 USER_AGENT = "DinPuls.se/0.21 (lokal evenemangskalender; https://sirelin8290.github.io/DinPuls/)"
+ALGOLIA_APP_ID = "JLIO3DI59W"
+ALGOLIA_SEARCH_KEY = "c3e912c214238b637c6a86d637acfe79"
 LOCALITIES = {
     "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog", "tydje"},
     "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
@@ -36,6 +38,60 @@ def fetch_json(url: str):
     raw = fetch_html(url)
     value = json.loads(raw)
     return json.loads(value) if isinstance(value, str) else value
+
+
+def fetch_visit_varmland_events(municipality: str) -> list[dict]:
+    """Läser Visit Värmlands publika sökindex när kalendersidan är JavaScript-renderad."""
+    endpoint = f"https://{ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/events/query"
+    today_timestamp = int(datetime.now(timezone.utc).timestamp())
+    params = urlencode({
+        "hitsPerPage": "100",
+        "filters": f"municipality:'{municipality}' AND dates.occasion_end_date >= {today_timestamp}",
+    })
+    request = urllib.request.Request(
+        endpoint,
+        data=json.dumps({"params": params}).encode(),
+        headers={
+            "User-Agent": USER_AGENT,
+            "Content-Type": "application/json",
+            "X-Algolia-Application-Id": ALGOLIA_APP_ID,
+            "X-Algolia-API-Key": ALGOLIA_SEARCH_KEY,
+        },
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        payload = json.load(response)
+    today = date.today().isoformat()
+    results = []
+    for item in payload.get("hits") or []:
+        title = str(item.get("title_sv") or "").strip()
+        if not title:
+            continue
+        venue = str(item.get("place") or municipality).strip()
+        item_url = urljoin("https://www.visitvarmland.com/", str(item.get("url_sv") or ""))
+        event_category, label = category(title)
+        for occurrence in (item.get("dates") or [])[:12]:
+            start = iso_date(occurrence.get("date"))
+            end = iso_date(occurrence.get("date_end")) or start
+            if not start or end < today:
+                continue
+            start_stamp = occurrence.get("occasion_date")
+            end_stamp = occurrence.get("occasion_end_date")
+            time_label = "Se källan"
+            if start_stamp:
+                start_time = datetime.fromtimestamp(int(start_stamp), timezone.utc).strftime("%H:%M")
+                end_time = datetime.fromtimestamp(int(end_stamp), timezone.utc).strftime("%H:%M") if end_stamp else ""
+                time_label = f"{start_time}–{end_time}" if end_time and end_time != start_time else start_time
+            identifier = hashlib.sha1(
+                f"{municipality}|{title}|{start}|{venue}|{item_url}".encode()
+            ).hexdigest()[:16]
+            results.append({
+                "id": f"event-{identifier}", "title": title,
+                "startDate": start, "endDate": end, "time": time_label,
+                "venue": venue, "category": event_category,
+                "categoryLabel": label, "sourceName": "Visit Värmland",
+                "url": item_url,
+            })
+    return results
 
 
 def json_ld_blocks(markup: str) -> list[object]:
@@ -306,6 +362,8 @@ def main() -> int:
                             if event:
                                 rows.append(event)
                 rows.extend(events_from_filter_api(markup, municipality, source))
+                if "visitvarmland.com" in source["url"]:
+                    rows.extend(fetch_visit_varmland_events(municipality))
                 collected.extend(rows)
                 health.append({
                     "name": source["name"],
@@ -328,7 +386,17 @@ def main() -> int:
             current = unique.get(key)
             if not current or item.get("verified"):
                 unique[key] = item
-        payload["events"] = sorted(unique.values(), key=lambda item: (item.get("startDate") or "", item.get("title") or ""))[:80]
+        ordered = sorted(unique.values(), key=lambda item: (item.get("startDate") or "", item.get("title") or ""))
+        selected = ordered[:80]
+        # Stora manuellt verifierade evenemang får aldrig trängas undan när en
+        # automatisk kalender innehåller fler än 80 mindre aktiviteter.
+        selected_keys = {item.get("id") for item in selected}
+        for verified in (item for item in ordered if item.get("verified") and item.get("id") not in selected_keys):
+            replace_at = next((index for index in range(len(selected) - 1, -1, -1) if not selected[index].get("verified")), None)
+            if replace_at is not None:
+                selected[replace_at] = verified
+                selected_keys.add(verified.get("id"))
+        payload["events"] = sorted(selected, key=lambda item: (item.get("startDate") or "", item.get("title") or ""))
         payload["sourceHealth"] = health
 
     if not any_source_ok:
