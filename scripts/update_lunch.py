@@ -197,6 +197,10 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
                     page = fetcher(source["url"])
                     if source.get("parser") == "all-days-heading":
                         week, days = parse_all_days_menu(page)
+                        # Den stående vardagsrätten är den aktuella menyn på sidan.
+                        # Äldre veckonummer kan förekomma i sidfot eller semesterinformation.
+                        if any(days.values()):
+                            week = current_week
                     else:
                         week, days = parse_weekday_menu(page)
                     if source.get("id") == "mickans-grill":
