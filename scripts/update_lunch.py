@@ -139,6 +139,27 @@ def parse_weekday_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
     return extract_week(lines), menu
 
 
+def parse_all_days_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
+    """Tolkar en verifierad veckomeny där samma rätter gäller alla vardagar."""
+    parser = TextExtractor()
+    parser.feed(page)
+    lines = parser.text_lines()
+    dishes: list[str] = []
+    active = False
+    for line in lines:
+        normalized = line.lower().strip(" .:-")
+        if "alla dagar" in normalized:
+            active = True
+            continue
+        if active and (weekday_key(line) or any(normalized.startswith(marker) for marker in STOP_MARKERS)):
+            break
+        if active and useful_dish(line) and len(dishes) < 5:
+            dishes.append(line)
+    return extract_week(lines), {
+        day: list(dishes) for day in ("monday", "tuesday", "wednesday", "thursday", "friday")
+    }
+
+
 def validate_config(config: dict) -> None:
     municipalities = config.get("municipalities", {})
     missing = EXPECTED_MUNICIPALITIES - set(municipalities)
@@ -171,9 +192,13 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
                 "status": "reference",
                 "mode": "reference",
             }
-            if source.get("parser") == "weekday-headings":
+            if source.get("parser") in {"weekday-headings", "all-days-heading"}:
                 try:
-                    week, days = parse_weekday_menu(fetcher(source["url"]))
+                    page = fetcher(source["url"])
+                    if source.get("parser") == "all-days-heading":
+                        week, days = parse_all_days_menu(page)
+                    else:
+                        week, days = parse_weekday_menu(page)
                     if source.get("id") == "mickans-grill":
                         days = {
                             day: ["Från 100 kr" if dish == "$9.95" else dish for dish in dishes]

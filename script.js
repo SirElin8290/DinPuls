@@ -2338,6 +2338,12 @@ function renderLunchTicker(municipality) {
 
   document.querySelectorAll("[data-lunch-ticker]").forEach((container) => {
     container.innerHTML = markup;
+    const track = container.closest(".lunch-airport-track");
+    if (track) {
+      const itemCount = Math.max(1, tickerRestaurants.length || fallback.length);
+      track.style.setProperty("--lunch-roll-desktop", `${Math.max(24, itemCount * 11)}s`);
+      track.style.setProperty("--lunch-roll-mobile", `${Math.max(10, itemCount * 6)}s`);
+    }
   });
   document.querySelectorAll("[data-lunch-strip-day]").forEach((element) => {
     element.textContent = dayNames[weekday] || "I DAG";

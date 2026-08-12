@@ -137,7 +137,7 @@ footer{min-height:72px;display:flex;align-items:center;justify-content:space-bet
 .lunch-airport-strip{max-width:calc(var(--max) - 28px);min-height:66px;margin:12px auto 0;display:grid;grid-template-columns:190px minmax(0,1fr);overflow:hidden;color:#f8ead0;background:#14202a;border:1px solid #263746;border-radius:12px;box-shadow:var(--shadow)}
 .lunch-airport-label{position:relative;z-index:2;display:flex;align-items:center;gap:11px;padding:12px 18px;color:#fff;background:linear-gradient(135deg,#a44b20,#e27a25);box-shadow:8px 0 18px rgba(0,0,0,.22)}
 .lunch-airport-label svg{width:24px}.lunch-airport-label span{display:grid}.lunch-airport-label strong{font-size:12px;letter-spacing:.08em}.lunch-airport-label small{margin-top:4px;color:#ffe3c7;font-size:9px;font-weight:800;letter-spacing:.14em}
-.lunch-airport-window{overflow:hidden}.lunch-airport-track{display:flex;width:max-content;min-height:66px;animation:lunch-airport-roll 45s linear infinite}.lunch-airport-strip:hover .lunch-airport-track{animation-play-state:paused}.lunch-airport-set{display:flex}
+.lunch-airport-window{overflow:hidden}.lunch-airport-track{display:flex;width:max-content;min-height:66px;animation:lunch-airport-roll var(--lunch-roll-desktop,45s) linear infinite}.lunch-airport-strip:hover .lunch-airport-track{animation-play-state:paused}.lunch-airport-set{display:flex}
 .lunch-airport-item{min-width:520px;max-width:660px;display:grid;grid-template-columns:max-content minmax(220px,1fr) max-content;align-items:center;gap:15px;padding:12px 24px;color:#f8ead0;border-right:1px solid #3a4853}
 .lunch-airport-item strong{color:#ffb15f;font-size:12px;letter-spacing:.05em;text-transform:uppercase}.lunch-airport-item span{display:-webkit-box;overflow:hidden;font-size:12px;font-weight:700;line-height:1.35;-webkit-box-orient:vertical;-webkit-line-clamp:2}.lunch-airport-item b{display:flex;align-items:center;gap:3px;color:#a8bbc9;font-size:8px}.lunch-airport-item b svg{width:12px}
 @keyframes lunch-airport-roll{to{transform:translateX(-50%)}}
@@ -147,7 +147,7 @@ footer{min-height:72px;display:flex;align-items:center;justify-content:space-bet
   .lunch-airport-label svg{width:18px;flex:0 0 auto}
   .lunch-airport-label strong{font-size:9px;letter-spacing:.04em;white-space:nowrap}
   .lunch-airport-label small{margin-top:2px;font-size:7px;letter-spacing:.08em;white-space:nowrap}
-  .lunch-airport-track{min-height:58px;animation-duration:24s}
+  .lunch-airport-track{min-height:58px;animation-duration:var(--lunch-roll-mobile,12s)}
   .lunch-airport-item{box-sizing:border-box;min-width:calc(100vw - 138px);max-width:calc(100vw - 138px);min-height:58px;grid-template-columns:minmax(0,1fr);align-content:center;padding:8px 12px;gap:2px}
   .lunch-airport-item strong{overflow:hidden;font-size:9px;white-space:nowrap;text-overflow:ellipsis}
   .lunch-airport-item span{font-size:10px;line-height:1.3;-webkit-line-clamp:2}
