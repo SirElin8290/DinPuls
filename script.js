@@ -2305,15 +2305,16 @@ function renderLunchTicker(municipality) {
       todayDishes: restaurant.status === "current"
         ? (restaurant.days?.[weekday] || [])
         : []
-    }));
+    }))
+    .filter((restaurant) => restaurant.todayDishes.length);
   const fallback = [{
     id: "lunch",
     name: weekday === "saturday" || weekday === "sunday"
       ? `Helgens restaurangutbud i ${municipality}`
-      : `${restaurants.length} lunchställen i ${municipality}`,
+      : `Dagens lunch i ${municipality}`,
     todayDishes: [weekday === "saturday" || weekday === "sunday"
       ? "Se öppna restauranger och kontrollera helgens meny"
-      : "Se lunchställen och deras aktuella originalmenyer"]
+      : "Ingen verifierad dagsmeny är publicerad ännu – se restaurangernas originalmenyer"]
   }];
   const dayNames = {
     monday: "MÅNDAG", tuesday: "TISDAG", wednesday: "ONSDAG",
