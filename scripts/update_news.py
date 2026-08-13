@@ -28,6 +28,21 @@ MUNICIPALITIES = {
     "Grums": ["grums", "slottsbron", "segmon", "borgvik"],
 }
 
+LOCAL_SEARCH_FEEDS = [
+    dict(
+        url="https://news.google.com/rss/search?q=" + urllib.parse.quote_plus(name) + "&hl=sv&gl=SE&ceid=SE:sv",
+        scope="local",
+        source=f"Google Nyheter – {name}",
+        sourceType="media",
+        quality=88,
+        impact=58,
+        category="Lokalt",
+        region=name,
+        municipalities=[name],
+    )
+    for name in MUNICIPALITIES
+]
+
 FEEDS = [
     dict(url="https://www.svt.se/nyheter/lokalt/varmland/rss.xml", scope="regional", source="SVT Nyheter Värmland", sourceType="media", quality=98, impact=65, category="Regionalt", region="Värmland", municipalities=[]),
     dict(url="https://www.svt.se/nyheter/lokalt/vast/rss.xml", scope="regional", source="SVT Nyheter Väst", sourceType="media", quality=98, impact=65, category="Regionalt", region="Västra Götaland", municipalities=[]),
@@ -280,11 +295,54 @@ def parse_date(article):
         return datetime.min.replace(tzinfo=timezone.utc)
 
 
+SWEDISH_MONTHS = {
+    "januari": 1, "februari": 2, "mars": 3, "april": 4, "maj": 5, "juni": 6,
+    "juli": 7, "augusti": 8, "september": 9, "oktober": 10, "november": 11, "december": 12,
+}
+FUTURE_EVENT_MARKERS = (
+    "kommer snart", "nedräkning", "är det dags", "på lördag", "på söndag",
+    "äger rum", "välkommen till", "missa inte", "vi ses",
+)
+
+
+def explicit_event_date(article, now):
+    value = clean_text(f"{article.get('title', '')} {article.get('summary', '')}").casefold()
+    numeric = re.search(r"\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b", value)
+    if numeric:
+        try:
+            return datetime(int(numeric.group(1)), int(numeric.group(2)), int(numeric.group(3)), tzinfo=timezone.utc)
+        except ValueError:
+            return None
+    swedish = re.search(
+        r"\b(\d{1,2})\s+(" + "|".join(SWEDISH_MONTHS) + r")(?:\s+(20\d{2}))?\b",
+        value,
+    )
+    if not swedish:
+        return None
+    try:
+        return datetime(
+            int(swedish.group(3) or now.year),
+            SWEDISH_MONTHS[swedish.group(2)],
+            int(swedish.group(1)),
+            tzinfo=timezone.utc,
+        )
+    except ValueError:
+        return None
+
+
+def is_expired_event_article(article, now):
+    value = clean_text(f"{article.get('title', '')} {article.get('summary', '')}").casefold()
+    if not any(marker in value for marker in FUTURE_EVENT_MARKERS):
+        return False
+    event_date = explicit_event_date(article, now)
+    return bool(event_date and event_date.date() < now.date())
+
+
 def main():
     previous_data = json.loads(NEWS.read_text(encoding="utf-8"))
     previous = previous_data.get("articles", [])
     fetched, successful_sources, errors = [], set(), []
-    for feed in FEEDS:
+    for feed in FEEDS + LOCAL_SEARCH_FEEDS:
         try:
             rows = fetch_feed(feed)
             fetched.extend(rows)
@@ -326,6 +384,11 @@ def main():
 
     deduplicated = {}
     for article in retained + fetched:
+        if is_expired_event_article(article, now):
+            continue
+        max_age = timedelta(days=21 if article.get("scope") == "local" else 5)
+        if parse_date(article) < now - max_age:
+            continue
         key = article.get("url") or article.get("id")
         if key:
             deduplicated[key] = article
