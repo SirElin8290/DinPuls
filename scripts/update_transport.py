@@ -17,8 +17,9 @@ OUTPUT = ROOT / "data" / "transport.json"
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 API_URL = "https://realtime-api.trafiklab.se/v1/departures"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
-MAX_DEPARTURES = 20
-LOOKAHEAD_OFFSETS_HOURS = (1, 2, 4, 8, 12, 24)
+MAX_DEPARTURES = 40
+LOOKAHEAD_OFFSETS_HOURS = (2, 4, 8, 12, 18, 24)
+DEEP_SEARCH_INTERVAL_HOURS = 4
 EMPTY_RETRY_MINUTES = 45
 
 
@@ -142,32 +143,62 @@ def normalize(item):
 
 
 def normalize_departures(payload):
-    return [normalize(item) for item in payload.get("departures", [])[:MAX_DEPARTURES]]
+    return [normalize(item) for item in payload.get("departures", [])]
+
+
+def merge_departures(now, *groups):
+    """Slå ihop flera tidtabellsfönster och behåll den färskaste versionen av varje avgång."""
+    unique = {}
+    for group in groups:
+        for item in group or []:
+            departure_time = parse_time(item.get("realtime") or item.get("scheduled"), now.tzinfo)
+            if not departure_time or departure_time < now - timedelta(minutes=2):
+                continue
+            key = (
+                item.get("scheduled"),
+                item.get("mode"),
+                item.get("line"),
+                item.get("direction"),
+            )
+            if key not in unique or (unique[key].get("stale") and not item.get("stale")):
+                unique[key] = item
+    return sorted(
+        unique.values(),
+        key=lambda item: parse_time(item.get("realtime") or item.get("scheduled"), now.tzinfo),
+    )[:MAX_DEPARTURES]
 
 
 def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
     current = normalize_departures(current_payload)
-    if current:
-        return current, None, False, None, current_payload
-
     retained = future_departures(previous_stop, now)
-    if not should_deep_search(previous_stop, now):
-        return retained, previous_stop.get("lookupTime"), bool(retained), previous_stop.get("nextSearchAfter"), None
+    payloads = [current_payload]
+    lookup_time = previous_stop.get("lookupTime")
+    next_search = previous_stop.get("nextSearchAfter")
 
-    for query_time in future_query_times(now):
-        payload = fetch(api_key, area_id, query_time)
-        departures = normalize_departures(payload)
-        if departures:
-            return departures, query_time, False, None, payload
+    if should_deep_search(previous_stop, now):
+        lookup_time = now.isoformat(timespec="minutes")
+        successful_future_requests = 0
+        for query_time in future_query_times(now):
+            try:
+                payload = fetch(api_key, area_id, query_time)
+            except RuntimeError as error:
+                print(f"{area_id}: framtida fönster {query_time} misslyckades: {error}")
+                continue
+            successful_future_requests += 1
+            payloads.append(payload)
+            current.extend(normalize_departures(payload))
+        next_search = (
+            now + timedelta(
+                hours=DEEP_SEARCH_INTERVAL_HOURS
+                if successful_future_requests
+                else 0,
+                minutes=0 if successful_future_requests else EMPTY_RETRY_MINUTES,
+            )
+        ).isoformat(timespec="minutes")
 
-    # Sparade framtida tider är endast reservdata. De får aldrig stoppa en ny
-    # sökning, eftersom en gammal kvällsavgång annars kan dölja en tidigare tur
-    # som har tillkommit i Trafiklabs aktuella tidtabell.
-    if retained:
-        return retained, previous_stop.get("lookupTime"), True, previous_stop.get("nextSearchAfter"), None
-
-    next_search = (now + timedelta(minutes=EMPTY_RETRY_MINUTES)).isoformat(timespec="minutes")
-    return [], None, False, next_search, None
+    departures = merge_departures(now, current, retained)
+    retained_only = bool(departures) and all(item.get("stale") for item in departures)
+    return departures, lookup_time, retained_only, next_search, payloads
 
 
 def main():
@@ -200,10 +231,10 @@ def main():
             try:
                 current_payload = fetch(api_key, stop_id)
                 successful_current_requests += 1
-                departures, lookup_time, retained, next_search, future_payload = find_next_departures(
+                departures, lookup_time, retained, next_search, payloads = find_next_departures(
                     api_key, stop_id, now, previous, current_payload
                 )
-                alerts = collect_alerts(current_payload, future_payload or {})
+                alerts = collect_alerts(*payloads)
                 error_message = None
             except RuntimeError as error:
                 print(f"{municipality}: {error}")
