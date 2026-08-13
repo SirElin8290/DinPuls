@@ -311,9 +311,13 @@ def weather_items(payload, county: str, now: datetime) -> list[dict]:
     return result
 
 
-def road_items(road_data: dict, name: str) -> list[dict]:
+def road_items(road_data: dict, name: str, now: datetime) -> list[dict]:
     result = []
+    cutoff = now - timedelta(hours=48)
     for item in road_data.get("municipalities", {}).get(name, {}).get("items", []):
+        updated = parse_time(item.get("updatedAt") or item.get("publishedAt") or road_data.get("generatedAt"))
+        if not updated or updated.astimezone(timezone.utc) < cutoff:
+            continue
         title = str(item.get("title") or "").strip()
         combined = f"{title} {item.get('message', '')} {item.get('location', '')}".lower()
         serious = item.get("severity") == "danger" or any(term in combined for term in (
@@ -379,7 +383,7 @@ def main() -> int:
             previous = existing.get("municipalities", {}).get(name, {}).get("items", [])
             items.extend(recent_previous(previous, "police", now, 36))
         items.extend(traffic_items(transport, name, now))
-        items.extend(road_items(road_traffic, name))
+        items.extend(road_items(road_traffic, name, now))
         if weather_ok:
             items.extend(weather_items(weather_warnings, county, now))
 
