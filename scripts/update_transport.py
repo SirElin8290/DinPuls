@@ -18,8 +18,8 @@ MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 API_URL = "https://realtime-api.trafiklab.se/v1/departures"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
 MAX_DEPARTURES = 40
-LOOKAHEAD_OFFSETS_HOURS = (2, 4, 8, 12, 18, 24)
-DEEP_SEARCH_INTERVAL_HOURS = 4
+LOOKAHEAD_OFFSETS_HOURS = (4, 12)
+DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
 
 
