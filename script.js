@@ -1,9 +1,10 @@
 /* =========================================================
-   DINPULS.SE v0.23.4
+   DINPULS.SE v0.23.7
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.4";
+const DINPULS_VERSION = "0.23.7";
+const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 const {
@@ -935,14 +936,59 @@ function renderMunicipalityPlaceholders(config) {
   const hero = document.querySelector(".hero");
   const heroImage = document.querySelector("#municipality-hero-image");
   if (hero && heroImage) {
-    const hasImage = Boolean(config.heroImage);
+    const selectedHeroImage = selectHeroImageForVisit(config);
+    const hasImage = Boolean(selectedHeroImage);
     hero.classList.toggle("has-generic-background", !hasImage);
     heroImage.hidden = !hasImage;
     if (hasImage) {
-      heroImage.src = config.heroImage;
       heroImage.alt = `Vy över ${config.name}`;
+      if (heroImage.getAttribute("src") !== selectedHeroImage) {
+        heroImage.classList.add("is-changing");
+        const preload = new Image();
+        preload.onload = () => {
+          heroImage.src = selectedHeroImage;
+          requestAnimationFrame(() => heroImage.classList.remove("is-changing"));
+        };
+        preload.onerror = () => heroImage.classList.remove("is-changing");
+        preload.src = selectedHeroImage;
+      } else {
+        heroImage.classList.remove("is-changing");
+      }
     }
   }
+}
+
+function selectHeroImageForVisit(config) {
+  const images = Array.isArray(config.heroImages) && config.heroImages.length
+    ? config.heroImages
+    : config.heroImage
+      ? [config.heroImage]
+      : [];
+
+  if (images.length < 2) return images[0] || null;
+
+  const storageKey = `dinpuls-hero-rotation:${config.slug || config.name}`;
+  const now = Date.now();
+  let state = { index: 0, lastSeen: 0 };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+    if (saved && Number.isInteger(saved.index) && Number.isFinite(saved.lastSeen)) {
+      state = saved;
+    }
+
+    if (state.lastSeen > 0 && now - state.lastSeen >= HERO_VISIT_GAP) {
+      state.index = (state.index + 1) % images.length;
+    }
+
+    state.index = ((state.index % images.length) + images.length) % images.length;
+    state.lastSeen = now;
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch {
+    state.index = 0;
+  }
+
+  return images[state.index];
 }
 
 function initializeWeather() {
