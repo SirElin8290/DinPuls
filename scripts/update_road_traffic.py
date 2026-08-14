@@ -65,6 +65,15 @@ def first(data, *keys):
     return ""
 
 
+def normalize_county_codes(value):
+    """Returnera Trafikverkets länskoder oavsett om API:t ger tal, text eller lista."""
+    if isinstance(value, (list, tuple, set)):
+        values = value
+    else:
+        values = re.findall(r"\d+", str(value or ""))
+    return {str(code).strip() for code in values if str(code).strip()}
+
+
 def classify(text):
     value = text.casefold()
     if any(word in value for word in ("olycka", "accident", "kollision")):
@@ -101,6 +110,7 @@ def normalize(situation, deviation, index, now=None):
     category, category_label = classify(combined)
     start_time = deviation.get("StartTime")
     start = parse_datetime(start_time)
+    county_codes = sorted(normalize_county_codes(deviation.get("CountyNo")))
     return {
         "id": f"{situation.get('Id', 'situation')}-{index}",
         "category": category,
@@ -111,7 +121,7 @@ def normalize(situation, deviation, index, now=None):
         "message": "" if message == header else message,
         "road": first(deviation, "RoadNumber", "RoadName"),
         "location": first(deviation, "LocationDescriptor", "CountyNo"),
-        "countyCode": first(deviation, "CountyNo"),
+        "countyCodes": county_codes,
         "startTime": start_time,
         "endTime": deviation.get("EndTime"),
         "updatedAt": deviation.get("LastUpdateTime") or situation.get("ModifiedTime"),
@@ -201,11 +211,11 @@ def assign_items_to_municipalities(items, municipalities):
     for item in items:
         if item.get("latitude") is None or item.get("longitude") is None:
             continue
-        county_code = str(item.get("countyCode") or "").strip()
+        county_codes = normalize_county_codes(item.get("countyCodes") or item.get("countyCode"))
         candidates = []
         for municipality in municipalities:
             expected_county = COUNTY_CODES.get(str(municipality.get("county") or ""))
-            if county_code and expected_county and county_code != expected_county:
+            if county_codes and expected_county and expected_county not in county_codes:
                 continue
             distance = haversine(
                 float(municipality["latitude"]), float(municipality["longitude"]),
