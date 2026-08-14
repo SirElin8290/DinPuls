@@ -19,6 +19,10 @@ API_URL = "https://api.trafikinfo.trafikverket.se/v2/data.json"
 MAP_URL = "https://www.trafikverket.se/trafikinformation/vag/"
 RADIUS_KM = 35
 EXPIRED_GRACE = timedelta(minutes=15)
+COUNTY_CODES = {
+    "Västra Götalands län": "14",
+    "Värmlands län": "17",
+}
 
 
 def load_json(path: Path, fallback):
@@ -107,6 +111,7 @@ def normalize(situation, deviation, index, now=None):
         "message": "" if message == header else message,
         "road": first(deviation, "RoadNumber", "RoadName"),
         "location": first(deviation, "LocationDescriptor", "CountyNo"),
+        "countyCode": first(deviation, "CountyNo"),
         "startTime": start_time,
         "endTime": deviation.get("EndTime"),
         "updatedAt": deviation.get("LastUpdateTime") or situation.get("ModifiedTime"),
@@ -127,7 +132,7 @@ def fetch_situations(api_key):
     body = (
         f'<REQUEST><LOGIN authenticationkey="{api_key}"/>'
         '<QUERY objecttype="Situation" namespace="road.trafficinfo" '
-        'schemaversion="1.6" limit="1000"></QUERY></REQUEST>'
+        'schemaversion="1.6" limit="5000"></QUERY></REQUEST>'
     ).encode()
     request = Request(
         API_URL,
@@ -185,6 +190,40 @@ def municipality_items(items, municipality):
     )[:100]
 
 
+def assign_items_to_municipalities(items, municipalities):
+    """Tilldela varje trafikmeddelande till högst en av DinPuls kommuner.
+
+    Den tidigare 35-km-cirkeln kördes oberoende för varje kommun och skapade
+    därför många kopior i närliggande kommuner. Länskod används först när den
+    finns och därefter väljs den närmaste centralorten inom bevakningsradien.
+    """
+    assignments = {municipality["name"]: [] for municipality in municipalities}
+    for item in items:
+        if item.get("latitude") is None or item.get("longitude") is None:
+            continue
+        county_code = str(item.get("countyCode") or "").strip()
+        candidates = []
+        for municipality in municipalities:
+            expected_county = COUNTY_CODES.get(str(municipality.get("county") or ""))
+            if county_code and expected_county and county_code != expected_county:
+                continue
+            distance = haversine(
+                float(municipality["latitude"]), float(municipality["longitude"]),
+                float(item["latitude"]), float(item["longitude"]),
+            )
+            if distance <= RADIUS_KM:
+                candidates.append((distance, municipality))
+        if not candidates:
+            continue
+        distance, municipality = min(candidates, key=lambda candidate: candidate[0])
+        assignments[municipality["name"]].append({**item, "distanceKm": round(distance, 1)})
+
+    return {
+        municipality["name"]: municipality_items(assignments[municipality["name"]], municipality)
+        for municipality in municipalities
+    }
+
+
 def main():
     api_key = os.environ.get("TRAFIKVERKET_API_KEY", "").strip()
     if not api_key:
@@ -203,9 +242,11 @@ def main():
                 if is_relevant(item, now):
                     normalized.append(item)
 
+    config_municipalities = load_json(CONFIG, {}).get("municipalities", [])
+    assigned = assign_items_to_municipalities(normalized, config_municipalities)
     municipalities = {}
-    for municipality in load_json(CONFIG, {}).get("municipalities", []):
-        items = municipality_items(normalized, municipality)
+    for municipality in config_municipalities:
+        items = assigned[municipality["name"]]
         municipalities[municipality["name"]] = {"items": items}
         print(f"{municipality['name']}: {len(items)} vägmeddelanden")
 
