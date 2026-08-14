@@ -118,9 +118,19 @@ function renderTrafficPageError() {
   if (window.lucide) lucide.createIcons();
 }
 
+function formatTrafficValidity(item) {
+  const options = { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" };
+  const start = new Date(item.startTime || "");
+  const end = new Date(item.endTime || "");
+  const updated = new Date(item.updatedAt || "");
+  if (item.status === "planned" && !Number.isNaN(start.getTime())) return `Planerad från ${start.toLocaleString("sv-SE", options)}`;
+  if (!Number.isNaN(end.getTime()) && end.getTime() > Date.now()) return `Gäller till ${end.toLocaleString("sv-SE", options)}`;
+  if (!Number.isNaN(updated.getTime())) return `Händelsen ändrad ${updated.toLocaleString("sv-SE", options)}`;
+  return "Giltighetstid saknas";
+}
+
 function renderTrafficMessage(item) {
   const icons = { accident: "triangle-alert", roadwork: "construction", congestion: "traffic-cone", obstacle: "shield-alert", weather: "cloud-snow" };
-  const time = new Date(item.updatedAt || item.startTime || "");
   const source = item.source || "Trafikverket";
   const status = item.status === "planned" ? "Planerad" : item.categoryLabel;
   const isFocused = requestedTrafficEventId && item.id === requestedTrafficEventId;
@@ -139,7 +149,7 @@ function renderTrafficMessage(item) {
       ${isFocused ? '<strong class="traffic-selected-label"><i data-lucide="map-pin"></i> Händelsen du valde</strong>' : ""}
       <div class="traffic-source"><span>Källa: ${escapeTraffic(source)}</span><div class="traffic-source-actions">${hasPosition ? `<a href="${escapeTraffic(safeTrafficUrl(mapUrl))}" target="_blank" rel="noopener noreferrer">Visa exakt plats</a>` : ""}<a href="${escapeTraffic(safeTrafficUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer">Trafikverkets vägkarta</a></div></div>
     </div>
-    <time>${Number.isNaN(time.getTime()) ? "Tid saknas" : time.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
+    <time>${escapeTraffic(formatTrafficValidity(item))}</time>
   </article>`;
 }
 
