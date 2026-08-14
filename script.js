@@ -2345,6 +2345,7 @@ async function refreshLunchTicker() {
 function renderLunchTicker(municipality) {
   const restaurants = lunchTickerData?.municipalities?.[municipality]?.restaurants || [];
   const weekday = getStockholmWeekday();
+  const isWeekend = weekday === "saturday" || weekday === "sunday";
   const tickerRestaurants = restaurants
     .map((restaurant) => ({
       ...restaurant,
@@ -2352,7 +2353,12 @@ function renderLunchTicker(municipality) {
         ? (restaurant.days?.[weekday] || [])
         : []
     }))
-    .filter((restaurant) => restaurant.todayDishes.length);
+    .filter((restaurant) => restaurant.url)
+    .sort((first, second) => {
+      const firstPriority = first.todayDishes.length ? 0 : first.seasonal ? 2 : 1;
+      const secondPriority = second.todayDishes.length ? 0 : second.seasonal ? 2 : 1;
+      return firstPriority - secondPriority || first.name.localeCompare(second.name, "sv");
+    });
   const fallback = [{
     id: "lunch",
     name: weekday === "saturday" || weekday === "sunday"
@@ -2370,7 +2376,11 @@ function renderLunchTicker(municipality) {
   const markup = (tickerRestaurants.length ? tickerRestaurants : fallback).map((restaurant) => {
     const detail = restaurant.todayDishes.length
       ? restaurant.todayDishes.slice(0, 3).join(" · ")
-      : "Öppna restaurangens aktuella meny och kontrollera dagens utbud";
+      : restaurant.seasonal
+        ? "Säsongsöppet – kontrollera aktuell meny och öppettid"
+        : isWeekend
+          ? "Se restaurangens helgmeny och aktuella öppettider"
+          : "Veckomenyn finns hos restaurangen – öppna och kontrollera dagens rätter";
     const restaurantQuery = restaurant.id && restaurant.id !== "lunch"
       ? `&restaurang=${encodeURIComponent(restaurant.id)}`
       : "";
