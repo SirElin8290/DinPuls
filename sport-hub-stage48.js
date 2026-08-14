@@ -42,7 +42,11 @@
   function sportModule(sport){
     const [icon,accent]=meta(sport);
     const clubs=(current().clubs||[]).filter(club=>(club.sports||[]).includes(sport));
-    const clubLinks=clubs.map(club=>`<a href="${esc(safeUrl(club.url))}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${esc(club.source||"Föreningen")}</small></span><i data-lucide="external-link"></i></a>`).join("");
+    const clubLinks=clubs.map(club=>{
+      const teams=(club.teams||[]).filter(team=>team.sport===sport);
+      const teamLinks=teams.length?`<div class="activity-teams" aria-label="Lag i ${esc(club.name)}">${teams.map(team=>`<a href="${esc(safeUrl(team.url||club.url))}" target="_blank" rel="noopener noreferrer"><span>${esc(team.name)}</span><small>Matcher, resultat och tabell</small><i data-lucide="external-link"></i></a>`).join("")}</div>`:"";
+      return `<section class="activity-club"><a class="activity-club-main" href="${esc(safeUrl(club.url))}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${teams.length?`${teams.length} ${teams.length===1?"lag":"lag"} · ${esc(club.source||"Föreningen")}`:esc(club.source||"Föreningen")}</small></span><i data-lucide="external-link"></i></a>${teamLinks}</section>`;
+    }).join("");
     return `<article class="activity-module" data-accent="${accent}"><header><span class="activity-icon"><i data-lucide="${icon}"></i></span><div><span class="section-kicker">Idrott</span><h2>${esc(sport)}</h2><p>${clubs.length} ${clubs.length===1?"lokal förening":"lokala föreningar"}</p></div></header><div class="activity-clubs">${clubLinks}</div>${matchRows(sport)}${sourceLinks(sport)}</article>`;
   }
   function discoveryModule(item){
