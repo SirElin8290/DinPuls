@@ -2482,28 +2482,34 @@ function renderSportsHome(config) {
   const summary = document.querySelector("#sport-home-summary");
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
-  if (summary) summary.innerHTML = `<strong>${clubs.length} föreningar · ${sports.length} sporter</strong><span>${matchCount ? `${matchCount} inlästa matcher och resultat` : `officiella match-, tävlings- och resultatlänkar`} · hela det lokala sportlivet</span>`;
+  if (summary) summary.innerHTML = `<strong>${clubs.length} idrottsföreningar · ${sports.length} idrotter</strong><span>Scouter, dans, musik, barnkör och övrig fritid finns också på undersidan</span>`;
   document.querySelectorAll("[data-quick-sport-title]").forEach((element) => {
-    element.textContent = `${sports.length} sporter i ${config.name}`;
+    element.textContent = `Föreningar & fritid i ${config.name}`;
   });
   document.querySelectorAll("[data-quick-sport-detail]").forEach((element) => {
-    element.textContent = matchCount ? `${matchCount} matcher och resultat` : `${clubs.length} föreningar och officiella länkar`;
+    element.textContent = `${clubs.length} föreningar · ${sports.length} idrotter`;
   });
   const withMatches = sports.filter((sport) => matches.some((match) => match.sport === sport));
   const withoutMatches = sports.filter((sport) => !withMatches.includes(sport));
   const dayOffset = withoutMatches.length ? Math.floor(Date.now() / 86400000) % withoutMatches.length : 0;
   const rotating = [...withoutMatches.slice(dayOffset), ...withoutMatches.slice(0, dayOffset)];
   const selected = [...withMatches.slice(0, 2), ...rotating].filter((sport, index, list) => list.indexOf(sport) === index).slice(0, 4);
-  const featured = selected.map((sport) => ({
+  const iconMap = { Fotboll: ["circle-dot", "green"], Innebandy: ["target", "purple"], Ishockey: ["disc-3", "blue"], Bowling: ["circle", "violet"], Golf: ["flag-triangle-right", "green"], Ridsport: ["trophy", "rose"], Motorsport: ["flag", "red"], Orientering: ["compass", "green"] };
+  const featured = selected.slice(0, 3).map((sport) => ({
     sport,
     clubs: clubs.filter((club) => (club.sports || []).includes(sport)),
     matches: matches.filter((match) => match.sport === sport)
   }));
-  if (list) list.innerHTML = featured.map((item) => `<a href="sport.html?kommun=${encodeURIComponent(config.name)}&sport=${encodeURIComponent(item.sport)}">
-    <span class="sport-home-icon"><i data-lucide="medal"></i></span>
-    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.matches.length ? `${item.matches.length} matcher/resultat` : `${item.clubs.length} lokala föreningar · officiella länkar`}</small></span>
+  featured.push({ sport: "Scouter, dans & musik", clubs: [], matches: [], discovery: true });
+  if (list) list.innerHTML = featured.map((item) => {
+    const visual = item.discovery ? ["sparkles", "orange"] : (iconMap[item.sport] || ["users", "blue"]);
+    const target = item.discovery ? "Barn%20%26%20unga" : encodeURIComponent(item.sport);
+    return `<a data-accent="${visual[1]}" href="sport.html?kommun=${encodeURIComponent(config.name)}&kategori=${target}">
+    <span class="sport-home-icon"><i data-lucide="${visual[0]}"></i></span>
+    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.discovery ? "Hitta fler lokala aktiviteter" : (item.matches.length ? `${item.matches.length} matcher/resultat` : `${item.clubs.length} lokala föreningar · officiella länkar`)}</small></span>
     <i data-lucide="chevron-right"></i>
-  </a>`).join("");
+  </a>`;
+  }).join("");
   if (link) link.href = `sport.html?kommun=${encodeURIComponent(config.name)}`;
   if (window.lucide) lucide.createIcons();
 }

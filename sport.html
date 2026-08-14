@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Matcher, resultat, tabeller och idrottsanläggningar i din kommun.">
-  <title>Lokalt sportläge – DinPuls</title>
+  <meta name="description" content="Lokala föreningar, idrott, scouter, dans, musik och fritidsaktiviteter i din kommun.">
+  <title>Föreningar &amp; fritid – DinPuls</title>
   <link rel="stylesheet" href="styles.css?version=0.23.4">
   <link rel="stylesheet" href="portal-pages.css?version=0.23.4">
   <link rel="stylesheet" href="sport-hub-stage48.css?version=1.0.0">
-  <link rel="stylesheet" href="sport-hub-fixes.css?version=1.0.0">
+  <link rel="stylesheet" href="sport-hub-fixes.css?version=1.1.0">
   <link rel="icon" href="favicon.ico?version=0.23.4" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.4">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.4">
@@ -24,30 +24,22 @@
   <main class="portal-main sport-hub">
     <section class="sport-hub-hero">
       <div>
-        <span class="section-kicker">Helt lokalt</span>
-        <h1>Sportläget i <span id="sport-hub-place">Åmål</span></h1>
-        <p>Spelade och kommande matcher, resultat, tabeller samt arenor och sporthallar.</p>
+        <span class="section-kicker">Lokalt engagemang</span>
+        <h1>Föreningar &amp; fritid i <span id="sport-hub-place">Åmål</span></h1>
+        <p>Hitta idrott, scouter, dans, musik, barnkör och andra aktiviteter. Varje område har en egen fristående modul.</p>
       </div>
-      <button id="sport-hub-spoiler" type="button" aria-pressed="false"><i data-lucide="eye-off"></i><span>Dölj resultat</span></button>
     </section>
 
     <section class="sport-hub-toolbar" aria-label="Välj kommun och sport">
       <label>Kommun<select id="sport-hub-municipality"></select></label>
-      <label>Sport<select id="sport-hub-sport"><option value="all">Alla sporter</option></select></label>
-      <p id="sport-hub-freshness"><i data-lucide="shield-check"></i> Originalkällan gäller alltid</p>
+      <label>Aktivitet<select id="sport-hub-sport"><option value="all">Alla aktiviteter</option></select></label>
+      <p id="sport-hub-freshness"><i data-lucide="shield-check"></i> Lokala och officiella källor</p>
     </section>
 
     <section class="sport-hub-summary" id="sport-hub-summary" aria-live="polite"></section>
 
-    <nav class="sport-hub-tabs" role="tablist" aria-label="Sportinnehåll">
-      <button class="active" type="button" data-hub-tab="matches" role="tab" aria-selected="true"><i data-lucide="calendar-days"></i>Matcher & resultat</button>
-      <button type="button" data-hub-tab="tables" role="tab" aria-selected="false"><i data-lucide="list-ordered"></i>Tabeller</button>
-      <button type="button" data-hub-tab="clubs" role="tab" aria-selected="false"><i data-lucide="users"></i>Föreningar & källor</button>
-      <button type="button" data-hub-tab="arenas" role="tab" aria-selected="false"><i data-lucide="map-pin"></i>Arenor & sporthallar</button>
-    </nav>
-
     <section id="sport-hub-view" class="sport-hub-view" aria-live="polite">
-      <div class="sport-hub-loading">Hämtar det lokala sportläget…</div>
+      <div class="sport-hub-loading">Hämtar lokala föreningar och aktiviteter…</div>
     </section>
   </main>
 
@@ -55,7 +47,7 @@
   <script src="dp-safety.js?version=0.23.4"></script>
   <script src="municipality-engine.js?version=0.23.4"></script>
   <script src="sport-data-engine.js?version=1.0.0"></script>
-  <script src="sport-hub-stage48.js?version=1.0.1"></script>
+  <script src="sport-hub-stage48.js?version=1.1.0"></script>
   <script src="privacy-controls.js?version=0.23.4"></script>
 </body>
 </html>
