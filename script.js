@@ -1532,7 +1532,16 @@ function renderTrafficCard(config = DinPulsMunicipality.getConfig()) {
 }
 
 function renderTrafficCompactItem(item) {
-  return `<a href="${escapeAttribute(safeExternalUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatRelativeNewsTime(item.updatedAt))}</small></span><i data-lucide="arrow-up-right"></i></a>`;
+  return `<a href="${escapeAttribute(safeExternalUrl(item.sourceUrl || "https://www.trafikverket.se/trafikinformation/vag/"))}" target="_blank" rel="noopener noreferrer"><span class="traffic-kind ${escapeAttribute(item.severity || "info")}"><i data-lucide="${trafficIcon(item.category)}"></i></span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.road || item.location || "Nära vald kommun")} · ${escapeHtml(formatTrafficCompactTiming(item))}</small></span><i data-lucide="arrow-up-right"></i></a>`;
+}
+
+function formatTrafficCompactTiming(item) {
+  const options = { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" };
+  const start = new Date(item.startTime || "");
+  const end = new Date(item.endTime || "");
+  if (item.status === "planned" && !Number.isNaN(start.getTime())) return `Planerad från ${start.toLocaleString("sv-SE", options)}`;
+  if (!Number.isNaN(end.getTime()) && end.getTime() > Date.now()) return `Gäller till ${end.toLocaleString("sv-SE", options)}`;
+  return `Händelsen ändrad ${formatRelativeNewsTime(item.updatedAt)}`;
 }
 
 function trafficIcon(category) {
