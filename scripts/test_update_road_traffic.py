@@ -43,6 +43,34 @@ class RoadTrafficTests(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertLess(result[0]["distanceKm"], 2)
 
+    def test_item_is_assigned_to_only_one_nearest_municipality(self):
+        municipalities = [
+            {"name": "Åmål", "county": "Västra Götalands län", "latitude": 59.052, "longitude": 12.704},
+            {"name": "Säffle", "county": "Värmlands län", "latitude": 59.132, "longitude": 12.929},
+            {"name": "Bengtsfors", "county": "Västra Götalands län", "latitude": 59.029, "longitude": 12.232},
+        ]
+        item = {
+            "id": "road-164", "category": "roadwork", "title": "Vägarbete", "road": "164",
+            "location": "Väg 164", "countyCode": "14", "status": "current", "severity": "info",
+            "latitude": 59.04, "longitude": 12.60,
+        }
+        result = traffic.assign_items_to_municipalities([item], municipalities)
+        self.assertEqual([name for name, rows in result.items() if rows], ["Åmål"])
+
+    def test_county_filter_blocks_nearby_wrong_county(self):
+        municipalities = [
+            {"name": "Åmål", "county": "Västra Götalands län", "latitude": 59.052, "longitude": 12.704},
+            {"name": "Säffle", "county": "Värmlands län", "latitude": 59.132, "longitude": 12.929},
+        ]
+        item = {
+            "id": "varmland", "category": "roadwork", "title": "Vägarbete", "road": "E45",
+            "location": "Värmlands län", "countyCode": "17", "status": "current", "severity": "info",
+            "latitude": 59.08, "longitude": 12.75,
+        }
+        result = traffic.assign_items_to_municipalities([item], municipalities)
+        self.assertFalse(result["Åmål"])
+        self.assertEqual(len(result["Säffle"]), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
