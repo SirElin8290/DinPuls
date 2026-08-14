@@ -29,6 +29,15 @@ class RoadTrafficTests(unittest.TestCase):
         item = traffic.normalize({"Id": "test"}, deviation, 0, now)
         self.assertEqual(item["status"], "planned")
 
+    def test_county_number_list_is_normalized(self):
+        deviation = {
+            "Header": "Vägarbete",
+            "CountyNo": [14, 17],
+            "Geometry": {"WGS84": "POINT (12.7 59.0)"},
+        }
+        item = traffic.normalize({"Id": "test"}, deviation, 0)
+        self.assertEqual(item["countyCodes"], ["14", "17"])
+
     def test_duplicate_keeps_nearest_item(self):
         municipality = {"latitude": 59.0, "longitude": 12.7}
         base = {
@@ -51,7 +60,7 @@ class RoadTrafficTests(unittest.TestCase):
         ]
         item = {
             "id": "road-164", "category": "roadwork", "title": "Vägarbete", "road": "164",
-            "location": "Väg 164", "countyCode": "14", "status": "current", "severity": "info",
+            "location": "Väg 164", "countyCodes": ["14"], "status": "current", "severity": "info",
             "latitude": 59.04, "longitude": 12.60,
         }
         result = traffic.assign_items_to_municipalities([item], municipalities)
@@ -64,7 +73,7 @@ class RoadTrafficTests(unittest.TestCase):
         ]
         item = {
             "id": "varmland", "category": "roadwork", "title": "Vägarbete", "road": "E45",
-            "location": "Värmlands län", "countyCode": "17", "status": "current", "severity": "info",
+            "location": "Värmlands län", "countyCodes": ["17"], "status": "current", "severity": "info",
             "latitude": 59.08, "longitude": 12.75,
         }
         result = traffic.assign_items_to_municipalities([item], municipalities)
