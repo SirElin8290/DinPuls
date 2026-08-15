@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-15T17:44:55+00:00",
+  "generatedAt": "2026-08-15T18:00:55+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -49,10 +49,9 @@
               "scheduled": "2026-08-15T20:55:00+02:00",
               "realtime": "2026-08-15T20:55:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "L",
-              "stale": true
+              "platform": "L"
             },
             {
               "mode": "bus",
@@ -62,10 +61,9 @@
               "scheduled": "2026-08-15T20:55:00+02:00",
               "realtime": "2026-08-15T20:55:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "X",
-              "stale": true
+              "platform": "X"
             },
             {
               "mode": "bus",
@@ -130,7 +128,7 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-08-15T18:55+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-08-15T20:55+02:00",
           "error": null,
           "departures": [
@@ -142,10 +140,9 @@
               "scheduled": "2026-08-15T20:54:00+02:00",
               "realtime": "2026-08-15T20:54:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "",
-              "stale": true
+              "platform": ""
             },
             {
               "mode": "train",
@@ -155,10 +152,9 @@
               "scheduled": "2026-08-15T20:54:00+02:00",
               "realtime": "2026-08-15T20:54:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "bus",
@@ -227,18 +223,6 @@
           "nextSearchAfter": "2026-08-15T20:55+02:00",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "775",
-              "direction": "Åmål",
-              "operator": "Västtrafik",
-              "scheduled": "2026-08-15T19:53:00+02:00",
-              "realtime": "2026-08-15T19:53:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "730",
@@ -312,10 +296,9 @@
               "scheduled": "2026-08-15T20:51:00+02:00",
               "realtime": "2026-08-15T20:51:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -401,36 +384,12 @@
           "departures": [
             {
               "mode": "train",
-              "line": "73",
-              "direction": "Kristinehamn",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-08-15T19:44:00+02:00",
-              "realtime": "2026-08-15T19:44:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "1"
-            },
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Kristinehamn",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-15T19:44:00+02:00",
-              "realtime": "2026-08-15T19:50:32+02:00",
-              "delayMinutes": 7,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "T"
-            },
-            {
-              "mode": "train",
               "line": "70",
               "direction": "Charlottenberg",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-15T20:12:00+02:00",
-              "realtime": "2026-08-15T20:09:10+02:00",
-              "delayMinutes": -3,
+              "realtime": "2026-08-15T20:07:46+02:00",
+              "delayMinutes": -4,
               "isRealtime": true,
               "canceled": false,
               "platform": "T"
@@ -534,7 +493,9 @@
         {
           "id": "740000217",
           "name": "Grums station",
-          "alerts": [],
+          "alerts": [
+            "Försening på linje 800 mot Säffle Grums Karlstad"
+          ],
           "lookupTime": "2026-08-15T18:55+02:00",
           "retained": false,
           "nextSearchAfter": "2026-08-15T20:55+02:00",
@@ -546,8 +507,8 @@
               "direction": "Karlstad",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-15T19:53:00+02:00",
-              "realtime": "2026-08-15T20:03:02+02:00",
-              "delayMinutes": 10,
+              "realtime": "2026-08-15T20:01:57+02:00",
+              "delayMinutes": 9,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -560,9 +521,10 @@
               "scheduled": "2026-08-15T19:50:00+02:00",
               "realtime": "2026-08-15T20:04:41+02:00",
               "delayMinutes": 15,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -584,10 +546,9 @@
               "scheduled": "2026-08-15T21:00:00+02:00",
               "realtime": "2026-08-15T21:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "train",
