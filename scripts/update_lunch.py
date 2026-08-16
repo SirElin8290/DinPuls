@@ -204,8 +204,10 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
                     else:
                         week, days = parse_weekday_menu(page)
                     if source.get("id") == "mickans-grill":
+                        # Mickans visar inget pris i DinPuls. Ett felaktigt "$9.95"
+                        # från källsidans metadata ska inte behandlas som en maträtt.
                         days = {
-                            day: ["Från 100 kr" if dish == "$9.95" else dish for dish in dishes]
+                            day: [dish for dish in dishes if dish != "$9.95"]
                             for day, dishes in days.items()
                         }
                     item["weekNumber"] = week
