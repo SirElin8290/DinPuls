@@ -3,7 +3,7 @@
   <div class="card-title">
     <span class="title-icon blue-soft"><i data-lucide="cloud-sun"></i></span>
     <div>
-      <h2>Väder</h2>
+      <h2>Väderläge</h2>
       <small id="weather-location" data-municipality-name>Åmål</small>
     </div>
     <span class="weather-live-badge" id="weather-status">Hämtar…</span>
@@ -11,10 +11,15 @@
 
   <div class="weather-loading" id="weather-loading">
     <span class="loading-spinner" aria-hidden="true"></span>
-    <span>Hämtar prognos från SMHI…</span>
+    <span>Hämtar radarbaserat nuläge och prognos…</span>
   </div>
 
   <div class="weather-content" id="weather-content" hidden>
+    <div class="weather-alert" id="weather-alert" hidden>
+      <i data-lucide="cloud-lightning"></i>
+      <div><strong id="weather-alert-title">Aktivt väder nära kommunen</strong><span id="weather-alert-detail"></span></div>
+    </div>
+
     <div class="weather">
       <span class="weather-symbol" id="weather-symbol">🌤️</span>
       <div>
@@ -30,16 +35,30 @@
     <div class="weather-metrics">
       <span><i data-lucide="wind"></i><b id="weather-wind">-- m/s</b><small>Vind</small></span>
       <span><i data-lucide="droplets"></i><b id="weather-humidity">-- %</b><small>Luftfuktighet</small></span>
-      <span><i data-lucide="cloud-rain"></i><b id="weather-precipitation">-- mm</b><small>Nederbörd</small></span>
+      <span><i data-lucide="cloud-rain"></i><b id="weather-precipitation">-- mm</b><small id="weather-precipitation-label">Nederbörd</small></span>
     </div>
 
+    <div class="weather-section-heading">
+      <span><i data-lucide="cloud-rain"></i>Radarbaserat regnläge</span>
+      <small id="weather-nowcast-source">MET Norway Nowcast</small>
+    </div>
+    <div class="weather-nowcast" id="weather-nowcast"></div>
+
+    <div class="weather-lightning" id="weather-lightning" hidden>
+      <i data-lucide="zap"></i><span id="weather-lightning-text"></span>
+    </div>
+
+    <div class="weather-section-heading weather-forecast-heading">
+      <span><i data-lucide="clock-3"></i>SMHI:s närmaste timmar</span>
+    </div>
     <div class="forecast" id="weather-forecast"></div>
 
     <div class="weather-footer">
       <span id="weather-updated">Senast uppdaterad: --</span>
       <span class="weather-links">
-        <a href="https://www.smhi.se/data/aska-och-blixt/blixt/blixtkartor" target="_blank" rel="noopener noreferrer"><i data-lucide="zap"></i>Blixtkarta</a>
-        <a href="https://www.smhi.se/" target="_blank" rel="noopener noreferrer">Källa: SMHI</a>
+        <a href="https://www.yr.no/en/map/radar" target="_blank" rel="noopener noreferrer"><i data-lucide="cloud-rain"></i>Öppna radarkarta</a>
+        <a href="https://api.met.no/" target="_blank" rel="noopener noreferrer">MET Norway</a>
+        <a href="https://www.smhi.se/" target="_blank" rel="noopener noreferrer">SMHI</a>
       </span>
     </div>
   </div>

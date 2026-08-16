@@ -777,7 +777,7 @@ body{transition:background .25s,color .25s}
 
 
 /* =========================================================
-   SPRINT 2 – RIKTIG VÄDERDATA FRÅN SMHI
+   VÄDERLÄGE 2.0 – NOWCAST, PROGNOS OCH ÅSKLÄGE
 ========================================================= */
 
 .weather-card {
@@ -878,6 +878,105 @@ body{transition:background .25s,color .25s}
   font-size: 8px;
 }
 
+.weather-alert {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  color: #733d00;
+  background: linear-gradient(135deg, #fff3cf, #ffe0a8);
+  border: 1px solid #f1bd58;
+  border-radius: 11px;
+}
+
+.weather-alert[hidden],
+.weather-lightning[hidden] {
+  display: none !important;
+}
+
+.weather-alert[data-level="thunder"] {
+  color: #542079;
+  background: linear-gradient(135deg, #f3e7ff, #e0c4ff);
+  border-color: #b784e6;
+}
+
+.weather-alert > svg {
+  width: 27px;
+  height: 27px;
+}
+
+.weather-alert div {
+  display: grid;
+  gap: 2px;
+}
+
+.weather-alert strong { font-size: 12px; }
+.weather-alert span { font-size: 9px; line-height: 1.35; }
+
+.weather-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 2px 0 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.weather-section-heading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.weather-section-heading svg { width: 13px; height: 13px; color: var(--blue700); }
+.weather-section-heading small { color: var(--muted); font-size: 7px; text-align: right; }
+.weather-forecast-heading { margin-top: 13px; }
+
+.weather-nowcast {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.weather-nowcast > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 8px 4px;
+  text-align: center;
+  background: #f7f9fc;
+  border: 1px solid #e4ebf4;
+  border-radius: 8px;
+}
+
+.weather-nowcast span { color: var(--muted); font-size: 8px; }
+.weather-nowcast strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.weather-nowcast i { width: 100%; height: 5px; background: #d5dde8; border-radius: 999px; }
+.weather-nowcast [data-rain="light"] i { background: #68b8ed; }
+.weather-nowcast [data-rain="moderate"] i { background: #247cc4; }
+.weather-nowcast [data-rain="heavy"] i { background: linear-gradient(90deg, #5b35b5, #c03b94); box-shadow: 0 0 7px rgba(132,53,181,.35); }
+.weather-nowcast-missing { grid-column: 1 / -1; padding: 9px; color: var(--muted); background: #f7f9fc; border-radius: 8px; font-size: 9px; text-align: center; }
+
+.weather-lightning {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 7px 9px;
+  color: #5a257e;
+  background: #f4eaff;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.weather-lightning svg { width: 15px; height: 15px; }
+
 .weather-card .forecast {
   gap: 5px;
 }
@@ -966,10 +1065,16 @@ body{transition:background .25s,color .25s}
 }
 
 [data-theme="dark"] .weather-metrics > span,
-[data-theme="dark"] .weather-card .forecast div {
+[data-theme="dark"] .weather-card .forecast div,
+[data-theme="dark"] .weather-nowcast > div,
+[data-theme="dark"] .weather-nowcast-missing {
   background: #102946;
   border-color: #263957;
 }
+
+[data-theme="dark"] .weather-alert { color: #ffe6b3; background: #483318; border-color: #7a5422; }
+[data-theme="dark"] .weather-alert[data-level="thunder"] { color: #ecd7ff; background: #322046; border-color: #68458d; }
+[data-theme="dark"] .weather-lightning { color: #e2c8ff; background: #2c1d3e; }
 
 [data-theme="dark"] .weather-footer a {
   color: #8fc2ff;

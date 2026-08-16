@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.10";
+const DINPULS_VERSION = "0.23.13";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -177,8 +177,9 @@ const WEATHER_SYMBOLS = {
   27: { emoji: "❄️", text: "Kraftigt snöfall" }
 };
 
-const WEATHER_REFRESH_INTERVAL = 30 * 60 * 1000;
-const WEATHER_CACHE_MAX_AGE = 6 * 60 * 60 * 1000;
+const WEATHER_REFRESH_INTERVAL = 10 * 60 * 1000;
+const WEATHER_CACHE_MAX_AGE = 90 * 60 * 1000;
+const WEATHER_LIVE_DATA_URL = "data/weather-live.json";
 const STOCKHOLM_DATE_FORMAT = new Intl.DateTimeFormat("sv-SE", {
   timeZone: STOCKHOLM_TIME_ZONE,
   year: "numeric",
@@ -1022,7 +1023,7 @@ async function loadWeather(config) {
   const requestNumber = ++weatherRequestNumber;
   weatherRequestController?.abort();
   weatherRequestController = new AbortController();
-  const url =
+  const forecastUrl =
     "https://opendata-download-metfcst.smhi.se/api/" +
     "category/snow1g/version/1/geotype/point/" +
     `lon/${config.longitude}/lat/${config.latitude}/data.json` +
@@ -1037,36 +1038,43 @@ async function loadWeather(config) {
 
   showWeatherLoading(municipality);
 
-  try {
+  const fetchJson = async (url, label) => {
     const response = await fetch(url, {
       signal: weatherRequestController.signal,
-      headers: {
-        Accept: "application/json"
-      }
+      cache: "no-store",
+      headers: { Accept: "application/json" }
     });
+    if (!response.ok) throw new Error(`${label} svarade med status ${response.status}`);
+    return response.json();
+  };
 
-    if (!response.ok) {
-      throw new Error(`SMHI svarade med status ${response.status}`);
+  try {
+    const [forecastResult, liveResult] = await Promise.allSettled([
+      fetchJson(forecastUrl, "SMHI"),
+      fetchJson(WEATHER_LIVE_DATA_URL, "Väderläget")
+    ]);
+    if (requestNumber !== weatherRequestNumber || municipality !== DinPulsMunicipality.getName()) return;
+
+    let forecastData = forecastResult.status === "fulfilled" ? forecastResult.value : null;
+    const liveData = liveResult.status === "fulfilled"
+      ? liveResult.value?.municipalities?.[municipality]
+      : null;
+    const liveGeneratedAt = liveResult.status === "fulfilled" ? liveResult.value?.generatedAt : null;
+
+    if (forecastData) writeWeatherCache(config.slug || municipality, forecastData);
+    if (!forecastData) forecastData = readWeatherCache(config.slug || municipality)?.data || null;
+    if (!forecastData && !liveData?.nowcast?.current) {
+      throw forecastResult.reason || liveResult.reason || new Error("Väderdata saknas");
     }
-
-    const weatherData = await response.json();
-
-    if (requestNumber !== weatherRequestNumber || municipality !== DinPulsMunicipality.getName()) {
-      return;
-    }
-
-    writeWeatherCache(config.slug || municipality, weatherData);
-    renderWeather(weatherData, municipality);
+    renderWeather(forecastData, municipality, {
+      live: liveData,
+      liveGeneratedAt,
+      forecastCached: forecastResult.status !== "fulfilled"
+    });
   } catch (error) {
-    if (error.name === "AbortError") {
-      return;
-    }
-    console.error("SMHI-väder kunde inte hämtas:", error);
-    if (municipality === DinPulsMunicipality.getName()) {
-      const cached = readWeatherCache(config.slug || municipality);
-      if (cached) renderWeather(cached.data, municipality, { cachedAt: cached.savedAt });
-      else showWeatherError(municipality);
-    }
+    if (error.name === "AbortError") return;
+    console.error("Väderläget kunde inte hämtas:", error);
+    if (municipality === DinPulsMunicipality.getName()) showWeatherError(municipality);
   }
 }
 
@@ -1130,23 +1138,19 @@ function showWeatherError(municipality) {
 }
 
 function renderWeather(response, municipality, options = {}) {
-  if (!Array.isArray(response.timeSeries) || response.timeSeries.length === 0) {
-    throw new Error("SMHI-svaret saknar tidsserier.");
-  }
-
-  const entries = response.timeSeries
+  const entries = (response?.timeSeries || [])
     .map(normalizeWeatherEntry)
     .filter((entry) => entry.time && Number.isFinite(entry.temperature));
-
-  if (entries.length === 0) {
-    throw new Error("SMHI-svaret saknar användbara temperaturvärden.");
-  }
-
   const now = Date.now();
-  const current = entries.reduce((closest, entry) => {
+  const forecastCurrent = entries.reduce((closest, entry) => {
     const distance = Math.abs(new Date(entry.time).getTime() - now);
     return !closest || distance < closest.distance ? { entry, distance } : closest;
-  }, null).entry;
+  }, null)?.entry;
+  const liveCurrent = normalizeLiveWeatherEntry(options.live?.nowcast?.current);
+  const current = liveCurrent || forecastCurrent;
+  if (!current || !Number.isFinite(current.temperature)) {
+    throw new Error("Väderdata saknar användbara temperaturvärden.");
+  }
 
   const localToday = STOCKHOLM_DATE_FORMAT.format(new Date(now));
   const todayEntries = entries.filter(
@@ -1158,9 +1162,11 @@ function renderWeather(response, municipality, options = {}) {
     .map((entry) => entry.temperature)
     .filter(Number.isFinite);
 
-  const high = Math.max(...temperatures);
-  const low = Math.min(...temperatures);
-  const symbol = getWeatherSymbol(current.symbolCode);
+  const high = temperatures.length ? Math.max(...temperatures) : current.temperature;
+  const low = temperatures.length ? Math.min(...temperatures) : current.temperature;
+  const symbol = liveCurrent
+    ? getMetWeatherSymbol(current.symbolCode)
+    : getWeatherSymbol(current.symbolCode);
   const forecastEntries = chooseForecastEntries(entries, now, 4);
 
   setText("#weather-location", municipality);
@@ -1182,21 +1188,26 @@ function renderWeather(response, municipality, options = {}) {
   );
   setText(
     "#weather-precipitation",
-    Number.isFinite(current.precipitation)
-      ? `${current.precipitation.toFixed(1)} mm`
+    Number.isFinite(current.precipitationRate)
+      ? `${current.precipitationRate.toFixed(1)} mm/h`
+      : Number.isFinite(current.precipitation)
+        ? `${current.precipitation.toFixed(1)} mm`
       : "0,0 mm"
   );
+  setText("#weather-precipitation-label", Number.isFinite(current.precipitationRate) ? "Regnintensitet nu" : "Prognos nederbörd");
   setText("#weather-symbol", symbol.emoji);
 
-  const updatedTime = response.createdTime || response.referenceTime;
+  const updatedTime = options.live?.nowcast?.updatedAt || options.liveGeneratedAt || response?.createdTime || response?.referenceTime;
 
   setText(
     "#weather-updated",
     updatedTime
       ? `Uppdaterad ${formatSwedishTime(updatedTime)}`
-      : "Uppdaterad av SMHI"
+      : "Väderläget är hämtat"
   );
 
+  renderNowcastTimeline(options.live?.nowcast?.timeline || []);
+  renderWeatherAlert(options.live, current, municipality);
   renderHourlyForecast(forecastEntries);
 
   const status = document.querySelector("#weather-status");
@@ -1204,11 +1215,99 @@ function renderWeather(response, municipality, options = {}) {
   setWeatherPanel("content");
 
   if (status) {
-    status.textContent = options.cachedAt ? "Senast hämtad prognos" : "SMHI-prognos";
-    status.className = `weather-live-badge ${options.cachedAt ? "is-fallback" : "is-live"}`;
+    status.textContent = liveCurrent && !options.live?.nowcast?.stale ? "Radarbaserat nuläge" : "Senast hämtad prognos";
+    status.className = `weather-live-badge ${liveCurrent && !options.live?.nowcast?.stale ? "is-live" : "is-fallback"}`;
   }
 
   updateHeaderWeather(current.temperature, symbol.emoji);
+}
+
+function normalizeLiveWeatherEntry(entry) {
+  if (!entry) return null;
+  const temperature = cleanNumber(entry.temperature);
+  if (!Number.isFinite(temperature)) return null;
+  return {
+    time: entry.time,
+    temperature,
+    windSpeed: cleanNumber(entry.windSpeed),
+    humidity: cleanNumber(entry.humidity),
+    precipitationRate: cleanNumber(entry.precipitationRate),
+    precipitation: cleanNumber(entry.precipitationAmount),
+    symbolCode: String(entry.symbolCode || "")
+  };
+}
+
+function getMetWeatherSymbol(code) {
+  const value = String(code || "").toLowerCase();
+  if (value.includes("thunder")) return { emoji: "⛈️", text: value.includes("heavy") ? "Kraftiga åskskurar" : "Åska eller åskskurar" };
+  if (value.includes("heavyrain")) return { emoji: "🌧️", text: "Kraftigt regn" };
+  if (value.includes("rainshowers")) return { emoji: "🌦️", text: "Regnskurar" };
+  if (value.includes("rain")) return { emoji: "🌧️", text: "Regn" };
+  if (value.includes("sleet")) return { emoji: "🌨️", text: "Snöblandat regn" };
+  if (value.includes("snow")) return { emoji: "❄️", text: "Snöfall" };
+  if (value.includes("fog")) return { emoji: "🌫️", text: "Dimma" };
+  if (value.includes("cloudy")) return { emoji: value.includes("partly") ? "⛅" : "☁️", text: value.includes("partly") ? "Halvklart" : "Mulet" };
+  if (value.includes("fair")) return { emoji: "🌤️", text: "Nästan klart" };
+  if (value.includes("clear")) return { emoji: "☀️", text: "Klart" };
+  return { emoji: "🌤️", text: "Växlande väder" };
+}
+
+function selectNowcastEntries(entries) {
+  const valid = entries.map((entry) => ({
+    time: entry?.time,
+    precipitationRate: cleanNumber(entry?.precipitationRate),
+    precipitation: cleanNumber(entry?.precipitationAmount)
+  })).filter((entry) => entry.time && Number.isFinite(entry.precipitationRate));
+  if (!valid.length) return [];
+  const firstTime = new Date(valid[0].time).getTime();
+  return [0, 15, 30, 60].map((minutes) => valid.reduce((closest, entry) => {
+    const distance = Math.abs(new Date(entry.time).getTime() - (firstTime + minutes * 60000));
+    return !closest || distance < closest.distance ? { entry, distance } : closest;
+  }, null)?.entry).filter((entry, index, list) => entry && list.indexOf(entry) === index);
+}
+
+function renderNowcastTimeline(entries) {
+  const container = document.querySelector("#weather-nowcast");
+  if (!container) return;
+  const selected = selectNowcastEntries(entries);
+  if (!selected.length) {
+    container.innerHTML = '<span class="weather-nowcast-missing">Radarbaserat regnläge är tillfälligt otillgängligt.</span>';
+    return;
+  }
+  container.innerHTML = selected.map((entry, index) => {
+    const rate = Number.isFinite(entry.precipitationRate) ? entry.precipitationRate : 0;
+    const level = rate >= 4 ? "heavy" : rate >= 1 ? "moderate" : rate > 0 ? "light" : "dry";
+    const label = index === 0 ? "Nu" : new Date(entry.time).toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
+    return `<div data-rain="${level}"><span>${label}</span><i></i><strong>${rate > 0 ? `${rate.toFixed(1)} mm/h` : "Uppehåll"}</strong></div>`;
+  }).join("");
+}
+
+function renderWeatherAlert(live, current, municipality) {
+  const alert = document.querySelector("#weather-alert");
+  const lightning = document.querySelector("#weather-lightning");
+  if (!alert || !lightning) return;
+  const lightningData = live?.lightning;
+  const strikes = lightningData?.available ? Number(lightningData.count || 0) : 0;
+  const nearest = cleanNumber(lightningData?.nearestKm);
+  const symbol = String(current.symbolCode || "").toLowerCase();
+  const rate = Number.isFinite(current.precipitationRate) ? current.precipitationRate : 0;
+  const thunder = symbol.includes("thunder") || strikes > 0;
+  const severeRain = rate >= 4;
+
+  alert.hidden = !thunder && !severeRain;
+  if (!alert.hidden) {
+    alert.dataset.level = thunder ? "thunder" : "rain";
+    setText("#weather-alert-title", thunder ? `Åska nära ${municipality}` : `Kraftigt regn i ${municipality}`);
+    setText("#weather-alert-detail", strikes
+      ? `${strikes} registrerade blixtar senaste fem minuterna${Number.isFinite(nearest) ? ` · närmaste cirka ${nearest.toFixed(1)} km` : ""}`
+      : `Radarbaserad regnintensitet cirka ${rate.toFixed(1)} mm/h`);
+  }
+
+  lightning.hidden = !lightningData?.available || strikes <= 0;
+  if (!lightning.hidden) {
+    setText("#weather-lightning-text", `${strikes} blixtar registrerade inom 40 km senaste fem minuterna${Number.isFinite(nearest) ? ` · närmaste ${nearest.toFixed(1)} km` : ""}`);
+  }
+  if (window.lucide) lucide.createIcons();
 }
 
 function normalizeWeatherEntry(entry) {
@@ -1254,26 +1353,7 @@ function chooseForecastEntries(entries, now, count) {
   const futureEntries = entries.filter(
     (entry) => new Date(entry.time).getTime() >= now
   );
-
-  if (futureEntries.length <= count) {
-    return futureEntries.slice(0, count);
-  }
-
-  const result = [];
-  const interval = Math.max(
-    1,
-    Math.floor((futureEntries.length - 1) / (count - 1))
-  );
-
-  for (let index = 0; index < futureEntries.length; index += interval) {
-    result.push(futureEntries[index]);
-
-    if (result.length === count) {
-      break;
-    }
-  }
-
-  return result;
+  return futureEntries.slice(0, count);
 }
 
 function renderHourlyForecast(entries) {

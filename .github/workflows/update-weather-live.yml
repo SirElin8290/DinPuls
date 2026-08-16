@@ -1,0 +1,55 @@
+name: Uppdatera väderläget
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/update-weather-live.yml"
+      - "scripts/update_weather_live.py"
+      - "data/municipalities.json"
+  schedule:
+    - cron: "3,13,23,33,43,53 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-weather-live
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Testa väderinsamlingen
+        run: PYTHONPATH=scripts python scripts/test_update_weather_live.py
+
+      - name: Hämta väderläge
+        env:
+          XWEATHER_CLIENT_ID: ${{ secrets.XWEATHER_CLIENT_ID }}
+          XWEATHER_CLIENT_SECRET: ${{ secrets.XWEATHER_CLIENT_SECRET }}
+        run: python scripts/update_weather_live.py
+
+      - name: Publicera väderläge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/weather-live.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera väderläget"
+          for attempt in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 3))
+          done
+          echo "Kunde inte publicera väderläget efter tre försök" >&2
+          exit 1
