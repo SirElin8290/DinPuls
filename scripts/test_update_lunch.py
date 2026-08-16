@@ -45,6 +45,23 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(item["status"], "unavailable")
         self.assertEqual(item["days"], {})
 
+    def test_mickans_price_metadata_is_not_exposed_as_a_dish(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Åmål"] = [{
+            "id": "mickans-grill", "name": "Mickans Grill",
+            "url": "https://example.test", "address": "Åmål",
+            "hours": "11–14", "parser": "weekday-headings",
+        }]
+        page = "<h2>Vecka 31</h2><h3>Måndag</h3><p>$9.95</p><p>Pannbiff med potatis</p>"
+        output = update_lunch.build_output(
+            {"municipalities": municipalities},
+            datetime(2026, 7, 27, 8, tzinfo=ZoneInfo("Europe/Stockholm")),
+            fetcher=lambda _url: page,
+        )
+        dishes = output["municipalities"]["Åmål"]["restaurants"][0]["days"]["monday"]
+        self.assertEqual(dishes, ["Pannbiff med potatis"])
+
+
     def test_duplicate_ids_are_rejected(self):
         municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
         duplicate = {"id": "same", "name": "A", "url": "https://example.test"}
