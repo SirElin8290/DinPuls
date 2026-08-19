@@ -19,7 +19,7 @@ ACTIVE_PAGES = [
 ]
 COMPONENTS = [
     "header", "homepage-guide", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
-    "secondary-cards", "primary-cards", "transport", "premium-ad-1", "jobs-housing", "premium-ad-2",
+    "missing-people", "secondary-cards", "primary-cards", "transport", "premium-ad-1", "jobs-housing", "premium-ad-2",
     "health", "sport", "cinema", "service", "authorities",
     "premium-ad-3", "footer",
 ]

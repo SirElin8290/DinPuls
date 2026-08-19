@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+import unittest
+
+import update_missing_people as missing
+
+
+SAMPLE = """
+<article class="person mix region--fyrbodal">
+  <h5 class="card-title">Försvunnen man</h5>
+  <div class="person__location">TÖSSE</div>
+  <time class="person__date" datetime="2026-08-17">2026-08-17</time>
+  <p class="person__ingress">Har någon sett den försvunne mannen?</p>
+  <a class="person__link" href="/efterlysningar/forsvunnen-man/">Läs mer</a>
+</article>
+<article class="person mix region--varmland">
+  <h5 class="card-title">Bengt</h5><div class="person__location">GRUMS</div>
+  <time class="person__date" datetime="2026-05-11">2026-05-11</time>
+  <p class="person__ingress">Efterlysningen är fortfarande publicerad.</p>
+  <a class="person__link" href="/efterlysningar/bengt-1/">Läs mer</a>
+</article>
+"""
+
+
+class MissingPeopleTests(unittest.TestCase):
+    def test_parser_ignores_images_and_keeps_direct_link(self):
+        items = missing.parse_people(SAMPLE)
+        self.assertEqual(items[0]["name"], "Försvunnen man")
+        self.assertEqual(items[0]["location"], "TÖSSE")
+        self.assertEqual(items[0]["url"], "https://www.missingpeople.se/efterlysningar/forsvunnen-man/")
+        self.assertNotIn("image", items[0])
+
+    def test_place_is_mapped_to_exact_municipality(self):
+        self.assertEqual(missing.municipality_for("TÖSSE"), "Åmål")
+        self.assertEqual(missing.municipality_for("DALS LÅNGED"), "Bengtsfors")
+        self.assertIsNone(missing.municipality_for("KARLSTAD"))
+
+    def test_neighbor_case_is_visible_but_labeled(self):
+        data = missing.distribute(missing.parse_people(SAMPLE))
+        amal = data["Åmål"]["items"]
+        saffle = data["Säffle"]["items"]
+        self.assertEqual(amal[0]["scope"], "local")
+        self.assertTrue(any(item["originMunicipality"] == "Grums" and item["scope"] == "neighbor" for item in saffle))
+
+    def test_case_is_not_spread_beyond_neighbor_graph(self):
+        data = missing.distribute(missing.parse_people(SAMPLE))
+        self.assertFalse(any(item["originMunicipality"] == "Grums" for item in data["Bengtsfors"]["items"]))
+
+
+if __name__ == "__main__":
+    unittest.main()

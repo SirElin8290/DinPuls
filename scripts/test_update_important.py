@@ -34,8 +34,8 @@ def test_only_serious_road_event_is_kept():
         {"id": "work", "category": "roadwork", "severity": "warning", "title": "Vägarbete"},
         {"id": "crash", "category": "accident", "severity": "danger", "title": "Vägen helt avstängd efter olycka"},
     ]}}}
-    assert [item["id"] for item in important.road_items(data, "Åmål")] == ["road-crash"]
-    assert important.road_items(data, "Åmål")[0]["url"] == "trafik.html?kommun=%C3%85m%C3%A5l&event=crash"
+    assert [item["id"] for item in important.road_items(data, "Åmål", NOW)] == ["road-crash"]
+    assert important.road_items(data, "Åmål", NOW)[0]["url"] == "trafik.html?kommun=%C3%85m%C3%A5l&event=crash"
 
 
 if __name__ == "__main__":

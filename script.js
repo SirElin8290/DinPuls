@@ -33,6 +33,7 @@ const componentNames = [
   "navigation",
   "lunch-strip",
   "hero",
+  "missing-people",
   "premium-ad-1",
   "primary-cards",
   "transport",
@@ -225,7 +226,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
+    await Promise.all([initializeImportant(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -1715,6 +1716,69 @@ function renderImportantItem(item, municipality) {
   return detailUrl
     ? `<article class="important-item">${body}<a href="${escapeAttribute(safeHref(detailUrl))}"${opensNewTab ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="${roadEventId ? "Visa trafikhändelsen" : `Läs mer hos ${escapeAttribute(source)}`}"><i data-lucide="arrow-up-right"></i></a></article>`
     : `<article class="important-item">${body}</article>`;
+}
+
+/* =========================================================
+   MISSING PEOPLE – REKLAMFRI SAMHÄLLSINFORMATION
+========================================================= */
+const MISSING_PEOPLE_SOURCE_URL = "https://www.missingpeople.se/efterlysningar/";
+let missingPeopleData = null;
+
+async function initializeMissingPeople() {
+  DinPulsMunicipality.subscribe("missing-people", renderMissingPeople);
+  try {
+    const response = await fetch("data/missing-people.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    missingPeopleData = await response.json();
+  } catch (error) {
+    console.error("Missing People-modulen kunde inte laddas:", error);
+    missingPeopleData = null;
+  }
+}
+
+function renderMissingPeople(config = DinPulsMunicipality.getConfig()) {
+  const list = document.querySelector("#missing-people-list");
+  const status = document.querySelector("#missing-people-status");
+  if (!list || !status || !config) return;
+
+  const generatedAt = new Date(missingPeopleData?.generatedAt || "");
+  const maxAgeMinutes = Number(missingPeopleData?.maxAgeMinutes || 90);
+  const isVerified = missingPeopleData
+    && !Number.isNaN(generatedAt.getTime())
+    && Date.now() - generatedAt.getTime() <= maxAgeMinutes * 60 * 1000;
+
+  if (!isVerified) {
+    status.textContent = "Aktuella uppgifter kunde inte verifieras";
+    list.innerHTML = `<div class="missing-people-unverified"><i data-lucide="shield-alert"></i><span><strong>Öppna Missing Peoples officiella lista</strong><small>DinPuls visar inga personuppgifter när den senaste kontrollen är för gammal.</small></span><a href="${MISSING_PEOPLE_SOURCE_URL}" target="_blank" rel="noopener noreferrer">Kontrollera hos Missing People <i data-lucide="arrow-up-right"></i></a></div>`;
+  } else {
+    const items = Array.isArray(missingPeopleData?.municipalities?.[config.name]?.items)
+      ? missingPeopleData.municipalities[config.name].items.slice(0, 4)
+      : [];
+    status.textContent = `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
+    list.innerHTML = items.length
+      ? items.map(renderMissingPerson).join("")
+      : `<div class="missing-people-empty"><i data-lucide="circle-check"></i><span><strong>Inga publicerade efterlysningar i området</strong><small>Den officiella listan är kontrollerad för ${escapeHtml(config.name)} och angränsande DinPuls-kommuner.</small></span></div>`;
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderMissingPerson(item) {
+  const local = item.scope === "local";
+  const scopeLabel = local ? "I din kommun" : `Grannkommun · ${item.originMunicipality || "närområdet"}`;
+  const published = new Date(item.publishedAt || "");
+  const dateLabel = Number.isNaN(published.getTime())
+    ? "Publicerad hos Missing People"
+    : `Publicerad ${published.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", year: "numeric" })}`;
+  return `<article class="missing-person-card${local ? " local" : " neighbor"}">
+    <span class="missing-person-icon" aria-hidden="true"><i data-lucide="user-round-search"></i></span>
+    <div class="missing-person-content">
+      <span class="missing-person-scope">${escapeHtml(scopeLabel)}</span>
+      <h3>${escapeHtml(item.name || "Försvunnen person")}</h3>
+      <div class="missing-person-meta"><span><i data-lucide="map-pin"></i>${escapeHtml(item.location || item.originMunicipality || "Plats anges hos Missing People")}</span><span><i data-lucide="calendar-days"></i>${escapeHtml(dateLabel)}</span></div>
+      <p>${escapeHtml(item.summary || "Missing People har publicerat en efterlysning med koppling till området.")}</p>
+      <a href="${escapeAttribute(safeExternalUrl(item.url || MISSING_PEOPLE_SOURCE_URL))}" target="_blank" rel="noopener noreferrer">Öppna officiell efterlysning <i data-lucide="arrow-up-right"></i></a>
+    </div>
+  </article>`;
 }
 
 /* =========================================================
