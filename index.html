@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="sv" data-version="0.23.14">
+<html lang="sv" data-version="0.23.15">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="DinPuls.se – din lokala startsida.">
   <meta name="theme-color" content="#082653">
-  <meta name="dinpuls-version" content="0.23.14">
+  <meta name="dinpuls-version" content="0.23.15">
   <title>DinPuls.se – din lokala startsida</title>
-  <link rel="stylesheet" href="styles.css?version=0.23.14">
+  <link rel="stylesheet" href="styles.css?version=0.23.15">
   <link rel="icon" href="favicon.ico?version=0.23.6" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.6">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.6">
@@ -62,12 +62,50 @@
     </form>
   </dialog>
 
+  <dialog class="homepage-customize-dialog" id="homepage-customize-dialog" aria-labelledby="homepage-customize-title">
+    <div class="homepage-customize-inner">
+      <button class="homepage-customize-close" type="button" aria-label="Stäng anpassningen"><i data-lucide="x"></i></button>
+      <span class="homepage-customize-icon"><i data-lucide="sliders-horizontal"></i></span>
+      <span class="section-kicker">DIN STARTSIDA</span>
+      <h2 id="homepage-customize-title">Välj vad du vill se</h2>
+      <p class="homepage-customize-intro">Valen sparas bara i den här webbläsaren. Du behöver inget konto.</p>
+
+      <section class="homepage-customize-fixed" aria-labelledby="homepage-customize-fixed-title">
+        <div><strong id="homepage-customize-fixed-title">Alltid synligt</strong><small>Viktig och aktuell information</small></div>
+        <span><i data-lucide="lock-keyhole"></i>Dagens viktigaste</span>
+        <span><i data-lucide="lock-keyhole"></i>Missing People</span>
+        <span><i data-lucide="lock-keyhole"></i>Väder</span>
+      </section>
+
+      <fieldset class="homepage-customize-options">
+        <legend>Valbara moduler</legend>
+        <label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-home-module="news" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-home-module="events" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="utensils"></i><b>Dagens lunch</b></span><input type="checkbox" data-home-module="lunch" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="car-front"></i><b>Trafik</b></span><input type="checkbox" data-home-module="traffic" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-home-module="transport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-home-module="jobs" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-home-module="housing" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="trophy"></i><b>Föreningar och fritid</b></span><input type="checkbox" data-home-module="sport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="ticket"></i><b>Bio</b></span><input type="checkbox" data-home-module="cinema" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="heart-pulse"></i><b>Vård och hälsa</b></span><input type="checkbox" data-home-module="health" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="hammer"></i><b>Service och hantverk</b></span><input type="checkbox" data-home-module="service" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+        <label><span><i data-lucide="landmark"></i><b>Myndigheter och samhällsservice</b></span><input type="checkbox" data-home-module="authorities" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+      </fieldset>
+
+      <div class="homepage-customize-footer">
+        <span id="homepage-customize-status" role="status">Alla valbara moduler visas</span>
+        <button type="button" id="homepage-customize-reset"><i data-lucide="rotate-ccw"></i>Återställ</button>
+      </div>
+    </div>
+  </dialog>
+
   <script src="assets/vendor/lucide.min.js"></script>
   <script src="dp-safety.js?version=0.23.6"></script>
   <script src="dp-core.js?version=0.23.6"></script>
   <script src="municipality-engine.js?version=0.23.6"></script>
   <script src="sport-data-engine.js?version=0.23.6"></script>
-  <script src="script.js?version=0.23.14"></script>
+  <script src="script.js?version=0.23.15"></script>
   <script src="privacy-controls.js?version=0.23.6"></script>
 </body>
 </html>

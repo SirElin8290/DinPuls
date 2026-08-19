@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.14";
+const DINPULS_VERSION = "0.23.15";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -217,6 +217,7 @@ async function startDinPuls() {
     initializeTabs();
     initializeSearch();
     initializeHomepageGuide();
+    initializeHomepageCustomization();
     initializeClock();
     await initializeNameDay();
     initializeTheme();
@@ -299,6 +300,103 @@ function initializeHomepageGuide() {
       copyStatus.textContent = "Markera och kopiera adressen ovan.";
     }
   });
+}
+
+const HOME_MODULE_STORAGE_KEY = "dinpuls-home-modules-v1";
+const HOME_OPTIONAL_MODULES = Object.freeze({
+  news: ["#nyheter", ".news-sources-section"],
+  events: ["#evenemang"],
+  lunch: [".lunch-airport-strip"],
+  traffic: ["#trafik"],
+  transport: ["#buss", "#kollektivtrafik"],
+  jobs: ["#jobb"],
+  housing: ["#bostader"],
+  sport: [".sport-home"],
+  cinema: [".cinema-home"],
+  health: [".health-home"],
+  service: [".service-home"],
+  authorities: [".authorities-home"]
+});
+
+function readHomepageModulePreferences() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(HOME_MODULE_STORAGE_KEY) || "{}");
+    const hidden = Array.isArray(stored.hidden)
+      ? stored.hidden.filter(name => Object.hasOwn(HOME_OPTIONAL_MODULES, name))
+      : [];
+    return new Set(hidden);
+  } catch {
+    return new Set();
+  }
+}
+
+function initializeHomepageCustomization() {
+  const dialog = document.querySelector("#homepage-customize-dialog");
+  const openButton = document.querySelector("#homepage-customize-button");
+  const closeButton = dialog?.querySelector(".homepage-customize-close");
+  const resetButton = document.querySelector("#homepage-customize-reset");
+  const controls = [...document.querySelectorAll("[data-home-module]")];
+  const status = document.querySelector("#homepage-customize-status");
+  if (!dialog || !openButton || controls.length === 0) return;
+
+  let hiddenModules = readHomepageModulePreferences();
+
+  function applyPreferences({ save = false } = {}) {
+    Object.entries(HOME_OPTIONAL_MODULES).forEach(([name, selectors]) => {
+      const hidden = hiddenModules.has(name);
+      selectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => { element.hidden = hidden; });
+      });
+    });
+
+    controls.forEach(control => { control.checked = !hiddenModules.has(control.dataset.homeModule); });
+    document.querySelectorAll(".grid.three,.grid.lower,.primary-service-grid").forEach(grid => {
+      const children = [...grid.children];
+      const visibleChildren = children.filter(child => !child.hidden);
+      grid.hidden = visibleChildren.length === 0;
+      grid.classList.toggle("personalized-grid", visibleChildren.length !== children.length && visibleChildren.length > 0);
+    });
+
+    if (status) {
+      status.textContent = hiddenModules.size === 0
+        ? "Alla valbara moduler visas"
+        : `${hiddenModules.size} ${hiddenModules.size === 1 ? "modul är dold" : "moduler är dolda"}`;
+    }
+    openButton.classList.toggle("has-custom-home", hiddenModules.size > 0);
+    if (save) {
+      try {
+        localStorage.setItem(HOME_MODULE_STORAGE_KEY, JSON.stringify({ hidden: [...hiddenModules] }));
+      } catch {
+        if (status) status.textContent = "Valet gäller under det här besöket";
+      }
+    }
+  }
+
+  controls.forEach(control => control.addEventListener("change", () => {
+    const name = control.dataset.homeModule;
+    if (control.checked) hiddenModules.delete(name);
+    else hiddenModules.add(name);
+    applyPreferences({ save: true });
+  }));
+
+  openButton.addEventListener("click", () => {
+    openButton.setAttribute("aria-expanded", "true");
+    dialog.showModal();
+  });
+  closeButton?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  dialog.addEventListener("close", () => openButton.setAttribute("aria-expanded", "false"));
+  resetButton?.addEventListener("click", () => {
+    hiddenModules = new Set();
+    applyPreferences({ save: true });
+  });
+  window.addEventListener("storage", event => {
+    if (event.key !== HOME_MODULE_STORAGE_KEY) return;
+    hiddenModules = readHomepageModulePreferences();
+    applyPreferences();
+  });
+
+  applyPreferences();
 }
 
 
