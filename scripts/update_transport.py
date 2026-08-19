@@ -175,28 +175,33 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
     lookup_time = previous_stop.get("lookupTime")
     next_search = previous_stop.get("nextSearchAfter")
 
-    if should_deep_search(previous_stop, now):
+    if not current and should_deep_search(previous_stop, now):
         lookup_time = now.isoformat(timespec="minutes")
-        successful_future_requests = 0
+        future_departures_found = 0
         for query_time in future_query_times(now):
             try:
                 payload = fetch(api_key, area_id, query_time)
             except RuntimeError as error:
                 print(f"{area_id}: framtida fönster {query_time} misslyckades: {error}")
                 continue
-            successful_future_requests += 1
             payloads.append(payload)
-            current.extend(normalize_departures(payload))
+            normalized_future = normalize_departures(payload)
+            future_departures_found += len(normalized_future)
+            current.extend(normalized_future)
+            if normalized_future:
+                break
         next_search = (
             now + timedelta(
                 hours=DEEP_SEARCH_INTERVAL_HOURS
-                if successful_future_requests
+                if future_departures_found
                 else 0,
-                minutes=0 if successful_future_requests else EMPTY_RETRY_MINUTES,
+                minutes=0 if future_departures_found else EMPTY_RETRY_MINUTES,
             )
         ).isoformat(timespec="minutes")
 
-    departures = merge_departures(now, current, retained)
+    # Tidigare data är en reserv, inte ett parallellt tidtabellsfönster.
+    # Så snart API:t ger färska avgångar ska de gamla reservavgångarna bort.
+    departures = merge_departures(now, current if current else retained)
     retained_only = bool(departures) and all(item.get("stale") for item in departures)
     return departures, lookup_time, retained_only, next_search, payloads
 
