@@ -12,46 +12,29 @@ function regionDetails(county) {
     : { name: "1177 Västra Götaland", url: "https://www.1177.se/Vastra-Gotaland/" };
 }
 
-function externalSearchUrl(category, municipality) {
-  const terms = {
-    vardcentral: "vårdcentral",
-    jour: "jourcentral akutmottagning",
-    tandvard: "tandläkare",
-    apotek: "apotek",
-    fysioterapi: "fysioterapeut sjukgymnast",
-    kiropraktor: "kiropraktor",
-    naprapat: "naprapat",
-    massage: "massage friskvård",
-    fotvard: "medicinsk fotvård",
-    "psykisk-halsa": "psykolog samtalsstöd",
-    arbetsterapi: "arbetsterapi rehabilitering",
-    "syn-horsel": "optiker hörselmottagning"
-  };
-  return `https://www.google.com/maps/search/${encodeURIComponent(`${terms[category] || category} ${municipality}`)}`;
-}
-
 function renderHealthPage() {
   const municipalityData = healthData?.municipalities?.[healthMunicipality];
   if (!municipalityData) return;
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
-  const categories = (healthData.categories || []).filter(category =>
-    [category.name, category.description].join(" ").toLocaleLowerCase("sv-SE").includes(query)
-  );
+  const providers = (healthData.providers || []).filter(provider =>
+    provider.municipality === healthMunicipality &&
+    [provider.name, provider.description, provider.sourceType].join(" ").toLocaleLowerCase("sv-SE").includes(query)
+  ).sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
   const region = regionDetails(municipalityData.county);
   document.querySelectorAll("[data-health-municipality]").forEach(element => { element.textContent = healthMunicipality; });
   document.querySelector("#health-county").textContent = municipalityData.county;
   document.querySelector("#health-region-name").textContent = region.name;
   document.querySelector("#health-region-link").href = region.url;
   document.querySelector("#health-1177-link").href = healthData.officialCareUrl;
-  document.querySelector("#health-result-count").textContent = `${categories.length} kategorier`;
-  document.querySelector("#health-category-grid").innerHTML = categories.map(category => `
-    <a class="health-category-card" href="${escapeHealth(safeHealthUrl(externalSearchUrl(category.id, healthMunicipality)))}" target="_blank" rel="noopener noreferrer">
-      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(safeHealthIcon(category.icon))}"></i></span>
-      <span><strong>${escapeHealth(category.name)}</strong><small>${escapeHealth(category.description)}</small>${category.official ? "<em>Kontrollera hos 1177</em>" : "<em>Lokalt sökresultat</em>"}</span>
+  document.querySelector("#health-result-count").textContent = `${providers.length} mottagningar`;
+  document.querySelector("#health-category-grid").innerHTML = providers.map(provider => `
+    <a class="health-category-card" href="${escapeHealth(safeHealthUrl(provider.url))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna ${escapeHealth(provider.name)} hos ${escapeHealth(provider.sourceType)}">
+      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(safeHealthIcon(provider.icon))}"></i></span>
+      <span><strong>${escapeHealth(provider.name)}</strong><small>${escapeHealth(provider.description)}</small><em>Direktlänk · ${escapeHealth(provider.sourceType)}</em></span>
       <i data-lucide="external-link"></i>
     </a>`).join("");
-  document.querySelector("#health-empty").hidden = categories.length > 0;
-  document.querySelector("#health-category-grid").hidden = categories.length === 0;
+  document.querySelector("#health-empty").hidden = providers.length > 0;
+  document.querySelector("#health-category-grid").hidden = providers.length === 0;
   document.title = `Vård och hälsa i ${healthMunicipality} – DinPuls`;
   if (window.lucide) lucide.createIcons();
 }

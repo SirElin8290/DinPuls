@@ -16,26 +16,24 @@ const serviceAdvertisers = {
 const escapeService = window.DinPulsSecurity.escapeHtml;
 const safeServiceUrl = window.DinPulsSecurity.safeExternalUrl;
 
-function serviceSearchUrl(category, municipality) {
-  return `https://www.google.com/maps/search/${encodeURIComponent(`${category.query} ${municipality}`)}`;
-}
-
 function renderServicePage() {
   const query = document.querySelector("#service-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
   const group = document.querySelector("#service-group")?.value || "";
-  const categories = (serviceData.categories || []).filter(category =>
-    (!group || category.group === group) && [category.name, category.description, category.group, category.query].join(" ").toLocaleLowerCase("sv-SE").includes(query)
-  );
+  const businesses = (serviceData.businesses || []).filter(business =>
+    business.municipality === serviceMunicipality &&
+    (!group || business.group === group) &&
+    [business.name, business.description, business.group].join(" ").toLocaleLowerCase("sv-SE").includes(query)
+  ).sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
   document.querySelectorAll("[data-service-municipality]").forEach(element => { element.textContent = serviceMunicipality; });
-  document.querySelector("#service-result-count").textContent = `${categories.length} kategorier`;
-  document.querySelector("#service-category-grid").innerHTML = categories.map(category => `
-    <a class="service-category-card" href="${escapeService(safeServiceUrl(serviceSearchUrl(category, serviceMunicipality)))}" target="_blank" rel="noopener noreferrer">
-      <span class="portal-card-icon service"><i data-lucide="${escapeService(category.icon)}"></i></span>
-      <span><em>${escapeService(category.group)}</em><strong>${escapeService(category.name)}</strong><small>${escapeService(category.description)}</small></span>
+  document.querySelector("#service-result-count").textContent = `${businesses.length} företag`;
+  document.querySelector("#service-category-grid").innerHTML = businesses.map(business => `
+    <a class="service-category-card" href="${escapeService(safeServiceUrl(business.url))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna ${escapeService(business.name)} – ${escapeService(business.sourceType)}">
+      <span class="portal-card-icon service"><i data-lucide="${escapeService(business.icon)}"></i></span>
+      <span><em>${escapeService(business.group)}</em><strong>${escapeService(business.name)}</strong><small>${escapeService(business.description)} · ${escapeService(business.sourceType)}</small></span>
       <i data-lucide="external-link"></i>
     </a>`).join("");
-  document.querySelector("#service-empty").hidden = categories.length > 0;
-  document.querySelector("#service-category-grid").hidden = categories.length === 0;
+  document.querySelector("#service-empty").hidden = businesses.length > 0;
+  document.querySelector("#service-category-grid").hidden = businesses.length === 0;
   document.title = `Service & hantverk i ${serviceMunicipality} – DinPuls`;
   if (window.lucide) lucide.createIcons();
 }
@@ -64,7 +62,9 @@ async function initializeServicePage() {
   const municipalitySelect = document.querySelector("#service-municipality");
   const groupSelect = document.querySelector("#service-group");
   serviceState.populateSelect(municipalitySelect, serviceMunicipality);
-  [...new Set(serviceData.categories.map(category => category.group))].forEach(group => groupSelect.add(new Option(group, group)));
+  [...new Set(serviceData.businesses.map(business => business.group))]
+    .sort((first, second) => first.localeCompare(second, "sv-SE"))
+    .forEach(group => groupSelect.add(new Option(group, group)));
   const parameters = new URLSearchParams(window.location.search);
   if (parameters.get("grupp") && [...groupSelect.options].some(option => option.value === parameters.get("grupp"))) groupSelect.value = parameters.get("grupp");
   municipalitySelect.addEventListener("change", () => {

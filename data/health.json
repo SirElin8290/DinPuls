@@ -1,6 +1,6 @@
 {
-  "version": "0.21.5",
-  "sourceChecked": "2026-08-01",
+  "version": "0.24.0",
+  "sourceChecked": "2026-08-19",
   "officialCareUrl": "https://www.1177.se/hitta-vard/",
   "municipalities": {
     "Åmål": { "county": "Västra Götalands län" },
@@ -11,18 +11,27 @@
     "Arvika": { "county": "Värmlands län" },
     "Grums": { "county": "Värmlands län" }
   },
-  "categories": [
-    { "id": "vardcentral", "name": "Vårdcentraler", "description": "Primärvård, provtagning och rådgivning", "icon": "stethoscope", "official": true },
-    { "id": "jour", "name": "Jour och akutmottagning", "description": "Vård när vårdcentralen är stängd eller besvär inte kan vänta", "icon": "hospital", "official": true },
-    { "id": "tandvard", "name": "Tandvård", "description": "Tandläkare och akut tandvård", "icon": "badge-plus" },
-    { "id": "apotek", "name": "Apotek", "description": "Lokala apotek och aktuella öppettider", "icon": "pill" },
-    { "id": "fysioterapi", "name": "Fysioterapi", "description": "Legitimerade fysioterapeuter och rehabilitering", "icon": "activity" },
-    { "id": "kiropraktor", "name": "Kiropraktik", "description": "Lokala kiropraktorer", "icon": "accessibility" },
-    { "id": "naprapat", "name": "Naprapati", "description": "Lokala naprapater", "icon": "person-standing" },
-    { "id": "massage", "name": "Massage och friskvård", "description": "Massage, friskvård och återhämtning", "icon": "hand-heart" },
-    { "id": "fotvard", "name": "Fotvård", "description": "Medicinsk fotvård och fotvårdsbehandling", "icon": "footprints" },
-    { "id": "psykisk-halsa", "name": "Psykisk hälsa", "description": "Vård, samtalsstöd och lokala kontaktvägar", "icon": "brain" },
-    { "id": "arbetsterapi", "name": "Arbetsterapi och rehab", "description": "Stöd, hjälpmedel och rehabilitering", "icon": "heart-handshake" },
-    { "id": "syn-horsel", "name": "Syn och hörsel", "description": "Optiker och hörselmottagningar", "icon": "eye" }
+  "providers": [
+    { "municipality": "Åmål", "name": "Medpro Clinic Åmål Vårdcentral", "description": "Vårdcentral, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/Vastra-Gotaland/hitta-vard/kontaktkort/Medpro-Clinic-Amal-Vardcentral/", "sourceType": "1177" },
+    { "municipality": "Åmål", "name": "Medpro Clinic Rehab Åmål", "description": "Fysioterapi, sjukgymnastik och arbetsterapi", "icon": "activity", "url": "https://www.1177.se/hitta-vard/kontaktkort/Medpro-Clinic-Rehab-Amal/", "sourceType": "1177" },
+    { "municipality": "Åmål", "name": "Närhälsan Åmål rehabmottagning", "description": "Rehabilitering, fysioterapi och arbetsterapi", "icon": "heart-handshake", "url": "https://www.narhalsan.se/hitta-mottagning/amal/narhalsan-amal-rehabmottagning/", "sourceType": "Närhälsan" },
+
+    { "municipality": "Säffle", "name": "Vårdcentralen Säffle", "description": "Primärvård, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Saffle/", "sourceType": "1177" },
+    { "municipality": "Säffle", "name": "Jourcentralen Säffle", "description": "Jourvård efter bedömning via 1177", "icon": "hospital", "url": "https://www.1177.se/Varmland/hitta-vard/kontaktkort/Jourcentralen-Saffle/", "sourceType": "1177" },
+    { "municipality": "Säffle", "name": "Fysioterapimottagningen Säffle", "description": "Fysioterapi och rehabilitering", "icon": "activity", "url": "https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Saffle/", "sourceType": "1177" },
+
+    { "municipality": "Bengtsfors", "name": "Närhälsan Bengtsfors vårdcentral", "description": "Vårdcentral, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Bengtsfors/", "sourceType": "1177" },
+    { "municipality": "Bengtsfors", "name": "Doktorbjörn Bengtsfors", "description": "Vaccinationsmottagning på regionalt uppdrag", "icon": "syringe", "url": "https://www.1177.se/hitta-vard/kontaktkort/Doktorbjorn-Bengtsfors/", "sourceType": "1177" },
+
+    { "municipality": "Mellerud", "name": "Närhälsan Mellerud vårdcentral", "description": "Vårdcentral, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Mellerud-vardcentral-Mellerud/", "sourceType": "1177" },
+    { "municipality": "Mellerud", "name": "Närhälsan Mellerud rehabmottagning", "description": "Rehabilitering, fysioterapi och arbetsterapi", "icon": "activity", "url": "https://www.narhalsan.se/hitta-mottagning/mellerud/narhalsan-mellerud-rehabmottagning/", "sourceType": "Närhälsan" },
+
+    { "municipality": "Årjäng", "name": "Vårdcentralen Årjäng", "description": "Primärvård, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Arjang", "sourceType": "1177" },
+    { "municipality": "Årjäng", "name": "Fysioterapimottagningen Årjäng", "description": "Fysioterapi och rehabilitering", "icon": "activity", "url": "https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Arjang/", "sourceType": "1177" },
+
+    { "municipality": "Arvika", "name": "Vårdcentralen Verkstaden Arvika", "description": "Primärvård, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Verkstaden-Arvika", "sourceType": "1177" },
+    { "municipality": "Arvika", "name": "Jourcentralen Arvika", "description": "Jourvård efter bedömning via 1177", "icon": "hospital", "url": "https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/", "sourceType": "1177" },
+
+    { "municipality": "Grums", "name": "Vårdcentralen Grums", "description": "Primärvård, provtagning och rådgivning", "icon": "stethoscope", "url": "https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Grums/", "sourceType": "1177" }
   ]
 }
