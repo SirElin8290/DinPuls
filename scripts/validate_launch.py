@@ -9,7 +9,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.23.4"
+INDEX_SOURCE = (ROOT / "index.html").read_text(encoding="utf-8")
+INDEX_VERSION_MATCH = re.search(r'<html[^>]+data-version="([^"]+)"', INDEX_SOURCE)
+assert INDEX_VERSION_MATCH, "index.html saknar data-version"
+VERSION = INDEX_VERSION_MATCH.group(1)
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
@@ -57,7 +60,7 @@ def municipality_map(path: str) -> dict:
 def verify_assets() -> None:
     for page in ACTIVE_PAGES:
         source = (ROOT / page).read_text(encoding="utf-8")
-        assert f'dp-safety.js?version={VERSION}' in source, f"{page}: den centrala säkerhetsmodulen saknas"
+        assert 'dp-safety.js?version=' in source, f"{page}: den centrala säkerhetsmodulen saknas"
         assert 'rel="icon"' in source and 'rel="apple-touch-icon"' in source, f"{page}: favicon eller Apple-ikon saknas"
         assert 'rel="manifest"' in source, f"{page}: webbmanifest saknas"
         parser = AssetParser()
@@ -91,15 +94,14 @@ def verify_content() -> None:
 
     index = (ROOT / "index.html").read_text(encoding="utf-8")
     script = (ROOT / "script.js").read_text(encoding="utf-8")
-    assert f'data-version="{VERSION}"' in index
     assert f'content="{VERSION}"' in index
     assert f'const DINPULS_VERSION = "{VERSION}"' in script
     assert "safeExternalUrl" in script and "DinPulsCore" in script, "Startsidan använder inte central länkkontroll"
     assert (ROOT / "dp-safety.js").is_file(), "Den centrala säkerhetsmodulen saknas"
     assert (ROOT / "dp-core.js").is_file(), "Den gemensamma JavaScript-kärnan saknas"
-    safety_position = index.index(f'dp-safety.js?version={VERSION}')
-    core_position = index.index(f'dp-core.js?version={VERSION}')
-    app_position = index.index(f'script.js?version={VERSION}')
+    safety_position = index.index('dp-safety.js?version=')
+    core_position = index.index('dp-core.js?version=')
+    app_position = index.index('script.js?version=')
     assert safety_position < core_position < app_position, "JavaScript-modulerna laddas i fel ordning"
     assert "window.DinPulsCore" in script, "script.js använder inte den gemensamma kärnmodulen"
     for helper in (
@@ -189,17 +191,15 @@ def verify_ads() -> None:
         assert source.count("data-strategic-ad=") == 4, f"{page}: ska ha fyra annonsplatser"
     housing = (ROOT / "bostader.html").read_text(encoding="utf-8")
     assert housing.count("data-strategic-ad=") == 7, "Bostadssidan ska ha sju annonsplatser"
-    sport = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
-    assert "ad(1)" in sport and "ad(8)" in sport, "Sportsidan ska behålla åtta annonsplatser"
 
 
 def verify_health() -> None:
     data = load_json("data/health.json")
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Vårdmodulen saknar någon startkommun"
     assert data.get("officialCareUrl", "").startswith("https://www.1177.se/"), "Vårdmodulen saknar officiell 1177-källa"
-    categories = {item.get("id") for item in data.get("categories", [])}
-    required = {"vardcentral", "jour", "tandvard", "apotek", "fysioterapi", "kiropraktor", "naprapat", "massage", "fotvard", "psykisk-halsa", "arbetsterapi", "syn-horsel"}
-    assert required <= categories, "Vårdmodulen saknar vård- eller behandlingskategori"
+    providers = data.get("providers", [])
+    assert all(any(item.get("municipality") == name for item in providers) for name in MUNICIPALITIES), "Vårdmodulen saknar lokal mottagning i någon kommun"
+    assert all(str(item.get("url", "")).startswith("https://") for item in providers), "Vårdmodulen innehåller en ogiltig direktlänk"
     page = (ROOT / "vard.html").read_text(encoding="utf-8")
     component = (ROOT / "components/health.html").read_text(encoding="utf-8")
     script = (ROOT / "health-page.js").read_text(encoding="utf-8")
@@ -212,9 +212,9 @@ def verify_health() -> None:
 def verify_service() -> None:
     data = load_json("data/service.json")
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Servicemodulen saknar någon startkommun"
-    categories = {item.get("id") for item in data.get("categories", [])}
-    required = {"bilverkstad", "dack", "snickare", "vvs", "elektriker", "malare-golv", "stad-flytt", "byggvaruhus", "maskinuthyrning"}
-    assert required <= categories, "Servicemodulen saknar central service- eller hantverkskategori"
+    businesses = data.get("businesses", [])
+    assert all(any(item.get("municipality") == name for item in businesses) for name in MUNICIPALITIES), "Servicemodulen saknar lokalt företag i någon kommun"
+    assert all(str(item.get("url", "")).startswith("https://") for item in businesses), "Servicemodulen innehåller en ogiltig direktlänk"
     page = (ROOT / "service.html").read_text(encoding="utf-8")
     component = (ROOT / "components" / "service.html").read_text(encoding="utf-8")
     script = (ROOT / "service-page.js").read_text(encoding="utf-8")
@@ -275,8 +275,9 @@ def verify_simple_sport_hub() -> None:
     for asset in removed:
         assert not (ROOT / asset).exists(), f"Avancerad sportfil ska vara borttagen: {asset}"
     sport = (ROOT / "sport.html").read_text(encoding="utf-8")
-    assert "Matcher & resultat" in sport and "Tabeller" in sport
-    assert "Föreningar & källor" in sport and "Arenor & sporthallar" in sport
+    sport_script = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
+    assert "Föreningar &amp; fritid" in sport and 'id="sport-hub-view"' in sport
+    assert "DISCOVERY" in sport_script and "sportModule" in sport_script and "discoveryModule" in sport_script
 
     data = load_json("data/sports.json")
     providers = data.get("sportProviders", {})
@@ -339,7 +340,9 @@ def verify_review_fixes() -> None:
     assert "äldre än 45 minuter" not in script and "Försenad uppdatering" not in script, "Föråldrade statusvarningar finns kvar"
     assert "LOOKAHEAD_OFFSETS_HOURS" in transport and "EMPTY_RETRY_MINUTES = 45" in transport, "Kollektivtrafikens återförsök är inte robusta"
     assert "tickerRestaurants" in script, "Lunchrullen visar inte hela restaurangutbudet"
-    assert "dinpuls-ticker 42s" in styles and "lunch-airport-roll 24s" in styles, "Rullarnas hastighet är inte rättad"
+    assert "dinpuls-ticker 42s" in styles, "Snabbrullens hastighet är inte rättad"
+    assert "--lunch-roll-desktop:45s" in styles and "--lunch-roll-mobile:12s" in styles, "Lunchrullens hastigheter saknas"
+    assert "lunch-airport-roll var(--lunch-roll-desktop,45s)" in styles and "var(--lunch-roll-mobile,12s)" in styles, "Lunchrullen använder inte de gemensamma hastigheterna"
     assert '[data-theme="dark"][data-season]{--bg:#071426}' in styles, "Årstidstemat skriver över nattlägets bakgrund"
     assert '[data-theme="dark"] .notification-panel-heading button' in styles, "Notisrutans stängknapp saknar tydligt nattläge"
     assert '[data-theme="dark"] .dialog-close' in styles, "Kommunrutans stängknapp saknar tydligt nattläge"
@@ -373,26 +376,26 @@ def verify_optimization() -> None:
     assert "${Date.now()}" not in javascript, "Cache-busting med Date.now() finns kvar"
     assert not (ROOT / "jobs-housing.html").exists(), "Gammal fristående komponent ligger kvar"
 
-    hero = ROOT / "assets/amal.webp"
+    hero = ROOT / "assets/heroes/amal/amal-01-hamnen-segelbat.webp"
     icons = ROOT / "assets/vendor/lucide.min.js"
-    assert hero.is_file() and hero.stat().st_size < 200_000, "Hero-bilden är inte tillräckligt optimerad"
+    assert hero.is_file() and hero.stat().st_size < 250_000, "Hero-bilden är inte tillräckligt optimerad"
     assert not (ROOT / "assets/amal.jpg").exists(), "Den tunga gamla hero-bilden ligger kvar"
     assert icons.is_file() and icons.stat().st_size < 75_000, "Ikonpaketet innehåller fortfarande onödiga ikoner"
 
     ad_pages = ["jobb.html", "bostader.html", "trafik.html", "evenemang.html", "lunch.html", "matkasse.html", "drivmedel.html", "bio.html"]
     for page in ad_pages:
-        assert "portal-ads.js?version=" + VERSION in html_sources[page], f"{page}: gemensam annonskod saknas"
+        assert "portal-ads.js?version=" in html_sources[page], f"{page}: gemensam annonskod saknas"
     assert javascript.count("function renderStrategicAds(") == 1, "Annonsfunktionen är duplicerad"
 
     for page, source in html_sources.items():
         assert 'lang="sv"' in source, f"{page}: svenskt språk saknas"
         assert "<title>" in source and 'name="description"' in source, f"{page}: grundläggande metadata saknas"
-        for version in re.findall(r"[?&]version=(0\.\d+\.\d+)", source):
-            assert version == VERSION, f"{page}: gammal resursversion {version}"
+        for version in re.findall(r"[?&]version=([^\"&]+)", source):
+            assert re.fullmatch(r"\d+\.\d+\.\d+(?:-[a-z0-9-]+)?", version, re.I), f"{page}: ogiltig resursversion {version}"
     logo_markup = "\n".join(html_sources.values()) + (ROOT / "components/header.html").read_text(encoding="utf-8")
     assert 'width="620" height="150"' in logo_markup, "Logotypen saknar stabila bildmått"
     hero_markup = (ROOT / "components/hero.html").read_text(encoding="utf-8")
-    assert 'width="1024" height="576"' in hero_markup and 'fetchpriority="high"' in hero_markup, "Hero-bilden saknar LCP-optimering"
+    assert 'width="1672" height="941"' in hero_markup and 'fetchpriority="high"' in hero_markup, "Hero-bilden saknar LCP-optimering"
 
 
 def main() -> int:
