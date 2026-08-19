@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.15";
+const DINPULS_VERSION = "0.23.16";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -1868,7 +1868,7 @@ function renderMissingPerson(item) {
     ? "Publicerad hos Missing People"
     : `Publicerad ${published.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", year: "numeric" })}`;
   return `<article class="missing-person-card${local ? " local" : " neighbor"}">
-    <span class="missing-person-icon" aria-hidden="true"><i data-lucide="user-round-search"></i></span>
+    <span class="missing-person-icon" aria-hidden="true"><i data-lucide="search"></i></span>
     <div class="missing-person-content">
       <span class="missing-person-scope">${escapeHtml(scopeLabel)}</span>
       <h3>${escapeHtml(item.name || "Försvunnen person")}</h3>
