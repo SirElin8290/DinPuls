@@ -90,6 +90,31 @@ MELLERUD_PAGES = {
 }
 SKIP = ("politisk", "parti", "arbetarekommun", "moderata", "centerpart", "socialdemokrat", "vänsterpart", "sverigedemokrat", "liberalerna")
 
+# Verifierade egna webbplatser eller direkta organisationssidor. Dessa ska
+# alltid vinna över kommunernas registerlänkar vid en ny import.
+DIRECT_LINKS = {
+    "Arvika Disc Golf Club": "https://tjing.se/club/arvika-disc-golf-club/",
+    "Arvika Simsällskap": "https://www.arvikass.se/",
+    "Bengtsfors Scoutkår": "https://www.scouterna.se/hitta-scoutkar/vastra-gotalands-lan/bengtsfors-kommun/bengtsfors-scoutkar/",
+    "Dalslands Konstförening": "https://dkf.se/dalslands-konstforening/",
+    "Dalslands Konstnärsförbund": "https://dkf.se/dalslands-konstnarsforbund/",
+    "Dalslands Litteraturförening": "https://www.bokdagaridalsland.se/dalslands-litteraturforening/",
+    "Dalslands Skrivarförening": "https://dalslandsskrivarforening.se/",
+    "Dalslands Skrivarförening – Mellerudsgruppen": "https://dalslandsskrivarforening.se/",
+    "Filmföreningen på Dal": "https://www.filmfestivalpadal.se/",
+    "Grums Brukshundklubb": "https://grumsbrukshundklubb.se/",
+    "Halmens Hus": "https://www.halmenshus.com/",
+    "Melleruds Ridklubb": "https://www.mellerudsridklubb.com/",
+    "Melleruds Scoutkår": "https://mellerud.scout.se/",
+    "Säffle Filmstudio": "https://saffle.filmstudio.se/",
+    "Säffle IBF": "https://www.saffleibf.se/",
+    "Åmåls Brukshundklubb": "https://xn--mlsbrukshundklubb-7qbb.se/",
+    "Åmåls Fotoklubb": "https://amalsfotoklubb.se/",
+    "Åmåls Innebandyklubb": "https://amalsibk.com/",
+    "Åmåls Scoutkår": "https://www.scouterna.se/hitta-scoutkar/vastra-gotalands-lan/amals-kommun/amals-scoutkar/",
+    "Årjängs Brukshundklubb": "https://arjangsbrukshund.wordpress.com/",
+}
+
 SPORT_WORDS = {
     "Fotboll": ("fotboll",), "Futsal": ("futsal",), "Innebandy": ("innebandy",),
     "Ishockey": ("ishockey", "hockey"), "Bandy": ("bandy",), "Handboll": ("handboll",),
@@ -265,6 +290,11 @@ def dedupe(items: list[dict], manual: list[dict]) -> list[dict]:
             if generated.get("tags"):
                 item = dict(item, tags=list(dict.fromkeys(item.get("tags", []) + generated["tags"])))
         merged[key] = item
+    for item in merged.values():
+        if item["name"] in DIRECT_LINKS:
+            item["url"] = DIRECT_LINKS[item["name"]]
+            if "source" in item:
+                item["source"] = "Föreningens egen sida"
     return sorted(merged.values(), key=lambda item: item["name"].casefold())
 
 
