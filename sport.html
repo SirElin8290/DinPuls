@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Lokala föreningar, idrott, scouter, dans, musik och fritidsaktiviteter i din kommun.">
-  <title>Föreningar &amp; fritid – DinPuls</title>
+  <meta name="description" content="Hitta lokal idrott, motion, lag, matcher och föreningar i din kommun.">
+  <title>Idrott &amp; motion – DinPuls</title>
   <link rel="stylesheet" href="styles.css?version=0.23.4">
   <link rel="stylesheet" href="portal-pages.css?version=0.23.4">
   <link rel="stylesheet" href="sport-hub-stage48.css?version=1.0.0">
-  <link rel="stylesheet" href="sport-hub-fixes.css?version=1.1.0">
+  <link rel="stylesheet" href="sport-hub-fixes.css?version=1.2.0">
   <link rel="icon" href="favicon.ico?version=0.23.4" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.4">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.4">
@@ -24,10 +24,16 @@
   <main class="portal-main sport-hub">
     <section class="sport-hub-hero">
       <div>
-        <span class="section-kicker">Lokalt engagemang</span>
-        <h1>Föreningar &amp; fritid i <span id="sport-hub-place">Åmål</span></h1>
-        <p>Hitta idrott, scouter, dans, musik, barnkör och andra aktiviteter. Varje område har en egen fristående modul.</p>
+        <span class="section-kicker">Träna, tävla och röra på dig</span>
+        <h1>Idrott &amp; motion i <span id="sport-hub-place">Åmål</span></h1>
+        <p>Hitta lag, motion, matcher och föreningar. Varje idrott har en egen fristående modul.</p>
       </div>
+    </section>
+
+    <section class="sport-search-panel" aria-labelledby="sport-search-title">
+      <div><span><i data-lucide="search"></i></span><div><h2 id="sport-search-title">Vad vill du träna?</h2><p>Sök exempelvis fotboll, ridning, simning, ett lag eller en förening.</p></div></div>
+      <label><span class="visually-hidden">Sök idrott eller förening</span><i data-lucide="search"></i><input id="sport-hub-search" type="search" autocomplete="off" placeholder="Sök idrott, lag eller förening…"><button id="sport-hub-clear" type="button" aria-label="Rensa sökningen"><i data-lucide="x"></i></button></label>
+      <p id="sport-hub-search-status" aria-live="polite"></p>
     </section>
 
     <section class="sport-hub-toolbar" aria-label="Välj kommun och sport">
@@ -38,6 +44,8 @@
 
     <section class="sport-hub-summary" id="sport-hub-summary" aria-live="polite"></section>
 
+    <nav class="sport-leisure-link" aria-label="Relaterat innehåll"><span><i data-lucide="palette"></i><strong>Söker du scouter, musik, spel eller skapande?</strong></span><a id="sport-leisure-link" href="fritid.html">Gå till Fritid &amp; föreningsliv <i data-lucide="arrow-right"></i></a></nav>
+
     <section id="sport-hub-view" class="sport-hub-view" aria-live="polite">
       <div class="sport-hub-loading">Hämtar lokala föreningar och aktiviteter…</div>
     </section>
@@ -47,7 +55,7 @@
   <script src="dp-safety.js?version=0.23.4"></script>
   <script src="municipality-engine.js?version=0.23.4"></script>
   <script src="sport-data-engine.js?version=1.0.0"></script>
-  <script src="sport-hub-stage48.js?version=1.1.0"></script>
+  <script src="sport-hub-stage48.js?version=1.2.0"></script>
   <script src="privacy-controls.js?version=0.23.4"></script>
 </body>
 </html>

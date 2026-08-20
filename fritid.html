@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="sv" data-portal="leisure">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Hitta scouter, musik, körer, spel, skapande, natur och föreningsliv i din kommun.">
+  <title>Fritid &amp; föreningsliv – DinPuls</title>
+  <link rel="stylesheet" href="styles.css?version=0.23.16">
+  <link rel="stylesheet" href="portal-pages.css?version=0.23.4">
+  <link rel="stylesheet" href="leisure-hub.css?version=1.0.0">
+  <style>.leisure-show-more{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border:1px dashed color-mix(in srgb,var(--accent) 38%,#dce6ef);border-radius:13px;background:color-mix(in srgb,var(--accent) 6%,white);color:var(--accent);font:inherit;font-size:.76rem;font-weight:900;cursor:pointer}.leisure-show-more:hover{background:color-mix(in srgb,var(--accent) 12%,white)}.leisure-show-more svg{width:17px}</style>
+  <link rel="icon" href="favicon.ico?version=0.23.6" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.6">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.6">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?version=0.23.6">
+  <link rel="manifest" href="site.webmanifest?version=0.23.6">
+</head>
+<body>
+  <header class="portal-header">
+    <a href="index.html" class="portal-brand"><img src="assets/logo.svg?version=0.23.6" alt="DinPuls" width="620" height="150"></a>
+    <a href="index.html">← Till startsidan</a>
+  </header>
+  <main class="portal-main leisure-hub">
+    <section class="leisure-hero">
+      <span class="leisure-hero-spark leisure-hero-spark-one"><i data-lucide="music-2"></i></span>
+      <span class="leisure-hero-spark leisure-hero-spark-two"><i data-lucide="palette"></i></span>
+      <div><span class="section-kicker">Något för varje intresse</span><h1>Fritid &amp; föreningsliv i <span id="leisure-place">Åmål</span></h1><p>Upptäck små och stora föreningar, lokala eldsjälar och aktiviteter nära dig.</p></div>
+    </section>
+    <section class="leisure-search-panel" aria-labelledby="leisure-search-title">
+      <div class="leisure-search-heading"><span><i data-lucide="search"></i></span><div><h2 id="leisure-search-title">Vad vill du göra?</h2><p>Sök på ett namn eller ett intresse – exempelvis hund, kör, brädspel, scouter eller barn.</p></div></div>
+      <div class="leisure-search-row">
+        <label class="leisure-search-box"><span class="visually-hidden">Sök förening eller aktivitet</span><i data-lucide="search"></i><input id="leisure-search" type="search" autocomplete="off" placeholder="Sök förening eller aktivitet…"><button id="leisure-clear" type="button" aria-label="Rensa sökningen"><i data-lucide="x"></i></button></label>
+        <label class="leisure-municipality"><span>Kommun</span><select id="leisure-municipality"></select></label>
+      </div>
+      <div class="leisure-suggestions" aria-label="Populära sökningar"><button type="button" data-query="barn">Barn &amp; unga</button><button type="button" data-query="musik">Musik</button><button type="button" data-query="natur">Natur</button><button type="button" data-query="spel">Spel</button><button type="button" data-query="hund">Hund</button></div>
+      <p id="leisure-search-status" class="leisure-search-status" aria-live="polite"></p>
+    </section>
+    <nav class="leisure-crosslink" aria-label="Relaterat innehåll"><span><i data-lucide="trophy"></i><strong>Söker du fotboll, hockey eller annan idrott?</strong></span><a id="leisure-sport-link" href="sport.html">Gå till Idrott &amp; motion <i data-lucide="arrow-right"></i></a></nav>
+    <section id="leisure-view" class="leisure-view" aria-live="polite"><div class="leisure-loading">Hämtar föreningar och aktiviteter…</div></section>
+  </main>
+  <script src="assets/vendor/lucide.min.js"></script>
+  <script src="dp-safety.js?version=0.23.6"></script>
+  <script src="municipality-engine.js?version=0.23.6"></script>
+  <script src="leisure-hub.js?version=1.0.0"></script>
+  <script src="privacy-controls.js?version=0.23.6"></script>
+</body>
+</html>

@@ -16,14 +16,14 @@ VERSION = INDEX_VERSION_MATCH.group(1)
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
-    "evenemang.html", "lunch.html", "matkasse.html", "sport.html",
+    "evenemang.html", "lunch.html", "matkasse.html", "sport.html", "fritid.html",
     "information.html", "vard.html", "myndigheter.html", "service.html",
     "nyheter.html", "drivmedel.html", "bio.html",
 ]
 COMPONENTS = [
     "header", "homepage-guide", "google-search", "quick-strip", "navigation", "lunch-strip", "hero",
     "missing-people", "secondary-cards", "primary-cards", "transport", "premium-ad-1", "jobs-housing", "premium-ad-2",
-    "health", "sport", "cinema", "service", "authorities",
+    "health", "sport", "leisure", "cinema", "service", "authorities",
     "premium-ad-3", "footer",
 ]
 
@@ -276,8 +276,15 @@ def verify_simple_sport_hub() -> None:
         assert not (ROOT / asset).exists(), f"Avancerad sportfil ska vara borttagen: {asset}"
     sport = (ROOT / "sport.html").read_text(encoding="utf-8")
     sport_script = (ROOT / "sport-hub-stage48.js").read_text(encoding="utf-8")
-    assert "Föreningar &amp; fritid" in sport and 'id="sport-hub-view"' in sport
-    assert "DISCOVERY" in sport_script and "sportModule" in sport_script and "discoveryModule" in sport_script
+    assert "Idrott &amp; motion" in sport and 'id="sport-hub-view"' in sport and 'id="sport-hub-search"' in sport
+    assert "sportModule" in sport_script and "DISCOVERY" not in sport_script
+
+    leisure = (ROOT / "fritid.html").read_text(encoding="utf-8")
+    leisure_script = (ROOT / "leisure-hub.js").read_text(encoding="utf-8")
+    leisure_data = municipality_map("data/leisure.json")
+    assert "Fritid &amp; föreningsliv" in leisure and 'id="leisure-search"' in leisure
+    assert "searchable" in leisure_script and "leisureModule" not in leisure_script
+    assert all(payload.get("directoryUrl", "").startswith("https://") for payload in leisure_data.values()), "Fritidsregistret saknar kommunlänkar"
 
     data = load_json("data/sports.json")
     providers = data.get("sportProviders", {})
@@ -358,6 +365,7 @@ def verify_review_fixes() -> None:
         'data-component="premium-ad-2"',
         'data-component="health"',
         'data-component="sport"',
+        'data-component="leisure"',
         'data-component="cinema"',
         'data-component="service"',
         'data-component="authorities"',

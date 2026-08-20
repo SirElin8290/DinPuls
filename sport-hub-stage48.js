@@ -7,17 +7,12 @@
   const META = {
     Fotboll:["circle-dot","green"],Futsal:["circle-dot","green"],Innebandy:["target","purple"],Ishockey:["disc-3","blue"],Bandy:["goal","cyan"],Handboll:["circle-dot","orange"],Basket:["circle-dot","orange"],Bowling:["circle","violet"],Golf:["flag-triangle-right","green"],Ridsport:["trophy","rose"],Motorsport:["flag","red"],Orientering:["compass","green"],Löpning:["person-standing","orange"],Skidor:["mountain-snow","cyan"],Mountainbike:["bike","green"],Cykel:["bike","green"],Tennis:["circle-dot","yellow"],Badminton:["activity","yellow"],Bordtennis:["circle-dot","red"],Boule:["circle","blue"],Kampsport:["shield","red"],Boxning:["badge","red"],Bågskytte:["target","green"],Simning:["waves","blue"],Gymnastik:["sparkles","purple"],Skytte:["target","slate"],Kanot:["waves","blue"],Travsport:["trophy","orange"],Parasport:["accessibility","blue"],Sportfiske:["fish","cyan"]
   };
-  const DISCOVERY = [
-    {id:"Scouter",icon:"compass",accent:"green",title:"Scouter & friluftsliv",text:"Kårer, friluftsaktiviteter och gemenskap för barn och unga."},
-    {id:"Dans",icon:"music-2",accent:"purple",title:"Dans",text:"Dansföreningar, kurser och lokala dansaktiviteter."},
-    {id:"Musik & barnkör",icon:"mic-2",accent:"rose",title:"Musik & barnkör",text:"Körer, musikföreningar och skapande verksamhet."},
-    {id:"Barn & unga",icon:"sparkles",accent:"orange",title:"Barn & unga",text:"Övriga föreningar och fritidsaktiviteter för barn och ungdomar."}
-  ];
   let municipality = state.getInitial();
   let requested = params.get("kategori") || params.get("sport") || "all";
   let data;
   const current = () => data?.municipalities?.[municipality] || {clubs:[],liveSources:[],matches:[]};
   const sports = () => [...new Set((current().clubs||[]).flatMap(club=>club.sports||[]))].sort((a,b)=>a.localeCompare(b,"sv"));
+  const normalize = value => String(value||"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const meta = sport => META[sport] || ["users","blue"];
   const validMatch = match => match?.sport && match.homeTeam && match.awayTeam && !Number.isNaN(new Date(match.startTime).getTime());
   const finished = match => ["finished","final","ended"].includes(String(match.status||"").toLowerCase()) || (Number.isFinite(Number(match.homeScore)) && Number.isFinite(Number(match.awayScore)));
@@ -39,9 +34,9 @@
     if(!matches.length)return '<div class="activity-data-missing"><i data-lucide="link"></i><span><strong>Automatisk matchdata saknas</strong><small>Använd länken till lagets eller förbundets aktuella resultat- och matchsida.</small></span></div>';
     return '<div class="activity-matches">'+matches.slice(-5).map(match=>`<article><time>${esc(dateTime(match.startTime))}</time><span><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc(match.competition||match.venue||"Match")}</small></span><b>${finished(match)?`${esc(match.homeScore)}–${esc(match.awayScore)}`:"Kommande"}</b>${match.sourceUrl?`<a href="${esc(safeUrl(match.sourceUrl))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna originalkällan">↗</a>`:""}</article>`).join("")+"</div>";
   }
-  function sportModule(sport){
+  function sportModule(sport, query=""){
     const [icon,accent]=meta(sport);
-    const clubs=(current().clubs||[]).filter(club=>(club.sports||[]).includes(sport));
+    const clubs=(current().clubs||[]).filter(club=>(club.sports||[]).includes(sport)).filter(club=>!query||normalize([sport,club.name,...(club.teams||[]).map(team=>team.name)].join(" ")).includes(query));
     const clubLinks=clubs.map(club=>{
       const teams=(club.teams||[]).filter(team=>team.sport===sport);
       const teamLinks=teams.length?`<div class="activity-teams" aria-label="Lag i ${esc(club.name)}">${teams.map(team=>`<a href="${esc(safeUrl(team.url||club.url))}" target="_blank" rel="noopener noreferrer"><span>${esc(team.name)}</span><small>Matcher, resultat och tabell</small><i data-lucide="external-link"></i></a>`).join("")}</div>`:"";
@@ -49,26 +44,23 @@
     }).join("");
     return `<article class="activity-module" data-accent="${accent}"><header><span class="activity-icon"><i data-lucide="${icon}"></i></span><div><span class="section-kicker">Idrott</span><h2>${esc(sport)}</h2><p>${clubs.length} ${clubs.length===1?"lokal förening":"lokala föreningar"}</p></div></header><div class="activity-clubs">${clubLinks}</div>${matchRows(sport)}${sourceLinks(sport)}</article>`;
   }
-  function discoveryModule(item){
-    const directory=current().directoryUrl;
-    return `<article class="activity-module activity-discovery" data-accent="${item.accent}"><header><span class="activity-icon"><i data-lucide="${item.icon}"></i></span><div><span class="section-kicker">Föreningsliv</span><h2>${esc(item.title)}</h2><p>${esc(item.text)}</p></div></header><div class="activity-data-missing"><i data-lucide="search"></i><span><strong>Se vilka verksamheter som finns i ${esc(municipality)}</strong><small>Utbud och kontaktuppgifter kan ändras. Kommunens föreningsregister är originalkällan.</small></span></div>${directory?`<div class="activity-links"><a class="primary" href="${esc(safeUrl(directory))}" target="_blank" rel="noopener noreferrer"><i data-lucide="list-tree"></i><span><strong>Öppna kommunens föreningsregister</strong><small>Scouter, kultur, barn, unga och övrig fritid</small></span></a></div>`:""}</article>`;
-  }
   function updateControls(){
     document.querySelector("#sport-hub-place").textContent=municipality;
-    document.title=`Föreningar & fritid i ${municipality} – DinPuls`;
+    document.title=`Idrott & motion i ${municipality} – DinPuls`;
     const select=document.querySelector("#sport-hub-sport");
-    const options=[...sports(),...DISCOVERY.map(item=>item.id)];
+    const options=[...sports()];
     select.innerHTML='<option value="all">Alla aktiviteter</option>'+options.map(item=>`<option value="${esc(item)}">${esc(item)}</option>`).join("");
     select.value=options.includes(requested)?requested:"all";
     document.querySelector("#sport-hub-freshness").innerHTML=`<i data-lucide="shield-check"></i> ${sports().length} idrotter · officiella källor och kommunens föreningsregister`;
   }
   function render(){
     const selected=document.querySelector("#sport-hub-sport")?.value||"all";
-    const shownSports=selected==="all"?sports():sports().filter(sport=>sport===selected);
-    const shownDiscovery=selected==="all"?DISCOVERY:DISCOVERY.filter(item=>item.id===selected);
+    const query=normalize(document.querySelector("#sport-hub-search")?.value);
+    const shownSports=(selected==="all"?sports():sports().filter(sport=>sport===selected)).filter(sport=>!query||(current().clubs||[]).some(club=>(club.sports||[]).includes(sport)&&normalize([sport,club.name,...(club.teams||[]).map(team=>team.name)].join(" ")).includes(query)));
     const clubs=current().clubs||[];
-    document.querySelector("#sport-hub-summary").innerHTML=`<article><strong>${clubs.length}</strong><span>verifierade idrottsföreningar</span></article><article><strong>${sports().length}</strong><span>idrotter med egen modul</span></article><article><strong>${DISCOVERY.length}</strong><span>ingångar till övrigt föreningsliv</span></article>`;
-    document.querySelector("#sport-hub-view").innerHTML=shownSports.map(sportModule).join("")+shownDiscovery.map(discoveryModule).join("");
+    document.querySelector("#sport-hub-summary").innerHTML=`<article><strong>${clubs.length}</strong><span>verifierade idrottsföreningar</span></article><article><strong>${sports().length}</strong><span>idrotter med egen modul</span></article><article><strong>${shownSports.length}</strong><span>${query?"sökresultat":"visas just nu"}</span></article>`;
+    document.querySelector("#sport-hub-search-status").textContent=query?`${shownSports.length} idrott${shownSports.length===1?"":"er"} matchar sökningen i ${municipality}`:"";
+    document.querySelector("#sport-hub-view").innerHTML=shownSports.length?shownSports.map(sport=>sportModule(sport,query)).join(""):`<article class="sport-search-empty"><i data-lucide="search-x"></i><h2>Ingen träff i ${esc(municipality)}</h2><p>Prova ett annat ord eller välj Alla aktiviteter.</p></article>`;
     if(window.lucide)window.lucide.createIcons();
   }
   async function init(){
@@ -80,8 +72,13 @@
     municipalitySelect.innerHTML=state.MUNICIPALITIES.map(item=>`<option value="${esc(item)}">${esc(item)}</option>`).join("");
     municipalitySelect.value=municipality;
     updateControls();render();
-    municipalitySelect.addEventListener("change",event=>{municipality=event.target.value;requested="all";state.set(municipality);updateControls();render();});
+    municipalitySelect.addEventListener("change",event=>{municipality=event.target.value;requested="all";state.set(municipality);document.querySelector("#sport-leisure-link").href=`fritid.html?kommun=${encodeURIComponent(municipality)}`;updateControls();render();});
     document.querySelector("#sport-hub-sport").addEventListener("change",render);
+    const search=document.querySelector("#sport-hub-search");
+    search.value=params.get("q")||"";
+    search.addEventListener("input",render);
+    document.querySelector("#sport-hub-clear").addEventListener("click",()=>{search.value="";search.focus();render();});
+    document.querySelector("#sport-leisure-link").href=`fritid.html?kommun=${encodeURIComponent(municipality)}`;
   }
   init().catch(error=>{console.error(error);document.querySelector("#sport-hub-view").innerHTML='<div class="sport-hub-loading">Föreningar och fritid kunde inte laddas. Försök igen om en stund.</div>';});
 })();

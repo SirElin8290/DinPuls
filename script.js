@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.23.10
+   DINPULS.SE v0.24.0
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.23.16";
+const DINPULS_VERSION = "0.24.0";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -38,6 +38,7 @@ const componentNames = [
   "primary-cards",
   "transport",
   "sport",
+  "leisure",
   "health",
   "authorities",
   "service",
@@ -227,7 +228,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
+    await Promise.all([initializeImportant(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeLeisure(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -312,6 +313,7 @@ const HOME_OPTIONAL_MODULES = Object.freeze({
   jobs: ["#jobb"],
   housing: ["#bostader"],
   sport: [".sport-home"],
+  leisure: [".leisure-home"],
   cinema: [".cinema-home"],
   health: [".health-home"],
   service: [".service-home"],
@@ -472,7 +474,8 @@ function initializeSearch() {
       { terms: ["lunch", "restaurang", "dagens lunch"], url: `lunch.html?kommun=${municipality}` },
       { terms: ["bio", "biograf", "film", "filmer", "filmprogram"], url: `bio.html?kommun=${municipality}` },
       { terms: ["evenemang", "event", "kalender", "festival", "konsert"], url: `evenemang.html?kommun=${municipality}` },
-      { terms: ["sport", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf"], url: `sport.html?kommun=${municipality}` },
+      { terms: ["sport", "idrott", "motion", "matcher", "resultat", "tabell", "fotboll", "innebandy", "ishockey", "golf", "ridning"], url: `sport.html?kommun=${municipality}` },
+      { terms: ["fritid", "förening", "scouter", "kör", "musik", "dans", "teater", "brädspel", "gaming", "hund", "natur", "hembygd", "bygdegård"], url: `fritid.html?kommun=${municipality}` },
       { terms: ["vård", "hälsa", "vårdcentral", "1177", "apotek", "tandläkare", "fysioterapeut", "fysioterapi", "kiropraktor", "naprapat", "massage", "fotvård", "psykolog"], url: `vard.html?kommun=${municipality}` },
       { terms: ["myndighet", "myndigheter", "samhällsservice", "socialen", "socialtjänst", "försäkringskassan", "vab", "sjukpenning", "pension", "skatt", "deklaration", "folkbokföring", "arbetsförmedlingen", "csn", "kronofogden", "skuld", "polisen", "körkort", "transportstyrelsen", "trafikverket", "bygglov", "god man"], url: `myndigheter.html?kommun=${municipality}` },
       { terms: ["service", "hantverk", "verkstad", "bilverkstad", "däck", "däckbyte", "snickare", "rörmokare", "vvs", "elektriker", "målare", "golvläggare", "byggvaruhus", "byggmax", "optimera", "jem och fix", "städ", "flytt", "låssmed"], url: `service.html?kommun=${municipality}` },
@@ -997,7 +1000,7 @@ function applyMunicipality(config) {
 }
 
 function updateMunicipalityLinks(municipality) {
-  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "bio.html", "sport.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "bio.html", "sport.html", "fritid.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
   document.querySelectorAll("a[href]").forEach(link => {
     const raw = link.getAttribute("href");
     if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;
@@ -2743,9 +2746,9 @@ function renderSportsHome(config) {
   const summary = document.querySelector("#sport-home-summary");
   const list = document.querySelector("#sport-home-list");
   const link = document.querySelector("#sport-home-link");
-  if (summary) summary.innerHTML = `<strong>${clubs.length} idrottsföreningar · ${sports.length} idrotter</strong><span>Scouter, dans, musik, barnkör och övrig fritid finns också på undersidan</span>`;
+  if (summary) summary.innerHTML = `<strong>${clubs.length} idrottsföreningar · ${sports.length} aktiviteter</strong><span>Lag, motion, matcher och direkta föreningslänkar</span>`;
   document.querySelectorAll("[data-quick-sport-title]").forEach((element) => {
-    element.textContent = `Föreningar & fritid i ${config.name}`;
+    element.textContent = `Idrott & motion i ${config.name}`;
   });
   document.querySelectorAll("[data-quick-sport-detail]").forEach((element) => {
     element.textContent = `${clubs.length} föreningar · ${sports.length} idrotter`;
@@ -2761,16 +2764,39 @@ function renderSportsHome(config) {
     clubs: clubs.filter((club) => (club.sports || []).includes(sport)),
     matches: matches.filter((match) => match.sport === sport)
   }));
-  featured.push({ sport: "Scouter, dans & musik", clubs: [], matches: [], discovery: true });
   if (list) list.innerHTML = featured.map((item) => {
-    const visual = item.discovery ? ["sparkles", "orange"] : (iconMap[item.sport] || ["users", "blue"]);
-    const target = item.discovery ? "Barn%20%26%20unga" : encodeURIComponent(item.sport);
+    const visual = iconMap[item.sport] || ["users", "blue"];
+    const target = encodeURIComponent(item.sport);
     return `<a data-accent="${visual[1]}" href="sport.html?kommun=${encodeURIComponent(config.name)}&kategori=${target}">
     <span class="sport-home-icon"><i data-lucide="${visual[0]}"></i></span>
-    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.discovery ? "Hitta fler lokala aktiviteter" : (item.matches.length ? `${item.matches.length} matcher/resultat` : `${item.clubs.length} lokala föreningar · officiella länkar`)}</small></span>
+    <span><strong>${escapeHtml(item.sport)}</strong><small>${item.matches.length ? `${item.matches.length} matcher/resultat` : `${item.clubs.length} lokala föreningar · officiella länkar`}</small></span>
     <i data-lucide="chevron-right"></i>
   </a>`;
   }).join("");
   if (link) link.href = `sport.html?kommun=${encodeURIComponent(config.name)}`;
   if (window.lucide) lucide.createIcons();
+}
+
+async function initializeLeisure() {
+  const response = await fetch("data/leisure.json", { cache: "no-cache" });
+  if (!response.ok) throw new Error(`Fritidsdata kunde inte laddas: ${response.status}`);
+  const data = await response.json();
+  const render = (config) => {
+    const municipality = data.municipalities?.[config.name] || { activities: [] };
+    const activities = Array.isArray(municipality.activities) ? municipality.activities : [];
+    const categories = new Set(activities.map((item) => item.category));
+    const summary = document.querySelector("#leisure-home-summary");
+    const link = document.querySelector("#leisure-home-link");
+    if (summary) summary.textContent = activities.length
+      ? `${activities.length} verifierade verksamheter inom ${categories.size} områden`
+      : "Sök i kommunens föreningsliv och lokala aktiviteter";
+    document.querySelectorAll("#leisure-home-grid a").forEach((element) => {
+      const url = new URL(element.getAttribute("href"), window.location.href);
+      url.searchParams.set("kommun", config.name);
+      element.href = `${url.pathname.split("/").pop()}?${url.searchParams.toString()}`;
+    });
+    if (link) link.href = `fritid.html?kommun=${encodeURIComponent(config.name)}`;
+  };
+  DinPulsMunicipality.subscribe("leisure", render);
+  render(DinPulsMunicipality.getConfig());
 }
