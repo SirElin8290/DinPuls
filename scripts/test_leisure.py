@@ -34,6 +34,21 @@ class LeisureModuleTests(unittest.TestCase):
         names = [item["name"] for item in self.data["municipalities"]["Årjäng"]["activities"]]
         self.assertIn("Mosseruds Gård", names)
 
+    def test_verified_direct_links_are_applied(self):
+        overrides = json.loads((ROOT / "data/association-link-overrides.json").read_text(encoding="utf-8"))
+        sports = json.loads((ROOT / "data/sports.json").read_text(encoding="utf-8"))
+        actual = {}
+        for municipality, payload in self.data["municipalities"].items():
+            for activity in payload["activities"]:
+                actual[f"{municipality}|{activity['name']}"] = activity["url"]
+        for municipality, payload in sports["municipalities"].items():
+            for club in payload["clubs"]:
+                actual[f"{municipality}|{club['name']}"] = club["url"]
+        self.assertGreaterEqual(len(overrides), 190)
+        for key, url in overrides.items():
+            self.assertTrue(url.startswith("https://"), key)
+            self.assertEqual(actual.get(key), url, key)
+
     def test_sport_and_leisure_are_independently_optional(self):
         index = (ROOT / "index.html").read_text(encoding="utf-8")
         script = (ROOT / "script.js").read_text(encoding="utf-8")

@@ -114,6 +114,7 @@ DIRECT_LINKS = {
     "Åmåls Scoutkår": "https://www.scouterna.se/hitta-scoutkar/vastra-gotalands-lan/amals-kommun/amals-scoutkar/",
     "Årjängs Brukshundklubb": "https://arjangsbrukshund.wordpress.com/",
 }
+LINK_OVERRIDES = json.loads((ROOT / "data/association-link-overrides.json").read_text(encoding="utf-8"))
 
 SPORT_WORDS = {
     "Fotboll": ("fotboll",), "Futsal": ("futsal",), "Innebandy": ("innebandy",),
@@ -270,7 +271,7 @@ def grums_rows() -> tuple[list[dict], list[dict]]:
     return leisure, sports
 
 
-def dedupe(items: list[dict], manual: list[dict]) -> list[dict]:
+def dedupe(items: list[dict], manual: list[dict], municipality: str) -> list[dict]:
     def key_for(name):
         key = re.sub(r"[^a-zåäö0-9]", "", name.casefold())
         key = key.replace("brukshundsklubb", "brukshundklubb").replace("forening", "förening")
@@ -291,8 +292,9 @@ def dedupe(items: list[dict], manual: list[dict]) -> list[dict]:
                 item = dict(item, tags=list(dict.fromkeys(item.get("tags", []) + generated["tags"])))
         merged[key] = item
     for item in merged.values():
-        if item["name"] in DIRECT_LINKS:
-            item["url"] = DIRECT_LINKS[item["name"]]
+        direct_url = LINK_OVERRIDES.get(f"{municipality}|{item['name']}") or DIRECT_LINKS.get(item["name"])
+        if direct_url:
+            item["url"] = direct_url
             if "source" in item:
                 item["source"] = "Föreningens egen sida"
     return sorted(merged.values(), key=lambda item: item["name"].casefold())
@@ -323,9 +325,9 @@ def main():
             leisure_by[name].append({"name":extra_name, "category":category, "categoryLabel":label,
                 "tags":[label, "kyrka", "musik" if category == "musik" else "gemenskap"], "type":"Fritidsverksamhet", "url":url})
         manual_leisure = old_leisure["municipalities"][name]["activities"]
-        output_leisure["municipalities"][name] = {"directoryUrl":DIRECTORIES[name], "activities":dedupe(leisure_by[name], manual_leisure)}
+        output_leisure["municipalities"][name] = {"directoryUrl":DIRECTORIES[name], "activities":dedupe(leisure_by[name], manual_leisure, name)}
         manual_sports = old_sports["municipalities"][name]["clubs"]
-        old_sports["municipalities"][name]["clubs"] = dedupe(sports_by[name], manual_sports)
+        old_sports["municipalities"][name]["clubs"] = dedupe(sports_by[name], manual_sports, name)
     old_sports["generatedAt"] = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     (ROOT / "data/leisure.json").write_text(json.dumps(output_leisure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (ROOT / "data/sports.json").write_text(json.dumps(old_sports, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
