@@ -18,7 +18,10 @@ SOURCES = ROOT / "data" / "lunch-sources.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
-EXPECTED_MUNICIPALITIES = {"Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"}
+EXPECTED_MUNICIPALITIES = {
+    item["name"]
+    for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+}
 DAYS = {
     "måndag": "monday", "mandag": "monday",
     "tisdag": "tuesday", "onsdag": "wednesday",

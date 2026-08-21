@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "missing-people.json"
 SOURCE_URL = "https://www.missingpeople.se/efterlysningar/"
 USER_AGENT = "DinPuls/0.24 (+https://dinpuls.se/)"
-MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
+MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil"]
 MAX_AGE_MINUTES = 90
 
 NEIGHBORS = {
@@ -29,7 +29,8 @@ NEIGHBORS = {
     "Mellerud": ["Åmål", "Bengtsfors"],
     "Årjäng": ["Säffle", "Bengtsfors", "Arvika"],
     "Arvika": ["Årjäng", "Säffle", "Grums"],
-    "Grums": ["Säffle", "Arvika"],
+    "Grums": ["Säffle", "Arvika", "Kil"],
+    "Kil": ["Grums", "Arvika"],
 }
 
 PLACE_ALIASES = {
@@ -40,6 +41,7 @@ PLACE_ALIASES = {
     "Årjäng": ["Årjäng", "Töcksfors", "Sillerud", "Lennartsfors", "Holmedal"],
     "Arvika": ["Arvika", "Edane", "Glava", "Gunnarskog", "Jössefors", "Sulvik", "Mangskog"],
     "Grums": ["Grums", "Slottsbron", "Segmon", "Borgvik"],
+    "Kil": ["Kil", "Fagerås", "Högboda", "Tolita", "Fryksta"],
 }
 
 
@@ -188,7 +190,7 @@ def main() -> int:
     }
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     local_ids = {item["id"] for payload in output["municipalities"].values() for item in payload["items"]}
-    print(f"Missing People: {len(local_ids)} lokalt relevanta efterlysningar fördelade till sju kommunflöden")
+    print(f"Missing People: {len(local_ids)} lokalt relevanta efterlysningar fördelade till åtta kommunflöden")
     return 0
 
 

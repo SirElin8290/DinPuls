@@ -5,7 +5,7 @@
   const STORAGE_KEY = "dinpuls-municipality";
   const DEFAULT_NAME = "Åmål";
   const MUNICIPALITIES = Object.freeze([
-    "Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"
+    "Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil"
   ]);
 
   const canonicalNames = new Map(

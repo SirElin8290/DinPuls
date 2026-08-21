@@ -16,7 +16,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
+MUNICIPALITIES = [
+    item["name"]
+    for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+]
 DIRECTORIES = {
     "Åmål": "https://saffle.ibgo.se/AssociationRegister",
     "Säffle": "https://saffle.ibgo.se/AssociationRegister",
@@ -25,6 +28,7 @@ DIRECTORIES = {
     "Årjäng": "https://arjang.interbookfri.se/AssociationRegister",
     "Arvika": "https://arvika.ibgo.se/AssociationRegister",
     "Grums": "https://business.updatesystem.se/ifgrums/search-char",
+    "Kil": "https://kil.rbok.se/foreningsregister",
 }
 IBGO = {
     "Åmål": ("https://saffle.ibgo.se", "18"),

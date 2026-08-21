@@ -58,7 +58,7 @@
     if(!response.ok) throw new Error(`Fritidsdata kunde inte laddas: ${response.status}`);
     data = await response.json();
     const select = document.querySelector("#leisure-municipality");
-    select.innerHTML = `<option value="${ALL_MUNICIPALITIES}">Alla sju kommuner</option>` + state.MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
+    select.innerHTML = `<option value="${ALL_MUNICIPALITIES}">Alla kommuner</option>` + state.MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
     select.value = municipality;
     document.querySelector("#leisure-place").textContent = municipality;
     document.querySelector("#leisure-sport-link").href = `sport.html?kommun=${encodeURIComponent(municipality)}`;

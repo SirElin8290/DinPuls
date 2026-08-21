@@ -4,7 +4,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
+MUNICIPALITY_CONFIG = json.loads((ROOT / "data/municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+MUNICIPALITIES = [item["name"] for item in MUNICIPALITY_CONFIG]
+PILOT_MUNICIPALITIES = {item["name"] for item in MUNICIPALITY_CONFIG if item.get("launchMode") == "pilot"}
 
 
 class LeisureModuleTests(unittest.TestCase):
@@ -21,7 +23,8 @@ class LeisureModuleTests(unittest.TestCase):
     def test_activities_are_local_searchable_and_secure(self):
         total = 0
         for name, payload in self.data["municipalities"].items():
-            self.assertGreaterEqual(len(payload["activities"]), 40, name)
+            if name not in PILOT_MUNICIPALITIES:
+                self.assertGreaterEqual(len(payload["activities"]), 40, name)
             total += len(payload["activities"])
             for activity in payload["activities"]:
                 self.assertTrue(activity["name"], name)

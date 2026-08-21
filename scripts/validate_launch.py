@@ -13,7 +13,10 @@ INDEX_SOURCE = (ROOT / "index.html").read_text(encoding="utf-8")
 INDEX_VERSION_MATCH = re.search(r'<html[^>]+data-version="([^"]+)"', INDEX_SOURCE)
 assert INDEX_VERSION_MATCH, "index.html saknar data-version"
 VERSION = INDEX_VERSION_MATCH.group(1)
-MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]
+MUNICIPALITY_CONFIG = json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+MUNICIPALITIES = [item["name"] for item in MUNICIPALITY_CONFIG]
+PILOT_MUNICIPALITIES = {item["name"] for item in MUNICIPALITY_CONFIG if item.get("launchMode") == "pilot"}
+STRICT_MUNICIPALITIES = [name for name in MUNICIPALITIES if name not in PILOT_MUNICIPALITIES]
 ACTIVE_PAGES = [
     "index.html", "jobb.html", "bostader.html", "trafik.html",
     "evenemang.html", "lunch.html", "matkasse.html", "sport.html", "fritid.html",
@@ -160,8 +163,9 @@ def verify_data() -> None:
     for name, payload in transport.items():
         stops = payload.get("stops", [])
         departures = [item for stop in stops for item in stop.get("departures", [])]
-        assert stops, f"{name}: säker hållplats saknas"
-        assert departures, f"{name}: inga kollektivtrafikavgångar"
+        if name in STRICT_MUNICIPALITIES:
+            assert stops, f"{name}: säker hållplats saknas"
+            assert departures, f"{name}: inga kollektivtrafikavgångar"
     assert load_json("data/transport.json").get("source") != "demo", "Kollektivtrafiken använder demodata"
 
     jobs = municipality_map("data/jobs.json")
@@ -172,7 +176,7 @@ def verify_data() -> None:
     municipality_map("data/important.json")
     municipality_map("data/road-traffic.json")
 
-    for name in MUNICIPALITIES:
+    for name in STRICT_MUNICIPALITIES:
         assert jobs[name].get("jobs"), f"{name}: jobb saknas"
         assert housing[name].get("providers"), f"{name}: bostadskälla saknas"
         assert events[name].get("sources"), f"{name}: evenemangskällor saknas"
@@ -198,7 +202,7 @@ def verify_health() -> None:
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Vårdmodulen saknar någon startkommun"
     assert data.get("officialCareUrl", "").startswith("https://www.1177.se/"), "Vårdmodulen saknar officiell 1177-källa"
     providers = data.get("providers", [])
-    assert all(any(item.get("municipality") == name for item in providers) for name in MUNICIPALITIES), "Vårdmodulen saknar lokal mottagning i någon kommun"
+    assert all(any(item.get("municipality") == name for item in providers) for name in STRICT_MUNICIPALITIES), "Vårdmodulen saknar lokal mottagning i någon aktiv kommun"
     assert all(str(item.get("url", "")).startswith("https://") for item in providers), "Vårdmodulen innehåller en ogiltig direktlänk"
     page = (ROOT / "vard.html").read_text(encoding="utf-8")
     component = (ROOT / "components/health.html").read_text(encoding="utf-8")
@@ -213,7 +217,7 @@ def verify_service() -> None:
     data = load_json("data/service.json")
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Servicemodulen saknar någon startkommun"
     businesses = data.get("businesses", [])
-    assert all(any(item.get("municipality") == name for item in businesses) for name in MUNICIPALITIES), "Servicemodulen saknar lokalt företag i någon kommun"
+    assert all(any(item.get("municipality") == name for item in businesses) for name in STRICT_MUNICIPALITIES), "Servicemodulen saknar lokalt företag i någon aktiv kommun"
     assert all(str(item.get("url", "")).startswith("https://") for item in businesses), "Servicemodulen innehåller en ogiltig direktlänk"
     page = (ROOT / "service.html").read_text(encoding="utf-8")
     component = (ROOT / "components" / "service.html").read_text(encoding="utf-8")
@@ -250,7 +254,7 @@ def verify_cinema() -> None:
     data = load_json("data/cinemas.json")
     municipalities = data.get("municipalities", {})
     assert list(municipalities) == MUNICIPALITIES, "Biomodulen saknar någon startkommun"
-    assert all(municipalities[name] for name in MUNICIPALITIES), "Någon kommun saknar biograf"
+    assert all(municipalities[name] for name in STRICT_MUNICIPALITIES), "Någon aktiv kommun saknar biograf"
     assert len(municipalities["Mellerud"]) == 2, "Melleruds två biografer ska visas"
     for name, cinemas in municipalities.items():
         for cinema in cinemas:
@@ -298,8 +302,9 @@ def verify_simple_sport_hub() -> None:
     assert len(local_sources) >= 25, "Sporthubben saknar lokala direktlänkar"
     for name, payload in municipalities.items():
         assert payload.get("directoryUrl", "").startswith("https://"), f"{name}: föreningsregister saknas"
-        assert payload.get("clubs"), f"{name}: föreningar saknas"
-        assert payload.get("liveSources"), f"{name}: sportkällor saknas"
+        if name in STRICT_MUNICIPALITIES:
+            assert payload.get("clubs"), f"{name}: föreningar saknas"
+            assert payload.get("liveSources"), f"{name}: sportkällor saknas"
         for club in payload["clubs"]:
             assert club.get("url", "").startswith("https://"), f"{name}: ogiltig klubblänk"
         for source in payload["liveSources"]:
@@ -411,7 +416,7 @@ def main() -> int:
     for check in checks:
         check()
         print(f"✓ {check.__name__}")
-    print("✓ DinPuls är godkänd för publicering i sju kommuner")
+    print("✓ DinPuls är godkänd för publicering i åtta kommuner")
     return 0
 
 

@@ -25,6 +25,7 @@ LOCALITIES = {
     "Årjäng": {"årjäng", "töcksfors", "lennartsfors", "svanskog"},
     "Arvika": {"arvika", "edane", "glava", "jössefors", "sulvik", "gunnarskog", "klässbol", "mangskog"},
     "Grums": {"grums", "slottsbron", "segelmon", "borgvik", "liljedal"},
+    "Kil": {"kil", "fagerås", "högboda", "tolita", "fryksta"},
 }
 
 

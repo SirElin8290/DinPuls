@@ -4,7 +4,8 @@ const assert = require("assert");
 const worker = fs.readFileSync("cloudflare/push-worker.js", "utf8");
 const config = fs.readFileSync("wrangler.jsonc", "utf8");
 
-for (const municipality of ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"]) {
+const municipalities = JSON.parse(fs.readFileSync("data/municipalities.json", "utf8")).municipalities.map(item => item.name);
+for (const municipality of municipalities) {
   assert(worker.includes(`"${municipality}"`), `Kommun saknas i pushservern: ${municipality}`);
 }
 for (const category of ["extreme-weather", "missing-people", "important"]) {

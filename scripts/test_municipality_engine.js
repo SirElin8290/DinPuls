@@ -31,7 +31,7 @@ function loadEngine(search = "", stored = null) {
   return { engine: context.DinPulsMunicipalityState, storage, events, location };
 }
 
-const expected = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums"];
+const expected = JSON.parse(fs.readFileSync("data/municipalities.json", "utf8")).municipalities.map(item => item.name);
 const baseline = loadEngine();
 assert.deepEqual([...baseline.engine.MUNICIPALITIES], expected);
 assert.equal(baseline.engine.getInitial(), "Åmål");
@@ -49,4 +49,4 @@ assert.equal(loadEngine("?kommun=Okänd", "Arvika").engine.getInitial(), "Arvika
 assert.equal(loadEngine("?kommun=grums").engine.getInitial(), "Grums");
 assert.equal(loadEngine().engine.set("Ogiltig", { updateUrl: false }), "Åmål");
 
-console.log("✓ Kommunmotorn klarar alla sju kommuner, lagring, URL och fallback");
+console.log("✓ Kommunmotorn klarar alla åtta kommuner, lagring, URL och fallback");
