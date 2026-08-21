@@ -219,7 +219,14 @@ def main():
         if not stops or any(not str(stop.get("id", "")).strip() for stop in stops)
     ]
     if missing:
-        print("Saknar säkra hållplats-id:n för: " + ", ".join(missing))
+        print("Hoppar över kommuner utan säkra hållplats-id:n: " + ", ".join(missing))
+        stop_areas = {
+            municipality: stops
+            for municipality, stops in stop_areas.items()
+            if municipality not in missing
+        }
+    if not stop_areas:
+        print("Inga kommuner har säkra hållplats-id:n; befintlig transport.json behålls")
         return 1
 
     previous_stops = load_previous_stops()
@@ -274,8 +281,8 @@ def main():
         "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Trafiklab",
         "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
-        "partial": bool(failed_stops),
-        "failedMunicipalities": failed_stops,
+        "partial": bool(failed_stops or missing),
+        "failedMunicipalities": list(dict.fromkeys([*missing, *failed_stops])),
         "municipalities": municipalities,
     }
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
