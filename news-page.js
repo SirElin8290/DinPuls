@@ -91,7 +91,7 @@ function renderNewsPageSources() {
 function renderNewsAds() {
   document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
     const position = slot.dataset.adPosition;
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=Annonsplats%20nyheter%20${position}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls nyhetssida · 500 kr/mån</small></a>`;
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=Annonsplats%20nyheter%20${position}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls nyhetssida · 500 kr/månad + moms</small></a>`;
   });
 }
 

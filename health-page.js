@@ -43,7 +43,7 @@ function renderHealthAds() {
   document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
     const position = Number(slot.dataset.adPosition || 1);
     const subject = encodeURIComponent(`Annonsplats vård och hälsa ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Vård och hälsa · 500 kr/mån</small></a>`;
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Vård och hälsa · 500 kr/månad + moms</small></a>`;
   });
 }
 

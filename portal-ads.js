@@ -6,7 +6,7 @@
     slots.forEach(slot => {
       const position = Number(slot.dataset.adPosition || 1);
       const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/mån</small></a>`;
+      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/månad + moms</small></a>`;
     });
 
     const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");

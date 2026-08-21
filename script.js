@@ -1,9 +1,9 @@
 /* =========================================================
-   DINPULS.SE v0.24.1
+   DINPULS.SE v0.24.5
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.24.1";
+const DINPULS_VERSION = "0.24.5";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -2674,7 +2674,7 @@ function initializeRotatingAds() {
         return `<a class="ad-face" data-ad-face href="mailto:annonser@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
           <span class="ad-slot">PREMIUM ${slot}</span>
           <strong>Din verksamhet kan synas här</strong>
-          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 1 500 kr/mån</small>
+          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 500 kr/månad + moms</small>
           <b>Boka plats <i data-lucide="arrow-right"></i></b>
         </a>`;
       }).join("")}

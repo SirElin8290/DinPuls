@@ -209,7 +209,7 @@ Version 0.23.4 avslutar webbplatsens första stabiliseringsomgång: säkerhetsfu
   aktuella veckan.
 - Restauranger utan maskinläsbar meny visas med direktlänk till sin aktuella
   meny.
-- Fyra lokala annonsplatser på lunchsidan för 500 kr per månad.
+- Fyra lokala annonsplatser på lunchsidan för 500 kr per månad plus moms.
 - Lunchdata uppdateras automatiskt med GitHub Actions.
 
 ## Rättningar i v0.15.1
@@ -234,7 +234,7 @@ Version 0.23.4 avslutar webbplatsens första stabiliseringsomgång: säkerhetsfu
 - Ny mellansida `evenemang.html` med kommun-, kategori-, tids- och sökfilter.
 - Samlade originalkällor för alla sju kommuner: kommunernas kalendrar, regionala besökskalendrar och Svenska kyrkans lokala församlingar/pastorat.
 - Tydlig källmärkning och direktlänkar; tider och ändringar kontrolleras alltid hos arrangören.
-- Fyra separata lokala annonsplatser på evenemangssidan enligt 500 kr/mån-modellen.
+- Fyra separata lokala annonsplatser på evenemangssidan enligt 500 kr/månad plus moms-modellen.
 - Version 0.15.0 publiceras komplett från projektets huvudgren.
 
 ## Nytt i v0.14.0 – Trafik
@@ -271,7 +271,7 @@ Version 0.23.4 avslutar webbplatsens första stabiliseringsomgång: säkerhetsfu
 - Kommunvalet följer samma centrala kommun som resten av DinPuls.
 - `data/grocery.json` skiljer kassinnehåll, lokala butikslänkar och verifierade prisuppgifter åt.
 - Butikspris visas bara när total, källa och kontrolldatum finns. Saknade priser uppskattas aldrig.
-- Matkassesidan har fyra kategoriannonsplatser enligt nivån 500 kr per månad.
+- Matkassesidan har fyra kategoriannonsplatser enligt nivån 500 kr per månad plus moms.
 
 ## Klickbar drivmedelsruta
 
@@ -299,9 +299,9 @@ stationsraderna och länken längst ned fungerar fortfarande separat. Kortet kan
   knappen på DinPuls-sidan.
 - `jobb.html` visar samtliga hämtade jobb i vald kommun med lokal sökning och
   en tydlig ansökningslänk till originalannonsen.
-- Startsidan har tre roterande premiumannonsgrupper med tio platser per grupp,
-  totalt 30 platser avsedda för 1 500 kr per månad.
-- Jobb- och bostadssidorna har kategoriannonser avsedda för 500 kr per månad.
+- Startsidan har tre roterande annonsgrupper med tio platser per grupp,
+  totalt 30 platser avsedda för 500 kr per månad plus moms.
+- Jobb- och bostadssidorna har kategoriannonser avsedda för 500 kr per månad plus moms.
 - Kommunvalet delas via `localStorage`, så mellansidorna öppnas för kommunen
   som användaren redan följer.
 

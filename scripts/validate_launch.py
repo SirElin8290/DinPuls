@@ -195,6 +195,16 @@ def verify_ads() -> None:
         assert source.count("data-strategic-ad=") == 4, f"{page}: ska ha fyra annonsplatser"
     housing = (ROOT / "bostader.html").read_text(encoding="utf-8")
     assert housing.count("data-strategic-ad=") == 7, "Bostadssidan ska ha sju annonsplatser"
+    price_sources = [
+        "script.js", "portal-ads.js", "health-page.js", "myndigheter-page.js",
+        "news-page.js", "service-page.js", "information.html",
+        "components/premium-ad-1.html", "components/premium-ad-2.html",
+        "components/premium-ad-3.html",
+    ]
+    price_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in price_sources)
+    assert "1 500" not in price_text and "1500 kr" not in price_text, "Gammalt annonspris finns kvar"
+    assert "500 kr/månad + moms" in price_text, "Aktuellt annonspris saknas"
+    assert "500 kr per månad plus moms" in price_text, "Prisinformationen saknar momsangivelse"
 
 
 def verify_health() -> None:
