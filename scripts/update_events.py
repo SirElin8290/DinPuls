@@ -23,7 +23,7 @@ MUNICIPALITY_CONFIG = json.loads(
 LOCALITIES = {
     item["name"]: {
         str(term).casefold()
-        for term in [item["name"], *item.get("newsSearchTerms", []), *item.get("missingPeopleAliases", [])]
+        for term in item.get("localityAliases", [])
         if str(term).strip()
     }
     for item in MUNICIPALITY_CONFIG
