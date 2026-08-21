@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="sv" data-version="0.24.0">
+<html lang="sv" data-version="0.24.1">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="DinPuls.se – din lokala startsida.">
   <meta name="theme-color" content="#082653">
-  <meta name="dinpuls-version" content="0.24.0">
+  <meta name="dinpuls-version" content="0.24.1">
   <title>DinPuls.se – din lokala startsida</title>
-  <link rel="stylesheet" href="styles.css?version=0.24.0">
+  <link rel="stylesheet" href="styles.css?version=0.24.1">
   <link rel="icon" href="favicon.ico?version=0.23.6" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.6">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.6">
@@ -78,6 +78,38 @@
         <span><i data-lucide="lock"></i>Väder</span>
       </section>
 
+      <details class="push-settings" id="push-settings">
+        <summary><span><i data-lucide="bell-ring"></i><b>Pushnotiser</b><small>Få viktiga lokala besked även när DinPuls är stängd</small></span><i data-lucide="chevron-down"></i></summary>
+        <div class="push-settings-body">
+          <div class="push-status" id="push-status" role="status" aria-live="polite">
+            <span class="push-status-icon"><i data-lucide="bell"></i></span>
+            <span><strong>Pushnotiser är inte aktiverade</strong><small>Ingen app och inget konto behövs.</small></span>
+          </div>
+          <div class="push-required" aria-label="Viktiga notiser som alltid ingår">
+            <p><strong>Alltid med när push är på</strong><small>Skyddsvärd information för kommunen du följer</small></p>
+            <span><i data-lucide="cloud-lightning"></i>Extremväder</span>
+            <span><i data-lucide="search"></i>Missing People</span>
+            <span><i data-lucide="shield-alert"></i>Dagens viktigaste</span>
+          </div>
+          <fieldset class="push-options" id="push-options">
+            <legend>Välj fler notiser</legend>
+            <label><span><i data-lucide="car-front"></i><b>Trafikläget</b></span><input type="checkbox" data-push-category="traffic" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-push-category="news"><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-push-category="events"><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-push-category="transport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-push-category="jobs"><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-push-category="housing"><i class="homepage-switch" aria-hidden="true"></i></label>
+            <label><span><i data-lucide="trophy"></i><b>Idrott och motion</b></span><input type="checkbox" data-push-category="sport"><i class="homepage-switch" aria-hidden="true"></i></label>
+          </fieldset>
+          <p class="push-scope"><i data-lucide="map-pin"></i>Notiserna följer din valda kommun. Missing People kan även omfatta angränsande kommuner.</p>
+          <div class="push-actions">
+            <button class="push-enable" id="push-enable" type="button"><i data-lucide="bell-ring"></i>Aktivera pushnotiser</button>
+            <button class="push-disable" id="push-disable" type="button" hidden>Stäng av</button>
+          </div>
+          <p class="push-help" id="push-help"></p>
+        </div>
+      </details>
+
       <fieldset class="homepage-customize-options">
         <legend>Valbara moduler</legend>
         <label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-home-module="news" checked><i class="homepage-switch" aria-hidden="true"></i></label>
@@ -107,7 +139,8 @@
   <script src="dp-core.js?version=0.23.6"></script>
   <script src="municipality-engine.js?version=0.23.6"></script>
   <script src="sport-data-engine.js?version=0.23.6"></script>
-  <script src="script.js?version=0.24.0"></script>
+  <script src="script.js?version=0.24.1"></script>
+  <script src="push-notifications.js?version=0.24.1"></script>
   <script src="privacy-controls.js?version=0.23.6"></script>
 </body>
 </html>
