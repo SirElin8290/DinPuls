@@ -177,7 +177,7 @@ def main() -> int:
     }
     OUTPUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     local_ids = {item["id"] for payload in output["municipalities"].values() for item in payload["items"]}
-    print(f"Missing People: {len(local_ids)} lokalt relevanta efterlysningar fördelade till åtta kommunflöden")
+    print(f"Missing People: {len(local_ids)} lokalt relevanta efterlysningar fördelade till {len(MUNICIPALITIES)} kommunflöden")
     return 0
 
 

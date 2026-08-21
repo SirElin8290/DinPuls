@@ -22,14 +22,14 @@ SOURCE = {
     "name": "Arbetsförmedlingen – Platsbanken",
     "url": "https://jobsearch.api.jobtechdev.se/",
 }
+MUNICIPALITY_CONFIG = json.loads(MUNICIPALITY_FILE.read_text(encoding="utf-8"))["municipalities"]
 LOCALITIES = {
-    "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog"},
-    "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
-    "Bengtsfors": {"bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"},
-    "Mellerud": {"mellerud", "dals rostocks", "dals rostock", "åsensbruk", "håverud", "köpmannebro", "dalskog", "bolstad"},
-    "Årjäng": {"årjäng", "töcksfors", "lennartsfors", "svanskog"},
-    "Arvika": {"arvika", "edane", "glava", "jössefors", "sulvik", "gunnarskog", "klässbol", "mangskog"},
-    "Grums": {"grums", "slottsbron", "segelmon", "borgvik", "liljedal"},
+    item["name"]: {
+        str(term).casefold()
+        for term in [item["name"], *item.get("newsSearchTerms", []), *item.get("missingPeopleAliases", [])]
+        if str(term).strip()
+    }
+    for item in MUNICIPALITY_CONFIG
 }
 
 
