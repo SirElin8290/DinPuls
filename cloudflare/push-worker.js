@@ -8,7 +8,7 @@ function corsHeaders(request) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://dinpuls.se",
     "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin"
   };
@@ -83,6 +83,55 @@ async function deleteSubscription(request, env) {
   return json(request, { ok: true });
 }
 
+function configureWebPush(env) {
+  if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY || !env.VAPID_SUBJECT) {
+    throw new Error("VAPID-inställningarna saknas");
+  }
+  webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
+}
+
+async function sendTestNotification(request, env) {
+  if (!env.PUSH_ADMIN_TOKEN || request.headers.get("X-Admin-Token") !== env.PUSH_ADMIN_TOKEN) {
+    return json(request, { ok: false, error: "Obehörig testsändning." }, 401);
+  }
+  const body = await request.json();
+  if (!MUNICIPALITIES.has(body?.municipality)) {
+    return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
+  }
+  const row = await env.DB.prepare(
+    "SELECT endpoint_hash, endpoint, p256dh, auth FROM subscriptions WHERE municipality = ? ORDER BY updated_at DESC LIMIT 1"
+  ).bind(body.municipality).first();
+  if (!row) return json(request, { ok: false, error: "Ingen aktiv prenumeration finns för kommunen." }, 404);
+
+  configureWebPush(env);
+  try {
+    const result = await webpush.sendNotification({
+      endpoint: row.endpoint,
+      keys: { p256dh: row.p256dh, auth: row.auth }
+    }, JSON.stringify({
+      title: `Testnotis från DinPuls · ${body.municipality}`,
+      body: "Pushnotiser fungerar på den här enheten.",
+      tag: `dinpuls-test-${body.municipality}`,
+      url: `/?kommun=${encodeURIComponent(body.municipality)}`
+    }), { TTL: 60 });
+    await env.DB.prepare(
+      "UPDATE subscriptions SET last_success_at = ?, failure_count = 0 WHERE endpoint_hash = ?"
+    ).bind(new Date().toISOString(), row.endpoint_hash).run();
+    return json(request, { ok: true, statusCode: result.statusCode });
+  } catch (error) {
+    const statusCode = Number(error?.statusCode || 0);
+    if (statusCode === 404 || statusCode === 410) {
+      await env.DB.prepare("DELETE FROM subscriptions WHERE endpoint_hash = ?").bind(row.endpoint_hash).run();
+    } else {
+      await env.DB.prepare(
+        "UPDATE subscriptions SET failure_count = failure_count + 1 WHERE endpoint_hash = ?"
+      ).bind(row.endpoint_hash).run();
+    }
+    console.error("DinPuls testsändning:", error);
+    return json(request, { ok: false, error: "Testnotisen kunde inte levereras.", statusCode }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -97,10 +146,22 @@ export default {
     try {
       await ensureDatabase(env);
       if (request.method === "GET" && url.pathname === "/health") {
-        return json(request, { ok: true, service: "DinPuls Push", database: "connected" });
+        return json(request, {
+          ok: true,
+          service: "DinPuls Push",
+          database: "connected",
+          vapidConfigured: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT)
+        });
+      }
+      if (request.method === "GET" && url.pathname === "/config") {
+        return json(request, {
+          enabled: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT),
+          publicKey: env.VAPID_PUBLIC_KEY || ""
+        });
       }
       if (request.method === "PUT" && url.pathname === "/subscriptions") return saveSubscription(request, env);
       if (request.method === "DELETE" && url.pathname === "/subscriptions") return deleteSubscription(request, env);
+      if (request.method === "POST" && url.pathname === "/admin/test") return sendTestNotification(request, env);
       return json(request, { ok: false, error: "Sökvägen finns inte." }, 404);
     } catch (error) {
       console.error("DinPuls Push:", error);
@@ -108,3 +169,4 @@ export default {
     }
   }
 };
+import webpush from "web-push";
