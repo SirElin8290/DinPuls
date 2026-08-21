@@ -10,6 +10,30 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 
 
+def replace_javascript_registry(path: Path, pattern: str, replacement: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    updated, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+    if count != 1:
+        raise ValueError(f"Kunde inte synkronisera kommunregistret i {path.relative_to(ROOT)}")
+    path.write_text(updated, encoding="utf-8")
+
+
+def sync_runtime_registries(municipalities: list[dict]) -> None:
+    names = [item["name"] for item in municipalities]
+    engine_names = ", ".join(json.dumps(name, ensure_ascii=False) for name in names)
+    replace_javascript_registry(
+        ROOT / "municipality-engine.js",
+        r"const MUNICIPALITIES = Object\.freeze\(\[.*?\]\);",
+        f"const MUNICIPALITIES = Object.freeze([{engine_names}]);",
+    )
+    worker_names = ", ".join(json.dumps(name, ensure_ascii=False) for name in names)
+    replace_javascript_registry(
+        ROOT / "cloudflare" / "push-worker.js",
+        r"const MUNICIPALITIES = new Set\(\[.*?\]\);",
+        f"const MUNICIPALITIES = new Set([{worker_names}]);",
+    )
+
+
 def mapping_bounds(text: str, key: str) -> tuple[int, int]:
     match = re.search(rf'"{re.escape(key)}"\s*:\s*\{{', text)
     if not match:
@@ -80,6 +104,7 @@ def default_for(filename: str, municipality: dict) -> object:
 
 def main() -> None:
     config = json.loads((DATA / "municipalities.json").read_text(encoding="utf-8"))
+    sync_runtime_registries(config["municipalities"])
     for path in sorted(DATA.glob("*.json")):
         if path.name == "municipalities.json":
             continue
