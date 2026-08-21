@@ -193,7 +193,9 @@ def police_items(payload, name: str, now: datetime) -> list[dict]:
         location = event.get("location") or {}
         location_name = text(location, "name") if isinstance(location, dict) else ""
         searchable = f"{event.get('name', '')} {event.get('summary', '')} {location_name}".lower()
-        if name.lower() not in searchable:
+        # Matcha kommunen som ett eget ord. Kortnamn som "Kil" får annars
+        # felträffar i exempelvis ordet "trafikolycka".
+        if not re.search(rf"(?<!\w){re.escape(name.casefold())}(?!\w)", searchable.casefold()):
             continue
         published = parse_time(event.get("datetime"))
         if published and published.astimezone(timezone.utc) < now - timedelta(hours=36):

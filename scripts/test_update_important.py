@@ -18,6 +18,11 @@ def test_serious_police_event_is_kept():
     assert important.police_items(events, "Åmål", NOW)[0]["priority"] >= 70
 
 
+def test_short_municipality_name_does_not_match_inside_another_word():
+    events = [{"id": 3, "name": "Trafikolycka, Eskilstuna", "summary": "Olycka i Eskilstuna", "datetime": NOW.isoformat(), "location": {"name": "Eskilstuna"}}]
+    assert important.police_items(events, "Kil", NOW) == []
+
+
 def test_single_cancelled_departure_is_not_important():
     transport = {"generatedAt": NOW.isoformat(), "municipalities": {"Åmål": {"stops": [{"id": "x", "alerts": [], "departures": [{"canceled": True, "line": "1", "scheduled": NOW.isoformat()}]}]}}}
     assert important.traffic_items(transport, "Åmål", NOW) == []
