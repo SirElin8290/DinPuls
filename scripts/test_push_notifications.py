@@ -18,6 +18,6 @@ assert 'data-push-category="traffic"' in index
 assert 'data-push-category="sport"' in index
 assert 'self.addEventListener("push"' in worker
 assert 'self.addEventListener("notificationclick"' in worker
-assert config == {"enabled": False, "apiBase": "", "publicKey": ""}
+assert config.get("enabled") is True\nassert config.get("apiBase") == "https://dinpuls-push.soren-johansson-7.workers.dev"\nassert isinstance(config.get("publicKey"), str) and len(config["publicKey"]) >= 80
 
-print("✓ Pushgrunden kräver aktivt val, har rätt kommunomfång och är säkert avstängd före serverkoppling")
+print("✓ Pushgrunden kräver aktivt val, har rätt kommunomfång och en komplett serverkonfiguration")
