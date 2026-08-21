@@ -20,4 +20,5 @@ assert(config.includes('"binding": "DB"'));
 assert(config.includes('"database_name": "dinpuls-push-db"'));
 assert(config.includes('"database_id": "2745e92f-51a3-448d-9a49-eb1a89a076c0"'));
 assert(config.includes('"nodejs_compat"'));
+assert(config.includes('"keep_vars": true'));
 console.log("✓ Worker-konfigurationen bevarar D1-bindningen och kommunfiltreringen");
