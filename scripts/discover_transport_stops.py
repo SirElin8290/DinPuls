@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Söker säkra hållplatsgrupper för DinPuls startkommuner.
+"""Söker säkra hållplatsgrupper för alla kommuner i centralkonfigurationen.
 
 API-nyckeln läses enbart från TRAFIKLAB_API_KEY och skrivs aldrig till fil.
-De sju manuellt granskade hållplats-id:na återställs alltid i den centrala
-kommunfilen. Kandidater sparas fortsatt i data/stop-candidates.json.
+Manuellt granskade hållplats-id:n läses ur den centrala kommunfilen.
+Kandidater sparas fortsatt i data/stop-candidates.json.
 """
 from __future__ import annotations
 
@@ -21,20 +21,6 @@ ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 CANDIDATE_FILE = ROOT / "data" / "stop-candidates.json"
 API_KEY = os.getenv("TRAFIKLAB_API_KEY", "").strip()
-
-# Manuellt verifierade mot Trafiklab Stop Lookup 2026-07-19.
-# Denna reserv gör körningen självreparerande om en äldre workflow tidigare
-# har hunnit skriva tomma transportStops till municipalities.json.
-REVIEWED_STOPS = {
-    "Åmål": {"id": "740000076", "name": "Åmål station"},
-    "Säffle": {"id": "740000023", "name": "Säffle station"},
-    "Bengtsfors": {"id": "740098286", "name": "Bengtsfors"},
-    "Mellerud": {"id": "740098017", "name": "Mellerud"},
-    "Årjäng": {"id": "740000364", "name": "Årjäng busstation"},
-    "Arvika": {"id": "740098080", "name": "Arvika"},
-    "Grums": {"id": "740000217", "name": "Grums station"},
-}
-
 
 def normalize_name(value: str) -> str:
     value = unicodedata.normalize("NFKC", str(value)).casefold().strip()
@@ -114,13 +100,17 @@ def main() -> int:
             print(f"{name}: {error}")
             return 1
 
-        reviewed = REVIEWED_STOPS.get(name)
-        configured_ids = {reviewed["id"]} if reviewed else set()
+        configured_stops = municipality.get("transportStops") or []
+        configured_ids = {
+            str(stop.get("id")) for stop in configured_stops
+            if str(stop.get("id", "")).isdigit()
+        }
         selected = choose_safe(name, groups, configured_ids)
-        if reviewed:
-            # ID:t är redan manuellt verifierat. Använd det även om Trafiklabs
+        if len(configured_stops) == 1 and configured_ids:
+            # ID:t i centralkonfigurationen är manuellt verifierat. Använd det
+            # även om Trafiklabs
             # namnsökning tillfälligt ändrar sortering eller inte returnerar det.
-            selected = reviewed
+            selected = configured_stops[0]
         candidates = [public_candidate(group) for group in groups[:10]]
         result["municipalities"][name] = {
             "selectedId": str(selected.get("id")) if selected else None,
@@ -146,7 +136,7 @@ def main() -> int:
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print(f"Säkra automatiska träffar: {selected_count}/7")
+    print(f"Säkra automatiska träffar: {selected_count}/{len(config.get('municipalities', []))}")
     return 0
 
 

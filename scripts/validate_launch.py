@@ -161,6 +161,13 @@ def verify_data() -> None:
     for item in config.get("municipalities", []):
         name = item.get("name", "Okänd kommun")
         assert item.get("newsSearchTerms"), f"{name}: newsSearchTerms saknas"
+        assert item.get("newsListing", {}).get("url"), f"{name}: newsListing saknas"
+        assert item.get("newsListing", {}).get("pathContains"), f"{name}: newsListing.pathContains saknas"
+        assert item.get("associationDirectoryUrl"), f"{name}: associationDirectoryUrl saknas"
+        association_parser = item.get("associationImport", {}).get("parser")
+        assert association_parser in {"ibgo", "mellerud", "grums", "manual"}, f"{name}: ogiltig associationImport"
+        if association_parser == "ibgo":
+            assert item["associationImport"].get("host"), f"{name}: IBGO-värd saknas"
         assert item.get("missingPeopleAliases"), f"{name}: missingPeopleAliases saknas"
         assert item.get("neighbors"), f"{name}: neighbors saknas eller är tom"
 
@@ -436,7 +443,7 @@ def main() -> int:
     for check in checks:
         check()
         print(f"✓ {check.__name__}")
-    print("✓ DinPuls är godkänd för publicering i åtta kommuner")
+    print(f"✓ DinPuls är godkänd för publicering i {len(MUNICIPALITIES)} kommuner")
     return 0
 
 

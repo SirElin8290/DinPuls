@@ -16,26 +16,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MUNICIPALITIES = [
-    item["name"]
-    for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
-]
-DIRECTORIES = {
-    "Åmål": "https://saffle.ibgo.se/AssociationRegister",
-    "Säffle": "https://saffle.ibgo.se/AssociationRegister",
-    "Bengtsfors": "https://ibgo.bengtsfors.se/AssociationRegister",
-    "Mellerud": "https://mellerud.se/uppleva-och-gora/foreningar/foreningsliv/foreningsregister/",
-    "Årjäng": "https://arjang.interbookfri.se/AssociationRegister",
-    "Arvika": "https://arvika.ibgo.se/AssociationRegister",
-    "Grums": "https://business.updatesystem.se/ifgrums/search-char",
-    "Kil": "https://kil.rbok.se/foreningsregister",
-}
+MUNICIPALITY_CONFIG = json.loads(
+    (ROOT / "data" / "municipalities.json").read_text(encoding="utf-8")
+)["municipalities"]
+MUNICIPALITIES = [item["name"] for item in MUNICIPALITY_CONFIG]
+CONFIG_BY_NAME = {item["name"]: item for item in MUNICIPALITY_CONFIG}
+DIRECTORIES = {item["name"]: item["associationDirectoryUrl"] for item in MUNICIPALITY_CONFIG}
 IBGO = {
-    "Åmål": ("https://saffle.ibgo.se", "18"),
-    "Säffle": ("https://saffle.ibgo.se", "11"),
-    "Bengtsfors": ("https://ibgo.bengtsfors.se", ""),
-    "Årjäng": ("https://arjang.interbookfri.se", ""),
-    "Arvika": ("https://arvika.ibgo.se", ""),
+    item["name"]: (item["associationImport"]["host"], item["associationImport"].get("district", ""))
+    for item in MUNICIPALITY_CONFIG
+    if item.get("associationImport", {}).get("parser") == "ibgo"
 }
 EXTRA_LEISURE = {
     "Åmål": [
@@ -320,8 +310,14 @@ def main():
         registry_rows = list(pool.map(lambda job: ibgo_rows(job[1], job[2]), registry_jobs))
     for (municipality, _, _), rows in zip(registry_jobs, registry_rows):
         add_registry_rows(municipality, rows, leisure_by[municipality], sports_by[municipality])
-    leisure_by["Mellerud"], sports_by["Mellerud"] = mellerud_rows()
-    leisure_by["Grums"], sports_by["Grums"] = grums_rows()
+    for name, item in CONFIG_BY_NAME.items():
+        parser = item.get("associationImport", {}).get("parser", "manual")
+        if parser == "mellerud":
+            leisure_by[name], sports_by[name] = mellerud_rows()
+        elif parser == "grums":
+            leisure_by[name], sports_by[name] = grums_rows()
+        elif parser not in {"ibgo", "manual"}:
+            raise RuntimeError(f"{name}: okänd föreningsimport {parser}")
     output_leisure = {"version":"2.0.0", "updatedAt":datetime.now(timezone.utc).date().isoformat(),
         "notice":"Lokalt föreningsregister importerat från kommunernas offentliga register och kompletterat med direkta föreningslänkar.", "municipalities":{}}
     for name in MUNICIPALITIES:

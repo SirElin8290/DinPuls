@@ -17,15 +17,16 @@ SOURCE_CATALOG = ROOT / "data" / "event-sources.json"
 USER_AGENT = "DinPuls.se/0.21 (lokal evenemangskalender; https://sirelin8290.github.io/DinPuls/)"
 ALGOLIA_APP_ID = "JLIO3DI59W"
 ALGOLIA_SEARCH_KEY = "c3e912c214238b637c6a86d637acfe79"
+MUNICIPALITY_CONFIG = json.loads(
+    (ROOT / "data" / "municipalities.json").read_text(encoding="utf-8")
+)["municipalities"]
 LOCALITIES = {
-    "Åmål": {"åmål", "tösse", "fengersfors", "edsleskog", "fröskog", "ånimskog", "tydje"},
-    "Säffle": {"säffle", "värmlandsbro", "svanskog", "nysäter", "värmlands nysäter"},
-    "Bengtsfors": {"bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"},
-    "Mellerud": {"mellerud", "dals rostock", "åsensbruk", "håverud", "köpmannebro", "dalskog", "bolstad"},
-    "Årjäng": {"årjäng", "töcksfors", "lennartsfors", "svanskog"},
-    "Arvika": {"arvika", "edane", "glava", "jössefors", "sulvik", "gunnarskog", "klässbol", "mangskog"},
-    "Grums": {"grums", "slottsbron", "segelmon", "borgvik", "liljedal"},
-    "Kil": {"kil", "fagerås", "högboda", "tolita", "fryksta"},
+    item["name"]: {
+        str(term).casefold()
+        for term in [item["name"], *item.get("newsSearchTerms", []), *item.get("missingPeopleAliases", [])]
+        if str(term).strip()
+    }
+    for item in MUNICIPALITY_CONFIG
 }
 
 

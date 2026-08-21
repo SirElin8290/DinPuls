@@ -83,6 +83,23 @@ LOCAL_LISTINGS = [
          quality=96, impact=55, category="Kommunalt", region="Kil"),
 ]
 
+# Centralkonfigurationen är enda sanningskällan. Listan ovan behålls tillfälligt
+# endast som läsbar historik och får aldrig styra vilka kommuner som behandlas.
+LOCAL_LISTINGS = [
+    {
+        **item["newsListing"],
+        "sourceType": "municipality",
+        "municipalities": [item["name"]],
+        "quality": 96,
+        "impact": 55,
+        "category": "Kommunalt",
+        "region": item["name"],
+    }
+    for item in MUNICIPALITY_CONFIG
+]
+if any(not item.get("newsListing") for item in MUNICIPALITY_CONFIG):
+    raise RuntimeError("Alla kommuner måste ha newsListing i data/municipalities.json")
+
 SOURCE_DIRECTORY = [
     dict(name="Provinstidningen Dalsland", type="Lokaltidning", access="subscription", scope="local", municipalities=["Åmål", "Mellerud"], url="https://www.provinstidningen.se/"),
     dict(name="Åmåls kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Åmål"], url="https://amal.se/arkiv/nyheter"),
