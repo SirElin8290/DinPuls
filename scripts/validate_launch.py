@@ -202,7 +202,7 @@ def verify_health() -> None:
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Vårdmodulen saknar någon startkommun"
     assert data.get("officialCareUrl", "").startswith("https://www.1177.se/"), "Vårdmodulen saknar officiell 1177-källa"
     providers = data.get("providers", [])
-    assert all(any(item.get("municipality") == name for item in providers) for name in STRICT_MUNICIPALITIES), "Vårdmodulen saknar lokal mottagning i någon aktiv kommun"
+    assert all(any(item.get("municipality") == name for item in providers) for name in MUNICIPALITIES), "Vårdmodulen saknar lokal mottagning i någon kommun"
     assert all(str(item.get("url", "")).startswith("https://") for item in providers), "Vårdmodulen innehåller en ogiltig direktlänk"
     page = (ROOT / "vard.html").read_text(encoding="utf-8")
     component = (ROOT / "components/health.html").read_text(encoding="utf-8")
@@ -217,8 +217,13 @@ def verify_service() -> None:
     data = load_json("data/service.json")
     assert list(data.get("municipalities", {})) == MUNICIPALITIES, "Servicemodulen saknar någon startkommun"
     businesses = data.get("businesses", [])
-    assert all(any(item.get("municipality") == name for item in businesses) for name in STRICT_MUNICIPALITIES), "Servicemodulen saknar lokalt företag i någon aktiv kommun"
+    assert all(any(item.get("municipality") == name for item in businesses) for name in MUNICIPALITIES), "Servicemodulen saknar lokalt företag i någon kommun"
     assert all(str(item.get("url", "")).startswith("https://") for item in businesses), "Servicemodulen innehåller en ogiltig direktlänk"
+    assert all("google." not in str(item.get("url", "")).lower() for item in businesses), "Servicemodulen får inte länka till Google eller Google Maps"
+    for name in PILOT_MUNICIPALITIES:
+        local = [item for item in businesses if item.get("municipality") == name]
+        assert len(local) >= 6, f"{name}: pilotkommunen behöver minst sex verifierade serviceföretag"
+        assert len({item.get('group') for item in local}) >= 3, f"{name}: serviceutbudet behöver minst tre kategorier"
     page = (ROOT / "service.html").read_text(encoding="utf-8")
     component = (ROOT / "components" / "service.html").read_text(encoding="utf-8")
     script = (ROOT / "service-page.js").read_text(encoding="utf-8")
