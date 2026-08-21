@@ -38,10 +38,17 @@ class MunicipalityIntegrationTests(unittest.TestCase):
         for item in self.config:
             with self.subTest(municipality=item["name"]):
                 self.assertTrue(item.get("newsSearchTerms"))
+                self.assertTrue(item.get("localityAliases"))
                 self.assertTrue(item.get("newsListing", {}).get("url"))
                 self.assertTrue(item.get("associationDirectoryUrl"))
                 self.assertTrue(item.get("associationImport", {}).get("parser"))
                 self.assertTrue(item.get("transportStops"))
+
+    def test_smaller_existing_localities_remain_covered(self):
+        aliases = {item["name"]: set(item["localityAliases"]) for item in self.config}
+        self.assertTrue({"tydje"} <= aliases["Åmål"])
+        self.assertTrue({"bolstad"} <= aliases["Mellerud"])
+        self.assertTrue({"segelmon", "liljedal"} <= aliases["Grums"])
 
 
 if __name__ == "__main__":
