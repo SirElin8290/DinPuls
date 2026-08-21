@@ -26,6 +26,7 @@ MUNICIPALITIES = {
     "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal", "lennartsfors", "blomskog", "trankil"],
     "Arvika": ["arvika", "gunnarskog", "edane", "klässbol", "glava", "mangskog", "sulvik"],
     "Grums": ["grums", "slottsbron", "segmon", "borgvik"],
+    "Kil": ["kil", "fagerås", "högboda", "tolita", "fryksta", "frykerud"],
 }
 
 LOCAL_SEARCH_FEEDS = [
@@ -83,6 +84,9 @@ LOCAL_LISTINGS = [
          source="Grums kommun", sourceType="municipality", municipalities=["Grums"],
          pathContains="/nyheter/startsida/", quality=96, impact=55,
          category="Kommunalt", region="Grums"),
+    dict(url="https://kil.se/arkiv/nyheter", source="Kils kommun", sourceType="municipality",
+         municipalities=["Kil"], pathContains="/arkiv/nyheter/20",
+         quality=96, impact=55, category="Kommunalt", region="Kil"),
 ]
 
 SOURCE_DIRECTORY = [
@@ -101,6 +105,9 @@ SOURCE_DIRECTORY = [
     dict(name="Arvika kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Arvika"], url="https://www.arvika.se/nyheter.2932.html"),
     dict(name="Grums kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Grums"], url="https://www.grums.se/omwebbplatsen/sidorutanformeny/nyheter.2205.html"),
     dict(name="SVT Nyheter Grums", type="Lokal ämnessida", access="free", scope="local", municipalities=["Grums"], url="https://www.svt.se/nyheter/om/grums"),
+    dict(name="KilNytt", type="Lokal nyhetskälla", access="free", scope="local", municipalities=["Kil"], url="https://kilnytt.se/"),
+    dict(name="Kils kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Kil"], url="https://kil.se/arkiv/nyheter"),
+    dict(name="SVT Nyheter Värmland", type="Regional nyhetskälla", access="free", scope="local", municipalities=["Kil"], url="https://www.svt.se/nyheter/lokalt/varmland/"),
     dict(name="Polisen", type="Lokala händelser", access="free", scope="local", municipalities=list(MUNICIPALITIES), url="https://polisen.se/aktuellt/polisens-nyheter/"),
     dict(name="SVT Nyheter", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.svt.se/nyheter/"),
     dict(name="Sveriges Radio Ekot", type="Nationella nyheter", access="free", scope="sweden", municipalities=[], url="https://www.sverigesradio.se/ekot"),
