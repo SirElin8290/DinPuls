@@ -14,6 +14,46 @@
 .portal-hero.traffic-page{background:linear-gradient(120deg,#163f2a,#16834a)}.traffic-principle{display:flex;gap:10px;margin-top:16px;padding:14px 16px;color:#235c36;background:#effaf2;border:1px solid #c7e8d1;border-radius:13px;font-size:12px;line-height:1.5}.traffic-principle svg{width:20px;flex:0 0 auto}.traffic-toolbar{grid-template-columns:220px 220px 1fr}.portal-card-icon.traffic{color:#a65b00;background:#fff1d6}.portal-card-icon.traffic.danger{color:#a52828;background:#fee7e7}.traffic-message{grid-template-columns:46px minmax(0,1fr) 140px}.traffic-message.selected{border-color:#16834a;box-shadow:0 0 0 3px rgba(22,131,74,.16)}.traffic-message time{color:var(--muted);font-size:10px;text-align:right}.traffic-selected-label{display:flex;align-items:center;gap:6px;width:max-content;margin-top:10px;padding:6px 9px;color:#126b3b;background:#e9f8ef;border-radius:999px;font-size:9px}.traffic-selected-label svg{width:13px}.traffic-source{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:9px;color:var(--muted);font-size:10px}.traffic-source-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 14px}.traffic-source a{color:var(--blue700);font-weight:800}@media(max-width:760px){.traffic-toolbar{grid-template-columns:1fr}.traffic-message{grid-template-columns:40px 1fr}.traffic-message time{grid-column:1/-1;text-align:left}.traffic-source{align-items:flex-start;flex-direction:column}.traffic-source-actions{justify-content:flex-start}}
 .traffic-page-empty{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;text-align:left}.traffic-page-empty>svg{width:28px}.traffic-page-empty div{display:grid;gap:4px}.traffic-page-empty strong{font-size:13px;color:var(--text)}.traffic-page-empty span{font-size:11px}.traffic-page-empty a{color:var(--blue700);font-size:11px;font-weight:800}.traffic-page-empty.success>svg{color:#16834a}.traffic-page-empty.warning>svg{color:#a65b00}.traffic-page-empty.error>svg{color:#a52828}.traffic-official-sources{margin-top:22px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:16px}.traffic-official-sources h2{margin:0 0 12px;font-size:15px}.traffic-official-sources>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.traffic-official-sources a{display:grid;gap:4px;padding:13px;color:inherit;border:1px solid var(--border);border-radius:12px}.traffic-official-sources strong{font-size:11px}.traffic-official-sources span{color:var(--muted);font-size:9px;line-height:1.45}@media(max-width:760px){.traffic-page-empty{grid-template-columns:32px 1fr}.traffic-page-empty a{grid-column:2}.traffic-official-sources>div{grid-template-columns:1fr}}
 
+/* Gemensam läsbarhet för portalernas desktopvyer v0.24.3. */
+@media(min-width:1024px){
+  .portal-hero h1{font-size:42px;line-height:1.15}
+  .portal-hero p{font-size:16px;line-height:1.65}
+  .portal-toolbar label,.portal-result-heading span{font-size:14px}
+  .portal-toolbar input,.portal-toolbar select{font-size:15px}
+  .portal-result-heading h2{font-size:24px}
+  .portal-card h3{font-size:17px;line-height:1.35}
+  .portal-card p,.portal-card small{font-size:14px;line-height:1.5}
+  .portal-tags span,.portal-source-button{font-size:12px}
+  .secondary-ad b{font-size:11px}.ad-sales-note{font-size:13px}
+  .fuel-legend,.fuel-price small,.fuel-price time,.fuel-actions a,
+  .grocery-meals article>span,.grocery-meals p,.grocery-meals b,
+  .grocery-shopping-list h3,.grocery-shopping-list label,
+  .grocery-shopping-list label b,.grocery-reset,.grocery-store p,
+  .grocery-store small,.grocery-store-price em,.grocery-store-price a,
+  .traffic-message time,.traffic-selected-label,.traffic-source,
+  .event-date,.event-source small,.cinema-card-copy>small,.cinema-card p,
+  .cinema-notice,.cinema-actions>a:last-child,.lunch-summary span,
+  .lunch-status,.grocery-report-button,.grocery-price-fields small,
+  .grocery-price-input b,.grocery-collector-actions button,
+  .grocery-collector-actions span,.sport-stat-grid span,.sport-tabs button,
+  .sport-section-heading p,.sport-section-heading small,.sport-source-card small,
+  .sport-source-card span,.sport-source-card b,.sport-club-card small,
+  .sport-club-card em,.health-urgent-card small,.health-urgent-card em,
+  .health-official-grid small,.health-category-card small,.health-category-card em,
+  .health-directory-note,.service-category-card em,.service-category-card small,
+  .service-directory-note,.service-business-note p,.authority-urgent small,
+  .authority-urgent>a,.authority-search-help,.authority-card em,
+  .authority-card p,.authority-actions a,.authority-source-note p,
+  .authority-source-note small,.traffic-official-sources span{font-size:13px;line-height:1.5}
+  .event-source strong,.sport-source-card strong,.sport-club-card strong,
+  .health-official-grid strong,.health-category-card strong,
+  .service-category-card strong,.service-business-note strong,
+  .authority-urgent strong,.authority-source-note strong,
+  .traffic-official-sources strong{font-size:14px;line-height:1.4}
+  .cinema-card h3,.authority-card h3{font-size:18px}
+  .lunch-dishes{font-size:14px;line-height:1.55}
+}
+
 /* Evenemang v0.15.0 */
 .portal-hero.events-page{background:linear-gradient(120deg,#56206f,#a53a90)}.events-principle{display:flex;gap:10px;margin-top:16px;padding:14px 16px;color:#59345f;background:#fbf2fc;border:1px solid #e7c9eb;border-radius:13px;font-size:12px;line-height:1.5}.events-principle svg{width:20px;flex:0 0 auto}.events-toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}.portal-card-icon.event{color:#7d2b80;background:#f7e8f8}.event-message{grid-template-columns:46px minmax(0,1fr) 150px}.event-date{display:block;margin-bottom:5px;color:#8a3188;font-size:10px;font-weight:800;text-transform:uppercase}.events-sources{margin-top:28px;padding-top:6px;border-top:1px solid var(--border)}.events-sources .portal-result-heading p{margin:5px 0 0;color:var(--muted);font-size:11px}.events-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.event-source{display:grid;grid-template-columns:42px 1fr 18px;align-items:center;gap:11px;padding:13px;border:1px solid var(--border);border-radius:12px}.event-source .portal-card-icon{width:42px;height:42px}.event-source span{display:grid;gap:3px}.event-source strong{font-size:12px}.event-source small{color:var(--muted);font-size:9px}.event-source>svg{width:15px;color:var(--blue700)}
 @media(max-width:900px){.events-toolbar{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.events-toolbar,.events-source-grid{grid-template-columns:1fr}.event-message{grid-template-columns:40px 1fr}.event-message .portal-source-button{grid-column:1/-1}}
@@ -67,3 +107,14 @@
 
 /* Myndigheter & samhällsservice v0.21.7 */
 .portal-hero.authorities-page{background:linear-gradient(120deg,#102d52,#175b98 58%,#4086c2)}.authority-safety{display:flex;gap:10px;margin-top:16px;padding:14px 16px;color:#174f82;background:#edf5ff;border:1px solid #c6dbf0;border-radius:13px;font-size:11px;line-height:1.55}.authority-safety svg{width:20px;flex:0 0 auto}.authority-urgent{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:14px;padding:14px;background:#fff7f7;border:1px solid #efcccc;border-radius:14px}.authority-urgent>div{display:flex;align-items:center;gap:10px}.authority-urgent>div>svg{width:22px;color:#b5262f}.authority-urgent span{display:grid;gap:2px}.authority-urgent strong{font-size:11px}.authority-urgent small{color:var(--muted);font-size:9px}.authority-urgent>a{padding:9px 12px;color:#fff;background:#b5262f;border-radius:9px;font-size:10px;font-weight:800}.authority-content{margin-top:20px}.authority-toolbar{grid-template-columns:190px 260px minmax(0,1fr)}.authority-search-help{margin-top:9px;color:var(--muted);font-size:10px}.authority-section{padding-top:10px}.authority-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.authority-card{display:flex;flex-direction:column;min-height:245px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:14px}.authority-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.authority-card-icon{width:42px;height:42px;display:grid;place-items:center;color:#175b98;background:#eaf3fc;border-radius:11px}.authority-card-icon svg{width:21px}.authority-owner{padding:5px 7px;color:#385d7d;background:#eef4f9;border-radius:999px;font-size:7px;font-weight:800;text-transform:uppercase}.authority-card em{margin-top:13px;color:#175b98;font-size:8px;font-style:normal;font-weight:800;text-transform:uppercase}.authority-card h3{margin:5px 0 6px;font-size:15px}.authority-card p{margin:0 0 14px;color:var(--muted);font-size:10px;line-height:1.5}.authority-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}.authority-actions a{display:inline-flex;align-items:center;gap:5px;padding:8px 9px;color:#175b98;background:#edf5ff;border-radius:8px;font-size:8px;font-weight:800}.authority-actions a:first-child{color:#fff;background:#175b98}.authority-actions svg{width:12px}.authority-source-note{display:flex;align-items:flex-start;gap:13px;padding:17px;background:#f7f9fc;border:1px solid var(--border);border-radius:14px}.authority-source-note>svg{width:24px;color:#175b98;flex:0 0 auto}.authority-source-note strong{font-size:12px}.authority-source-note p{margin:5px 0;color:var(--muted);font-size:10px;line-height:1.55}.authority-source-note small{color:var(--muted);font-size:8px}@media(max-width:950px){.authority-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.authority-toolbar,.authority-card-grid,.authority-urgent{grid-template-columns:1fr}.authority-content{padding:18px}.authority-urgent>a{justify-self:start}.authority-card{min-height:0}}
+
+/* Slutlig desktopprioritet: placerad sist så modulernas specialregler inte kan minska texten igen. */
+@media(min-width:1024px){
+  .portal-hero h1{font-size:42px;line-height:1.15}.portal-hero p{font-size:16px;line-height:1.65}
+  .portal-toolbar label,.portal-result-heading span{font-size:14px}.portal-toolbar input,.portal-toolbar select{font-size:15px}
+  .portal-result-heading h2{font-size:24px}.portal-card h3{font-size:17px;line-height:1.35}.portal-card p,.portal-card small{font-size:14px;line-height:1.5}
+  .portal-tags span,.portal-source-button{font-size:12px}.secondary-ad b{font-size:11px}.ad-sales-note{font-size:13px}
+  .fuel-legend,.fuel-price small,.fuel-price time,.fuel-actions a,.grocery-meals article>span,.grocery-meals p,.grocery-meals b,.grocery-shopping-list h3,.grocery-shopping-list label,.grocery-shopping-list label b,.grocery-reset,.grocery-store p,.grocery-store small,.grocery-store-price em,.grocery-store-price a,.traffic-message time,.traffic-selected-label,.traffic-source,.event-date,.event-source small,.cinema-card-copy>small,.cinema-card p,.cinema-notice,.cinema-actions>a:last-child,.lunch-summary span,.lunch-status,.grocery-report-button,.grocery-price-fields small,.grocery-price-input b,.grocery-collector-actions button,.grocery-collector-actions span,.sport-stat-grid span,.sport-tabs button,.sport-section-heading p,.sport-section-heading small,.sport-source-card small,.sport-source-card span,.sport-source-card b,.sport-club-card small,.sport-club-card em,.health-urgent-card small,.health-urgent-card em,.health-official-grid small,.health-category-card small,.health-category-card em,.health-directory-note,.service-category-card em,.service-category-card small,.service-directory-note,.service-business-note p,.authority-urgent small,.authority-urgent>a,.authority-search-help,.authority-card em,.authority-card p,.authority-actions a,.authority-source-note p,.authority-source-note small,.traffic-official-sources span{font-size:13px;line-height:1.5}
+  .event-source strong,.sport-source-card strong,.sport-club-card strong,.health-official-grid strong,.health-category-card strong,.service-category-card strong,.service-business-note strong,.authority-urgent strong,.authority-source-note strong,.traffic-official-sources strong{font-size:14px;line-height:1.4}
+  .cinema-card h3,.authority-card h3{font-size:18px}.lunch-dishes{font-size:14px;line-height:1.55}
+}
