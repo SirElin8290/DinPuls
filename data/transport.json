@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-21T22:51:31+00:00",
+  "generatedAt": "2026-08-21T23:25:02+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -13,7 +13,7 @@
           "name": "Åmål station",
           "alerts": [],
           "lookupTime": "2026-08-22T00:51+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-22T02:51+02:00",
           "error": null,
           "departures": [
@@ -25,9 +25,10 @@
               "scheduled": "2026-08-22T13:00:00+02:00",
               "realtime": "2026-08-22T13:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             },
             {
               "mode": "train",
@@ -37,9 +38,10 @@
               "scheduled": "2026-08-22T13:10:00+02:00",
               "realtime": "2026-08-22T13:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "T"
+              "platform": "T",
+              "stale": true
             },
             {
               "mode": "train",
@@ -49,9 +51,10 @@
               "scheduled": "2026-08-22T13:10:00+02:00",
               "realtime": "2026-08-22T13:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             }
           ]
         }
@@ -91,11 +94,60 @@
           "id": "740098286",
           "name": "Bengtsfors",
           "alerts": [],
-          "lookupTime": "2026-08-22T00:25+02:00",
+          "lookupTime": "2026-08-22T01:24+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-08-22T01:10+02:00",
+          "nextSearchAfter": "2026-08-22T03:24+02:00",
           "error": null,
-          "departures": []
+          "departures": [
+            {
+              "mode": "train",
+              "line": "1337",
+              "direction": "Mellerud",
+              "operator": "DVVJ",
+              "scheduled": "2026-08-22T13:40:00+02:00",
+              "realtime": "2026-08-22T13:40:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "740",
+              "direction": "Dals Långed",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-22T13:45:00+02:00",
+              "realtime": "2026-08-22T13:45:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "X"
+            },
+            {
+              "mode": "bus",
+              "line": "755",
+              "direction": "Årjäng",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-22T14:10:00+02:00",
+              "realtime": "2026-08-22T14:10:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-22T14:14:00+02:00",
+              "realtime": "2026-08-22T14:14:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            }
+          ]
         }
       ]
     },
@@ -134,7 +186,7 @@
           "name": "Årjäng busstation",
           "alerts": [],
           "lookupTime": "2026-08-22T00:51+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-22T02:51+02:00",
           "error": null,
           "departures": [
@@ -146,9 +198,10 @@
               "scheduled": "2026-08-22T05:30:00+02:00",
               "realtime": "2026-08-22T05:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             }
           ]
         }
@@ -461,8 +514,8 @@
               "direction": "Högboda",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-22T01:45:00+02:00",
-              "realtime": "2026-08-22T01:45:00+02:00",
-              "delayMinutes": 0,
+              "realtime": "2026-08-22T01:44:14+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "D"
