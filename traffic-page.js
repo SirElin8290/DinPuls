@@ -3,16 +3,18 @@ const TRAFFIC_STALE_MINUTES = 40;
 let trafficMunicipality = municipalityState.getInitial();
 let fullRoadTrafficData = null;
 let requestedTrafficEventId = new URLSearchParams(location.search).get("event") || "";
-const municipalityWebsites = {
-  "Åmål": "https://www.amal.se/", "Säffle": "https://www.saffle.se/",
-  "Bengtsfors": "https://www.bengtsfors.se/", "Mellerud": "https://www.mellerud.se/",
-  "Årjäng": "https://www.arjang.se/", "Arvika": "https://www.arvika.se/", "Grums": "https://www.grums.se/"
-};
+let municipalityWebsites = new Map();
 
 const escapeTraffic = window.DinPulsSecurity.escapeHtml;
 const safeTrafficUrl = window.DinPulsSecurity.safeExternalUrl;
 
 async function initializeTrafficPage() {
+  const municipalityResponse = await fetch("data/municipalities.json", { cache: "no-cache" });
+  if (!municipalityResponse.ok) throw new Error(`Kommunfilen kunde inte laddas: ${municipalityResponse.status}`);
+  const municipalityData = await municipalityResponse.json();
+  municipalityWebsites = new Map(
+    (municipalityData.municipalities || []).map(item => [item.name, item.website])
+  );
   const select = document.querySelector("#traffic-municipality");
   municipalityState.populateSelect(select, trafficMunicipality);
   select.addEventListener("change", () => {
@@ -53,7 +55,7 @@ function renderTrafficPage() {
   });
   document.title = `Trafikläget nära ${trafficMunicipality} – DinPuls`;
   const municipalitySource = document.querySelector("#traffic-municipality-source");
-  if (municipalitySource) municipalitySource.href = municipalityWebsites[trafficMunicipality];
+  if (municipalitySource) municipalitySource.href = municipalityWebsites.get(trafficMunicipality) || "https://www.trafikverket.se/trafikinformation/vag/";
 
   const query = document.querySelector("#traffic-search").value.trim().toLocaleLowerCase("sv-SE");
   const type = document.querySelector("#traffic-type").value;

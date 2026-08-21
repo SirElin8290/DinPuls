@@ -19,30 +19,17 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "missing-people.json"
 SOURCE_URL = "https://www.missingpeople.se/efterlysningar/"
 USER_AGENT = "DinPuls/0.24 (+https://dinpuls.se/)"
-MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil"]
+MUNICIPALITY_CONFIG = json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+MUNICIPALITIES = [item["name"] for item in MUNICIPALITY_CONFIG]
 MAX_AGE_MINUTES = 90
 
-NEIGHBORS = {
-    "Åmål": ["Säffle", "Bengtsfors", "Mellerud"],
-    "Säffle": ["Åmål", "Årjäng", "Arvika", "Grums"],
-    "Bengtsfors": ["Åmål", "Mellerud", "Årjäng"],
-    "Mellerud": ["Åmål", "Bengtsfors"],
-    "Årjäng": ["Säffle", "Bengtsfors", "Arvika"],
-    "Arvika": ["Årjäng", "Säffle", "Grums"],
-    "Grums": ["Säffle", "Arvika", "Kil"],
-    "Kil": ["Grums", "Arvika"],
-}
-
-PLACE_ALIASES = {
-    "Åmål": ["Åmål", "Tösse", "Fengersfors", "Fröskog", "Edsleskog", "Ånimskog"],
-    "Säffle": ["Säffle", "Svanskog", "Värmlands Nysäter", "Nysäter", "Värmlandsbro", "Harnäs"],
-    "Bengtsfors": ["Bengtsfors", "Dals Långed", "Billingsfors", "Bäckefors", "Gustavsfors", "Skåpafors"],
-    "Mellerud": ["Mellerud", "Åsensbruk", "Håverud", "Dals Rostock"],
-    "Årjäng": ["Årjäng", "Töcksfors", "Sillerud", "Lennartsfors", "Holmedal"],
-    "Arvika": ["Arvika", "Edane", "Glava", "Gunnarskog", "Jössefors", "Sulvik", "Mangskog"],
-    "Grums": ["Grums", "Slottsbron", "Segmon", "Borgvik"],
-    "Kil": ["Kil", "Fagerås", "Högboda", "Tolita", "Fryksta"],
-}
+NEIGHBORS = {item["name"]: item.get("neighbors", []) for item in MUNICIPALITY_CONFIG}
+PLACE_ALIASES = {item["name"]: item.get("missingPeopleAliases", []) for item in MUNICIPALITY_CONFIG}
+if any(not aliases for aliases in PLACE_ALIASES.values()):
+    raise RuntimeError("Alla kommuner måste ha missingPeopleAliases i data/municipalities.json")
+unknown_neighbors = {neighbor for neighbors in NEIGHBORS.values() for neighbor in neighbors} - set(MUNICIPALITIES)
+if unknown_neighbors:
+    raise RuntimeError("Okända grannkommuner i data/municipalities.json: " + ", ".join(sorted(unknown_neighbors)))
 
 
 def normalize(value: str) -> str:

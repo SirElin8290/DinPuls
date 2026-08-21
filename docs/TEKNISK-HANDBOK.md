@@ -49,17 +49,17 @@ Säkerhetsmodulen måste finnas före kärnmodulen. Kärnmodulen måste finnas f
 
 ## Kommunmotorn
 
-De sju startkommunerna definieras centralt i `data/municipalities.json`:
+Alla kommuner definieras centralt i `data/municipalities.json`. En ny kommun ska registreras där med grunddata, söktermer, ortsaliaser och grannkommuner. Därefter körs:
 
-- Åmål
-- Säffle
-- Bengtsfors
-- Mellerud
-- Årjäng
-- Arvika
-- Grums
+```bash
+python3 scripts/sync_municipality_scaffolds.py
+```
 
-En modul ska läsa aktiv kommun från kommunmotorn och reagera på kommunbyte. Kommunnamn eller kommunspecifika värden ska inte hårdkodas i en generell modul. Alla kommunindelade datafiler måste innehålla exakt samma sju kommuner i samma ordning.
+Synkroniseringen skapar kommunposter i samtliga kommunindelade datafiler och uppdaterar de webbläsar- och pushregister som av tekniska skäl publiceras som JavaScript. De genererade registren får aldrig redigeras som den primära källan.
+
+En modul ska läsa aktiv kommun från kommunmotorn och reagera på kommunbyte. Generella moduler får inte innehålla egna kommunlistor. Uppdaterarna för nyheter och Missing People läser söktermer, ortsaliaser och grannkommuner från den centrala kommunfilen och stoppar publicering om nödvändiga uppgifter saknas.
+
+Alla kommunindelade datafiler måste innehålla exakt samma kommuner i samma ordning. `scripts/validate_launch.py`, kommunmotortestet och pushserverstestet stoppar publicering om registren avviker.
 
 ## Säkerhetsregler
 

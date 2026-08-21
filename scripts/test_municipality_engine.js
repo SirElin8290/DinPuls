@@ -49,4 +49,4 @@ assert.equal(loadEngine("?kommun=Okänd", "Arvika").engine.getInitial(), "Arvika
 assert.equal(loadEngine("?kommun=grums").engine.getInitial(), "Grums");
 assert.equal(loadEngine().engine.set("Ogiltig", { updateUrl: false }), "Åmål");
 
-console.log("✓ Kommunmotorn klarar alla åtta kommuner, lagring, URL och fallback");
+console.log(`✓ Kommunmotorn klarar alla ${expected.length} kommuner, lagring, URL och fallback`);

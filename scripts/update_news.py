@@ -18,16 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 NEWS = ROOT / "data" / "news.json"
 USER_AGENT = "DinPuls.se/0.21 (lokal nyhetsaggregator; https://sirelin8290.github.io/DinPuls/)"
 
-MUNICIPALITIES = {
-    "Åmål": ["åmål", "tösse", "fengersfors", "edsleskog", "ånimskog", "fröskog"],
-    "Säffle": ["säffle", "svanskog", "värmlandsnäs", "värmlandsbro", "nysäter"],
-    "Bengtsfors": ["bengtsfors", "billingsfors", "dals långed", "bäckefors", "skåpafors", "gustavsfors"],
-    "Mellerud": ["mellerud", "dals rostock", "åsensbruk", "håverud", "dalskog", "köpmannebro"],
-    "Årjäng": ["årjäng", "töcksfors", "sillerud", "holmedal", "lennartsfors", "blomskog", "trankil"],
-    "Arvika": ["arvika", "gunnarskog", "edane", "klässbol", "glava", "mangskog", "sulvik"],
-    "Grums": ["grums", "slottsbron", "segmon", "borgvik"],
-    "Kil": ["kil", "fagerås", "högboda", "tolita", "fryksta", "frykerud"],
-}
+MUNICIPALITY_CONFIG = json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
+MUNICIPALITIES = {item["name"]: item.get("newsSearchTerms", []) for item in MUNICIPALITY_CONFIG}
+if any(not terms for terms in MUNICIPALITIES.values()):
+    raise RuntimeError("Alla kommuner måste ha newsSearchTerms i data/municipalities.json")
 
 LOCAL_SEARCH_FEEDS = [
     dict(

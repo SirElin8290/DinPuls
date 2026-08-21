@@ -157,7 +157,12 @@ def verify_content() -> None:
 def verify_data() -> None:
     config = load_json("data/municipalities.json")
     names = [item.get("name") for item in config.get("municipalities", [])]
-    assert names == MUNICIPALITIES, "Kommunmotorn innehåller inte exakt de sju startkommunerna"
+    assert names == MUNICIPALITIES, "Kommunmotorn avviker från det centrala kommunregistret"
+    for item in config.get("municipalities", []):
+        name = item.get("name", "Okänd kommun")
+        assert item.get("newsSearchTerms"), f"{name}: newsSearchTerms saknas"
+        assert item.get("missingPeopleAliases"), f"{name}: missingPeopleAliases saknas"
+        assert item.get("neighbors"), f"{name}: neighbors saknas eller är tom"
 
     transport = municipality_map("data/transport.json")
     for name, payload in transport.items():
