@@ -57,6 +57,11 @@
     return registration?.pushManager.getSubscription() || null;
   }
 
+  async function activeServiceWorkerRegistration() {
+    await navigator.serviceWorker.register("/push-service-worker.js", { scope: "/" });
+    return navigator.serviceWorker.ready;
+  }
+
   function selectedCategories() {
     return [...document.querySelectorAll("[data-push-category]:checked")].map(input => input.dataset.pushCategory);
   }
@@ -143,7 +148,7 @@
       const permission = await Notification.requestPermission();
       if (permission !== "granted") throw new Error("Du valde att inte tillåta notiser.");
       const current = await loadConfig();
-      const registration = await navigator.serviceWorker.register("/push-service-worker.js", { scope: "/" });
+      const registration = await activeServiceWorkerRegistration();
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey(current.publicKey)
