@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-22T15:47:17+00:00",
+  "generatedAt": "2026-08-22T15:59:44+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -13,7 +13,7 @@
           "name": "Åmål station",
           "alerts": [],
           "lookupTime": "2026-08-22T17:47+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-22T19:47+02:00",
           "error": null,
           "departures": [
@@ -25,9 +25,10 @@
               "scheduled": "2026-08-22T22:00:00+02:00",
               "realtime": "2026-08-22T22:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             }
           ]
         }
@@ -50,11 +51,35 @@
               "direction": "Åmål",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-22T18:35:00+02:00",
-              "realtime": "2026-08-22T18:33:18+02:00",
-              "delayMinutes": -2,
+              "realtime": "2026-08-22T18:34:17+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "F"
+            },
+            {
+              "mode": "train",
+              "line": "71",
+              "direction": "Göteborg",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-22T18:58:00+02:00",
+              "realtime": "2026-08-22T18:58:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "T"
+            },
+            {
+              "mode": "train",
+              "line": "3975",
+              "direction": "Göteborg Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-08-22T18:58:00+02:00",
+              "realtime": "2026-08-22T18:58:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": ""
             }
           ]
         }
@@ -100,18 +125,6 @@
           "departures": [
             {
               "mode": "train",
-              "line": "1435",
-              "direction": "Bengtsfors",
-              "operator": "DVVJ",
-              "scheduled": "2026-08-22T17:50:00+02:00",
-              "realtime": "2026-08-22T17:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": ""
-            },
-            {
-              "mode": "train",
               "line": "70",
               "direction": "Göteborg Centralstation",
               "operator": "Tågab",
@@ -121,6 +134,18 @@
               "isRealtime": true,
               "canceled": false,
               "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "700",
+              "direction": "Ed",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-22T18:58:00+02:00",
+              "realtime": "2026-08-22T18:58:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "B"
             }
           ]
         }
@@ -136,20 +161,7 @@
           "retained": false,
           "nextSearchAfter": "2026-08-22T16:04+02:00",
           "error": null,
-          "departures": [
-            {
-              "mode": "bus",
-              "line": "700",
-              "direction": "Grums Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T18:00:00+02:00",
-              "realtime": "2026-08-22T17:56:29+02:00",
-              "delayMinutes": -4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            }
-          ]
+          "departures": []
         }
       ]
     },
@@ -165,16 +177,28 @@
           "error": null,
           "departures": [
             {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T17:56:00+02:00",
-              "realtime": "2026-08-22T17:56:00+02:00",
+              "mode": "train",
+              "line": "648",
+              "direction": "Stockholm Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-08-22T18:56:00+02:00",
+              "realtime": "2026-08-22T18:56:00+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "B"
+              "platform": ""
+            },
+            {
+              "mode": "train",
+              "line": "639",
+              "direction": "Oslo S",
+              "operator": "SJ AB",
+              "scheduled": "2026-08-22T18:57:00+02:00",
+              "realtime": "2026-08-22T18:57:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": ""
             }
           ]
         }
@@ -193,24 +217,12 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "801",
-              "direction": "Grums",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T17:50:00+02:00",
-              "realtime": "2026-08-22T17:50:20+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "E"
-            },
-            {
-              "mode": "bus",
               "line": "800",
               "direction": "Säffle Åmål",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-22T18:00:00+02:00",
-              "realtime": "2026-08-22T18:00:32+02:00",
-              "delayMinutes": 1,
+              "realtime": "2026-08-22T18:02:50+02:00",
+              "delayMinutes": 3,
               "isRealtime": true,
               "canceled": false,
               "platform": "E"
@@ -272,7 +284,7 @@
               "direction": "Kristinehamn",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-22T18:09:00+02:00",
-              "realtime": "2026-08-22T18:08:52+02:00",
+              "realtime": "2026-08-22T18:08:50+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
