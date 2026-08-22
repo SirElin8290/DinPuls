@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-22T20:49:50+00:00",
+  "generatedAt": "2026-08-22T21:22:46+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -93,7 +93,7 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-08-22T22:49+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-23T00:49+02:00",
           "error": null,
           "departures": [
@@ -105,9 +105,10 @@
               "scheduled": "2026-08-23T10:58:00+02:00",
               "realtime": "2026-08-23T10:58:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             },
             {
               "mode": "train",
@@ -117,9 +118,10 @@
               "scheduled": "2026-08-23T10:58:00+02:00",
               "realtime": "2026-08-23T10:58:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "T"
+              "platform": "T",
+              "stale": true
             },
             {
               "mode": "train",
@@ -129,9 +131,10 @@
               "scheduled": "2026-08-23T11:03:00+02:00",
               "realtime": "2026-08-23T11:03:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             }
           ]
         }
@@ -144,48 +147,21 @@
           "name": "Bengtsfors",
           "alerts": [],
           "lookupTime": "2026-08-22T21:46+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-08-22T23:46+02:00",
           "error": null,
           "departures": [
             {
               "mode": "bus",
-              "line": "740",
-              "direction": "Åmål",
-              "operator": "Västtrafik",
-              "scheduled": "2026-08-23T09:50:00+02:00",
-              "realtime": "2026-08-23T09:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "X",
-              "stale": true
-            },
-            {
-              "mode": "bus",
               "line": "775",
               "direction": "Åmål",
               "operator": "Västtrafik",
-              "scheduled": "2026-08-23T09:55:00+02:00",
-              "realtime": "2026-08-23T09:55:00+02:00",
+              "scheduled": "2026-08-23T00:00:00+02:00",
+              "realtime": "2026-08-23T00:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "730",
-              "direction": "Uddevalla",
-              "operator": "Västtrafik",
-              "scheduled": "2026-08-23T10:14:00+02:00",
-              "realtime": "2026-08-23T10:14:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             }
           ]
         }
@@ -203,28 +179,16 @@
           "error": null,
           "departures": [
             {
-              "mode": "bus",
-              "line": "710",
-              "direction": "Mellerud",
+              "mode": "train",
+              "line": "13244",
+              "direction": "Säffle",
               "operator": "Västtrafik",
-              "scheduled": "2026-08-22T22:51:00+02:00",
-              "realtime": "2026-08-22T22:51:00+02:00",
+              "scheduled": "2026-08-23T00:15:00+02:00",
+              "realtime": "2026-08-23T00:15:00+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "710",
-              "direction": "Vänersborg",
-              "operator": "Västtrafik",
-              "scheduled": "2026-08-22T23:05:00+02:00",
-              "realtime": "2026-08-22T23:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
+              "platform": ""
             }
           ]
         }
@@ -294,32 +258,7 @@
           "retained": false,
           "nextSearchAfter": "2026-08-22T23:25+02:00",
           "error": null,
-          "departures": [
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Charlottenberg",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T22:56:00+02:00",
-              "realtime": "2026-08-22T22:53:48+02:00",
-              "delayMinutes": -2,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "T"
-            },
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Charlottenberg",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-08-22T22:56:00+02:00",
-              "realtime": "2026-08-22T22:56:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "1"
-            }
-          ]
+          "departures": []
         }
       ]
     },
@@ -328,9 +267,7 @@
         {
           "id": "740000217",
           "name": "Grums station",
-          "alerts": [
-            "Försening på linje 800 mot Säffle Grums Karlstad"
-          ],
+          "alerts": [],
           "lookupTime": "2026-08-22T09:19+02:00",
           "retained": false,
           "nextSearchAfter": "2026-08-22T11:19+02:00",
@@ -338,12 +275,36 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "800",
-              "direction": "Karlstad",
+              "line": "801",
+              "direction": "Grums",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T22:53:00+02:00",
-              "realtime": "2026-08-22T23:12:02+02:00",
-              "delayMinutes": 19,
+              "scheduled": "2026-08-22T23:50:00+02:00",
+              "realtime": "2026-08-22T23:47:37+02:00",
+              "delayMinutes": -2,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Säffle Åmål",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-23T00:00:00+02:00",
+              "realtime": "2026-08-23T00:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "801",
+              "direction": "Vålberg Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-23T00:07:00+02:00",
+              "realtime": "2026-08-23T00:07:00+02:00",
+              "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -364,18 +325,6 @@
           "error": null,
           "departures": [
             {
-              "mode": "bus",
-              "line": "201",
-              "direction": "Fagerås",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T23:40:00+02:00",
-              "realtime": "2026-08-22T23:40:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "F"
-            },
-            {
               "mode": "train",
               "line": "74",
               "direction": "Sunne",
@@ -386,6 +335,30 @@
               "isRealtime": true,
               "canceled": false,
               "platform": "T"
+            },
+            {
+              "mode": "bus",
+              "line": "201",
+              "direction": "Fagerås",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-22T23:40:00+02:00",
+              "realtime": "2026-08-22T23:48:14+02:00",
+              "delayMinutes": 8,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "F"
+            },
+            {
+              "mode": "bus",
+              "line": "201",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-23T00:20:00+02:00",
+              "realtime": "2026-08-23T00:20:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "B"
             }
           ]
         }
