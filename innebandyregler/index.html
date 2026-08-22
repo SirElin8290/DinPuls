@@ -1,63 +1,18 @@
 <!doctype html>
 <html lang="sv">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#050505">
-  <title>VDK Regelgenerator 2026</title>
-  <meta name="description" content="Träna på innebandyns spelregler 2026 med Värmlands Domarkollektiv.">
-  <link rel="stylesheet" href="styles.css?v=1">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#050505"><title>VDK Regelgenerator 2026</title><meta name="description" content="Träna på innebandyns spelregler 2026 med Värmlands Domarkollektiv."><link rel="stylesheet" href="styles.css?v=1"></head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="VDK Regelgenerator – startsida"><img src="assets/vdk-logo.svg" alt="VDK"><span><strong>REGELGENERATOR</strong><small>REGELHANDBOKEN 2026</small></span></a>
-    <button class="icon-button" id="theme-toggle" type="button" aria-label="Växla ljust och mörkt läge">◐</button>
-  </header>
-
-  <main>
-    <section class="hero" id="home-view">
-      <div class="hero-copy">
-        <span class="eyebrow">VÄRMLANDS DOMARKOLLEKTIV</span>
-        <h1>Reglerna sitter<br><em>när matchen gäller.</em></h1>
-        <p>Scenario för scenario. Domslut, påföljd och regelkälla direkt efter varje svar – byggt på den officiella regelhandboken och genomgången av de nya reglerna 2026.</p>
-        <div class="hero-actions"><button class="primary" data-start-mode="training">Starta träning <span>→</span></button><button class="secondary" id="open-library">Utforska regelbanken</button></div>
-        <div class="source-strip"><span>✓ Regelhandbok 2026</span><span>✓ Nya regler 2026</span><span>✓ Sparas lokalt</span></div>
-      </div>
-      <aside class="score-card">
-        <div class="score-ring" id="score-ring"><strong id="accuracy-value">–</strong><small>träffsäkerhet</small></div>
-          <div><span class="label">DIN UTVECKLING</span><h2 id="questions-answered">0 frågor besvarade</h2><p id="progress-copy">Gör ditt första pass för att börja följa utvecklingen.</p><button class="reset-stats" id="reset-stats" type="button">Nollställ min statistik</button></div>
-      </aside>
-    </section>
-
-    <section class="mode-section" aria-labelledby="mode-title">
-      <div class="section-heading"><div><span class="eyebrow">VÄLJ UPPLÄGG</span><h2 id="mode-title">Hur vill du träna?</h2></div><p>Du får alltid en förklaring och exakt regelhänvisning.</p></div>
-      <div class="mode-grid">
-        <button class="mode-card yellow" data-start-mode="training"><span class="mode-icon">⚡</span><span class="tag">REKOMMENDERAD</span><h3>Snabbträning</h3><p>Blandade situationer med direkt återkoppling. Välj 10, 25 eller 50 frågor.</p><span class="card-link">Välj träning →</span></button>
-        <button class="mode-card dark" data-start-mode="new"><span class="mode-icon">✦</span><span class="tag">NYTT 2026</span><h3>Nya regler</h3><p>Fokusera på förändringarna som gäller från 1 juli 2026.</p><span class="card-link">Träna ändringarna →</span></button>
-        <button class="mode-card white" data-start-mode="exam"><span class="mode-icon">◎</span><span class="tag">PROVLÄGE</span><h3>Domarprov</h3><p>25, 50 eller 100 frågor. Facit och analys visas först när du är klar.</p><span class="card-link">Starta prov →</span></button>
-        <button class="mode-card white" id="weak-mode"><span class="mode-icon">↗</span><span class="tag">ADAPTIVT</span><h3>Smart repetition</h3><p>Prioriterar dina kunskapsluckor. På hög nivå blandas de med hela regelbanken så att träningen inte blir repetitiv.</p><span class="card-link">Fånga nästa kunskapslucka →</span></button>
-      </div>
-    </section>
-
-    <section class="facts">
-      <div><strong id="bank-count">0</strong><span>verifierade scenarier</span></div><div><strong>2026</strong><span>aktuell regelversion</span></div><div><strong>3</strong><span>varianter per grundfråga</span></div>
-    </section>
-
-    <section class="sources"><div><span class="eyebrow">OFFICIELLA UNDERLAG</span><h2>Kontrollera alltid mot originalet</h2><p>Generatorn är ett träningsverktyg. Vid tveksamhet är Svenska Innebandyförbundets regelhandbok styrande.</p></div><div class="source-links"><a href="https://innebandy.se/media/4d3bptk2/regelhandboken-2026.pdf" target="_blank" rel="noopener">Regelhandbok 2026 <span>↗</span></a><a href="https://innebandy.se/media/001i5xaw/nya-regler-presentation.pdf" target="_blank" rel="noopener">Presentation: nya regler <span>↗</span></a></div></section>
-  </main>
-
-  <dialog id="setup-dialog"><form method="dialog" class="dialog-card"><button class="close" value="cancel" aria-label="Stäng">×</button><span class="eyebrow" id="setup-kicker">TRÄNING</span><h2 id="setup-title">Ställ in ditt pass</h2><p id="setup-copy">Välj antal frågor och område.</p><fieldset><legend>Antal frågor</legend><div class="segmented" id="count-options"></div></fieldset><fieldset id="category-field"><legend>Område</legend><div class="category-options" id="category-options"></div></fieldset><button class="primary full" id="begin-session" value="default">Starta passet <span>→</span></button></form></dialog>
-
-  <section class="session-view" id="session-view" hidden>
-    <header class="session-header"><button class="back-button" id="quit-session">← Avsluta</button><div class="session-progress"><div><span id="session-mode">TRÄNING</span><strong id="progress-label">1 / 25</strong></div><div class="progress-track"><i id="progress-bar"></i></div></div><div class="session-score" id="live-score">0 rätt</div></header>
-    <main class="question-shell"><article class="question-card"><div class="question-meta"><span id="question-category">Fasta situationer</span><span id="question-rule">Regel 000.0</span></div><h1 id="question-text"></h1><div class="answers" id="answers"></div><div class="feedback" id="feedback" hidden><div class="feedback-head"><span id="feedback-icon"></span><div><strong id="feedback-title"></strong><small id="feedback-ruling"></small></div></div><p id="feedback-explanation"></p><div class="rule-source"><span>REGELKÄLLA</span><strong id="feedback-source"></strong></div><button class="primary" id="next-question">Nästa fråga <span>→</span></button></div></article><aside class="tip-card"><span>VDK-TIPS</span><p id="question-tip">Läs situationen hela vägen innan du väljer domslut.</p><small>Tangentbord: 1–4 för svar, Enter för nästa.</small></aside></main>
-  </section>
-
-  <section class="result-view" id="result-view" hidden><div class="result-card"><span class="eyebrow">PASS GENOMFÖRT</span><div class="result-score"><strong id="result-percent">0%</strong><span id="result-fraction">0 av 0 rätt</span></div><h1 id="result-title">Bra jobbat!</h1><p id="result-message"></p><div class="result-breakdown" id="result-breakdown"></div><div class="result-actions"><button class="primary" id="retry-session">Försök igen</button><button class="secondary" id="back-home">Till startsidan</button></div></div></section>
-
-  <section class="library-view" id="library-view" hidden><header class="library-header"><button class="back-button" id="close-library">← Startsidan</button><div><span class="eyebrow">REGELBANK 2026</span><h1>Sök bland situationerna</h1></div></header><div class="library-tools"><input id="rule-search" type="search" placeholder="Sök på situation, domslut eller regelnummer…"><select id="rule-filter"><option value="all">Alla områden</option></select></div><div class="library-list" id="library-list"></div></section>
-
-  <footer><img src="assets/vdk-logo.svg" alt="VDK"><p><strong>Värmlands Domarkollektiv</strong><br>Tillsammans utvecklar vi domarkåren i Värmland.</p><span>Träningsverktyg · Regelversion 2026</span></footer>
-  <script src="questions.js?v=1"></script><script src="question-expansion.js?v=1"></script><script src="app.js?v=3"></script>
+<header class="topbar"><a class="brand" href="./" aria-label="VDK Regelgenerator – startsida"><img src="assets/vdk-logo.svg" alt="VDK"><span><strong>REGELGENERATOR</strong><small>REGELHANDBOKEN 2026</small></span></a><button class="icon-button" id="theme-toggle" type="button" aria-label="Växla ljust och mörkt läge">◐</button></header>
+<main>
+<section class="hero" id="home-view"><div class="hero-copy"><span class="eyebrow">VÄRMLANDS DOMARKOLLEKTIV</span><h1>Reglerna sitter<br><em>när matchen gäller.</em></h1><p>Scenario för scenario. Domslut, påföljd och regelkälla direkt efter varje svar – byggt på den officiella regelhandboken och genomgången av de nya reglerna 2026.</p><div class="hero-actions"><button class="primary" data-start-mode="training">Starta träning <span>→</span></button><button class="secondary" id="open-library">Utforska regelbanken</button></div><div class="source-strip"><span>✓ Regelhandbok 2026</span><span>✓ Nya regler 2026</span><span>✓ Sparas lokalt</span></div></div><aside class="score-card"><div class="score-ring" id="score-ring"><strong id="accuracy-value">–</strong><small>träffsäkerhet</small></div><div><span class="label">DIN UTVECKLING</span><h2 id="questions-answered">0 frågor besvarade</h2><p id="progress-copy">Gör ditt första pass för att börja följa utvecklingen.</p><button class="reset-stats" id="reset-stats" type="button">Nollställ min statistik</button></div></aside></section>
+<section class="mode-section" aria-labelledby="mode-title"><div class="section-heading"><div><span class="eyebrow">VÄLJ UPPLÄGG</span><h2 id="mode-title">Hur vill du träna?</h2></div><p>Du får alltid en förklaring och exakt regelhänvisning.</p></div><div class="mode-grid"><button class="mode-card yellow" data-start-mode="training"><span class="mode-icon">⚡</span><span class="tag">REKOMMENDERAD</span><h3>Snabbträning</h3><p>Blandade situationer med direkt återkoppling. Välj 10, 25 eller 50 frågor.</p><span class="card-link">Välj träning →</span></button><button class="mode-card dark" data-start-mode="new"><span class="mode-icon">✦</span><span class="tag">NYTT 2026</span><h3>Nya regler</h3><p>Fokusera på förändringarna som gäller från 1 juli 2026.</p><span class="card-link">Träna ändringarna →</span></button><button class="mode-card white" data-start-mode="exam"><span class="mode-icon">◎</span><span class="tag">PROVLÄGE</span><h3>Domarprov</h3><p>25, 50 eller 100 frågor. Facit och analys visas först när du är klar.</p><span class="card-link">Starta prov →</span></button><button class="mode-card white" id="weak-mode"><span class="mode-icon">↗</span><span class="tag">ADAPTIVT</span><h3>Smart repetition</h3><p>Prioriterar dina kunskapsluckor. På hög nivå blandas de med hela regelbanken så att träningen inte blir repetitiv.</p><span class="card-link">Fånga nästa kunskapslucka →</span></button></div></section>
+<section class="facts"><div><strong id="bank-count">0</strong><span>verifierade scenarier</span></div><div><strong>2026</strong><span>aktuell regelversion</span></div><div><strong>3</strong><span>varianter per grundfråga</span></div></section>
+<section class="sources"><div><span class="eyebrow">OFFICIELLA UNDERLAG</span><h2>Kontrollera alltid mot originalet</h2><p>Generatorn är ett träningsverktyg. Vid tveksamhet är Svenska Innebandyförbundets regelhandbok styrande.</p></div><div class="source-links"><a href="https://innebandy.se/media/4d3bptk2/regelhandboken-2026.pdf" target="_blank" rel="noopener">Regelhandbok 2026 <span>↗</span></a><a href="https://innebandy.se/media/001i5xaw/nya-regler-presentation.pdf" target="_blank" rel="noopener">Presentation: nya regler <span>↗</span></a></div></section>
+</main>
+<dialog id="setup-dialog"><form method="dialog" class="dialog-card"><button class="close" value="cancel" aria-label="Stäng">×</button><span class="eyebrow" id="setup-kicker">TRÄNING</span><h2 id="setup-title">Ställ in ditt pass</h2><p id="setup-copy">Välj antal frågor och område.</p><fieldset><legend>Antal frågor</legend><div class="segmented" id="count-options"></div></fieldset><fieldset id="category-field"><legend>Område</legend><div class="category-options" id="category-options"></div></fieldset><button class="primary full" id="begin-session" value="default">Starta passet <span>→</span></button></form></dialog>
+<section class="session-view" id="session-view" hidden><header class="session-header"><button class="back-button" id="quit-session">← Avsluta</button><div class="session-progress"><div><span id="session-mode">TRÄNING</span><strong id="progress-label">1 / 25</strong></div><div class="progress-track"><i id="progress-bar"></i></div></div><div class="session-score" id="live-score">0 rätt</div></header><main class="question-shell"><article class="question-card"><div class="question-meta"><span id="question-category">Fasta situationer</span><span id="question-rule">Regel 000.0</span></div><h1 id="question-text"></h1><div class="answers" id="answers"></div><div class="feedback" id="feedback" hidden><div class="feedback-head"><span id="feedback-icon"></span><div><strong id="feedback-title"></strong><small id="feedback-ruling"></small></div></div><p id="feedback-explanation"></p><div class="rule-source"><span>REGELKÄLLA</span><strong id="feedback-source"></strong></div><button class="primary" id="next-question">Nästa fråga <span>→</span></button></div></article><aside class="tip-card"><span>VDK-TIPS</span><p id="question-tip">Läs situationen hela vägen innan du väljer domslut.</p><small>Tangentbord: 1–4 för svar, Enter för nästa.</small></aside></main></section>
+<section class="result-view" id="result-view" hidden><div class="result-card"><span class="eyebrow">PASS GENOMFÖRT</span><div class="result-score"><strong id="result-percent">0%</strong><span id="result-fraction">0 av 0 rätt</span></div><h1 id="result-title">Bra jobbat!</h1><p id="result-message"></p><div class="result-breakdown" id="result-breakdown"></div><div class="result-actions"><button class="primary" id="retry-session">Försök igen</button><button class="secondary" id="back-home">Till startsidan</button></div></div></section>
+<section class="library-view" id="library-view" hidden><header class="library-header"><button class="back-button" id="close-library">← Startsidan</button><div><span class="eyebrow">REGELBANK 2026</span><h1>Sök bland situationerna</h1></div></header><div class="library-tools"><input id="rule-search" type="search" placeholder="Sök på situation, domslut eller regelnummer…"><select id="rule-filter"><option value="all">Alla områden</option></select></div><div class="library-list" id="library-list"></div></section>
+<footer><img src="assets/vdk-logo.svg" alt="VDK"><p><strong>Värmlands Domarkollektiv</strong><br>Tillsammans utvecklar vi domarkåren i Värmland.</p><span>Träningsverktyg · Regelversion 2026</span></footer>
+<script src="questions.js?v=2"></script><script src="question-expansion.js?v=2"></script><script src="app.js?v=4"></script><script src="levels-print.js?v=1"></script>
 </body></html>
