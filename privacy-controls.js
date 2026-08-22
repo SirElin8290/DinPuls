@@ -2,14 +2,19 @@
   "use strict";
 
   const LOCAL_PREFIX = "dinpuls-";
-  const NOTICE_KEY = "dinpuls-privacy-notice-v2";
+  const CONSENT_KEY = "dinpuls-privacy-consent-v3";
 
-  function getNoticeState() {
-    try { return localStorage.getItem(NOTICE_KEY); } catch { return null; }
+  function getConsentState() {
+    try { return localStorage.getItem(CONSENT_KEY); } catch { return null; }
   }
 
-  function saveNoticeState() {
-    try { localStorage.setItem(NOTICE_KEY, "acknowledged"); } catch {}
+  function saveConsentState(value) {
+    try { localStorage.setItem(CONSENT_KEY, value); } catch {}
+    document.dispatchEvent(new CustomEvent("dinpuls:analytics-consent", { detail: { analytics: value === "analytics-accepted" } }));
+  }
+
+  function analyticsAllowed() {
+    return getConsentState() === "analytics-accepted";
   }
 
   function clearLocalSettings() {
@@ -22,36 +27,41 @@
       keys.forEach(key => localStorage.removeItem(key));
     } catch {}
     document.querySelectorAll("[data-privacy-status]").forEach(status => {
-      status.textContent = "Lokala inställningar har raderats på den här enheten.";
+      status.textContent = "Lokala inställningar och integritetsval har raderats på den här enheten.";
     });
     document.dispatchEvent(new CustomEvent("dinpuls:local-settings-cleared"));
     window.setTimeout(addPrivacyNotice, 50);
   }
 
   function closePrivacyNotice() {
-    saveNoticeState();
     const notice = document.querySelector("[data-privacy-notice]");
     if (!notice) return;
     notice.classList.add("is-closing");
     window.setTimeout(() => notice.remove(), 180);
   }
 
-  function addPrivacyNotice() {
-    if (getNoticeState() || document.querySelector("[data-privacy-notice]")) return;
+  function chooseConsent(value) {
+    saveConsentState(value);
+    closePrivacyNotice();
+  }
+
+  function addPrivacyNotice(force) {
+    if ((!force && getConsentState()) || document.querySelector("[data-privacy-notice]")) return;
 
     if (!document.querySelector("style[data-privacy-notice-style]")) {
       const style = document.createElement("style");
       style.dataset.privacyNoticeStyle = "true";
       style.textContent = `
-        .dp-privacy-notice{position:fixed!important;z-index:2147483647!important;left:16px!important;right:16px!important;bottom:16px!important;display:block!important;visibility:visible!important;opacity:1;max-width:720px;margin:auto;padding:18px 20px;border:1px solid #cfd9e8;border-radius:16px;background:#fff;color:#10213e;box-shadow:0 18px 55px rgba(8,38,83,.28);font:500 14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:opacity .18s ease,transform .18s ease}
+        .dp-privacy-notice{position:fixed!important;z-index:2147483647!important;left:16px!important;right:16px!important;bottom:16px!important;display:block!important;visibility:visible!important;opacity:1;max-width:760px;margin:auto;padding:18px 20px;border:1px solid #cfd9e8;border-radius:16px;background:#fff;color:#10213e;box-shadow:0 18px 55px rgba(8,38,83,.28);font:500 14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:opacity .18s ease,transform .18s ease}
         .dp-privacy-notice.is-closing{opacity:0;transform:translateY(10px)}
         .dp-privacy-notice strong{display:block;margin:0 0 5px;color:#082653;font-size:16px}
         .dp-privacy-notice p{margin:0;color:#44536b}
         .dp-privacy-notice-actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
         .dp-privacy-notice button,.dp-privacy-notice a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 15px;border-radius:10px;font:800 14px system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-decoration:none;cursor:pointer}
         .dp-privacy-notice button{border:1px solid #0a57c7;background:#0a57c7;color:#fff}
-        .dp-privacy-notice a{border:1px solid #cfd9e8;background:#fff;color:#0a57c7}
-        @media(max-width:520px){.dp-privacy-notice{left:10px!important;right:10px!important;bottom:10px!important;padding:16px}.dp-privacy-notice-actions>*{flex:1 1 130px}}
+        .dp-privacy-notice button[data-privacy-essential-only]{border-color:#cfd9e8;background:#fff;color:#0a57c7}
+        .dp-privacy-notice a{border:0;background:transparent;color:#0a57c7;padding-left:4px;padding-right:4px}
+        @media(max-width:520px){.dp-privacy-notice{left:10px!important;right:10px!important;bottom:10px!important;padding:16px}.dp-privacy-notice-actions>*{flex:1 1 145px}}
       `;
       (document.head || document.documentElement).appendChild(style);
     }
@@ -61,17 +71,19 @@
     notice.dataset.privacyNotice = "true";
     notice.setAttribute("role", "dialog");
     notice.setAttribute("aria-live", "polite");
-    notice.setAttribute("aria-label", "Information om lokal lagring");
+    notice.setAttribute("aria-label", "Integritetsval för DinPuls");
     notice.innerHTML = `
-      <strong>DinPuls sparar vissa val på din enhet</strong>
-      <p>DinPuls använder lokal lagring för exempelvis vald kommun och dina inställningar. Vi använder inte spårnings- eller marknadsföringskakor. Informationen stannar i din webbläsare och kan rensas när som helst.</p>
+      <strong>DinPuls använder lokal lagring och valfri statistik</strong>
+      <p>Nödvändig lokal lagring används för exempelvis vald kommun och dina inställningar. Du kan också tillåta anonymiserad besöksstatistik via Google Analytics när den tjänsten aktiveras. Statistik aktiveras inte utan ditt val.</p>
       <div class="dp-privacy-notice-actions">
-        <button type="button" data-privacy-notice-ok>Jag förstår</button>
+        <button type="button" data-privacy-accept-analytics>Tillåt statistik</button>
+        <button type="button" data-privacy-essential-only>Endast nödvändiga</button>
         <a href="information.html#integritet">Läs mer</a>
       </div>
     `;
     (document.body || document.documentElement).appendChild(notice);
-    notice.querySelector("[data-privacy-notice-ok]")?.addEventListener("click", closePrivacyNotice);
+    notice.querySelector("[data-privacy-accept-analytics]")?.addEventListener("click", () => chooseConsent("analytics-accepted"));
+    notice.querySelector("[data-privacy-essential-only]")?.addEventListener("click", () => chooseConsent("essential-only"));
   }
 
   function bindControls() {
@@ -80,6 +92,14 @@
       button.dataset.privacyBound = "true";
       button.addEventListener("click", clearLocalSettings);
     });
+    document.querySelectorAll("[data-change-privacy-choice]").forEach(button => {
+      if (button.dataset.privacyChoiceBound) return;
+      button.dataset.privacyChoiceBound = "true";
+      button.addEventListener("click", () => {
+        try { localStorage.removeItem(CONSENT_KEY); } catch {}
+        addPrivacyNotice(true);
+      });
+    });
   }
 
   function addUtilityFooter() {
@@ -87,22 +107,28 @@
     const footer = document.createElement("footer");
     footer.className = "privacy-utility";
     footer.style.cssText = "display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;padding:22px 16px;border-top:1px solid #dfe6ef;background:#fff;color:#52627a;font:600 13px system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
-    footer.innerHTML = '<a href="information.html#integritet">Integritet, kakor och lokal lagring</a><button type="button" data-clear-local-data>Rensa lokala inställningar</button><span data-privacy-status role="status" aria-live="polite"></span>';
+    footer.innerHTML = '<a href="information.html#integritet">Integritet, kakor och lokal lagring</a><button type="button" data-change-privacy-choice>Ändra integritetsval</button><button type="button" data-clear-local-data>Rensa lokala inställningar</button><span data-privacy-status role="status" aria-live="polite"></span>';
     document.body.appendChild(footer);
   }
 
   function initialize() {
     addUtilityFooter();
     bindControls();
-    addPrivacyNotice();
+    addPrivacyNotice(false);
   }
 
-  window.DinPulsPrivacy = { clearLocalSettings, showNotice: addPrivacyNotice };
+  window.DinPulsPrivacy = {
+    clearLocalSettings,
+    showNotice: () => addPrivacyNotice(true),
+    analyticsAllowed,
+    getConsentState
+  };
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initialize, { once: true });
   } else {
     initialize();
   }
-  window.addEventListener("pageshow", addPrivacyNotice);
+  window.addEventListener("pageshow", () => addPrivacyNotice(false));
   document.addEventListener("dinpuls:components-loaded", bindControls);
 })();
