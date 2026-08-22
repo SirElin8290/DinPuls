@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-22T23:27:36+00:00",
+  "generatedAt": "2026-08-22T23:46:42+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -82,7 +82,7 @@
           "name": "Bengtsfors",
           "alerts": [],
           "lookupTime": "2026-08-23T01:27+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-23T03:27+02:00",
           "error": null,
           "departures": [
@@ -94,9 +94,10 @@
               "scheduled": "2026-08-23T13:45:00+02:00",
               "realtime": "2026-08-23T13:45:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "X"
+              "platform": "X",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -106,9 +107,10 @@
               "scheduled": "2026-08-23T14:10:00+02:00",
               "realtime": "2026-08-23T14:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -118,9 +120,10 @@
               "scheduled": "2026-08-23T14:14:00+02:00",
               "realtime": "2026-08-23T14:14:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             }
           ]
         }
@@ -160,36 +163,22 @@
           "id": "740000364",
           "name": "Årjäng busstation",
           "alerts": [],
-          "lookupTime": "2026-08-22T23:46+02:00",
-          "retained": true,
-          "nextSearchAfter": "2026-08-23T01:46+02:00",
+          "lookupTime": "2026-08-23T01:46+02:00",
+          "retained": false,
+          "nextSearchAfter": "2026-08-23T03:46+02:00",
           "error": null,
           "departures": [
             {
               "mode": "bus",
-              "line": "850",
-              "direction": "Stockholm Cityterminalen",
-              "operator": "Vy bus4you",
-              "scheduled": "2026-08-23T11:50:00+02:00",
-              "realtime": "2026-08-23T11:50:00+02:00",
+              "line": "600",
+              "direction": "Stockholm",
+              "operator": "FlixBus Sverige AB",
+              "scheduled": "2026-08-23T14:40:00+02:00",
+              "realtime": "2026-08-23T14:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "700",
-              "direction": "Töcksfors",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T12:00:00+02:00",
-              "realtime": "2026-08-23T12:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "D"
             }
           ]
         }
@@ -201,49 +190,34 @@
           "id": "740098080",
           "name": "Arvika",
           "alerts": [],
-          "lookupTime": "2026-08-22T23:46+02:00",
-          "retained": true,
-          "nextSearchAfter": "2026-08-23T01:46+02:00",
+          "lookupTime": "2026-08-23T01:46+02:00",
+          "retained": false,
+          "nextSearchAfter": "2026-08-23T03:46+02:00",
           "error": null,
           "departures": [
             {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Ingesund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T12:00:00+02:00",
-              "realtime": "2026-08-23T12:00:00+02:00",
+              "mode": "train",
+              "line": "638",
+              "direction": "Stockholm Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-08-23T13:47:00+02:00",
+              "realtime": "2026-08-23T13:47:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": ""
             },
             {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Ingesund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T12:02:00+02:00",
-              "realtime": "2026-08-23T12:02:00+02:00",
+              "mode": "train",
+              "line": "629",
+              "direction": "Oslo S",
+              "operator": "SJ AB",
+              "scheduled": "2026-08-23T13:50:00+02:00",
+              "realtime": "2026-08-23T13:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T12:26:00+02:00",
-              "realtime": "2026-08-23T12:26:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": ""
             }
           ]
         }
@@ -256,35 +230,21 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-08-23T00:24+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-08-23T02:24+02:00",
           "error": null,
           "departures": [
             {
-              "mode": "train",
-              "line": "71",
-              "direction": "Göteborg",
+              "mode": "bus",
+              "line": "860",
+              "direction": "Segmon",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T12:40:00+02:00",
-              "realtime": "2026-08-23T12:40:00+02:00",
+              "scheduled": "2026-08-23T02:45:00+02:00",
+              "realtime": "2026-08-23T02:45:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "T",
-              "stale": true
-            },
-            {
-              "mode": "train",
-              "line": "3963",
-              "direction": "Göteborg Central",
-              "operator": "SJ AB",
-              "scheduled": "2026-08-23T12:40:00+02:00",
-              "realtime": "2026-08-23T12:40:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "",
-              "stale": true
+              "platform": "D"
             }
           ]
         }
@@ -304,14 +264,14 @@
             {
               "mode": "bus",
               "line": "260",
-              "direction": "Högboda",
+              "direction": "Karlstad",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-23T01:45:00+02:00",
-              "realtime": "2026-08-23T01:42:58+02:00",
-              "delayMinutes": -2,
+              "scheduled": "2026-08-23T02:40:00+02:00",
+              "realtime": "2026-08-23T02:40:00+02:00",
+              "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "D"
+              "platform": "C"
             }
           ]
         }
