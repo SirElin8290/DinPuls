@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-22T21:47:01+00:00",
+  "generatedAt": "2026-08-22T21:59:45+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -40,6 +40,18 @@
               "isRealtime": true,
               "canceled": false,
               "platform": "L"
+            },
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Säffle",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-23T00:55:00+02:00",
+              "realtime": "2026-08-23T00:55:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "K"
             }
           ]
         }
@@ -62,8 +74,8 @@
               "direction": "Åmål",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-23T00:35:00+02:00",
-              "realtime": "2026-08-23T00:32:41+02:00",
-              "delayMinutes": -2,
+              "realtime": "2026-08-23T00:33:31+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "F"
@@ -133,7 +145,7 @@
           "name": "Årjäng busstation",
           "alerts": [],
           "lookupTime": "2026-08-22T23:46+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-23T01:46+02:00",
           "error": null,
           "departures": [
@@ -145,9 +157,10 @@
               "scheduled": "2026-08-23T11:50:00+02:00",
               "realtime": "2026-08-23T11:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -157,9 +170,10 @@
               "scheduled": "2026-08-23T12:00:00+02:00",
               "realtime": "2026-08-23T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             }
           ]
         }
@@ -172,7 +186,7 @@
           "name": "Arvika",
           "alerts": [],
           "lookupTime": "2026-08-22T23:46+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-23T01:46+02:00",
           "error": null,
           "departures": [
@@ -184,9 +198,10 @@
               "scheduled": "2026-08-23T12:00:00+02:00",
               "realtime": "2026-08-23T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -196,9 +211,10 @@
               "scheduled": "2026-08-23T12:02:00+02:00",
               "realtime": "2026-08-23T12:02:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -208,9 +224,10 @@
               "scheduled": "2026-08-23T12:26:00+02:00",
               "realtime": "2026-08-23T12:26:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             }
           ]
         }
@@ -229,23 +246,11 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "801",
-              "direction": "Grums",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T23:50:00+02:00",
-              "realtime": "2026-08-22T23:47:37+02:00",
-              "delayMinutes": -2,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "E"
-            },
-            {
-              "mode": "bus",
               "line": "800",
               "direction": "Säffle Åmål",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-23T00:00:00+02:00",
-              "realtime": "2026-08-22T23:59:32+02:00",
+              "realtime": "2026-08-23T00:00:29+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
@@ -272,26 +277,12 @@
         {
           "id": "740000206",
           "name": "Kil station",
-          "alerts": [
-            "Försening på linje 201 mot Kil Fagerås"
-          ],
+          "alerts": [],
           "lookupTime": "2026-08-22T05:21+02:00",
           "retained": false,
           "nextSearchAfter": "2026-08-22T07:21+02:00",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "201",
-              "direction": "Fagerås",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-22T23:40:00+02:00",
-              "realtime": "2026-08-22T23:52:00+02:00",
-              "delayMinutes": 12,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "F"
-            },
             {
               "mode": "bus",
               "line": "201",
