@@ -9,6 +9,8 @@ on:
       - main
     paths:
       - "scripts/update_news.py"
+      - "scripts/update_news_deep.py"
+      - "data/municipalities.json"
       - ".github/workflows/update-news.yml"
 
 permissions:
@@ -30,6 +32,8 @@ jobs:
           python-version: "3.12"
       - name: Hämta aktuella nyheter
         run: python scripts/update_news.py
+      - name: Djupsök färska lokala nyheter i alla kommuner
+        run: python scripts/update_news_deep.py
       - name: Testa nyhetslogiken
         run: PYTHONPATH=scripts python -m unittest scripts/test_update_news.py
       - name: Spara nyhetsdata
