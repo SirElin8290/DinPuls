@@ -7,7 +7,7 @@
   const button = document.createElement("button");
   button.className = "mode-card dark death-mode-card";
   button.type = "button";
-  button.innerHTML = '<span class="mode-icon">☠</span><span class="tag">EXPERT</span><h3>Death Mode</h3><p>10 regeltekniska kombinationsscenarier. Inga gratispoäng.</p><span class="card-link">Starta Death Mode →</span>';
+  button.innerHTML = '<span class="mode-icon">☠</span><span class="tag">EXPERT</span><h3>Death Mode</h3><p>Välj 10, 25 eller 35 regeltekniska kombinationsscenarier. Inga gratispoäng.</p><span class="card-link">Starta Death Mode →</span>';
   grid.appendChild(button);
 
   button.addEventListener("click", () => {
@@ -25,7 +25,7 @@
     requestAnimationFrame(() => {
       const deathCategory = [...document.querySelectorAll('input[name="category"]')]
         .find(input => input.value === "Death Mode");
-      const ten = document.querySelector('input[name="count"][value="10"]');
+      const countOptions = document.querySelector("#count-options");
       const kicker = document.querySelector("#setup-kicker");
       const title = document.querySelector("#setup-title");
       const copy = document.querySelector("#setup-copy");
@@ -38,14 +38,19 @@
 
       deathCategory.checked = true;
       deathCategory.dispatchEvent(new Event("change", { bubbles: true }));
-      if (ten) {
-        ten.checked = true;
-        ten.dispatchEvent(new Event("change", { bubbles: true }));
+
+      // Death Mode har en egen passlängd: 10, 25 eller hela banken (35).
+      // app.js läser det valda input[name="count"] när passet startas, så vi
+      // kan använda den ordinarie sessionsmotorn och dess slumpning oförändrad.
+      if (countOptions) {
+        countOptions.innerHTML = [10, 25, 35].map((count, index) =>
+          `<label><input type="radio" name="count" value="${count}" ${index === 0 ? "checked" : ""}><span>${count}</span></label>`
+        ).join("");
       }
 
       if (kicker) kicker.textContent = "DEATH MODE";
-      if (title) title.textContent = "10 frågor. Noll marginal.";
-      if (copy) copy.textContent = "Endast Death Mode-scenarier används i detta pass.";
+      if (title) title.textContent = "Välj hur hårt du vill köra.";
+      if (copy) copy.textContent = "Välj 10, 25 eller alla 35 Death Mode-scenarier. Frågorna slumpas på nytt för varje pass.";
       if (categoryField) categoryField.hidden = true;
     });
   });
