@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-24T21:14:22+00:00",
+  "generatedAt": "2026-08-24T21:44:20+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -12,22 +12,46 @@
           "id": "740000076",
           "name": "Åmål station",
           "alerts": [],
-          "lookupTime": "2026-08-24T21:18+02:00",
+          "lookupTime": "2026-08-24T23:44+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-08-24T23:18+02:00",
+          "nextSearchAfter": "2026-08-25T01:44+02:00",
           "error": null,
           "departures": [
             {
               "mode": "bus",
-              "line": "41A",
-              "direction": "Säffle",
-              "operator": "Västtrafik",
-              "scheduled": "2026-08-24T23:16:00+02:00",
-              "realtime": "2026-08-24T23:16:00+02:00",
+              "line": "800",
+              "direction": "Säffle Grums Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-08-25T12:00:00+02:00",
+              "realtime": "2026-08-25T12:00:00+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "N"
+              "platform": "K"
+            },
+            {
+              "mode": "bus",
+              "line": "780",
+              "direction": "Åmålsrundan",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-25T12:09:00+02:00",
+              "realtime": "2026-08-25T12:09:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "780",
+              "direction": "Åmålsrundan",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-25T12:39:00+02:00",
+              "realtime": "2026-08-25T12:39:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "O"
             }
           ]
         }
@@ -39,11 +63,24 @@
           "id": "740000023",
           "name": "Säffle station",
           "alerts": [],
-          "lookupTime": "2026-08-24T21:18+02:00",
+          "lookupTime": "2026-08-24T23:44+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-08-24T23:18+02:00",
+          "nextSearchAfter": "2026-08-25T01:44+02:00",
           "error": null,
-          "departures": []
+          "departures": [
+            {
+              "mode": "bus",
+              "line": "41A",
+              "direction": "Öxnered station via mellanliggande stationer",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-25T04:42:00+02:00",
+              "realtime": "2026-08-25T04:42:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            }
+          ]
         }
       ]
     },
@@ -94,11 +131,24 @@
           "id": "740098017",
           "name": "Mellerud",
           "alerts": [],
-          "lookupTime": "2026-08-24T21:18+02:00",
+          "lookupTime": "2026-08-24T23:44+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-08-24T23:18+02:00",
+          "nextSearchAfter": "2026-08-25T01:44+02:00",
           "error": null,
-          "departures": []
+          "departures": [
+            {
+              "mode": "bus",
+              "line": "710",
+              "direction": "Trollhättan via Vänersborg",
+              "operator": "Västtrafik",
+              "scheduled": "2026-08-25T04:07:00+02:00",
+              "realtime": "2026-08-25T04:07:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            }
+          ]
         }
       ]
     },
@@ -119,8 +169,8 @@
               "direction": "Töcksfors",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-25T00:00:00+02:00",
-              "realtime": "2026-08-24T23:57:56+02:00",
-              "delayMinutes": -2,
+              "realtime": "2026-08-25T00:00:12+02:00",
+              "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
               "platform": "B"
@@ -136,7 +186,7 @@
           "name": "Arvika",
           "alerts": [],
           "lookupTime": "2026-08-24T23:14+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-08-25T01:14+02:00",
           "error": null,
           "departures": [
@@ -148,9 +198,10 @@
               "scheduled": "2026-08-25T11:26:00+02:00",
               "realtime": "2026-08-25T11:26:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -160,9 +211,10 @@
               "scheduled": "2026-08-25T11:29:00+02:00",
               "realtime": "2026-08-25T11:29:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -172,9 +224,10 @@
               "scheduled": "2026-08-25T11:30:00+02:00",
               "realtime": "2026-08-25T11:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -184,9 +237,10 @@
               "scheduled": "2026-08-25T11:30:00+02:00",
               "realtime": "2026-08-25T11:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -196,9 +250,10 @@
               "scheduled": "2026-08-25T11:30:00+02:00",
               "realtime": "2026-08-25T11:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -208,9 +263,10 @@
               "scheduled": "2026-08-25T11:31:00+02:00",
               "realtime": "2026-08-25T11:31:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -220,9 +276,10 @@
               "scheduled": "2026-08-25T11:32:00+02:00",
               "realtime": "2026-08-25T11:32:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -232,9 +289,10 @@
               "scheduled": "2026-08-25T11:44:00+02:00",
               "realtime": "2026-08-25T11:44:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -244,9 +302,10 @@
               "scheduled": "2026-08-25T11:50:00+02:00",
               "realtime": "2026-08-25T11:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "C"
+              "platform": "C",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -256,9 +315,10 @@
               "scheduled": "2026-08-25T11:56:00+02:00",
               "realtime": "2026-08-25T11:56:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -268,9 +328,10 @@
               "scheduled": "2026-08-25T11:59:00+02:00",
               "realtime": "2026-08-25T11:59:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -280,9 +341,10 @@
               "scheduled": "2026-08-25T12:00:00+02:00",
               "realtime": "2026-08-25T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -292,9 +354,10 @@
               "scheduled": "2026-08-25T12:00:00+02:00",
               "realtime": "2026-08-25T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "J"
+              "platform": "J",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -304,9 +367,10 @@
               "scheduled": "2026-08-25T12:00:00+02:00",
               "realtime": "2026-08-25T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "J"
+              "platform": "J",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -316,9 +380,10 @@
               "scheduled": "2026-08-25T12:00:00+02:00",
               "realtime": "2026-08-25T12:00:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -328,9 +393,10 @@
               "scheduled": "2026-08-25T12:01:00+02:00",
               "realtime": "2026-08-25T12:01:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -340,9 +406,10 @@
               "scheduled": "2026-08-25T12:01:00+02:00",
               "realtime": "2026-08-25T12:01:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -352,9 +419,10 @@
               "scheduled": "2026-08-25T12:02:00+02:00",
               "realtime": "2026-08-25T12:02:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -364,9 +432,10 @@
               "scheduled": "2026-08-25T12:02:00+02:00",
               "realtime": "2026-08-25T12:02:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             }
           ]
         }
@@ -389,11 +458,11 @@
               "direction": "Grums",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-08-24T23:50:00+02:00",
-              "realtime": "2026-08-24T23:47:19+02:00",
-              "delayMinutes": -3,
+              "realtime": "2026-08-25T00:04:17+02:00",
+              "delayMinutes": 14,
               "isRealtime": true,
               "canceled": false,
-              "platform": "E"
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -425,14 +494,14 @@
             {
               "mode": "bus",
               "line": "201",
-              "direction": "Fagerås",
+              "direction": "Karlstad",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-08-24T23:40:00+02:00",
-              "realtime": "2026-08-24T23:40:08+02:00",
+              "scheduled": "2026-08-25T00:20:00+02:00",
+              "realtime": "2026-08-25T00:20:00+02:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "F"
+              "platform": "B"
             }
           ]
         }
