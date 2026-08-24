@@ -25,6 +25,14 @@
   <main>
     <div data-component="hero"></div>
     <div data-component="missing-people"></div>
+    <section class="news-sources-section community-feed-section" id="community-feed-section" hidden>
+      <div class="section-heading">
+        <div><span class="section-kicker">Från lokalsamhället</span><h2>Det pratas om i <span data-municipality-name>Åmål</span></h2></div>
+        <p>Utvalda lokala uppgifter från godkända grupper. DinPuls sammanfattar kort och länkar alltid till originalet.</p>
+      </div>
+      <div class="news-source-grid" id="community-feed-list"></div>
+      <a class="primary-button" id="community-feed-all" href="lokalt-flode.html">Visa fler lokala inlägg</a>
+    </section>
     <div data-component="secondary-cards"></div>
     <div data-component="primary-cards"></div>
     <div data-component="transport"></div>
@@ -37,110 +45,22 @@
     <div data-component="cinema"></div>
     <div data-component="service"></div>
     <div data-component="authorities"></div>
-    <section class="news-sources-section" id="news-sources">
-      <div class="section-heading">
-        <div>
-          <span class="section-kicker">Öppen och tydlig källhantering</span>
-          <h2>Nyhetskällor för <span data-municipality-name>Åmål</span></h2>
-        </div>
-        <p>DinPuls visar rubrik, källa, tid och länk. Artikeln läses alltid hos originalutgivaren.</p>
-      </div>
-      <div class="news-source-grid" id="news-source-grid"></div>
-    </section>
+    <section class="news-sources-section" id="news-sources"><div class="section-heading"><div><span class="section-kicker">Öppen och tydlig källhantering</span><h2>Nyhetskällor för <span data-municipality-name>Åmål</span></h2></div><p>DinPuls visar rubrik, källa, tid och länk. Artikeln läses alltid hos originalutgivaren.</p></div><div class="news-source-grid" id="news-source-grid"></div></section>
     <div data-component="premium-ad-3"></div>
   </main>
   <div data-component="footer"></div>
 
-  <dialog class="municipality-dialog" id="municipality-dialog">
-    <form method="dialog">
-      <button class="dialog-close" type="submit" value="cancel" aria-label="Stäng"><i data-lucide="x"></i></button>
-      <span class="dialog-icon"><i data-lucide="map-pin"></i></span>
-      <h2>Vilken kommun vill du följa?</h2>
-      <p>DinPuls anpassar innehållet efter platsen du väljer.</p>
-      <label for="municipality-select">Kommun</label>
-      <select id="municipality-select"></select>
-      <button class="primary-button" id="save-municipality" type="submit" value="default">Spara kommun</button>
-    </form>
-  </dialog>
+  <dialog class="municipality-dialog" id="municipality-dialog"><form method="dialog"><button class="dialog-close" type="submit" value="cancel" aria-label="Stäng"><i data-lucide="x"></i></button><span class="dialog-icon"><i data-lucide="map-pin"></i></span><h2>Vilken kommun vill du följa?</h2><p>DinPuls anpassar innehållet efter platsen du väljer.</p><label for="municipality-select">Kommun</label><select id="municipality-select"></select><button class="primary-button" id="save-municipality" type="submit" value="default">Spara kommun</button></form></dialog>
 
   <dialog class="homepage-customize-dialog" id="homepage-customize-dialog" aria-labelledby="homepage-customize-title">
-    <div class="homepage-customize-inner">
-      <button class="homepage-customize-close" type="button" aria-label="Stäng anpassningen"><i data-lucide="x"></i></button>
-      <span class="homepage-customize-icon"><i data-lucide="settings"></i></span>
-      <span class="section-kicker">DIN STARTSIDA</span>
-      <h2 id="homepage-customize-title">Välj vad du vill se</h2>
-      <p class="homepage-customize-intro">Valen sparas bara i den här webbläsaren. Du behöver inget konto.</p>
-
-      <section class="homepage-customize-fixed" aria-labelledby="homepage-customize-fixed-title">
-        <div><strong id="homepage-customize-fixed-title">Alltid synligt</strong><small>Viktig och aktuell information</small></div>
-        <span><i data-lucide="lock"></i>Dagens viktigaste</span>
-        <span><i data-lucide="lock"></i>Missing People</span>
-        <span><i data-lucide="lock"></i>Väder</span>
-      </section>
-
-      <details class="push-settings" id="push-settings">
-        <summary><span><i data-lucide="bell-ring"></i><b>Pushnotiser</b><small>Få viktiga lokala besked även när DinPuls är stängd</small></span><i data-lucide="chevron-down"></i></summary>
-        <div class="push-settings-body">
-          <div class="push-status" id="push-status" role="status" aria-live="polite">
-            <span class="push-status-icon"><i data-lucide="bell"></i></span>
-            <span><strong>Pushnotiser är inte aktiverade</strong><small>Ingen app och inget konto behövs.</small></span>
-          </div>
-          <div class="push-required" aria-label="Viktiga notiser som alltid ingår">
-            <p><strong>Alltid med när push är på</strong><small>Skyddsvärd information för kommunen du följer</small></p>
-            <span><i data-lucide="cloud-lightning"></i>Extremväder</span>
-            <span><i data-lucide="search"></i>Missing People</span>
-            <span><i data-lucide="shield-alert"></i>Dagens viktigaste</span>
-          </div>
-          <fieldset class="push-options" id="push-options">
-            <legend>Välj fler notiser</legend>
-            <label><span><i data-lucide="car-front"></i><b>Trafikläget</b></span><input type="checkbox" data-push-category="traffic" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-push-category="news"><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-push-category="events"><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-push-category="transport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-push-category="jobs"><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-push-category="housing"><i class="homepage-switch" aria-hidden="true"></i></label>
-            <label><span><i data-lucide="trophy"></i><b>Idrott och motion</b></span><input type="checkbox" data-push-category="sport"><i class="homepage-switch" aria-hidden="true"></i></label>
-          </fieldset>
-          <p class="push-scope"><i data-lucide="map-pin"></i>Notiserna följer din valda kommun. Missing People kan även omfatta angränsande kommuner.</p>
-          <div class="push-actions">
-            <button class="push-enable" id="push-enable" type="button"><i data-lucide="bell-ring"></i>Aktivera pushnotiser</button>
-            <button class="push-disable" id="push-disable" type="button" hidden>Stäng av</button>
-          </div>
-          <p class="push-help" id="push-help"></p>
-        </div>
-      </details>
-
-      <fieldset class="homepage-customize-options">
-        <legend>Valbara moduler</legend>
-        <label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-home-module="news" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-home-module="events" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="utensils"></i><b>Dagens lunch</b></span><input type="checkbox" data-home-module="lunch" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="car-front"></i><b>Trafik</b></span><input type="checkbox" data-home-module="traffic" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-home-module="transport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-home-module="jobs" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-home-module="housing" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="trophy"></i><b>Idrott och motion</b></span><input type="checkbox" data-home-module="sport" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="palette"></i><b>Fritid och föreningsliv</b></span><input type="checkbox" data-home-module="leisure" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="ticket"></i><b>Bio</b></span><input type="checkbox" data-home-module="cinema" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="heart-pulse"></i><b>Vård och hälsa</b></span><input type="checkbox" data-home-module="health" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="hammer"></i><b>Service och hantverk</b></span><input type="checkbox" data-home-module="service" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-        <label><span><i data-lucide="landmark"></i><b>Myndigheter och samhällsservice</b></span><input type="checkbox" data-home-module="authorities" checked><i class="homepage-switch" aria-hidden="true"></i></label>
-      </fieldset>
-
-      <div class="homepage-customize-footer">
-        <span id="homepage-customize-status" role="status">Alla valbara moduler visas</span>
-        <button type="button" id="homepage-customize-reset"><i data-lucide="refresh-cw"></i>Återställ</button>
-      </div>
+    <div class="homepage-customize-inner"><button class="homepage-customize-close" type="button" aria-label="Stäng anpassningen"><i data-lucide="x"></i></button><span class="homepage-customize-icon"><i data-lucide="settings"></i></span><span class="section-kicker">DIN STARTSIDA</span><h2 id="homepage-customize-title">Välj vad du vill se</h2><p class="homepage-customize-intro">Valen sparas bara i den här webbläsaren. Du behöver inget konto.</p>
+      <section class="homepage-customize-fixed" aria-labelledby="homepage-customize-fixed-title"><div><strong id="homepage-customize-fixed-title">Alltid synligt</strong><small>Viktig och aktuell information</small></div><span><i data-lucide="lock"></i>Dagens viktigaste</span><span><i data-lucide="lock"></i>Missing People</span><span><i data-lucide="lock"></i>Väder</span></section>
+      <details class="push-settings" id="push-settings"><summary><span><i data-lucide="bell-ring"></i><b>Pushnotiser</b><small>Få viktiga lokala besked även när DinPuls är stängd</small></span><i data-lucide="chevron-down"></i></summary><div class="push-settings-body"><div class="push-status" id="push-status" role="status" aria-live="polite"><span class="push-status-icon"><i data-lucide="bell"></i></span><span><strong>Pushnotiser är inte aktiverade</strong><small>Ingen app och inget konto behövs.</small></span></div><div class="push-required"><p><strong>Alltid med när push är på</strong><small>Skyddsvärd information för kommunen du följer</small></p><span><i data-lucide="cloud-lightning"></i>Extremväder</span><span><i data-lucide="search"></i>Missing People</span><span><i data-lucide="shield-alert"></i>Dagens viktigaste</span></div><fieldset class="push-options" id="push-options"><legend>Välj fler notiser</legend><label><span><i data-lucide="car-front"></i><b>Trafikläget</b></span><input type="checkbox" data-push-category="traffic" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-push-category="news"><i class="homepage-switch"></i></label><label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-push-category="events"><i class="homepage-switch"></i></label><label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-push-category="transport" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-push-category="jobs"><i class="homepage-switch"></i></label><label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-push-category="housing"><i class="homepage-switch"></i></label><label><span><i data-lucide="trophy"></i><b>Idrott och motion</b></span><input type="checkbox" data-push-category="sport"><i class="homepage-switch"></i></label></fieldset><p class="push-scope"><i data-lucide="map-pin"></i>Notiserna följer din valda kommun. Missing People kan även omfatta angränsande kommuner.</p><div class="push-actions"><button class="push-enable" id="push-enable" type="button"><i data-lucide="bell-ring"></i>Aktivera pushnotiser</button><button class="push-disable" id="push-disable" type="button" hidden>Stäng av</button></div><p class="push-help" id="push-help"></p></div></details>
+      <fieldset class="homepage-customize-options"><legend>Valbara moduler</legend><label><span><i data-lucide="newspaper"></i><b>Lokala nyheter</b></span><input type="checkbox" data-home-module="news" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="calendar-days"></i><b>Evenemang</b></span><input type="checkbox" data-home-module="events" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="utensils"></i><b>Dagens lunch</b></span><input type="checkbox" data-home-module="lunch" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="car-front"></i><b>Trafik</b></span><input type="checkbox" data-home-module="traffic" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="bus-front"></i><b>Buss och tåg</b></span><input type="checkbox" data-home-module="transport" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="briefcase-business"></i><b>Lediga jobb</b></span><input type="checkbox" data-home-module="jobs" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="house"></i><b>Lediga bostäder</b></span><input type="checkbox" data-home-module="housing" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="trophy"></i><b>Idrott och motion</b></span><input type="checkbox" data-home-module="sport" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="palette"></i><b>Fritid och föreningsliv</b></span><input type="checkbox" data-home-module="leisure" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="ticket"></i><b>Bio</b></span><input type="checkbox" data-home-module="cinema" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="heart-pulse"></i><b>Vård och hälsa</b></span><input type="checkbox" data-home-module="health" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="hammer"></i><b>Service och hantverk</b></span><input type="checkbox" data-home-module="service" checked><i class="homepage-switch"></i></label><label><span><i data-lucide="landmark"></i><b>Myndigheter och samhällsservice</b></span><input type="checkbox" data-home-module="authorities" checked><i class="homepage-switch"></i></label></fieldset>
+      <div class="homepage-customize-footer"><span id="homepage-customize-status" role="status">Alla valbara moduler visas</span><button type="button" id="homepage-customize-reset"><i data-lucide="refresh-cw"></i>Återställ</button></div>
     </div>
   </dialog>
 
-  <script src="assets/vendor/lucide.min.js"></script>
-  <script src="dp-safety.js?version=0.23.6"></script>
-  <script src="dp-core.js?version=0.23.6"></script>
-  <script src="municipality-engine.js?version=0.24.6"></script>
-  <script src="sport-data-engine.js?version=0.23.6"></script>
-  <script src="script.js?version=0.24.7"></script>
-  <script src="push-notifications.js?version=0.24.1"></script>
-  <script src="privacy-controls.js?version=0.24.9"></script>
+  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.23.6"></script><script src="dp-core.js?version=0.23.6"></script><script src="municipality-engine.js?version=0.24.6"></script><script src="sport-data-engine.js?version=0.23.6"></script><script src="script.js?version=0.24.7"></script><script src="community-feed.js?version=0.1.0"></script><script src="push-notifications.js?version=0.24.1"></script><script src="privacy-controls.js?version=0.24.9"></script>
 </body>
 </html>
