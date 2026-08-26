@@ -1,46 +1,7 @@
-<!doctype html>
-<html lang="sv">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>DinPuls · Administration</title>
-  <link rel="icon" href="../assets/favicon-32x32.png">
-  <link rel="stylesheet" href="./admin.css?v=7">
-</head>
-<body>
-  <main class="shell">
-    <section id="loginView" class="login-stage">
-      <img class="login-background" src="../Admininlogg.png?v=1" alt="">
-      <div class="login-shade" aria-hidden="true"></div>
-      <div class="login-branding">
-        <div class="login-site-name">DinPuls<span>.se</span></div>
-        <div class="login-copy">
-          <p class="login-kicker">DIN KOMMUN. DIN VARDAG.</p>
-          <h2>Allt du behöver veta<br>där du bor.</h2>
-          <p>Snabb och samlad samhällsinformation – lokalt, enkelt och alltid tillgängligt.</p>
-          <div class="login-lines"><span>Lokalt.</span><span>Relevant.</span><span>DinPuls.</span></div>
-        </div>
-      </div>
-      <section class="login-card">
-        <img class="login-card-compass" src="../assets/compass-mark.svg" alt="DinPuls kompass">
-        <h1>Välkommen tillbaka</h1>
-        <p class="muted">Logga in för att komma åt DinPuls administrationspanel.</p>
-        <form id="loginForm">
-          <label>Användarnamn<input id="username" autocomplete="username" required></label>
-          <label>Lösenord<input id="password" type="password" autocomplete="current-password" required></label>
-          <button class="login-button" type="submit">Logga in <span>→</span></button>
-          <p id="loginError" class="error" hidden>Fel användarnamn eller lösenord.</p>
-        </form>
-      </section>
-    </section>
-    <section id="appView" hidden>
-      <header class="topbar"><div><span class="brand">DinPuls</span><span class="pill">Administration</span></div><button id="logout" class="secondary">Logga ut</button></header>
-      <nav class="tabs"><button class="tab active" data-view="overview">Översikt</button><button class="tab" data-view="contracts">Avtal</button></nav>
-      <section id="overview" class="view"><h1>Översikt</h1><div class="stats"><article><span>Aktiva avtal</span><strong id="activeContracts">0</strong></article><article><span>MRR enligt avtal</span><strong id="mrr">0 kr</strong></article><article><span>Avtalsvärde 12 mån</span><strong id="arr">0 kr</strong></article><article><span>Utkast</span><strong id="drafts">0</strong></article></div><div class="panel"><h2>Avtalssystem</h2><p>Skapa och hantera DinPuls annonsavtal från fliken Avtal.</p></div></section>
-      <section id="contracts" class="view" hidden><div class="section-head"><div><h1>Avtal</h1><p class="muted">Skapa och hantera DinPuls annonsavtal.</p></div><button id="newContract">+ Nytt avtal</button></div><div id="contractList" class="panel"></div><form id="contractForm" class="panel contract-form" hidden><div class="section-head"><h2>Nytt annonsavtal</h2><button type="button" id="cancelContract" class="secondary">Avbryt</button></div><div class="grid2"><label>Företagsnamn<input name="company" required></label><label>Organisationsnummer<input name="orgNo" required></label><label>Kontaktperson<input name="contact" required></label><label>E-post<input name="email" type="email" required></label><label>Telefon<input name="phone"></label><label>Kommun<select name="municipality" id="municipality" required></select></label></div><h3>Annonsplatser</h3><div id="placements"></div><button type="button" id="addPlacement" class="secondary">+ Lägg till annonsplats</button><div class="grid2 totals"><label>Pris per plats/månad exkl. moms<input name="price" type="number" min="0" value="500" required></label><label>Avtalstid<input value="12 månader" disabled></label></div><div class="actions"><button type="submit">Spara avtalsutkast</button></div><p class="muted small">E-postutskick och e-signering ansluts när DinPuls företagsmail och backend är på plats.</p></form></section>
-    </section>
-  </main>
-  <script src="./admin.js?v=7"></script>
-</body>
-</html>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>DinPuls · Administration</title><link rel="icon" href="../assets/favicon-32x32.png"><link rel="stylesheet" href="./admin.css?v=8"></head><body><main class="shell">
+<section id="loginView" class="login-stage"><img class="login-background" src="../Admininlogg.png?v=1" alt=""><div class="login-shade"></div><div class="login-branding"><div class="login-site-name">DinPuls<span>.se</span></div><div class="login-copy"><p class="login-kicker">DIN KOMMUN. DIN VARDAG.</p><h2>Allt du behöver veta<br>där du bor.</h2><p>Snabb och samlad samhällsinformation – lokalt, enkelt och alltid tillgängligt.</p><div class="login-lines"><span>Lokalt.</span><span>Relevant.</span><span>DinPuls.</span></div></div></div><section class="login-card"><img class="login-card-compass" src="../assets/compass-mark.svg" alt="DinPuls kompass"><h1>Välkommen tillbaka</h1><p>Logga in för att komma åt DinPuls administrationspanel.</p><form id="loginForm"><label>Användarnamn<input id="username" autocomplete="username" required></label><label>Lösenord<input id="password" type="password" autocomplete="current-password" required></label><button class="login-button" type="submit">Logga in <span>→</span></button><p id="loginError" class="error" hidden>Fel användarnamn eller lösenord.</p></form></section></section>
+<section id="appView" class="admin-app" hidden><aside class="admin-sidebar"><a class="admin-brand" href="../"><img src="../assets/compass-mark.svg" alt=""><span><b>DinPuls.se</b><small>ADMINISTRATION</small></span></a><nav><button class="tab active" data-view="overview"><i>⌂</i>Översikt</button><button class="tab" data-view="contracts"><i>▤</i>Avtal</button></nav><div class="sidebar-note"><strong>Din kommun. Din vardag.</strong><span>Administration för DinPuls annonsavtal.</span></div><button id="logout" class="logout">Logga ut →</button></aside>
+<div class="admin-main"><header class="admin-header"><div><h1>Välkommen tillbaka!</h1><p>Här är en översikt över DinPuls avtalssystem.</p></div><div class="admin-user"><span class="user-avatar">A</span><span><b>Admin</b><small>Administration</small></span></div></header>
+<section id="overview" class="view"><div class="stats"><article class="stat green"><span class="stat-icon">▤</span><div><span>Aktiva avtal</span><strong id="activeContracts">0</strong><small>Aktiva annonsavtal</small></div></article><article class="stat gold"><span class="stat-icon">kr</span><div><span>MRR enligt avtal</span><strong id="mrr">0 kr</strong><small>Månadsintäkt enligt avtal</small></div></article><article class="stat blue"><span class="stat-icon">12</span><div><span>Avtalsvärde 12 mån</span><strong id="arr">0 kr</strong><small>Beräknat avtalsvärde</small></div></article><article class="stat plum"><span class="stat-icon">✎</span><div><span>Utkast</span><strong id="drafts">0</strong><small>Ej aktiverade avtal</small></div></article></div>
+<div class="overview-grid"><article class="panel recent-panel"><div class="panel-heading"><div><h2>Senaste avtal</h2><p>Senast skapade avtal och utkast.</p></div><button class="text-button" data-open="contracts">Visa alla →</button></div><div id="recentContracts" class="recent-list"></div></article><article class="panel status-panel"><div class="panel-heading"><div><h2>Avtalssystem</h2><p>Det som finns i administrationen idag.</p></div><span class="ok-pill">● Aktivt</span></div><div class="status-list"><div><span class="check">✓</span><p><b>Avtalsöversikt</b><small>Aktiva avtal och utkast</small></p></div><div><span class="check">✓</span><p><b>Kommun och annonsplats</b><small>Kopplas till varje avtal</small></p></div><div><span class="check">✓</span><p><b>Avtalsvärde</b><small>MRR och 12 månaders värde</small></p></div></div></article><article class="panel info-panel"><h2>Avtalsvärde</h2><p>Översikten räknar automatiskt på de avtal som lagras i administrationen.</p><div class="value-bars"><span><i style="width:72%"></i></span><span><i style="width:48%"></i></span><span><i style="width:84%"></i></span></div></article><article class="panel quick-panel"><div class="quick-copy"><span class="eyebrow">SNABBÅTGÄRDER</span><h2>Arbeta med avtalen</h2><p>Skapa ett nytt avtal eller gå direkt till avtalslistan.</p></div><div class="quick-actions"><button data-open="contracts" data-new="1"><span>＋</span><b>Skapa nytt avtal</b><small>Lägg till ett nytt annonsavtal</small></button><button data-open="contracts"><span>▤</span><b>Visa alla avtal</b><small>Hantera avtal och utkast</small></button></div></article></div></section>
+<section id="contracts" class="view" hidden><div class="page-heading"><div><span class="eyebrow">AVTAL</span><h1>Annonsavtal</h1><p>Skapa och hantera DinPuls annonsavtal.</p></div><button id="newContract" class="primary">+ Nytt avtal</button></div><div id="contractList" class="panel contract-list"></div><form id="contractForm" class="panel contract-form" hidden><div class="panel-heading"><div><h2>Nytt annonsavtal</h2><p>Fyll i företaget och de annonsplatser som ingår.</p></div><button type="button" id="cancelContract" class="secondary">Avbryt</button></div><div class="grid2"><label>Företagsnamn<input name="company" required></label><label>Organisationsnummer<input name="orgNo" required></label><label>Kontaktperson<input name="contact" required></label><label>E-post<input name="email" type="email" required></label><label>Telefon<input name="phone"></label><label>Kommun<select name="municipality" id="municipality" required></select></label></div><h3>Annonsplatser</h3><div id="placements"></div><button type="button" id="addPlacement" class="secondary">+ Lägg till annonsplats</button><div class="grid2 totals"><label>Pris per plats/månad exkl. moms<input name="price" type="number" min="0" value="500" required></label><label>Avtalstid<input value="12 månader" disabled></label></div><div class="actions"><button type="submit" class="primary">Spara avtalsutkast</button></div><p class="muted small">E-postutskick och e-signering ansluts när DinPuls företagsmail och backend är på plats.</p></form></section></div></section></main><script src="./admin.js?v=8"></script></body></html>
