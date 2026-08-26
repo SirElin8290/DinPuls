@@ -1,9 +1,10 @@
 (() => {
  const loginView=document.getElementById('loginView'),appView=document.getElementById('appView'),loginForm=document.getElementById('loginForm'),loginError=document.getElementById('loginError'),logout=document.getElementById('logout');
  const navItems=[...document.querySelectorAll('.nav-item')],views=[...document.querySelectorAll('.view')];
+ const DEMO_EMAIL='test@dinpuls.se',DEMO_PASSWORD='1234';
  const showApp=()=>{loginView.hidden=true;appView.hidden=false}; const showLogin=()=>{appView.hidden=true;loginView.hidden=false};
  function showView(id){views.forEach(v=>v.hidden=v.id!==id);navItems.forEach(n=>n.classList.toggle('active',n.dataset.view===id));}
- loginForm.addEventListener('submit',e=>{e.preventDefault();const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;if(!email||!password){loginError.hidden=false;return}loginError.hidden=true;sessionStorage.setItem('dinpuls_company_demo','1');showApp();});
+ loginForm.addEventListener('submit',e=>{e.preventDefault();const email=document.getElementById('email').value.trim().toLowerCase(),password=document.getElementById('password').value;if(email!==DEMO_EMAIL||password!==DEMO_PASSWORD){loginError.textContent='Fel e-post eller lösenord.';loginError.hidden=false;return}loginError.hidden=true;sessionStorage.setItem('dinpuls_company_demo','1');showApp();});
  document.getElementById('forgot').addEventListener('click',e=>{e.preventDefault();alert('Återställning av lösenord ansluts när företagskonton och backend är på plats.')});
  logout.addEventListener('click',()=>{sessionStorage.removeItem('dinpuls_company_demo');showLogin()});
  navItems.forEach(n=>n.addEventListener('click',()=>showView(n.dataset.view)));document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.open)));
