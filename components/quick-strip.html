@@ -1,3 +1,23 @@
+<style>
+/* Snabböversikten ska alltid börja med ett helt kort. Automatisk ticker gav
+   avklippta kort och ett visuellt sidofel, särskilt på Bengtsfors. */
+.quick-strip .ticker-track{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  animation:none !important;
+  transform:none !important;
+  scroll-behavior:smooth;
+  scrollbar-width:thin;
+}
+.quick-strip .ticker-set{
+  flex:0 0 max-content;
+}
+.quick-strip .ticker-set[aria-hidden="true"]{
+  display:none;
+}
+</style>
 <section class="quick-strip" aria-label="Snabböversikt">
   <div class="ticker-track">
     <div class="ticker-set">
