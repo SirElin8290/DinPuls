@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>DinPuls · Företag</title>
+  <link rel="icon" href="../assets/favicon-32x32.png">
+  <link rel="stylesheet" href="./foretag.css?v=1">
+</head>
+<body>
+  <main class="shell">
+    <section id="loginView" class="login-stage">
+      <img class="login-background" src="../företagloggin.png?v=1" alt="">
+      <div class="login-shade" aria-hidden="true"></div>
+      <section class="login-card" aria-labelledby="loginTitle">
+        <div class="login-label">FÖRETAGSPORTAL</div>
+        <h1 id="loginTitle">Logga in</h1>
+        <p>Hantera ditt företag och din lokala synlighet på DinPuls.</p>
+        <form id="loginForm">
+          <label>E-post<input id="email" type="email" autocomplete="username" placeholder="namn@foretag.se" required></label>
+          <label>Lösenord<input id="password" type="password" autocomplete="current-password" required></label>
+          <div class="login-row"><label class="remember"><input type="checkbox"> Kom ihåg mig</label><a href="#" id="forgot">Glömt lösenord?</a></div>
+          <button class="login-button" type="submit">Logga in <span>→</span></button>
+          <p id="loginError" class="error" hidden>Fyll i e-post och lösenord.</p>
+        </form>
+      </section>
+    </section>
+
+    <section id="appView" class="app" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="../">DinPuls<span>.se</span></a>
+        <div class="portal-name">Företagsportal</div>
+        <nav>
+          <button class="nav-item active" data-view="overview">Översikt</button>
+          <button class="nav-item" data-view="offers">Erbjudanden</button>
+          <button class="nav-item" data-view="campaigns">Kampanjer</button>
+          <button class="nav-item" data-view="profile">Företagsprofil</button>
+        </nav>
+        <button id="logout" class="logout">Logga ut</button>
+      </aside>
+      <div class="workspace">
+        <header class="topbar"><div><span class="eyebrow">DINPULS FÖRETAG</span><h1>Välkommen tillbaka</h1></div><div class="company-chip">Ditt företag</div></header>
+        <section id="overview" class="view">
+          <div class="hero-panel"><div><span class="eyebrow">LOKAL SYNLIGHET</span><h2>Nå kunder där de faktiskt bor.</h2><p>Här får du överblick över erbjudanden, kampanjer och hur ditt företag syns på DinPuls.</p></div><button class="primary" data-open="offers">+ Skapa erbjudande</button></div>
+          <div class="stats"><article><span>Aktiva erbjudanden</span><strong>0</strong><small>Redo för ditt första</small></article><article><span>Visningar</span><strong>—</strong><small>Statistik aktiveras vid publicering</small></article><article><span>Klick</span><strong>—</strong><small>Följ intresset lokalt</small></article><article><span>Status</span><strong class="status">Redo</strong><small>Företagsprofil skapad</small></article></div>
+          <div class="grid"><article class="panel"><div class="panel-head"><h3>Senaste aktivitet</h3></div><div class="empty"><strong>Här kommer din aktivitet att visas</strong><p>När erbjudanden och kampanjer publiceras ser du dem här.</p></div></article><article class="panel"><div class="panel-head"><h3>Kom igång</h3></div><ol class="steps"><li><span>1</span><div><strong>Komplettera företagsprofilen</strong><p>Kontrollera kontaktuppgifter och information.</p></div></li><li><span>2</span><div><strong>Skapa ett erbjudande</strong><p>Ge DinPuls-besökare en anledning att välja dig.</p></div></li><li><span>3</span><div><strong>Följ resultatet</strong><p>Se räckvidd och respons när kampanjen är live.</p></div></li></ol></article></div>
+        </section>
+        <section id="offers" class="view" hidden><div class="section-head"><div><span class="eyebrow">ERBJUDANDEN</span><h2>Dina erbjudanden</h2><p>Skapa och hantera erbjudanden som visas för lokala DinPuls-besökare.</p></div><button class="primary">+ Nytt erbjudande</button></div><div class="panel empty large"><strong>Inga erbjudanden ännu</strong><p>När företagskopplingen är ansluten skapar och publicerar du dem här.</p></div></section>
+        <section id="campaigns" class="view" hidden><div class="section-head"><div><span class="eyebrow">KAMPANJER</span><h2>Kampanjer</h2><p>Överblick över din annonsering på DinPuls.</p></div></div><div class="panel empty large"><strong>Ingen aktiv kampanj</strong><p>Aktiva annonsplatser och kampanjresultat kommer att visas här.</p></div></section>
+        <section id="profile" class="view" hidden><div class="section-head"><div><span class="eyebrow">FÖRETAGSPROFIL</span><h2>Ditt företag</h2><p>Grunduppgifter som används i DinPuls företagsytor.</p></div></div><form class="panel profile-form"><label>Företagsnamn<input placeholder="Ditt företag"></label><label>Kontaktperson<input placeholder="Namn"></label><label>E-post<input type="email" placeholder="namn@foretag.se"></label><label>Telefon<input placeholder="Telefonnummer"></label><label class="wide">Kort beskrivning<textarea rows="4" placeholder="Berätta kort om företaget"></textarea></label><div class="wide"><button type="button" class="primary">Spara uppgifter</button></div></form></section>
+      </div>
+    </section>
+  </main>
+  <script src="./foretag.js?v=1"></script>
+</body>
+</html>
