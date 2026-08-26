@@ -15,7 +15,7 @@ function init(){
  const loginForm=$('#loginForm');
  loginForm.addEventListener('submit',e=>{e.preventDefault();const user=$('#username').value.trim();const pass=$('#password').value;if(user===ADMIN_USER&&pass===EXPECTED_PASSWORD){$('#loginError').hidden=true;login()}else $('#loginError').hidden=false});
  $('#logout').onclick=()=>{sessionStorage.removeItem('dp-admin');showLogin();window.scrollTo(0,0)};
- $$('.tab').forEach(b=>b.onclick=()=>{$$('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.view').forEach(v=>v.hidden=true);$('#'+b.dataset.view].hidden=false});
+ $$('.tab').forEach(b=>b.onclick=()=>{$$('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.view').forEach(v=>v.hidden=true);$('#'+b.dataset.view).hidden=false});
  municipalities.sort((a,b)=>a.localeCompare(b,'sv')).forEach(m=>$('#municipality').add(new Option(m,m)));
  $('#addPlacement').onclick=addPlacement;addPlacement();
  $('#newContract').onclick=()=>{$('#contractForm').hidden=false;$('#contractForm').scrollIntoView({behavior:'smooth'})};
