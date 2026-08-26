@@ -1,21 +1,29 @@
 <style>
-/* Snabböversikten ska alltid börja med ett helt kort. Automatisk ticker gav
-   avklippta kort och ett visuellt sidofel, särskilt på Bengtsfors. */
+/* Kompakt, kontinuerlig snabböversikt. Två identiska set ger sömlös rullning. */
+.quick-strip{
+  min-height:54px !important;
+  height:54px;
+}
 .quick-strip .ticker-track{
-  width:100%;
-  max-width:100%;
-  overflow-x:auto;
-  overflow-y:hidden;
-  animation:none !important;
-  transform:none !important;
-  scroll-behavior:smooth;
-  scrollbar-width:thin;
+  width:max-content;
+  max-width:none;
+  min-height:54px !important;
+  height:54px;
+  overflow:visible;
+  animation:dinpuls-ticker 42s linear infinite !important;
+  transform:translateX(0);
 }
-.quick-strip .ticker-set{
-  flex:0 0 max-content;
-}
-.quick-strip .ticker-set[aria-hidden="true"]{
-  display:none;
+.quick-strip:hover .ticker-track{animation-play-state:paused !important;}
+.quick-strip .ticker-set{display:flex;flex:0 0 auto;min-height:54px;height:54px;}
+.quick-strip .ticker-set[aria-hidden="true"]{display:flex;}
+.quick-strip .ticker-set > *{min-height:54px !important;height:54px;align-items:center;}
+.quick-strip .ticker-track a,
+.quick-strip .ticker-nameday{padding-top:7px !important;padding-bottom:7px !important;}
+@media(max-width:760px){
+  .quick-strip{min-height:50px !important;height:50px;}
+  .quick-strip .ticker-track,.quick-strip .ticker-set{min-height:50px !important;height:50px;}
+  .quick-strip .ticker-set > *{min-height:50px !important;height:50px;}
+  .quick-strip .ticker-track{animation-duration:58s !important;}
 }
 </style>
 <section class="quick-strip" aria-label="Snabböversikt">
