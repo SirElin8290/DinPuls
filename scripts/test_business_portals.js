@@ -22,6 +22,9 @@ assert(worker.includes("portal_sessions") && worker.includes("await sha256(token
 assert(worker.includes("env.ADMIN_USERNAME") && worker.includes("env.ADMIN_PASSWORD"), "Adminuppgifter ska komma från Cloudflare-secrets");
 assert(worker.includes('/portal/auth/admin') && worker.includes('/portal/auth/company'), "Båda säkra inloggningsvägarna måste finnas");
 assert(worker.includes('/portal/admin/contracts') && worker.includes('/portal/company/me'), "Rollseparerade portalvägar måste finnas");
+assert(worker.includes('billing_type') && worker.includes('signature_required') && worker.includes('renewal_type'), "Avtal måste stödja debitering, signaturval och förnyelse");
+assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
+assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste visa kostnadsfria avtal korrekt");
 assert(config.enabled === true && /^https:\/\//.test(config.apiBase), "Företagsportalen måste ha en säker API-adress");
 
 console.log("✓ Admin- och företagsportalen saknar klientlösenord och använder rollseparerad Worker/D1-auth");
