@@ -15,7 +15,7 @@ for (const [name, source] of [["admin", admin], ["företag", company]]) {
   assert(source.includes("business-config.json"), `${name}: API-adressen ska läsas centralt`);
 }
 
-assert(worker.includes('name: "PBKDF2"') && worker.includes("PASSWORD_ITERATIONS = 120000"), "Företagslösenord måste använda PBKDF2");
+assert(worker.includes('name: "PBKDF2"') && worker.includes("const PASSWORD_ITERATIONS = 10000") && worker.includes("iterations }, key, 256"), "Företagslösenord måste använda PBKDF2 med explicit iterationsantal");
 assert(worker.includes("crypto.getRandomValues(new Uint8Array(32))"), "Sessioner måste använda kryptografiskt slumpade nycklar");
 assert(worker.includes("login_attempts") && worker.includes("attempts) >= 8"), "Inloggning måste begränsa upprepade försök");
 assert(worker.includes("portal_sessions") && worker.includes("await sha256(token)"), "Endast hashade sessionsnycklar får lagras");
@@ -23,6 +23,7 @@ assert(worker.includes("env.ADMIN_USERNAME") && worker.includes("env.ADMIN_PASSW
 assert(worker.includes('/portal/auth/admin') && worker.includes('/portal/auth/company'), "Båda säkra inloggningsvägarna måste finnas");
 assert(worker.includes('/portal/admin/contracts') && worker.includes('/portal/company/me'), "Rollseparerade portalvägar måste finnas");
 assert(worker.includes('billing_type') && worker.includes('signature_required') && worker.includes('renewal_type'), "Avtal måste stödja debitering, signaturval och förnyelse");
+assert(worker.includes('password_iterations') && worker.includes('Number(user.password_iterations)'), "Lösenordets hashparametrar måste versionslagras per konto");
 assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
 assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste visa kostnadsfria avtal korrekt");
 assert(config.enabled === true && /^https:\/\//.test(config.apiBase), "Företagsportalen måste ha en säker API-adress");
