@@ -1,29 +1,265 @@
-const ADMIN_USER='snuttis8290';
-const EXPECTED_PASSWORD='Flisan5917';
-const CONTRACT_VERSION='3.0';
-let municipalities=[];
-const AD_SLOTS=window.DINPULS_AD_INVENTORY||[];
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-function contracts(){try{return JSON.parse(localStorage.getItem('dp-contracts')||'[]')}catch{return []}}
-function writeContracts(x){localStorage.setItem('dp-contracts',JSON.stringify(x))}function save(c){const x=contracts();x.unshift(c);writeContracts(x)}
-function updateContract(id,patch){const x=contracts(),i=x.findIndex(c=>c.id===id);if(i<0)return;x[i]={...x[i],...patch,updated:new Date().toISOString()};writeContracts(x);render()}
-function showLogin(){$('#loginView').hidden=false;$('#appView').hidden=true}function login(){sessionStorage.setItem('dp-admin','1');$('#loginView').hidden=true;$('#appView').hidden=false;scrollTo(0,0);render()}
-function money(n){return Number(n||0).toLocaleString('sv-SE')+' kr'}function escapeHtml(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-function contractNumber(){const y=new Date().getFullYear(),nums=contracts().map(c=>String(c.id||'')).filter(x=>x.startsWith(`DP-${y}-`)).map(x=>+x.split('-').pop()||0);return `DP-${y}-${String(Math.max(0,...nums)+1).padStart(4,'0')}`}
-function endDateFrom(start){if(!start)return '';const d=new Date(start+'T12:00:00');d.setFullYear(d.getFullYear()+1);d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)}
-function activeCompanies(cs){const map=new Map();cs.filter(c=>c.status==='Aktivt').forEach(c=>{const key=(c.orgNo||c.company||'').toLowerCase();if(!map.has(key))map.set(key,c)});return [...map.values()].sort((a,b)=>String(a.company).localeCompare(String(b.company),'sv'))}
-function slotById(id){return AD_SLOTS.find(s=>s.id===id)}function occupiedMap(cs=contracts()){const map=new Map();cs.filter(c=>c.status==='Aktivt').forEach(c=>(c.placements||[]).forEach(p=>{const id=p.slotId||p.slot;if(slotById(id))map.set(`${c.municipality}|${id}`,c)}));return map}
-function availableSlots(municipality,excludeRows=[]){const occupied=occupiedMap(),selected=new Set(excludeRows.map(r=>r.querySelector('.slot')?.value).filter(Boolean));return AD_SLOTS.filter(s=>!occupied.has(`${municipality}|${s.id}`)&&!selected.has(s.id))}
-function statusActions(c){if(c.status==='Utkast')return `<button class="secondary contract-action" data-id="${c.id}" data-status="Skickat">Markera skickat</button>`;if(c.status==='Skickat')return `<button class="primary contract-action" data-id="${c.id}" data-status="Aktivt">Markera signerat</button>`;if(c.status==='Aktivt')return `<button class="secondary contract-action" data-id="${c.id}" data-status="Avslutat">Avsluta</button>`;return ''}
-function render(){const cs=contracts(),active=cs.filter(c=>c.status==='Aktivt'),drafts=cs.filter(c=>c.status==='Utkast'),mrr=active.reduce((s,c)=>s+Number(c.price||0)*(c.placements?.length||0),0);$('#activeContracts').textContent=active.length;$('#mrr').textContent=money(mrr);$('#arr').textContent=money(mrr*12);$('#drafts').textContent=drafts.length;$('#contractList').innerHTML=cs.length?`<div class="contract-row"><strong>Avtal</strong><strong>Företag</strong><strong>Kommun / plats</strong><strong>Status</strong></div>`+cs.map(c=>`<div class="contract-row contract-click" data-contract="${c.id}"><span><b>${escapeHtml(c.id)}</b><small>v${escapeHtml(c.contractVersion||'äldre')}</small></span><span><b>${escapeHtml(c.company)}</b><small>${escapeHtml(c.contact||'')}</small></span><span>${escapeHtml(c.municipality)} · ${(c.placements||[]).map(p=>escapeHtml(p.slotId||p.slot)).join(', ')}<small>${escapeHtml(c.startDate||'')} ${c.endDate?'– '+escapeHtml(c.endDate):''}</small></span><span><span class="badge ${c.status==='Utkast'?'draft':''}">${escapeHtml(c.status)}</span></span></div>`).join(''):'<div class="empty-state">Inga avtal ännu.</div>';$('#recentContracts').innerHTML=cs.length?cs.slice(0,5).map(c=>`<div class="recent-row"><span><b>${escapeHtml(c.company)}</b><small>${escapeHtml(c.municipality)}</small></span><span class="badge">${escapeHtml(c.status)}</span><small>${new Date(c.created).toLocaleDateString('sv-SE')}</small></div>`).join(''):'<div class="empty-state">När du skapar avtal visas de senaste här.</div>';renderCompanies(cs);renderInventory();bindContractRows()}
-function bindContractRows(){$$('[data-contract]').forEach(r=>r.onclick=()=>openContract(r.dataset.contract));$$('.contract-action').forEach(b=>b.onclick=e=>{e.stopPropagation();updateContract(b.dataset.id,{status:b.dataset.status,activated:b.dataset.status==='Aktivt'?new Date().toISOString():undefined})})}
-function openContract(id){const c=contracts().find(x=>x.id===id);if(!c)return;let d=$('#contractDialog');if(!d){d=document.createElement('dialog');d.id='contractDialog';d.className='company-dialog';document.body.append(d)}d.innerHTML=`<button class="dialog-x" onclick="this.closest('dialog').close()">×</button><span class="eyebrow">ANNONSAVTAL v${escapeHtml(c.contractVersion||'3.0')}</span><h2>${escapeHtml(c.company)}</h2><p class="muted">${escapeHtml(c.id)} · ${escapeHtml(c.status)}</p><div class="contact-details"><div><small>Kommun</small><strong>${escapeHtml(c.municipality)}</strong></div><div><small>Period</small><strong>${escapeHtml(c.startDate)} – ${escapeHtml(c.endDate)}</strong></div><div><small>Månadspris</small><strong>${money(c.monthlyTotal)}</strong></div><div><small>Årsvärde</small><strong>${money(c.annualTotal)}</strong></div><div><small>Kontakt</small><strong>${escapeHtml(c.contact)}<br>${escapeHtml(c.phone)}</strong></div><div><small>E-post</small><strong>${escapeHtml(c.email)}</strong></div></div><h3>Annonsplatser</h3><p>${(c.placements||[]).map(p=>`<b>${escapeHtml(p.slotId)}</b> – ${escapeHtml(p.location)}`).join('<br>')}</p><p><b>4 annonsbyten</b> ingår under avtalsperioden.</p><div class="actions">${statusActions(c)}</div>`;d.showModal();d.querySelectorAll('.contract-action').forEach(b=>b.onclick=()=>{updateContract(b.dataset.id,{status:b.dataset.status,activated:b.dataset.status==='Aktivt'?new Date().toISOString():undefined});d.close()})}
-function renderCompanies(cs){const companies=activeCompanies(cs),list=$('#companyList');list.innerHTML=companies.length?companies.map((c,i)=>`<button type="button" class="company-row" data-company-index="${i}"><span><b>${escapeHtml(c.company)}</b><small>${escapeHtml(c.orgNo||'')}</small></span><span>${escapeHtml(c.municipality||'')}</span><span>${escapeHtml(c.contact||'')}</span><span class="company-arrow">→</span></button>`).join(''):'<div class="company-empty"><span>◉</span><h3>Inga aktiva företag ännu</h3><p>När ett avtal får status <b>Aktivt</b> visas företaget automatiskt här.</p></div>';$$('[data-company-index]').forEach(btn=>btn.onclick=()=>openCompany(companies[+btn.dataset.companyIndex]))}
-function openCompany(c){$('#companyDialogName').textContent=c.company||'';$('#companyDialogOrg').textContent=c.orgNo?'Organisationsnummer '+c.orgNo:'';$('#companyDialogContact').textContent=c.contact||'–';const p=$('#companyDialogPhone');p.textContent=c.phone||'–';p.removeAttribute('href');if(c.phone)p.href='tel:'+c.phone.replace(/\s/g,'');const e=$('#companyDialogEmail');e.textContent=c.email||'–';e.removeAttribute('href');if(c.email)e.href='mailto:'+c.email;$('#companyDialogMunicipality').textContent=c.municipality||'–';$('#companyDialog').showModal()}
-function renderInventory(){const municipality=$('#inventoryMunicipality').value||municipalities[0],occ=occupiedMap();let occupied=0;$('#inventoryList').innerHTML=AD_SLOTS.map(s=>{const c=occ.get(`${municipality}|${s.id}`);if(c)occupied++;return `<div class="inventory-row"><b>${s.id}</b><span><b>${escapeHtml(s.label)}</b><small>${escapeHtml(s.page)}</small></span><small>${escapeHtml(s.location)}</small><span class="badge ${c?'occupied':'free'}">${c?'Upptagen':'Ledig'}</span><span>${c?escapeHtml(c.company):'–'}</span></div>`}).join('');$('#inventoryTotal').textContent=AD_SLOTS.length;$('#inventoryFree').textContent=AD_SLOTS.length-occupied;$('#inventoryOccupied').textContent=occupied}
-function refreshPlacementOptions(){const municipality=$('#municipality').value;$$('.placement').forEach(row=>{const select=row.querySelector('.slot'),current=select.value,others=$$('.placement').filter(r=>r!==row),choices=availableSlots(municipality,others);select.innerHTML=choices.map(s=>`<option value="${s.id}">${s.id} · ${escapeHtml(s.label)}</option>`).join('');if(choices.some(s=>s.id===current))select.value=current})}
-function addPlacement(){const choices=availableSlots($('#municipality').value,$$('.placement'));if(!choices.length)return alert('Det finns inga fler lediga annonsplatser i vald kommun.');const row=document.createElement('div');row.className='placement';row.innerHTML=`<label>Annonsplats<select class="slot">${choices.map(s=>`<option value="${s.id}">${s.id} · ${escapeHtml(s.label)}</option>`).join('')}</select></label><label>Placering<input class="slot-location" value="${escapeHtml(choices[0].location)}" disabled></label><button type="button" class="secondary">Ta bort</button>`;const sel=row.querySelector('.slot'),loc=row.querySelector('.slot-location');sel.onchange=()=>{loc.value=slotById(sel.value)?.location||'';refreshPlacementOptions()};row.querySelector('button').onclick=()=>{row.remove();refreshPlacementOptions()};$('#placements').append(row);refreshPlacementOptions()}
-function openView(id){$$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===id));$$('.view').forEach(v=>v.hidden=v.id!==id);if(id==='inventory')renderInventory();scrollTo(0,0)}function openNewContract(){openView('contracts');$('#contractForm').hidden=false;$('#contractForm').reset();$('#placements').innerHTML='';const today=new Date().toISOString().slice(0,10);$('#startDate').value=today;$('#endDate').value=endDateFrom(today);addPlacement()}
-async function loadMunicipalities(){const response=await fetch('../data/municipalities.json',{cache:'no-store'});if(!response.ok)throw new Error('Kommunregistret kunde inte läsas.');const data=await response.json();const names=(data.municipalities||[]).map(item=>item.name).filter(Boolean);if(!names.length)throw new Error('Kommunregistret är tomt.');municipalities=names.sort((a,b)=>a.localeCompare(b,'sv'));municipalities.forEach(m=>{$('#municipality').add(new Option(m,m));$('#inventoryMunicipality').add(new Option(m,m))})}
-async function init(){try{await loadMunicipalities()}catch(error){console.error(error);$('#loginError').textContent='Administrationen kunde inte läsa aktiva kommuner.';$('#loginError').hidden=false;return}$('#loginForm').onsubmit=e=>{e.preventDefault();if($('#username').value.trim()===ADMIN_USER&&$('#password').value===EXPECTED_PASSWORD){$('#loginError').hidden=true;login()}else $('#loginError').hidden=false};$('#logout').onclick=()=>{sessionStorage.removeItem('dp-admin');showLogin()};$$('.tab').forEach(b=>b.onclick=()=>openView(b.dataset.view));$$('[data-open]').forEach(b=>b.onclick=()=>b.dataset.new?openNewContract():openView(b.dataset.open));$('#closeCompanyDialog').onclick=()=>$('#companyDialog').close();$('#inventoryMunicipality').onchange=renderInventory;$('#municipality').onchange=()=>{$('#placements').innerHTML='';addPlacement()};$('#startDate').onchange=()=>$('#endDate').value=endDateFrom($('#startDate').value);$('#addPlacement').onclick=addPlacement;$('#newContract').onclick=openNewContract;$('#cancelContract').onclick=()=>$('#contractForm').hidden=true;$('#contractForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),municipality=f.get('municipality'),ids=$$('.placement').map(r=>r.querySelector('.slot').value),occupied=occupiedMap();if(!ids.length)return alert('Lägg till minst en annonsplats.');if(new Set(ids).size!==ids.length)return alert('Samma annonsplats kan inte bokas två gånger.');for(const id of ids){if(!slotById(id))return alert(`Annonsplats ${id} finns inte.`);if(occupied.has(`${municipality}|${id}`))return alert(`Annonsplats ${id} är redan upptagen.`)}const placements=ids.map(id=>{const s=slotById(id);return {slotId:id,module:s.module,group:s.group,label:s.label,location:s.location}}),price=+f.get('price'),annualPrice=+f.get('annualPrice'),startDate=f.get('startDate');save({id:contractNumber(),contractVersion:CONTRACT_VERSION,company:f.get('company'),orgNo:f.get('orgNo'),contact:f.get('contact'),email:f.get('email'),phone:f.get('phone'),municipality,placements,price,annualPrice,monthlyTotal:price*placements.length,annualTotal:annualPrice*placements.length,startDate,endDate:endDateFrom(startDate),months:12,includedChanges:4,status:'Utkast',created:new Date().toISOString()});e.target.reset();$('#placements').innerHTML='';$('#contractForm').hidden=true;render()};if(sessionStorage.getItem('dp-admin')==='1')login();else showLogin()}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+(function () {
+  "use strict";
+
+  const CONTRACT_VERSION = "3.0";
+  const TOKEN_KEY = "dp-admin-session";
+  const AD_SLOTS = window.DINPULS_AD_INVENTORY || [];
+  const $ = selector => document.querySelector(selector);
+  const $$ = selector => [...document.querySelectorAll(selector)];
+  let municipalities = [];
+  let contractCache = [];
+  let apiBase = "";
+
+  function escapeHtml(value = "") {
+    return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+  }
+
+  function token() { return sessionStorage.getItem(TOKEN_KEY) || ""; }
+  function money(value) { return `${Number(value || 0).toLocaleString("sv-SE")} kr`; }
+  function slotById(id) { return AD_SLOTS.find(slot => slot.id === id); }
+
+  async function api(path, options = {}) {
+    const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+    if (token()) headers.Authorization = `Bearer ${token()}`;
+    const response = await fetch(`${apiBase}${path}`, { ...options, headers, cache: "no-store" });
+    const data = await response.json().catch(() => ({ ok: false, error: "Servern gav ett ogiltigt svar." }));
+    if (response.status === 401 && path !== "/portal/auth/admin") {
+      sessionStorage.removeItem(TOKEN_KEY);
+      showLogin();
+    }
+    if (!response.ok) throw new Error(data.error || "Begäran misslyckades.");
+    return data;
+  }
+
+  async function loadConfiguration() {
+    const [businessResponse, municipalityResponse] = await Promise.all([
+      fetch("../data/business-config.json", { cache: "no-store" }),
+      fetch("../data/municipalities.json", { cache: "no-store" })
+    ]);
+    if (!businessResponse.ok || !municipalityResponse.ok) throw new Error("Portalens konfiguration kunde inte läsas.");
+    const business = await businessResponse.json();
+    const municipalityData = await municipalityResponse.json();
+    if (!business.enabled || !business.apiBase) throw new Error("Den säkra portalservern är inte aktiverad.");
+    apiBase = business.apiBase.replace(/\/$/, "");
+    municipalities = (municipalityData.municipalities || []).map(item => item.name).filter(Boolean).sort((a, b) => a.localeCompare(b, "sv"));
+    if (!municipalities.length) throw new Error("Kommunregistret är tomt.");
+    municipalities.forEach(name => {
+      $("#municipality").add(new Option(name, name));
+      $("#inventoryMunicipality").add(new Option(name, name));
+    });
+  }
+
+  function showLogin(message = "") {
+    $("#loginView").hidden = false;
+    $("#appView").hidden = true;
+    if (message) { $("#loginError").textContent = message; $("#loginError").hidden = false; }
+  }
+
+  async function showApp() {
+    $("#loginView").hidden = true;
+    $("#appView").hidden = false;
+    scrollTo(0, 0);
+    await refreshContracts();
+  }
+
+  function contractNumber() {
+    const year = new Date().getFullYear();
+    const numbers = contractCache.map(contract => String(contract.id || "")).filter(id => id.startsWith(`DP-${year}-`)).map(id => Number(id.split("-").pop()) || 0);
+    return `DP-${year}-${String(Math.max(0, ...numbers) + 1).padStart(4, "0")}`;
+  }
+
+  function endDateFrom(start) {
+    if (!start) return "";
+    const date = new Date(`${start}T12:00:00`);
+    date.setFullYear(date.getFullYear() + 1);
+    date.setDate(date.getDate() - 1);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function occupiedMap() {
+    const map = new Map();
+    contractCache.filter(contract => contract.status === "Aktivt").forEach(contract => (contract.placements || []).forEach(placement => {
+      if (slotById(placement.slotId)) map.set(`${contract.municipality}|${placement.slotId}`, contract);
+    }));
+    return map;
+  }
+
+  function availableSlots(municipality, excludedRows = []) {
+    const occupied = occupiedMap();
+    const selected = new Set(excludedRows.map(row => row.querySelector(".slot")?.value).filter(Boolean));
+    return AD_SLOTS.filter(slot => !occupied.has(`${municipality}|${slot.id}`) && !selected.has(slot.id));
+  }
+
+  async function refreshContracts() {
+    const data = await api("/portal/admin/contracts");
+    contractCache = data.contracts || [];
+    render();
+  }
+
+  function statusActions(contract) {
+    if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
+    if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
+    if (contract.status === "Aktivt") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
+    return "";
+  }
+
+  function render() {
+    const active = contractCache.filter(contract => contract.status === "Aktivt");
+    const drafts = contractCache.filter(contract => contract.status === "Utkast");
+    const mrr = active.reduce((sum, contract) => sum + Number(contract.monthlyTotal || 0), 0);
+    $("#activeContracts").textContent = active.length;
+    $("#mrr").textContent = money(mrr);
+    $("#arr").textContent = money(active.reduce((sum, contract) => sum + Number(contract.annualTotal || 0), 0));
+    $("#drafts").textContent = drafts.length;
+    $("#contractList").innerHTML = contractCache.length ? `<div class="contract-row"><strong>Avtal</strong><strong>Företag</strong><strong>Kommun / plats</strong><strong>Status</strong></div>${contractCache.map(contract => `
+      <div class="contract-row contract-click" data-contract="${escapeHtml(contract.id)}">
+        <span><b>${escapeHtml(contract.id)}</b><small>v${escapeHtml(contract.contractVersion)}</small></span>
+        <span><b>${escapeHtml(contract.company)}</b><small>${escapeHtml(contract.contact)}</small></span>
+        <span>${escapeHtml(contract.municipality)} · ${(contract.placements || []).map(item => escapeHtml(item.slotId)).join(", ")}<small>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</small></span>
+        <span><span class="badge ${contract.status === "Utkast" ? "draft" : ""}">${escapeHtml(contract.status)}</span></span>
+      </div>`).join("")}` : '<div class="empty-state">Inga avtal ännu.</div>';
+    $("#recentContracts").innerHTML = contractCache.length ? contractCache.slice(0, 5).map(contract => `<div class="recent-row"><span><b>${escapeHtml(contract.company)}</b><small>${escapeHtml(contract.municipality)}</small></span><span class="badge">${escapeHtml(contract.status)}</span><small>${new Date(contract.created).toLocaleDateString("sv-SE")}</small></div>`).join("") : '<div class="empty-state">När du skapar avtal visas de senaste här.</div>';
+    renderCompanies();
+    renderInventory();
+    $$('[data-contract]').forEach(row => row.onclick = () => openContract(row.dataset.contract));
+  }
+
+  async function changeStatus(id, status) {
+    await api(`/portal/admin/contracts/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) });
+    await refreshContracts();
+  }
+
+  function openContract(id) {
+    const contract = contractCache.find(item => item.id === id);
+    if (!contract) return;
+    let dialog = $("#contractDialog");
+    if (!dialog) { dialog = document.createElement("dialog"); dialog.id = "contractDialog"; dialog.className = "company-dialog"; document.body.append(dialog); }
+    dialog.innerHTML = `<button class="dialog-x" type="button">×</button><span class="eyebrow">ANNONSAVTAL v${escapeHtml(contract.contractVersion)}</span><h2>${escapeHtml(contract.company)}</h2><p class="muted">${escapeHtml(contract.id)} · ${escapeHtml(contract.status)}</p><div class="contact-details"><div><small>Kommun</small><strong>${escapeHtml(contract.municipality)}</strong></div><div><small>Period</small><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></div><div><small>Månadspris</small><strong>${money(contract.monthlyTotal)}</strong></div><div><small>Årsvärde</small><strong>${money(contract.annualTotal)}</strong></div><div><small>Kontakt</small><strong>${escapeHtml(contract.contact)}<br>${escapeHtml(contract.phone)}</strong></div><div><small>E-post</small><strong>${escapeHtml(contract.email)}</strong></div></div><h3>Annonsplatser</h3><p>${(contract.placements || []).map(item => `<b>${escapeHtml(item.slotId)}</b> – ${escapeHtml(item.location)}`).join("<br>")}</p><div class="actions">${statusActions(contract)}</div>`;
+    dialog.querySelector(".dialog-x").onclick = () => dialog.close();
+    dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
+    dialog.showModal();
+  }
+
+  function renderCompanies() {
+    const map = new Map();
+    contractCache.filter(contract => contract.status === "Aktivt").forEach(contract => { const key = contract.orgNo || contract.email; if (!map.has(key)) map.set(key, contract); });
+    const companies = [...map.values()].sort((a, b) => a.company.localeCompare(b.company, "sv"));
+    $("#companyList").innerHTML = companies.length ? companies.map((company, index) => `<button type="button" class="company-row" data-company-index="${index}"><span><b>${escapeHtml(company.company)}</b><small>${escapeHtml(company.orgNo)}</small></span><span>${escapeHtml(company.municipality)}</span><span>${escapeHtml(company.contact)}</span><span class="company-arrow">→</span></button>`).join("") : '<div class="company-empty"><span>◉</span><h3>Inga aktiva företag ännu</h3><p>När ett avtal får status <b>Aktivt</b> visas företaget automatiskt här.</p></div>';
+    $$('[data-company-index]').forEach(button => button.onclick = () => openCompany(companies[Number(button.dataset.companyIndex)]));
+  }
+
+  function openCompany(company) {
+    $("#companyDialogName").textContent = company.company;
+    $("#companyDialogOrg").textContent = `Organisationsnummer ${company.orgNo}`;
+    $("#companyDialogContact").textContent = company.contact;
+    $("#companyDialogPhone").textContent = company.phone;
+    $("#companyDialogPhone").href = `tel:${company.phone.replace(/\s/g, "")}`;
+    $("#companyDialogEmail").textContent = company.email;
+    $("#companyDialogEmail").href = `mailto:${company.email}`;
+    $("#companyDialogMunicipality").textContent = company.municipality;
+    $("#companyDialog").showModal();
+  }
+
+  function renderInventory() {
+    const municipality = $("#inventoryMunicipality").value || municipalities[0];
+    const occupied = occupiedMap();
+    let occupiedCount = 0;
+    $("#inventoryList").innerHTML = AD_SLOTS.map(slot => {
+      const contract = occupied.get(`${municipality}|${slot.id}`);
+      if (contract) occupiedCount++;
+      return `<div class="inventory-row"><b>${escapeHtml(slot.id)}</b><span><b>${escapeHtml(slot.label)}</b><small>${escapeHtml(slot.page)}</small></span><small>${escapeHtml(slot.location)}</small><span class="badge ${contract ? "occupied" : "free"}">${contract ? "Upptagen" : "Ledig"}</span><span>${contract ? escapeHtml(contract.company) : "–"}</span></div>`;
+    }).join("");
+    $("#inventoryTotal").textContent = AD_SLOTS.length;
+    $("#inventoryFree").textContent = AD_SLOTS.length - occupiedCount;
+    $("#inventoryOccupied").textContent = occupiedCount;
+  }
+
+  function refreshPlacementOptions() {
+    const municipality = $("#municipality").value;
+    $$(".placement").forEach(row => {
+      const select = row.querySelector(".slot");
+      const current = select.value;
+      const choices = availableSlots(municipality, $$(".placement").filter(item => item !== row));
+      select.innerHTML = choices.map(slot => `<option value="${escapeHtml(slot.id)}">${escapeHtml(slot.id)} · ${escapeHtml(slot.label)}</option>`).join("");
+      if (choices.some(slot => slot.id === current)) select.value = current;
+    });
+  }
+
+  function addPlacement() {
+    const choices = availableSlots($("#municipality").value, $$(".placement"));
+    if (!choices.length) return alert("Det finns inga fler lediga annonsplatser i vald kommun.");
+    const row = document.createElement("div");
+    row.className = "placement";
+    row.innerHTML = `<label>Annonsplats<select class="slot">${choices.map(slot => `<option value="${escapeHtml(slot.id)}">${escapeHtml(slot.id)} · ${escapeHtml(slot.label)}</option>`).join("")}</select></label><label>Placering<input class="slot-location" value="${escapeHtml(choices[0].location)}" disabled></label><button type="button" class="secondary">Ta bort</button>`;
+    const select = row.querySelector(".slot");
+    select.onchange = () => { row.querySelector(".slot-location").value = slotById(select.value)?.location || ""; refreshPlacementOptions(); };
+    row.querySelector("button").onclick = () => { row.remove(); refreshPlacementOptions(); };
+    $("#placements").append(row);
+    refreshPlacementOptions();
+  }
+
+  function openView(id) {
+    $$(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === id));
+    $$(".view").forEach(view => view.hidden = view.id !== id);
+    if (id === "inventory") renderInventory();
+    scrollTo(0, 0);
+  }
+
+  function openNewContract() {
+    openView("contracts");
+    $("#contractForm").hidden = false;
+    $("#contractForm").reset();
+    $("#placements").innerHTML = "";
+    const today = new Date().toISOString().slice(0, 10);
+    $("#startDate").value = today;
+    $("#endDate").value = endDateFrom(today);
+    addPlacement();
+  }
+
+  async function submitContract(event) {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const municipality = form.get("municipality");
+    const ids = $$(".placement").map(row => row.querySelector(".slot").value);
+    if (!ids.length || new Set(ids).size !== ids.length) return alert("Välj minst en unik annonsplats.");
+    const placements = ids.map(id => { const slot = slotById(id); return { slotId: id, module: slot.module, group: slot.group, label: slot.label, location: slot.location, page: slot.page }; });
+    const price = Number(form.get("price"));
+    const annualPrice = Number(form.get("annualPrice"));
+    const startDate = form.get("startDate");
+    const payload = { id: contractNumber(), contractVersion: CONTRACT_VERSION, company: form.get("company"), orgNo: form.get("orgNo"), contact: form.get("contact"), email: form.get("email"), phone: form.get("phone"), temporaryPassword: form.get("temporaryPassword"), municipality, placements, price, annualPrice, monthlyTotal: price * placements.length, annualTotal: annualPrice * placements.length, startDate, endDate: endDateFrom(startDate) };
+    try {
+      await api("/portal/admin/contracts", { method: "POST", body: JSON.stringify(payload) });
+      event.target.reset(); $("#placements").innerHTML = ""; $("#contractForm").hidden = true;
+      await refreshContracts();
+    } catch (error) { alert(error.message); }
+  }
+
+  async function init() {
+    try { await loadConfiguration(); }
+    catch (error) { showLogin(error.message); return; }
+    $("#loginForm").onsubmit = async event => {
+      event.preventDefault();
+      try {
+        const data = await api("/portal/auth/admin", { method: "POST", body: JSON.stringify({ username: $("#username").value.trim(), password: $("#password").value }) });
+        sessionStorage.setItem(TOKEN_KEY, data.token);
+        $("#password").value = "";
+        $("#loginError").hidden = true;
+        await showApp();
+      } catch (error) { showLogin(error.message); }
+    };
+    $("#logout").onclick = async () => { try { await api("/portal/auth/logout", { method: "POST" }); } catch {} sessionStorage.removeItem(TOKEN_KEY); showLogin(); };
+    $$(".tab").forEach(button => button.onclick = () => openView(button.dataset.view));
+    $$('[data-open]').forEach(button => button.onclick = () => button.dataset.new ? openNewContract() : openView(button.dataset.open));
+    $("#closeCompanyDialog").onclick = () => $("#companyDialog").close();
+    $("#inventoryMunicipality").onchange = renderInventory;
+    $("#municipality").onchange = () => { $("#placements").innerHTML = ""; addPlacement(); };
+    $("#startDate").onchange = () => $("#endDate").value = endDateFrom($("#startDate").value);
+    $("#addPlacement").onclick = addPlacement;
+    $("#newContract").onclick = openNewContract;
+    $("#cancelContract").onclick = () => $("#contractForm").hidden = true;
+    $("#contractForm").onsubmit = submitContract;
+    if (token()) { try { await showApp(); } catch (error) { showLogin(error.message); } } else showLogin();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();

@@ -7,8 +7,8 @@ function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://dinpuls.se",
-    "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin"
   };
@@ -42,6 +42,251 @@ async function ensureDatabase(env) {
   await env.DB.prepare(
     "CREATE INDEX IF NOT EXISTS subscriptions_municipality ON subscriptions (municipality)"
   ).run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS business_users (" +
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, " +
+    "company TEXT NOT NULL, org_no TEXT NOT NULL, contact TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '', municipality TEXT NOT NULL, " +
+    "active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+  ).run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS ad_contracts (" +
+    "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_version TEXT NOT NULL, municipality TEXT NOT NULL, " +
+    "placements TEXT NOT NULL, price REAL NOT NULL, annual_price REAL NOT NULL, monthly_total REAL NOT NULL, annual_total REAL NOT NULL, " +
+    "start_date TEXT NOT NULL, end_date TEXT NOT NULL, included_changes INTEGER NOT NULL DEFAULT 4, used_changes INTEGER NOT NULL DEFAULT 0, " +
+    "status TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
+    "FOREIGN KEY(company_user_id) REFERENCES business_users(id))"
+  ).run();
+  await env.DB.prepare(
+    "CREATE INDEX IF NOT EXISTS ad_contracts_company ON ad_contracts (company_user_id, status)"
+  ).run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS portal_sessions (" +
+    "token_hash TEXT PRIMARY KEY, role TEXT NOT NULL, subject_id TEXT NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL)"
+  ).run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS login_attempts (" +
+    "attempt_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, reset_at TEXT NOT NULL)"
+  ).run();
+}
+
+const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
+const PASSWORD_ITERATIONS = 120000;
+const SESSION_HOURS = 8;
+
+function bytesToHex(bytes) {
+  return [...bytes].map(value => value.toString(16).padStart(2, "0")).join("");
+}
+
+function hexToBytes(value) {
+  if (!/^[0-9a-f]+$/i.test(value || "") || value.length % 2) return new Uint8Array();
+  return new Uint8Array(value.match(/.{2}/g).map(part => Number.parseInt(part, 16)));
+}
+
+async function sha256(value) {
+  return bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
+}
+
+async function hashPassword(password, saltHex) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: hexToBytes(saltHex), iterations: PASSWORD_ITERATIONS }, key, 256);
+  return bytesToHex(new Uint8Array(bits));
+}
+
+function safeEqual(left, right) {
+  const a = new TextEncoder().encode(String(left || ""));
+  const b = new TextEncoder().encode(String(right || ""));
+  if (a.length !== b.length) return false;
+  let difference = 0;
+  for (let index = 0; index < a.length; index++) difference |= a[index] ^ b[index];
+  return difference === 0;
+}
+
+function cleanText(value, maximum = 200) {
+  return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, maximum);
+}
+
+function validEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
+}
+
+function validDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
+}
+
+async function readBody(request) {
+  const length = Number(request.headers.get("Content-Length") || 0);
+  if (length > 100000) throw new Error("För stor begäran");
+  return request.json();
+}
+
+async function checkLoginLimit(request, env, identity, role) {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const key = await sha256(`${ip}|${role}|${String(identity).toLowerCase()}`);
+  const now = Date.now();
+  const row = await env.DB.prepare("SELECT attempts, reset_at FROM login_attempts WHERE attempt_key = ?").bind(key).first();
+  if (row && Date.parse(row.reset_at) > now && Number(row.attempts) >= 8) return { allowed: false, key };
+  if (!row || Date.parse(row.reset_at) <= now) {
+    await env.DB.prepare("INSERT INTO login_attempts (attempt_key, attempts, reset_at) VALUES (?, 0, ?) ON CONFLICT(attempt_key) DO UPDATE SET attempts = 0, reset_at = excluded.reset_at")
+      .bind(key, new Date(now + 15 * 60 * 1000).toISOString()).run();
+  }
+  return { allowed: true, key };
+}
+
+async function recordLoginFailure(env, key) {
+  await env.DB.prepare("UPDATE login_attempts SET attempts = attempts + 1 WHERE attempt_key = ?").bind(key).run();
+}
+
+async function clearLoginFailures(env, key) {
+  await env.DB.prepare("DELETE FROM login_attempts WHERE attempt_key = ?").bind(key).run();
+}
+
+async function createSession(env, role, subjectId) {
+  const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = bytesToHex(tokenBytes);
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + SESSION_HOURS * 60 * 60 * 1000).toISOString();
+  await env.DB.prepare("INSERT INTO portal_sessions (token_hash, role, subject_id, expires_at, created_at) VALUES (?, ?, ?, ?, ?)")
+    .bind(await sha256(token), role, String(subjectId), expiresAt, now.toISOString()).run();
+  return { token, expiresAt };
+}
+
+function bearerToken(request) {
+  const match = /^Bearer\s+([0-9a-f]{64})$/i.exec(request.headers.get("Authorization") || "");
+  return match?.[1] || "";
+}
+
+async function requireSession(request, env, role) {
+  const token = bearerToken(request);
+  if (!token) return null;
+  const tokenHash = await sha256(token);
+  const row = await env.DB.prepare("SELECT role, subject_id, expires_at FROM portal_sessions WHERE token_hash = ?").bind(tokenHash).first();
+  if (!row || row.role !== role || Date.parse(row.expires_at) <= Date.now()) {
+    await env.DB.prepare("DELETE FROM portal_sessions WHERE token_hash = ?").bind(tokenHash).run();
+    return null;
+  }
+  return { ...row, tokenHash };
+}
+
+async function logoutPortal(request, env) {
+  const token = bearerToken(request);
+  if (token) await env.DB.prepare("DELETE FROM portal_sessions WHERE token_hash = ?").bind(await sha256(token)).run();
+  return json(request, { ok: true });
+}
+
+async function adminLogin(request, env) {
+  if (!env.ADMIN_USERNAME || !env.ADMIN_PASSWORD) return json(request, { ok: false, error: "Admininloggningen är inte konfigurerad." }, 503);
+  const body = await readBody(request);
+  const username = cleanText(body?.username, 100);
+  const password = String(body?.password || "");
+  const limit = await checkLoginLimit(request, env, username, "admin");
+  if (!limit.allowed) return json(request, { ok: false, error: "För många inloggningsförsök. Försök igen om 15 minuter." }, 429);
+  if (!safeEqual(username, env.ADMIN_USERNAME) || !safeEqual(password, env.ADMIN_PASSWORD)) {
+    await recordLoginFailure(env, limit.key);
+    return json(request, { ok: false, error: "Fel användarnamn eller lösenord." }, 401);
+  }
+  await clearLoginFailures(env, limit.key);
+  return json(request, { ok: true, ...(await createSession(env, "admin", username)) });
+}
+
+async function companyLogin(request, env) {
+  const body = await readBody(request);
+  const email = cleanText(body?.email, 254).toLowerCase();
+  const password = String(body?.password || "");
+  const limit = await checkLoginLimit(request, env, email, "company");
+  if (!limit.allowed) return json(request, { ok: false, error: "För många inloggningsförsök. Försök igen om 15 minuter." }, 429);
+  const user = validEmail(email) ? await env.DB.prepare("SELECT id, password_salt, password_hash, active FROM business_users WHERE email = ?").bind(email).first() : null;
+  const candidateHash = user ? await hashPassword(password, user.password_salt) : await hashPassword(password, "00".repeat(16));
+  if (!user || !Number(user.active) || !safeEqual(candidateHash, user.password_hash)) {
+    await recordLoginFailure(env, limit.key);
+    return json(request, { ok: false, error: "Fel e-post eller lösenord." }, 401);
+  }
+  await clearLoginFailures(env, limit.key);
+  return json(request, { ok: true, ...(await createSession(env, "company", user.id)) });
+}
+
+function contractFromRow(row) {
+  return {
+    id: row.id, contractVersion: row.contract_version, company: row.company, orgNo: row.org_no,
+    contact: row.contact, email: row.email, phone: row.phone, municipality: row.municipality,
+    placements: JSON.parse(row.placements || "[]"), price: Number(row.price), annualPrice: Number(row.annual_price),
+    monthlyTotal: Number(row.monthly_total), annualTotal: Number(row.annual_total), startDate: row.start_date,
+    endDate: row.end_date, includedChanges: Number(row.included_changes), usedChanges: Number(row.used_changes),
+    status: row.status, created: row.created_at, updated: row.updated_at
+  };
+}
+
+const CONTRACT_SELECT = "SELECT c.*, u.company, u.org_no, u.contact, u.email, u.phone FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id";
+
+async function listContracts(request, env) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const result = await env.DB.prepare(`${CONTRACT_SELECT} ORDER BY c.created_at DESC`).all();
+  return json(request, { ok: true, contracts: (result.results || []).map(contractFromRow) });
+}
+
+async function createContract(request, env) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const body = await readBody(request);
+  const email = cleanText(body.email, 254).toLowerCase();
+  const password = String(body.temporaryPassword || "");
+  const company = cleanText(body.company), orgNo = cleanText(body.orgNo, 30), contact = cleanText(body.contact);
+  const phone = cleanText(body.phone, 40), municipality = cleanText(body.municipality, 80);
+  const placements = Array.isArray(body.placements) ? body.placements.slice(0, 20).map(item => ({
+    slotId: cleanText(item.slotId, 40), module: cleanText(item.module, 100), group: cleanText(item.group, 100),
+    label: cleanText(item.label, 160), location: cleanText(item.location, 240), page: cleanText(item.page, 100)
+  })) : [];
+  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || password.length < 12 || password.length > 200 || !validDate(body.startDate) || !validDate(body.endDate)) {
+    return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter. Företagslösenordet måste ha minst 12 tecken." }, 400);
+  }
+  const now = new Date().toISOString();
+  let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();
+  if (!user) {
+    const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, company, org_no, contact, phone, municipality, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(email, salt, await hashPassword(password, salt), company, orgNo, contact, phone, municipality, now, now).run();
+    user = { id: result.meta.last_row_id };
+  } else {
+    const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+    await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, active = 1, updated_at = ? WHERE id = ?")
+      .bind(salt, await hashPassword(password, salt), company, orgNo, contact, phone, municipality, now, user.id).run();
+  }
+  const id = cleanText(body.id, 40);
+  if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
+  try {
+    await env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, start_date, end_date, included_changes, used_changes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'Utkast', ?, ?)")
+      .bind(id, user.id, "3.0", municipality, JSON.stringify(placements), Number(body.price), Number(body.annualPrice), Number(body.monthlyTotal), Number(body.annualTotal), body.startDate, body.endDate, 4, now, now).run();
+  } catch (error) {
+    if (String(error).includes("UNIQUE")) return json(request, { ok: false, error: "Avtalsnumret finns redan." }, 409);
+    throw error;
+  }
+  return json(request, { ok: true, id }, 201);
+}
+
+async function updateContractStatus(request, env, id) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const body = await readBody(request);
+  const status = cleanText(body.status, 20);
+  if (!PORTAL_STATUSES.has(status)) return json(request, { ok: false, error: "Ogiltig avtalsstatus." }, 400);
+  const result = await env.DB.prepare("UPDATE ad_contracts SET status = ?, updated_at = ? WHERE id = ?").bind(status, new Date().toISOString(), id).run();
+  return result.meta.changes ? json(request, { ok: true }) : json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+}
+
+async function companyAccount(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const user = await env.DB.prepare("SELECT id, email, company, org_no, contact, phone, municipality FROM business_users WHERE id = ? AND active = 1").bind(session.subject_id).first();
+  if (!user) return json(request, { ok: false, error: "Företagskontot är inte aktivt." }, 403);
+  const result = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.company_user_id = ? AND c.status = 'Aktivt' ORDER BY c.updated_at DESC LIMIT 1`).bind(user.id).first();
+  return json(request, { ok: true, profile: { company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, municipality: user.municipality }, contract: result ? contractFromRow(result) : null });
+}
+
+async function updateCompanyProfile(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const body = await readBody(request);
+  const contact = cleanText(body.contact), phone = cleanText(body.phone, 40);
+  if (!contact || !phone) return json(request, { ok: false, error: "Kontaktperson och telefon krävs." }, 400);
+  await env.DB.prepare("UPDATE business_users SET contact = ?, phone = ?, updated_at = ? WHERE id = ?").bind(contact, phone, new Date().toISOString(), session.subject_id).run();
+  return json(request, { ok: true });
 }
 
 function cleanCategories(value) {
@@ -159,6 +404,15 @@ export default {
           publicKey: env.VAPID_PUBLIC_KEY || ""
         });
       }
+      if (request.method === "POST" && url.pathname === "/portal/auth/admin") return adminLogin(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/auth/company") return companyLogin(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/auth/logout") return logoutPortal(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/contracts") return listContracts(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/admin/contracts") return createContract(request, env);
+      const contractMatch = /^\/portal\/admin\/contracts\/([^/]+)$/.exec(url.pathname);
+      if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
+      if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
+      if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "PUT" && url.pathname === "/subscriptions") return saveSubscription(request, env);
       if (request.method === "DELETE" && url.pathname === "/subscriptions") return deleteSubscription(request, env);
       if (request.method === "POST" && url.pathname === "/admin/test") return sendTestNotification(request, env);
