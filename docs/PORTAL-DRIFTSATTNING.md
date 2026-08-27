@@ -39,7 +39,9 @@ När Worker-kontrollen är godkänd kan webbgrenen slås ihop. `data/business-co
 
 ## 5. Skapa första företagskontot
 
-Logga in på `/admin/`, skapa ett avtalsutkast och ange ett tillfälligt företagslösenord på minst 12 tecken. Skicka e-post och lösenord till företaget via separata kanaler. När avtalet markeras som aktivt visas det i företagets portal.
+Logga in på `/admin/`, skapa ett avtalsutkast och skriv företagslösenordet direkt i lösenordsfältet. Lösenordet måste ha minst 12 tecken och skickas till Worker över HTTPS; endast saltad PBKDF2-hash lagras i D1. När avtalet markeras som aktivt visas det i företagets portal.
+
+Avtal kan vara ordinarie betalande eller kostnadsfria. Båda har samma 12-månadersperiod, portal, statistik och annonsbyten. För kostnadsfria avtal väljs `Kostnadsfri plats`, faktisk debitering blir 0 kr och ordinarie värde kan anges i avtalsnoteringen. Om signatur inte krävs kan utkastet aktiveras direkt. `Årlig förnyelseprövning` innebär att avtalet hanteras på nytt efter periodens slut; det är inte en automatisk debitering.
 
 ## Säkerhetsgränser
 
