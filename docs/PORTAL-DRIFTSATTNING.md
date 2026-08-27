@@ -31,7 +31,7 @@ Kontrollera därefter:
 - Ett felaktigt lösenord ger 401 och inga sessionsuppgifter.
 - Åtta felaktiga försök ger tillfällig 429-spärr.
 
-D1-tabellerna skapas av Worker vid första anropet. Företagslösenord lagras med PBKDF2-SHA-256, unik salt och 120 000 iterationer. Sessionsnycklar lagras endast som SHA-256-hash och löper ut efter åtta timmar.
+D1-tabellerna skapas av Worker vid första anropet. Företagslösenord lagras med PBKDF2-SHA-256, unik salt och ett versionslagrat iterationsantal anpassat till Workers CPU-budget. Sessionsnycklar lagras endast som SHA-256-hash och löper ut efter åtta timmar.
 
 ## 4. Publicera webbgränssnittet
 
