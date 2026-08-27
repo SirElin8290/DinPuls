@@ -44,10 +44,14 @@ async function ensureDatabase(env) {
   ).run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS business_users (" +
-    "id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, " +
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, password_iterations INTEGER NOT NULL DEFAULT 10000, " +
     "company TEXT NOT NULL, org_no TEXT NOT NULL, contact TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '', municipality TEXT NOT NULL, " +
     "active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
   ).run();
+  const userColumns = await env.DB.prepare("PRAGMA table_info(business_users)").all();
+  if (!(userColumns.results || []).some(column => column.name === "password_iterations")) {
+    await env.DB.prepare("ALTER TABLE business_users ADD COLUMN password_iterations INTEGER NOT NULL DEFAULT 10000").run();
+  }
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_contracts (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_version TEXT NOT NULL, municipality TEXT NOT NULL, " +
@@ -83,7 +87,9 @@ async function ensureDatabase(env) {
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
 const BILLING_TYPES = new Set(["paid", "complimentary"]);
 const RENEWAL_TYPES = new Set(["annual-review", "none"]);
-const PASSWORD_ITERATIONS = 120000;
+// Cloudflare Workers has a strict per-request CPU budget. The iteration count is
+// stored per account so it can be raised later without invalidating passwords.
+const PASSWORD_ITERATIONS = 10000;
 const SESSION_HOURS = 8;
 
 function bytesToHex(bytes) {
@@ -99,9 +105,9 @@ async function sha256(value) {
   return bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
 }
 
-async function hashPassword(password, saltHex) {
+async function hashPassword(password, saltHex, iterations = PASSWORD_ITERATIONS) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: hexToBytes(saltHex), iterations: PASSWORD_ITERATIONS }, key, 256);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: hexToBytes(saltHex), iterations }, key, 256);
   return bytesToHex(new Uint8Array(bits));
 }
 
@@ -207,8 +213,8 @@ async function companyLogin(request, env) {
   const password = String(body?.password || "");
   const limit = await checkLoginLimit(request, env, email, "company");
   if (!limit.allowed) return json(request, { ok: false, error: "För många inloggningsförsök. Försök igen om 15 minuter." }, 429);
-  const user = validEmail(email) ? await env.DB.prepare("SELECT id, password_salt, password_hash, active FROM business_users WHERE email = ?").bind(email).first() : null;
-  const candidateHash = user ? await hashPassword(password, user.password_salt) : await hashPassword(password, "00".repeat(16));
+  const user = validEmail(email) ? await env.DB.prepare("SELECT id, password_salt, password_hash, password_iterations, active FROM business_users WHERE email = ?").bind(email).first() : null;
+  const candidateHash = user ? await hashPassword(password, user.password_salt, Number(user.password_iterations) || PASSWORD_ITERATIONS) : await hashPassword(password, "00".repeat(16));
   if (!user || !Number(user.active) || !safeEqual(candidateHash, user.password_hash)) {
     await recordLoginFailure(env, limit.key);
     return json(request, { ok: false, error: "Fel e-post eller lösenord." }, 401);
@@ -260,13 +266,13 @@ async function createContract(request, env) {
   let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();
   if (!user) {
     const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, company, org_no, contact, phone, municipality, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(email, salt, await hashPassword(password, salt), company, orgNo, contact, phone, municipality, now, now).run();
+    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, password_iterations, company, org_no, contact, phone, municipality, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(email, salt, await hashPassword(password, salt), PASSWORD_ITERATIONS, company, orgNo, contact, phone, municipality, now, now).run();
     user = { id: result.meta.last_row_id };
   } else {
     const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, active = 1, updated_at = ? WHERE id = ?")
-      .bind(salt, await hashPassword(password, salt), company, orgNo, contact, phone, municipality, now, user.id).run();
+    await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, password_iterations = ?, company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, active = 1, updated_at = ? WHERE id = ?")
+      .bind(salt, await hashPassword(password, salt), PASSWORD_ITERATIONS, company, orgNo, contact, phone, municipality, now, user.id).run();
   }
   const id = cleanText(body.id, 40);
   if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
