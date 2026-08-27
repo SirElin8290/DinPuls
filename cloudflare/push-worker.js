@@ -52,10 +52,21 @@ async function ensureDatabase(env) {
     "CREATE TABLE IF NOT EXISTS ad_contracts (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_version TEXT NOT NULL, municipality TEXT NOT NULL, " +
     "placements TEXT NOT NULL, price REAL NOT NULL, annual_price REAL NOT NULL, monthly_total REAL NOT NULL, annual_total REAL NOT NULL, " +
+    "billing_type TEXT NOT NULL DEFAULT 'paid', value_note TEXT NOT NULL DEFAULT '', renewal_type TEXT NOT NULL DEFAULT 'annual-review', signature_required INTEGER NOT NULL DEFAULT 0, " +
     "start_date TEXT NOT NULL, end_date TEXT NOT NULL, included_changes INTEGER NOT NULL DEFAULT 4, used_changes INTEGER NOT NULL DEFAULT 0, " +
     "status TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
     "FOREIGN KEY(company_user_id) REFERENCES business_users(id))"
   ).run();
+  const contractColumns = await env.DB.prepare("PRAGMA table_info(ad_contracts)").all();
+  const existingContractColumns = new Set((contractColumns.results || []).map(column => column.name));
+  for (const [name, definition] of [
+    ["billing_type", "TEXT NOT NULL DEFAULT 'paid'"],
+    ["value_note", "TEXT NOT NULL DEFAULT ''"],
+    ["renewal_type", "TEXT NOT NULL DEFAULT 'annual-review'"],
+    ["signature_required", "INTEGER NOT NULL DEFAULT 0"]
+  ]) {
+    if (!existingContractColumns.has(name)) await env.DB.prepare(`ALTER TABLE ad_contracts ADD COLUMN ${name} ${definition}`).run();
+  }
   await env.DB.prepare(
     "CREATE INDEX IF NOT EXISTS ad_contracts_company ON ad_contracts (company_user_id, status)"
   ).run();
@@ -70,6 +81,8 @@ async function ensureDatabase(env) {
 }
 
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
+const BILLING_TYPES = new Set(["paid", "complimentary"]);
+const RENEWAL_TYPES = new Set(["annual-review", "none"]);
 const PASSWORD_ITERATIONS = 120000;
 const SESSION_HOURS = 8;
 
@@ -211,6 +224,8 @@ function contractFromRow(row) {
     placements: JSON.parse(row.placements || "[]"), price: Number(row.price), annualPrice: Number(row.annual_price),
     monthlyTotal: Number(row.monthly_total), annualTotal: Number(row.annual_total), startDate: row.start_date,
     endDate: row.end_date, includedChanges: Number(row.included_changes), usedChanges: Number(row.used_changes),
+    billingType: row.billing_type || "paid", valueNote: row.value_note || "",
+    renewalType: row.renewal_type || "annual-review", signatureRequired: Boolean(Number(row.signature_required)),
     status: row.status, created: row.created_at, updated: row.updated_at
   };
 }
@@ -230,11 +245,15 @@ async function createContract(request, env) {
   const password = String(body.temporaryPassword || "");
   const company = cleanText(body.company), orgNo = cleanText(body.orgNo, 30), contact = cleanText(body.contact);
   const phone = cleanText(body.phone, 40), municipality = cleanText(body.municipality, 80);
+  const billingType = cleanText(body.billingType, 30) || "paid";
+  const renewalType = cleanText(body.renewalType, 30) || "annual-review";
+  const valueNote = cleanText(body.valueNote, 240);
+  const signatureRequired = body.signatureRequired === true ? 1 : 0;
   const placements = Array.isArray(body.placements) ? body.placements.slice(0, 20).map(item => ({
     slotId: cleanText(item.slotId, 40), module: cleanText(item.module, 100), group: cleanText(item.group, 100),
     label: cleanText(item.label, 160), location: cleanText(item.location, 240), page: cleanText(item.page, 100)
   })) : [];
-  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || password.length < 12 || password.length > 200 || !validDate(body.startDate) || !validDate(body.endDate)) {
+  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || password.length < 12 || password.length > 200 || !validDate(body.startDate) || !validDate(body.endDate) || !BILLING_TYPES.has(billingType) || !RENEWAL_TYPES.has(renewalType)) {
     return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter. Företagslösenordet måste ha minst 12 tecken." }, 400);
   }
   const now = new Date().toISOString();
@@ -252,8 +271,8 @@ async function createContract(request, env) {
   const id = cleanText(body.id, 40);
   if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
   try {
-    await env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, start_date, end_date, included_changes, used_changes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'Utkast', ?, ?)")
-      .bind(id, user.id, "3.0", municipality, JSON.stringify(placements), Number(body.price), Number(body.annualPrice), Number(body.monthlyTotal), Number(body.annualTotal), body.startDate, body.endDate, 4, now, now).run();
+    await env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, value_note, renewal_type, signature_required, start_date, end_date, included_changes, used_changes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'Utkast', ?, ?)")
+      .bind(id, user.id, "3.0", municipality, JSON.stringify(placements), Number(body.price), Number(body.annualPrice), Number(body.monthlyTotal), Number(body.annualTotal), billingType, valueNote, renewalType, signatureRequired, body.startDate, body.endDate, 4, now, now).run();
   } catch (error) {
     if (String(error).includes("UNIQUE")) return json(request, { ok: false, error: "Avtalsnumret finns redan." }, 409);
     throw error;
