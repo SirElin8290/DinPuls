@@ -13,6 +13,7 @@ Kör följande från projektroten i en behörig terminal. Wrangler frågar efter
 ```bash
 npx wrangler secret put ADMIN_USERNAME
 npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put PORTAL_PASSWORD_PEPPER
 ```
 
 Kontrollera att befintliga push-hemligheter fortfarande finns kvar. `keep_vars` är aktiverat, men VAPID-värden får inte tas bort.
@@ -31,7 +32,7 @@ Kontrollera därefter:
 - Ett felaktigt lösenord ger 401 och inga sessionsuppgifter.
 - Åtta felaktiga försök ger tillfällig 429-spärr.
 
-D1-tabellerna skapas av Worker vid första anropet. Företagslösenord lagras med PBKDF2-SHA-256, unik salt och ett versionslagrat iterationsantal anpassat till Workers CPU-budget. Sessionsnycklar lagras endast som SHA-256-hash och löper ut efter åtta timmar.
+D1-tabellerna skapas av Worker vid första anropet. Företagslösenord lagras som saltad HMAC-SHA-256 med en separat hemlig servernyckel (`PORTAL_PASSWORD_PEPPER`). Det skyddar lösenorden vid en fristående D1-läcka och ryms inom Workers CPU-budget. Sessionsnycklar lagras endast som SHA-256-hash och löper ut efter åtta timmar.
 
 ## 4. Publicera webbgränssnittet
 

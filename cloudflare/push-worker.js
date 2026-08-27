@@ -87,9 +87,6 @@ async function ensureDatabase(env) {
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
 const BILLING_TYPES = new Set(["paid", "complimentary"]);
 const RENEWAL_TYPES = new Set(["annual-review", "none"]);
-// Cloudflare Workers has a strict per-request CPU budget. The iteration count is
-// stored per account so it can be raised later without invalidating passwords.
-const PASSWORD_ITERATIONS = 10000;
 const SESSION_HOURS = 8;
 
 function bytesToHex(bytes) {
@@ -105,10 +102,10 @@ async function sha256(value) {
   return bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
 }
 
-async function hashPassword(password, saltHex, iterations = PASSWORD_ITERATIONS) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: hexToBytes(saltHex), iterations }, key, 256);
-  return bytesToHex(new Uint8Array(bits));
+async function hashPassword(password, saltHex, pepper) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pepper), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const message = new Uint8Array([...hexToBytes(saltHex), ...new TextEncoder().encode(password)]);
+  return bytesToHex(new Uint8Array(await crypto.subtle.sign("HMAC", key, message)));
 }
 
 function safeEqual(left, right) {
@@ -208,13 +205,14 @@ async function adminLogin(request, env) {
 }
 
 async function companyLogin(request, env) {
+  if (!env.PORTAL_PASSWORD_PEPPER) return json(request, { ok: false, error: "Företagsinloggningen är inte konfigurerad." }, 503);
   const body = await readBody(request);
   const email = cleanText(body?.email, 254).toLowerCase();
   const password = String(body?.password || "");
   const limit = await checkLoginLimit(request, env, email, "company");
   if (!limit.allowed) return json(request, { ok: false, error: "För många inloggningsförsök. Försök igen om 15 minuter." }, 429);
-  const user = validEmail(email) ? await env.DB.prepare("SELECT id, password_salt, password_hash, password_iterations, active FROM business_users WHERE email = ?").bind(email).first() : null;
-  const candidateHash = user ? await hashPassword(password, user.password_salt, Number(user.password_iterations) || PASSWORD_ITERATIONS) : await hashPassword(password, "00".repeat(16));
+  const user = validEmail(email) ? await env.DB.prepare("SELECT id, password_salt, password_hash, active FROM business_users WHERE email = ?").bind(email).first() : null;
+  const candidateHash = user ? await hashPassword(password, user.password_salt, env.PORTAL_PASSWORD_PEPPER) : await hashPassword(password, "00".repeat(16), env.PORTAL_PASSWORD_PEPPER);
   if (!user || !Number(user.active) || !safeEqual(candidateHash, user.password_hash)) {
     await recordLoginFailure(env, limit.key);
     return json(request, { ok: false, error: "Fel e-post eller lösenord." }, 401);
@@ -246,6 +244,7 @@ async function listContracts(request, env) {
 
 async function createContract(request, env) {
   if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (!env.PORTAL_PASSWORD_PEPPER) return json(request, { ok: false, error: "Företagsinloggningen är inte konfigurerad." }, 503);
   const body = await readBody(request);
   const email = cleanText(body.email, 254).toLowerCase();
   const password = String(body.temporaryPassword || "");
@@ -267,12 +266,12 @@ async function createContract(request, env) {
   if (!user) {
     const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
     const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, password_iterations, company, org_no, contact, phone, municipality, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(email, salt, await hashPassword(password, salt), PASSWORD_ITERATIONS, company, orgNo, contact, phone, municipality, now, now).run();
+      .bind(email, salt, await hashPassword(password, salt, env.PORTAL_PASSWORD_PEPPER), 0, company, orgNo, contact, phone, municipality, now, now).run();
     user = { id: result.meta.last_row_id };
   } else {
     const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
     await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, password_iterations = ?, company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, active = 1, updated_at = ? WHERE id = ?")
-      .bind(salt, await hashPassword(password, salt), PASSWORD_ITERATIONS, company, orgNo, contact, phone, municipality, now, user.id).run();
+      .bind(salt, await hashPassword(password, salt, env.PORTAL_PASSWORD_PEPPER), 0, company, orgNo, contact, phone, municipality, now, user.id).run();
   }
   const id = cleanText(body.id, 40);
   if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
@@ -420,7 +419,9 @@ export default {
           ok: true,
           service: "DinPuls Push",
           database: "connected",
-          vapidConfigured: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT)
+          vapidConfigured: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT),
+          portalConfigured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD && env.PORTAL_PASSWORD_PEPPER),
+          portalAuthVersion: "hmac-sha256-v1"
         });
       }
       if (request.method === "GET" && url.pathname === "/config") {
