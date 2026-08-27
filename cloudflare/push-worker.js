@@ -1,5 +1,5 @@
 const ALLOWED_ORIGINS = new Set(["https://dinpuls.se", "https://www.dinpuls.se"]);
-const MUNICIPALITIES = new Set(["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil"]);
+const MUNICIPALITIES = new Set(["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil", "Sunne"]);
 const REQUIRED_CATEGORIES = ["extreme-weather", "missing-people", "important"];
 const OPTIONAL_CATEGORIES = new Set(["traffic", "transport", "news", "events", "jobs", "housing", "sport"]);
 
