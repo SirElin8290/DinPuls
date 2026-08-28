@@ -90,6 +90,12 @@ async function ensureDatabase(env) {
     "FOREIGN KEY(company_user_id) REFERENCES business_users(id), FOREIGN KEY(contract_id) REFERENCES ad_contracts(id))"
   ).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_banners_schedule ON ad_banners (contract_id, slot_id, start_at)").run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS ad_daily_stats (" +
+    "banner_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, day TEXT NOT NULL, impressions INTEGER NOT NULL DEFAULT 0, clicks INTEGER NOT NULL DEFAULT 0, " +
+    "PRIMARY KEY (banner_id, day), FOREIGN KEY(banner_id) REFERENCES ad_banners(id), FOREIGN KEY(company_user_id) REFERENCES business_users(id))"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_daily_stats_company ON ad_daily_stats (company_user_id, day)").run();
 }
 
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
@@ -236,6 +242,45 @@ async function currentBanner(request, env, slotId, municipality) {
   const row = await env.DB.prepare("SELECT b.* FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id WHERE b.slot_id = ? AND c.municipality = ? AND c.status = 'Aktivt' AND b.start_at <= ? AND c.start_date <= ? AND c.end_date >= ? ORDER BY b.start_at DESC LIMIT 1")
     .bind(slotId, municipality, now, today, today).first();
   return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
+}
+
+async function recordBannerEvent(request, env) {
+  const body = await readBody(request);
+  const bannerId = cleanText(body?.bannerId, 40);
+  const eventType = cleanText(body?.eventType, 20);
+  if (!/^[0-9a-f-]{36}$/i.test(bannerId) || !["impression", "click"].includes(eventType)) {
+    return json(request, { ok: false, error: "Ogiltig annonshändelse." }, 400);
+  }
+  const today = stockholmDateKey(new Date().toISOString());
+  const banner = await env.DB.prepare(
+    "SELECT b.company_user_id FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id " +
+    "WHERE b.id = ? AND c.status = 'Aktivt' AND c.start_date <= ? AND c.end_date >= ?"
+  ).bind(bannerId, today, today).first();
+  if (!banner) return json(request, { ok: false, error: "Annonsen är inte aktiv." }, 404);
+  const impressions = eventType === "impression" ? 1 : 0;
+  const clicks = eventType === "click" ? 1 : 0;
+  await env.DB.prepare(
+    "INSERT INTO ad_daily_stats (banner_id, company_user_id, day, impressions, clicks) VALUES (?, ?, ?, ?, ?) " +
+    "ON CONFLICT(banner_id, day) DO UPDATE SET impressions = impressions + excluded.impressions, clicks = clicks + excluded.clicks"
+  ).bind(bannerId, banner.company_user_id, today, impressions, clicks).run();
+  return json(request, { ok: true }, 202);
+}
+
+async function companyStats(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const month = stockholmDateKey(new Date().toISOString()).slice(0, 7);
+  const totals = await env.DB.prepare(
+    "SELECT COALESCE(SUM(impressions), 0) AS impressions, COALESCE(SUM(clicks), 0) AS clicks " +
+    "FROM ad_daily_stats WHERE company_user_id = ? AND day LIKE ?"
+  ).bind(session.subject_id, `${month}-%`).first();
+  const active = await env.DB.prepare(
+    "SELECT COUNT(*) AS count FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id " +
+    "WHERE b.company_user_id = ? AND c.status = 'Aktivt' AND b.start_at <= ?"
+  ).bind(session.subject_id, new Date().toISOString()).first();
+  const impressions = Number(totals?.impressions || 0);
+  const clicks = Number(totals?.clicks || 0);
+  return json(request, { ok: true, month, activeBanners: Number(active?.count || 0), impressions, clicks, ctr: impressions ? Number(((clicks / impressions) * 100).toFixed(2)) : 0 });
 }
 
 async function serveBannerAsset(request, env, id) {
@@ -561,11 +606,13 @@ export default {
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/company/stats") return companyStats(request, env);
       if (request.method === "POST" && url.pathname === "/portal/company/banners") return uploadCompanyBanner(request, env);
       const companyBannerMatch = /^\/portal\/company\/banners\/([0-9a-f-]{36})$/i.exec(url.pathname);
       if (request.method === "DELETE" && companyBannerMatch) return deleteCompanyBanner(request, env, companyBannerMatch[1]);
       const currentBannerMatch = /^\/ads\/current\/([A-Z0-9-]{4,40})$/.exec(url.pathname);
       if (request.method === "GET" && currentBannerMatch) return currentBanner(request, env, currentBannerMatch[1], cleanText(url.searchParams.get("municipality"), 80));
+      if (request.method === "POST" && url.pathname === "/ads/events") return recordBannerEvent(request, env);
       const bannerAssetMatch = /^\/ads\/assets\/([0-9a-f-]{36})$/i.exec(url.pathname);
       if (request.method === "GET" && bannerAssetMatch) return serveBannerAsset(request, env, bannerAssetMatch[1]);
       if (request.method === "PUT" && url.pathname === "/subscriptions") return saveSubscription(request, env);

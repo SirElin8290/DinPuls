@@ -29,6 +29,11 @@ assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste vi
 assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_banners"), "Bannerplanering måste lagras centralt i D1");
 assert(worker.includes("env.AD_ASSETS.put") && worker.includes("imageTypeMatches"), "Bannerbilder måste verifieras och lagras i privat R2");
 assert(worker.includes('/portal/company/banners') && worker.includes('currentBanner(request, env'), "Företags- och publik banner-API måste finnas");
+assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_daily_stats") && worker.includes('/portal/company/stats') && worker.includes('/ads/events'), "Daglig annonsstatistik måste lagras centralt och visas för företaget");
+assert(company.includes('window.print()') && company.includes('Avtalet förnyas inte automatiskt'), "Företaget måste kunna skriva ut en tydlig avtalskopia");
+for (const id of [...company.matchAll(/\$\("#([A-Za-z][\w-]*)"\)/g)].map(match => match[1])) {
+  assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes(`id="${id}"`), `Företagsportalen hänvisar till ett HTML-fält som saknas: ${id}`);
+}
 assert(company.includes('X-Banner-Start') && company.includes('Europe/Stockholm'), "Företagsportalen måste schemalägga och visa svensk tid");
 assert(company.includes('högst fyra') || worker.includes('högst fyra'), "Högst fyra kommande banners ska tillåtas per annonsplats");
 assert(config.enabled === true && /^https:\/\//.test(config.apiBase), "Företagsportalen måste ha en säker API-adress");

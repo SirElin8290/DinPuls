@@ -2,6 +2,7 @@
   "use strict";
   const CATEGORY_KEYS = Object.freeze({ bio: "BIO", "bostäder": "BOST", drivmedel: "DRIV", evenemang: "EVEN", jobb: "JOBB", lunch: "LUNCH", matkasse: "MAT", authorities: "MYND", myndigheter: "MYND", nyheter: "NYH", service: "SERV", trafik: "TRAF", vard: "VARD" });
   let apiBasePromise;
+  const measuredImpressions = new Set();
 
   function municipality() {
     return window.DinPulsMunicipality?.getName?.() || window.DinPulsMunicipalityState?.getInitial?.() || new URLSearchParams(location.search).get("kommun") || "Åmål";
@@ -39,8 +40,27 @@
     image.alt = label;
     image.loading = "lazy";
     link.append(image);
+    link.addEventListener("click", () => recordEvent(banner.id, "click"), { passive: true });
     slot.replaceChildren(link);
     slot.dataset.scheduledBanner = banner.id;
+    measureImpression(slot, banner.id);
+  }
+
+  async function recordEvent(bannerId, eventType) {
+    const base = await apiBase();
+    if (!base || !bannerId) return;
+    fetch(`${base}/ads/events`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bannerId, eventType }), keepalive: true }).catch(() => {});
+  }
+
+  function measureImpression(slot, bannerId) {
+    if (measuredImpressions.has(bannerId)) return;
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.5)) return;
+      measuredImpressions.add(bannerId);
+      observer.disconnect();
+      recordEvent(bannerId, "impression");
+    }, { threshold: 0.5 });
+    observer.observe(slot);
   }
 
   async function enhanceStrategicSlot(slot) {
