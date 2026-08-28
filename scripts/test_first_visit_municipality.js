@@ -9,7 +9,11 @@ assert(html.includes('id="municipality-onboarding"'), "Startsidan måste ha en f
 assert(script.includes("hasExplicitChoice"), "Första-gångsvyn måste hoppas över efter sparat eller länkat kommunval");
 assert(script.includes('localeCompare(right.name, "sv-SE")'), "Kommunerna måste visas i svensk alfabetisk ordning");
 assert(script.includes("data-first-municipality"), "Kommunvalet måste genereras från kommunregistret");
+assert(html.includes('role="combobox"'), "Kommunvalet måste vara sökbart och tillgängligt som en kombinationsruta");
+assert(script.includes("item.active !== false && item.published !== false"), "Avpublicerade kommuner får inte visas");
+assert(script.includes("matchingMunicipalities"), "Kommunväljaren måste kunna filtrera en stor kommunlista");
+assert(html.includes("Fortsätt till DinPuls"), "Besökaren måste bekräfta sitt kommunval tydligt");
 assert(script.includes("persist: true"), "Första kommunvalet måste sparas lokalt");
-assert(styles.includes("linear-gradient(120deg,#071d43"), "Introduktionen måste använda DinPuls headergradient");
+assert(styles.includes("linear-gradient(120deg,#075b72 0%,#078aa2 52%,#3b9f68 100%)"), "Introduktionen måste använda DinPuls blågröna headergradient");
 
 console.log("✓ Första besöket kräver ett sparat, alfabetiskt kommunval i DinPuls profil");
