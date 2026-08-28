@@ -115,6 +115,7 @@
   }
 
   function addPrivacyNotice(force) {
+    if (document.body?.classList.contains("municipality-onboarding-open")) return;
     if ((!force && getConsentState()) || document.querySelector("[data-privacy-notice]")) return;
 
     if (!document.querySelector("style[data-privacy-notice-style]")) {
@@ -218,6 +219,7 @@
     ensurePrivacyChoiceControl();
     bindControls();
   });
+  document.addEventListener("dinpuls:municipality-onboarding-complete", () => addPrivacyNotice(false));
   document.addEventListener("dinpuls:municipalitychange", event => {
     if (!analyticsAllowed()) return;
     window.gtag("event", "municipality_change", { municipality: event.detail?.name || selectedMunicipality() });
