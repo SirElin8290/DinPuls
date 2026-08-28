@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#082653">
   <meta name="dinpuls-version" content="0.24.7">
   <title>DinPuls.se – din lokala startsida</title>
-  <link rel="stylesheet" href="styles.css?version=0.24.3">
+  <link rel="stylesheet" href="styles.css?version=0.24.4">
   <link rel="icon" href="favicon.ico?version=0.23.6" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.6">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.6">
@@ -15,6 +15,19 @@
   <link rel="manifest" href="site.webmanifest?version=0.23.6">
 </head>
 <body>
+  <section class="municipality-onboarding" id="municipality-onboarding" hidden aria-labelledby="municipality-onboarding-title">
+    <div class="municipality-onboarding-shell">
+      <img src="assets/logo.svg?version=0.23.4" alt="DinPuls.se – din lokala startsida" width="620" height="150">
+      <div class="municipality-onboarding-card">
+        <span class="municipality-onboarding-icon"><i data-lucide="map-pin"></i></span>
+        <span class="municipality-onboarding-kicker">DIN LOKALA STARTSIDA</span>
+        <h1 id="municipality-onboarding-title">Vilken kommun vill du följa?</h1>
+        <p>Välj kommun för att få rätt nyheter, väder, trafik, evenemang och lokal service från första besöket.</p>
+        <div class="municipality-onboarding-options" id="municipality-onboarding-options" role="list" aria-label="Välj kommun"></div>
+        <p class="municipality-onboarding-note"><i data-lucide="shield-check"></i>Valet sparas bara i den här webbläsaren och kan ändras när som helst.</p>
+      </div>
+    </div>
+  </section>
   <div data-component="header"></div>
   <div data-component="homepage-guide"></div>
   <div data-component="google-search"></div>
@@ -60,6 +73,6 @@
     </div>
   </dialog>
 
-  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.23.6"></script><script src="dp-core.js?version=0.23.6"></script><script src="portal-ads.js?version=0.25.1"></script><script src="municipality-engine.js?version=0.24.6"></script><script src="sport-data-engine.js?version=0.23.6"></script><script src="script.js?version=0.25.1"></script><script src="community-feed.js?version=0.1.0"></script><script src="push-notifications.js?version=0.24.1"></script><script src="privacy-controls.js?version=0.25.1"></script>
+  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.23.6"></script><script src="dp-core.js?version=0.23.6"></script><script src="portal-ads.js?version=0.25.1"></script><script src="municipality-engine.js?version=0.24.7"></script><script src="sport-data-engine.js?version=0.23.6"></script><script src="script.js?version=0.25.2"></script><script src="community-feed.js?version=0.1.0"></script><script src="push-notifications.js?version=0.24.1"></script><script src="privacy-controls.js?version=0.25.1"></script>
 </body>
 </html>

@@ -210,6 +210,7 @@ async function startDinPuls() {
     await Promise.all(componentNames.map(loadComponent));
     document.dispatchEvent(new CustomEvent("dinpuls:components-loaded"));
     await DinPulsMunicipality.initialize();
+    await initializeFirstVisitMunicipality();
 
     if (window.lucide) {
       lucide.createIcons();
@@ -932,6 +933,7 @@ function initializeMunicipality() {
 
   if (select) {
     select.innerHTML = DinPulsMunicipality.getAll()
+      .sort((left, right) => left.name.localeCompare(right.name, "sv-SE"))
       .map((item) => `<option value="${escapeAttribute(item.name)}">${escapeHtml(item.name)}</option>`)
       .join("");
     select.value = DinPulsMunicipality.getName();
@@ -956,6 +958,39 @@ function initializeMunicipality() {
     if (typeof dialog?.close === "function") {
       dialog.close();
     }
+  });
+}
+
+function initializeFirstVisitMunicipality() {
+  const onboarding = document.querySelector("#municipality-onboarding");
+  const options = document.querySelector("#municipality-onboarding-options");
+  if (!onboarding || !options || window.DinPulsMunicipalityState?.hasExplicitChoice?.()) {
+    return Promise.resolve();
+  }
+
+  const municipalities = DinPulsMunicipality.getAll()
+    .sort((left, right) => left.name.localeCompare(right.name, "sv-SE"));
+  options.innerHTML = municipalities.map((item) => `
+    <button type="button" data-first-municipality="${escapeAttribute(item.name)}" role="listitem">
+      <span><i data-lucide="map-pin"></i></span>
+      <strong>${escapeHtml(item.name)}</strong>
+      <small>${escapeHtml(item.county || "")}</small>
+      <i data-lucide="arrow-right"></i>
+    </button>`).join("");
+  onboarding.hidden = false;
+  document.body.classList.add("municipality-onboarding-open");
+  if (window.lucide) lucide.createIcons();
+
+  return new Promise((resolve) => {
+    options.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-first-municipality]");
+      if (!button || button.disabled) return;
+      options.querySelectorAll("button").forEach((item) => { item.disabled = true; });
+      await DinPulsMunicipality.setMunicipality(button.dataset.firstMunicipality, { persist: true, force: true });
+      onboarding.hidden = true;
+      document.body.classList.remove("municipality-onboarding-open");
+      resolve();
+    });
   });
 }
 

@@ -23,6 +23,18 @@
     }
   }
 
+  function hasStoredChoice() {
+    return Boolean(readStored());
+  }
+
+  function getRequested() {
+    return normalize(new URLSearchParams(location.search).get("kommun"));
+  }
+
+  function hasExplicitChoice() {
+    return Boolean(getRequested() || readStored());
+  }
+
   function persist(name) {
     try {
       localStorage.setItem(STORAGE_KEY, name);
@@ -32,7 +44,7 @@
   }
 
   function getInitial() {
-    const requested = normalize(new URLSearchParams(location.search).get("kommun"));
+    const requested = getRequested();
     return requested || readStored() || DEFAULT_NAME;
   }
 
@@ -57,7 +69,8 @@
 
   function populateSelect(select, selected = getInitial()) {
     if (!select) return;
-    select.innerHTML = MUNICIPALITIES
+    select.innerHTML = [...MUNICIPALITIES]
+      .sort((left, right) => left.localeCompare(right, "sv-SE"))
       .map(name => `<option value="${name}">${name}</option>`)
       .join("");
     select.value = normalize(selected) || DEFAULT_NAME;
@@ -68,6 +81,8 @@
     DEFAULT_NAME,
     MUNICIPALITIES,
     normalize,
+    hasStoredChoice,
+    hasExplicitChoice,
     getInitial,
     set,
     populateSelect,
