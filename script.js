@@ -2686,6 +2686,24 @@ function initializeRotatingAds() {
     const faces = [...module.querySelectorAll("[data-ad-face]")];
     const dots = [...module.querySelectorAll("[data-ad-dot]")];
     if (!faces.length) return;
+    faces.forEach(face => { face.dataset.fallbackHtml = face.innerHTML; face.dataset.fallbackHref = face.getAttribute("href") || ""; });
+    const refreshScheduledFaces = async () => {
+      if (!window.DinPulsAds) return;
+      await Promise.all(faces.map(async (face, faceIndex) => {
+        const banner = await window.DinPulsAds.getCurrentBanner(`P${moduleIndex + 1}-${String(startNumber + faceIndex).padStart(2, "0")}`, DinPulsMunicipality.getName());
+        if (!banner) {
+          if (face.dataset.scheduledBanner) { face.innerHTML = face.dataset.fallbackHtml; face.href = face.dataset.fallbackHref; face.removeAttribute("target"); face.removeAttribute("rel"); face.classList.remove("scheduled-homepage-ad"); delete face.dataset.scheduledBanner; }
+          return;
+        }
+        face.classList.add("scheduled-homepage-ad");
+        face.href = banner.targetUrl || "mailto:annonser@dinpuls.se";
+        if (banner.targetUrl) { face.target = "_blank"; face.rel = "noopener noreferrer sponsored"; }
+        face.innerHTML = `<img src="${escapeAttribute(banner.imageUrl)}" alt="Företagsannons" loading="lazy">`;
+        face.dataset.scheduledBanner = banner.id;
+      }));
+    };
+    refreshScheduledFaces();
+    document.addEventListener("dinpuls:municipalitychange", refreshScheduledFaces);
     let current = moduleIndex % faces.length;
 
     const show = (index) => {

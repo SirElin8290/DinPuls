@@ -8,7 +8,7 @@ function corsHeaders(request) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://dinpuls.se",
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token, X-Banner-Slot, X-Banner-Start, X-Banner-Name, X-Banner-Link",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin"
   };
@@ -82,6 +82,14 @@ async function ensureDatabase(env) {
     "CREATE TABLE IF NOT EXISTS login_attempts (" +
     "attempt_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, reset_at TEXT NOT NULL)"
   ).run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS ad_banners (" +
+    "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_id TEXT NOT NULL, slot_id TEXT NOT NULL, " +
+    "object_key TEXT NOT NULL UNIQUE, file_name TEXT NOT NULL, content_type TEXT NOT NULL, file_size INTEGER NOT NULL, " +
+    "target_url TEXT NOT NULL DEFAULT '', start_at TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
+    "FOREIGN KEY(company_user_id) REFERENCES business_users(id), FOREIGN KEY(contract_id) REFERENCES ad_contracts(id))"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_banners_schedule ON ad_banners (contract_id, slot_id, start_at)").run();
 }
 
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
@@ -127,6 +135,119 @@ function validEmail(value) {
 
 function validDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
+}
+
+function validDateTime(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && !Number.isNaN(Date.parse(value));
+}
+
+function validTargetUrl(value) {
+  if (!value) return true;
+  try { return ["http:", "https:"].includes(new URL(value).protocol); } catch { return false; }
+}
+
+function stockholmDateKey(value) {
+  const parts = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Stockholm", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value));
+  const part = type => parts.find(item => item.type === type)?.value || "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+function bannerFromRow(row) {
+  return { id: row.id, slotId: row.slot_id, fileName: row.file_name, contentType: row.content_type,
+    fileSize: Number(row.file_size), targetUrl: row.target_url || "", startAt: row.start_at,
+    imageUrl: `/ads/assets/${encodeURIComponent(row.id)}`, createdAt: row.created_at };
+}
+
+async function activeCompanyContract(env, companyUserId) {
+  return env.DB.prepare("SELECT id, placements, start_date, end_date FROM ad_contracts WHERE company_user_id = ? AND status = 'Aktivt' ORDER BY updated_at DESC LIMIT 1")
+    .bind(companyUserId).first();
+}
+
+function contractHasSlot(contract, slotId) {
+  try { return JSON.parse(contract?.placements || "[]").some(item => item.slotId === slotId); } catch { return false; }
+}
+
+async function listCompanyBanners(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const contract = await activeCompanyContract(env, session.subject_id);
+  if (!contract) return json(request, { ok: true, banners: [] });
+  const result = await env.DB.prepare("SELECT * FROM ad_banners WHERE company_user_id = ? AND contract_id = ? ORDER BY start_at ASC")
+    .bind(session.subject_id, contract.id).all();
+  return json(request, { ok: true, banners: (result.results || []).map(bannerFromRow) });
+}
+
+function imageTypeMatches(bytes, declaredType) {
+  const png = bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  const jpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const webp = bytes.length >= 12 && String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP";
+  return (png && declaredType === "image/png") || (jpeg && declaredType === "image/jpeg") || (webp && declaredType === "image/webp");
+}
+
+async function uploadCompanyBanner(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (!env.AD_ASSETS) return json(request, { ok: false, error: "Bannerlagringen är inte aktiverad." }, 503);
+  const size = Number(request.headers.get("Content-Length") || 0);
+  const contentType = cleanText(request.headers.get("Content-Type"), 80).split(";")[0].toLowerCase();
+  const slotId = cleanText(request.headers.get("X-Banner-Slot"), 40);
+  const startAt = cleanText(request.headers.get("X-Banner-Start"), 40);
+  const fileName = cleanText(decodeURIComponent(request.headers.get("X-Banner-Name") || "banner"), 160);
+  const targetUrl = cleanText(decodeURIComponent(request.headers.get("X-Banner-Link") || ""), 500);
+  if (!size || size > 5 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(contentType)) return json(request, { ok: false, error: "Välj en PNG-, JPG- eller WebP-bild på högst 5 MB." }, 400);
+  if (!slotId || !validDateTime(startAt) || !validTargetUrl(targetUrl)) return json(request, { ok: false, error: "Annonsplats, publiceringstid eller länk är ogiltig." }, 400);
+  const contract = await activeCompanyContract(env, session.subject_id);
+  if (!contract || !contractHasSlot(contract, slotId)) return json(request, { ok: false, error: "Annonsplatsen ingår inte i ditt aktiva avtal." }, 403);
+  const scheduledDate = stockholmDateKey(startAt);
+  if (scheduledDate < contract.start_date || scheduledDate > contract.end_date) return json(request, { ok: false, error: "Publiceringsdatumet måste ligga inom avtalsperioden." }, 400);
+  const upcoming = await env.DB.prepare("SELECT COUNT(*) AS count FROM ad_banners WHERE company_user_id = ? AND contract_id = ? AND slot_id = ? AND start_at > ?")
+    .bind(session.subject_id, contract.id, slotId, new Date().toISOString()).first();
+  if (Number(upcoming?.count || 0) >= 4) return json(request, { ok: false, error: "Du kan ha högst fyra kommande banners per annonsplats." }, 409);
+  const buffer = await request.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  if (bytes.byteLength !== size || !imageTypeMatches(bytes, contentType)) return json(request, { ok: false, error: "Bildfilen kunde inte verifieras." }, 400);
+  const id = crypto.randomUUID();
+  const extension = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
+  const objectKey = `companies/${session.subject_id}/${contract.id}/${slotId}/${id}.${extension}`;
+  await env.AD_ASSETS.put(objectKey, buffer, { httpMetadata: { contentType, cacheControl: "public, max-age=300" } });
+  const now = new Date().toISOString();
+  try {
+    await env.DB.prepare("INSERT INTO ad_banners (id, company_user_id, contract_id, slot_id, object_key, file_name, content_type, file_size, target_url, start_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(id, session.subject_id, contract.id, slotId, objectKey, fileName, contentType, size, targetUrl, startAt, now, now).run();
+  } catch (error) { await env.AD_ASSETS.delete(objectKey); throw error; }
+  return json(request, { ok: true, banner: bannerFromRow({ id, slot_id: slotId, file_name: fileName, content_type: contentType, file_size: size, target_url: targetUrl, start_at: startAt, created_at: now }) }, 201);
+}
+
+async function deleteCompanyBanner(request, env, id) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const banner = await env.DB.prepare("SELECT object_key, start_at FROM ad_banners WHERE id = ? AND company_user_id = ?").bind(id, session.subject_id).first();
+  if (!banner) return json(request, { ok: false, error: "Bannern finns inte." }, 404);
+  if (Date.parse(banner.start_at) <= Date.now()) return json(request, { ok: false, error: "En redan publicerad banner kan inte tas bort här. Kontakta DinPuls." }, 409);
+  await env.DB.prepare("DELETE FROM ad_banners WHERE id = ? AND company_user_id = ?").bind(id, session.subject_id).run();
+  if (env.AD_ASSETS) await env.AD_ASSETS.delete(banner.object_key);
+  return json(request, { ok: true });
+}
+
+async function currentBanner(request, env, slotId, municipality) {
+  if (!MUNICIPALITIES.has(municipality)) return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
+  const now = new Date().toISOString();
+  const today = stockholmDateKey(now);
+  const row = await env.DB.prepare("SELECT b.* FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id WHERE b.slot_id = ? AND c.municipality = ? AND c.status = 'Aktivt' AND b.start_at <= ? AND c.start_date <= ? AND c.end_date >= ? ORDER BY b.start_at DESC LIMIT 1")
+    .bind(slotId, municipality, now, today, today).first();
+  return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
+}
+
+async function serveBannerAsset(request, env, id) {
+  if (!env.AD_ASSETS || !/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
+  const row = await env.DB.prepare("SELECT object_key FROM ad_banners WHERE id = ?").bind(id).first();
+  if (!row) return new Response("Not found", { status: 404 });
+  const object = await env.AD_ASSETS.get(row.object_key);
+  if (!object?.body) return new Response("Not found", { status: 404 });
+  const headers = new Headers({ "Cache-Control": "public, max-age=300", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'" });
+  object.writeHttpMetadata(headers);
+  headers.set("ETag", object.httpEtag);
+  return new Response(object.body, { headers });
 }
 
 async function readBody(request) {
@@ -439,6 +560,14 @@ export default {
       if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/company/banners") return uploadCompanyBanner(request, env);
+      const companyBannerMatch = /^\/portal\/company\/banners\/([0-9a-f-]{36})$/i.exec(url.pathname);
+      if (request.method === "DELETE" && companyBannerMatch) return deleteCompanyBanner(request, env, companyBannerMatch[1]);
+      const currentBannerMatch = /^\/ads\/current\/([A-Z0-9-]{4,40})$/.exec(url.pathname);
+      if (request.method === "GET" && currentBannerMatch) return currentBanner(request, env, currentBannerMatch[1], cleanText(url.searchParams.get("municipality"), 80));
+      const bannerAssetMatch = /^\/ads\/assets\/([0-9a-f-]{36})$/i.exec(url.pathname);
+      if (request.method === "GET" && bannerAssetMatch) return serveBannerAsset(request, env, bannerAssetMatch[1]);
       if (request.method === "PUT" && url.pathname === "/subscriptions") return saveSubscription(request, env);
       if (request.method === "DELETE" && url.pathname === "/subscriptions") return deleteSubscription(request, env);
       if (request.method === "POST" && url.pathname === "/admin/test") return sendTestNotification(request, env);
