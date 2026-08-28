@@ -43,9 +43,9 @@
 
   async function showApp() {
     const details = await api("/portal/company/me");
-    let schedule = { banners: [] }, bannerBackendReady = true;
-    try { schedule = await api("/portal/company/banners"); } catch { bannerBackendReady = false; }
-    account = { ...details, banners: schedule.banners || [], bannerBackendReady };
+    let schedule = { banners: [] }, stats = null, bannerBackendReady = true;
+    try { [schedule, stats] = await Promise.all([api("/portal/company/banners"), api("/portal/company/stats")]); } catch { bannerBackendReady = false; }
+    account = { ...details, banners: schedule.banners || [], stats, bannerBackendReady };
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     renderCompany();
@@ -67,6 +67,11 @@
     const placements = contract?.placements || [];
     $("#accountName").textContent = profile.company || "Företagskonto";
     $("#companyMunicipality").textContent = `⌖ ${profile.municipality || "–"}`;
+    const stats = account.stats || { activeBanners: 0, impressions: 0, clicks: 0, ctr: 0 };
+    $("#activeBanners").textContent = Number(stats.activeBanners || 0).toLocaleString("sv-SE");
+    $("#bannerViews").textContent = Number(stats.impressions || 0).toLocaleString("sv-SE");
+    $("#bannerClicks").textContent = Number(stats.clicks || 0).toLocaleString("sv-SE");
+    $("#bannerCtr").textContent = `${Number(stats.ctr || 0).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} %`;
     const priceLabel = contract?.billingType === "complimentary" ? "Kostnadsfri annonsplats" : `${Number(contract?.monthlyTotal || 0).toLocaleString("sv-SE")} kr / månad exkl. moms`;
     $("#contractSummary").innerHTML = contract ? `<p>Avtalsperiod<br><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></p><p>Månader kvar<br><strong class="months">${monthsLeft(contract.endDate)} månader</strong></p><p>Annonsplatser<br><strong>${placements.map(item => escapeHtml(item.slotId)).join(", ") || "–"}</strong></p><p>Avtalspris<br><strong>${priceLabel}</strong></p>` : "<p>Inget aktivt avtal hittades.</p>";
     const banners = account.banners || [];
@@ -79,11 +84,8 @@
     }).join("") : '<p class="muted">Inga annonsplatser i ett aktivt avtal.</p>';
     $("#bannerSlot").innerHTML = placements.map(placement => `<option value="${escapeHtml(placement.slotId)}">${escapeHtml(placement.slotId)} · ${escapeHtml(placement.location)}</option>`).join("");
     const included = Number(contract?.includedChanges || 0);
-    const used = Number(contract?.usedChanges || 0);
-    $("#includedChanges").textContent = included;
-    $("#usedChanges").textContent = used;
-    $("#remainingChanges").textContent = Math.max(0, included - used);
-    $("#companyContractDetail").innerHTML = contract ? `<article class="panel"><h3>${monthsLeft(contract.endDate)} månader kvar</h3><dl class="contract-list"><div><dt>Avtalsnummer</dt><dd>${escapeHtml(contract.id)}</dd></div><div><dt>Version</dt><dd>${escapeHtml(contract.contractVersion)}</dd></div><div><dt>Startdatum</dt><dd>${escapeHtml(contract.startDate)}</dd></div><div><dt>Slutdatum</dt><dd>${escapeHtml(contract.endDate)}</dd></div><div><dt>Förnyelse</dt><dd>${contract.renewalType === "annual-review" ? "Årlig prövning" : "Ingen"}</dd></div><div><dt>Signatur</dt><dd>${contract.signatureRequired ? "Krävs" : "Krävs inte"}</dd></div><div><dt>Annonsplatser</dt><dd>${placements.length}</dd></div></dl>${contract.valueNote ? `<p>${escapeHtml(contract.valueNote)}</p>` : ""}</article><article class="panel"><h3>Platser i avtalet</h3><p>${placements.map(item => `<b>${escapeHtml(item.slotId)}</b> – ${escapeHtml(item.location)}`).join("<br>")}</p><p><b>${included} annonsbyten</b> ingår under avtalsperioden.</p></article>` : '<article class="panel"><h3>Inget aktivt avtal</h3><p>Kontakta DinPuls om du förväntar dig att se ett aktivt avtal.</p></article>';
+    $("#companyContractDetail").innerHTML = contract ? `<article class="panel contract-document"><h3>Annonsavtal ${escapeHtml(contract.id)}</h3><dl class="contract-list"><div><dt>Företag</dt><dd>${escapeHtml(profile.company)}</dd></div><div><dt>Organisationsnummer</dt><dd>${escapeHtml(profile.orgNo)}</dd></div><div><dt>Avtalsversion</dt><dd>${escapeHtml(contract.contractVersion)}</dd></div><div><dt>Avtalsperiod</dt><dd>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</dd></div><div><dt>Pris</dt><dd>${priceLabel}</dd></div><div><dt>Förnyelse</dt><dd>${contract.renewalType === "annual-review" ? "Prövas gemensamt efter 12 månader" : "Avslutas vid periodens slut"}</dd></div><div><dt>Signatur</dt><dd>${contract.signatureRequired ? "Krävs" : "Krävs inte"}</dd></div></dl>${contract.valueNote ? `<p><b>Särskild notering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}</article><article class="panel contract-terms"><h3>Omfattning och villkor</h3><p><b>Annonsplatser:</b><br>${placements.map(item => `${escapeHtml(item.slotId)} – ${escapeHtml(item.location)}`).join("<br>")}</p><ol><li>DinPuls visar företagets material på de annonsplatser och under den period som anges ovan.</li><li>Företaget ansvarar för att bilder, texter, länkar och rättigheter till materialet är korrekta.</li><li>Upp till fyra kommande banners kan planeras per annonsplats. Publicerat material kan stoppas av DinPuls om det är olagligt, vilseledande eller tekniskt skadligt.</li><li>Statistik i portalen är en teknisk mätning och garanterar inte ett visst antal visningar, klick eller affärer.</li><li>${included} bannerbyten ingår under avtalsperioden. Avtalet förnyas inte automatiskt utan den förnyelseprövning som anges ovan.</li></ol><p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p></article>` : '<article class="panel"><h3>Inget aktivt avtal</h3><p>Kontakta DinPuls om du förväntar dig att se ett aktivt avtal.</p></article>';
+    $("#printContract").hidden = !contract;
     $("#profileCompany").value = profile.company || "";
     $("#profileOrg").value = profile.orgNo || "";
     $("#profileContact").value = profile.contact || "";
@@ -194,6 +196,7 @@
         alert("Kontaktuppgifterna är uppdaterade.");
       } catch (error) { alert(error.message); }
     };
+    $("#printContract").onclick = () => window.print();
     if (token()) { try { await showApp(); } catch (error) { showLogin(error.message); } } else showLogin();
   }
 
