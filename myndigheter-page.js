@@ -45,7 +45,7 @@ function renderAuthorityAds() {
   document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
     const position = Number(slot.dataset.adPosition || 1);
     const subject = encodeURIComponent(`Annonsplats Myndigheter & samhällsservice ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>Tydligt avskild från myndighetsinformationen · 500 kr/månad + moms</small></a>`;
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>Tydligt avskild från myndighetsinformationen · 500 kr/månad + moms</small></a>`;
   });
 }
 

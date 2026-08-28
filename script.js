@@ -2671,7 +2671,7 @@ function initializeRotatingAds() {
     module.innerHTML = `<span class="ad-dice-label">Annonsgrupp ${moduleIndex + 1}</span>
       ${Array.from({ length: 10 }, (_, faceIndex) => {
         const slot = startNumber + faceIndex;
-        return `<a class="ad-face" data-ad-face href="mailto:annonser@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
+        return `<a class="ad-face" data-ad-face href="mailto:annons@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
           <span class="ad-slot">PREMIUM ${slot}</span>
           <strong>Din verksamhet kan synas här</strong>
           <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 500 kr/månad + moms</small>
@@ -2696,7 +2696,7 @@ function initializeRotatingAds() {
           return;
         }
         face.classList.add("scheduled-homepage-ad");
-        face.href = banner.targetUrl || "mailto:annonser@dinpuls.se";
+        face.href = banner.targetUrl || "mailto:annons@dinpuls.se";
         if (banner.targetUrl) { face.target = "_blank"; face.rel = "noopener noreferrer sponsored"; }
         face.innerHTML = `<img src="${escapeAttribute(banner.imageUrl)}" alt="Företagsannons" loading="lazy">`;
         face.dataset.scheduledBanner = banner.id;

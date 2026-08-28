@@ -32,7 +32,7 @@
     if (!slot || !banner) return;
     const link = document.createElement("a");
     link.className = "secondary-ad strategic-ad scheduled-public-ad";
-    link.href = banner.targetUrl || "mailto:annonser@dinpuls.se";
+    link.href = banner.targetUrl || "mailto:annons@dinpuls.se";
     if (banner.targetUrl) { link.target = "_blank"; link.rel = "noopener noreferrer sponsored"; }
     link.setAttribute("aria-label", `${label} – öppna annons`);
     const image = document.createElement("img");
@@ -80,7 +80,7 @@
     slots.forEach(slot => {
       const position = Number(slot.dataset.adPosition || 1);
       const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annonser@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/månad + moms</small></a>`;
+      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/månad + moms</small></a>`;
     });
     const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3");
     const list = document.querySelector(listSelector);
