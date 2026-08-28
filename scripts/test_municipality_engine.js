@@ -35,6 +35,9 @@ const expected = JSON.parse(fs.readFileSync("data/municipalities.json", "utf8"))
 const baseline = loadEngine();
 assert.deepEqual([...baseline.engine.MUNICIPALITIES], expected);
 assert.equal(baseline.engine.getInitial(), "Åmål");
+assert.equal(baseline.engine.hasExplicitChoice(), false);
+assert.equal(loadEngine("", "Sunne").engine.hasExplicitChoice(), true);
+assert.equal(loadEngine("?kommun=Kil").engine.hasExplicitChoice(), true);
 
 for (const name of expected) {
   const test = loadEngine(`?kommun=${encodeURIComponent(name)}&sport=Fotboll`, "Grums");
@@ -48,5 +51,10 @@ for (const name of expected) {
 assert.equal(loadEngine("?kommun=Okänd", "Arvika").engine.getInitial(), "Arvika");
 assert.equal(loadEngine("?kommun=grums").engine.getInitial(), "Grums");
 assert.equal(loadEngine().engine.set("Ogiltig", { updateUrl: false }), "Åmål");
+
+const select = {};
+baseline.engine.populateSelect(select);
+const renderedNames = [...select.innerHTML.matchAll(/value="([^"]+)"/g)].map(match => match[1]);
+assert.deepEqual(renderedNames, [...expected].sort((left, right) => left.localeCompare(right, "sv-SE")));
 
 console.log(`✓ Kommunmotorn klarar alla ${expected.length} kommuner, lagring, URL och fallback`);
