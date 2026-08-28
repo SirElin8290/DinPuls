@@ -3,6 +3,73 @@
 
   const LOCAL_PREFIX = "dinpuls-";
   const CONSENT_KEY = "dinpuls-privacy-consent-v3";
+  const ANALYTICS_ID = "G-TVLG1QMX8C";
+  const ANALYTICS_SCRIPT_ID = "dinpuls-google-analytics";
+  let analyticsStarted = false;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+  window.gtag("consent", "default", {
+    analytics_storage: "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    wait_for_update: 500
+  });
+
+  function selectedMunicipality() {
+    return window.DinPulsMunicipality?.getName?.()
+      || window.DinPulsMunicipalityState?.getInitial?.()
+      || new URLSearchParams(location.search).get("kommun")
+      || "Ej vald";
+  }
+
+  function safePageLocation() {
+    const url = new URL(location.href);
+    const municipality = new URLSearchParams(location.search).get("kommun");
+    url.search = municipality ? `?kommun=${encodeURIComponent(municipality)}` : "";
+    url.hash = "";
+    return url.href;
+  }
+
+  function sendPageView() {
+    if (!analyticsStarted || !analyticsAllowed()) return;
+    window.gtag("event", "page_view", {
+      page_title: document.title,
+      page_location: safePageLocation(),
+      municipality: selectedMunicipality()
+    });
+  }
+
+  function startAnalytics() {
+    if (analyticsStarted || !analyticsAllowed()) return;
+    analyticsStarted = true;
+    window[`ga-disable-${ANALYTICS_ID}`] = false;
+    window.gtag("consent", "update", { analytics_storage: "granted" });
+    window.gtag("js", new Date());
+    window.gtag("config", ANALYTICS_ID, {
+      send_page_view: false,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      cookie_flags: "SameSite=Lax;Secure"
+    });
+    const script = document.createElement("script");
+    script.id = ANALYTICS_SCRIPT_ID;
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ANALYTICS_ID)}`;
+    script.addEventListener("load", sendPageView, { once: true });
+    (document.head || document.documentElement).appendChild(script);
+  }
+
+  function stopAnalytics() {
+    window[`ga-disable-${ANALYTICS_ID}`] = true;
+    window.gtag("consent", "update", { analytics_storage: "denied" });
+    const cookieNames = ["_ga", `_ga_${ANALYTICS_ID.replace(/^G-/, "").replace(/-/g, "_")}`];
+    cookieNames.forEach(name => {
+      document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+      document.cookie = `${name}=; Max-Age=0; Path=/; Domain=.dinpuls.se; SameSite=Lax`;
+    });
+  }
 
   function getConsentState() {
     try { return localStorage.getItem(CONSENT_KEY); } catch { return null; }
@@ -10,6 +77,7 @@
 
   function saveConsentState(value) {
     try { localStorage.setItem(CONSENT_KEY, value); } catch {}
+    if (value === "analytics-accepted") startAnalytics(); else stopAnalytics();
     document.dispatchEvent(new CustomEvent("dinpuls:analytics-consent", { detail: { analytics: value === "analytics-accepted" } }));
   }
 
@@ -26,6 +94,7 @@
       }
       keys.forEach(key => localStorage.removeItem(key));
     } catch {}
+    stopAnalytics();
     document.querySelectorAll("[data-privacy-status]").forEach(status => {
       status.textContent = "Lokala inställningar och integritetsval har raderats på den här enheten.";
     });
@@ -61,6 +130,7 @@
         .dp-privacy-notice button{border:1px solid #0a57c7;background:#0a57c7;color:#fff}
         .dp-privacy-notice button[data-privacy-essential-only]{border-color:#cfd9e8;background:#fff;color:#0a57c7}
         .dp-privacy-notice a{border:0;background:transparent;color:#0a57c7;padding-left:4px;padding-right:4px}
+        .dp-privacy-choice{border:0;background:transparent;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
         @media(max-width:520px){.dp-privacy-notice{left:10px!important;right:10px!important;bottom:10px!important;padding:16px}.dp-privacy-notice-actions>*{flex:1 1 145px}}
       `;
       (document.head || document.documentElement).appendChild(style);
@@ -74,11 +144,11 @@
     notice.setAttribute("aria-label", "Integritetsval för DinPuls");
     notice.innerHTML = `
       <strong>DinPuls använder lokal lagring och valfri statistik</strong>
-      <p>Nödvändig lokal lagring används för exempelvis vald kommun och dina inställningar. Du kan också tillåta anonymiserad besöksstatistik via Google Analytics när den tjänsten aktiveras. Statistik aktiveras inte utan ditt val.</p>
+      <p>Nödvändig lokal lagring används för exempelvis vald kommun och dina inställningar. Du kan också tillåta sammanställd besöksstatistik via Google Analytics. Statistik aktiveras inte utan ditt val.</p>
       <div class="dp-privacy-notice-actions">
         <button type="button" data-privacy-accept-analytics>Tillåt statistik</button>
         <button type="button" data-privacy-essential-only>Endast nödvändiga</button>
-        <a href="information.html#integritet">Läs mer</a>
+        <a href="${location.pathname.includes("/innebandyregler/") ? "../" : ""}information.html#integritet">Läs mer</a>
       </div>
     `;
     (document.body || document.documentElement).appendChild(notice);
@@ -102,6 +172,18 @@
     });
   }
 
+  function ensurePrivacyChoiceControl() {
+    if (document.querySelector("[data-change-privacy-choice]")) return;
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dp-privacy-choice";
+    button.dataset.changePrivacyChoice = "true";
+    button.textContent = "Ändra integritetsval";
+    footer.appendChild(button);
+  }
+
   function addUtilityFooter() {
     if (document.querySelector("[data-component='footer'], .privacy-utility, body > footer")) return;
     const footer = document.createElement("footer");
@@ -113,8 +195,10 @@
 
   function initialize() {
     addUtilityFooter();
+    ensurePrivacyChoiceControl();
     bindControls();
     addPrivacyNotice(false);
+    if (analyticsAllowed()) startAnalytics();
   }
 
   window.DinPulsPrivacy = {
@@ -130,5 +214,13 @@
     initialize();
   }
   window.addEventListener("pageshow", () => addPrivacyNotice(false));
-  document.addEventListener("dinpuls:components-loaded", bindControls);
+  document.addEventListener("dinpuls:components-loaded", () => {
+    ensurePrivacyChoiceControl();
+    bindControls();
+  });
+  document.addEventListener("dinpuls:municipalitychange", event => {
+    if (!analyticsAllowed()) return;
+    window.gtag("event", "municipality_change", { municipality: event.detail?.name || selectedMunicipality() });
+    sendPageView();
+  });
 })();
