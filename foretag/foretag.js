@@ -44,7 +44,10 @@
   async function showApp() {
     const details = await api("/portal/company/me");
     let schedule = { banners: [] }, stats = null, bannerBackendReady = true;
-    try { [schedule, stats] = await Promise.all([api("/portal/company/banners"), api("/portal/company/stats")]); } catch { bannerBackendReady = false; }
+    try { schedule = await api("/portal/company/banners"); }
+    catch { bannerBackendReady = false; }
+    try { stats = await api("/portal/company/stats"); }
+    catch { stats = null; }
     account = { ...details, banners: schedule.banners || [], stats, bannerBackendReady };
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
@@ -103,8 +106,9 @@
     const container = $("#bannerSchedule");
     if (!container || !account) return;
     if (!account.bannerBackendReady) {
-      container.innerHTML = '<p class="muted">Bannerverktyget aktiveras just nu. Dina avtalsuppgifter och resten av portalen fungerar som vanligt.</p>';
-      $("#scheduleCount").textContent = "Aktivering pågår";
+      container.innerHTML = '<p class="muted">Bannerverktyget kunde inte nå lagringen just nu. Försök igen om en stund.</p>';
+      $("#scheduleCount").textContent = "Tillfälligt fel";
+      updateBannerButton();
       return;
     }
     const slotId = $("#bannerSlot").value;
@@ -123,6 +127,7 @@
       try { await api(`/portal/company/banners/${encodeURIComponent(button.dataset.bannerId)}`, { method: "DELETE" }); await showApp(); showView("banners"); }
       catch (error) { alert(error.message); }
     });
+    updateBannerButton();
   }
 
   function updateBannerButton() {
