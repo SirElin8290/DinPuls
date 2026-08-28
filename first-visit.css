@@ -1,0 +1,28 @@
+/* DinPuls first-visit municipality selector v1 */
+body.municipality-onboarding-open{overflow:hidden}
+.municipality-onboarding[hidden]{display:none!important}
+.municipality-onboarding{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;overflow:auto;padding:32px 18px;color:#103657;background:radial-gradient(circle at 52% 12%,rgba(255,255,255,.12),transparent 30%),linear-gradient(120deg,#071d43 0%,#087b9c 45%,#54bd75 100%)}
+.municipality-onboarding::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;background:repeating-radial-gradient(circle at 50% 34%,transparent 0 118px,rgba(255,255,255,.5) 120px 121px,transparent 123px 182px)}
+.municipality-onboarding-shell{position:relative;width:min(790px,100%);display:grid;justify-items:center;gap:28px}
+.municipality-onboarding-shell>img{width:min(430px,72vw);height:auto;filter:brightness(0) invert(1);object-fit:contain}
+.municipality-onboarding-card{width:100%;padding:36px 58px 32px;background:rgba(255,255,255,.97);border:1px solid rgba(255,255,255,.78);border-radius:20px;box-shadow:0 28px 80px rgba(3,31,62,.32);backdrop-filter:blur(12px)}
+.municipality-onboarding-icon,.municipality-onboarding-kicker{display:none}
+.municipality-onboarding-card h1{margin:0;text-align:center;color:#103657;font-size:40px;line-height:1.1;letter-spacing:-.035em}
+.municipality-onboarding-card h1::before{content:"Välkommen till DinPuls";display:block;margin-bottom:13px;font-size:1.2em}
+.municipality-onboarding-card>p:not(.municipality-onboarding-note){margin:12px 0 22px;text-align:center;color:#496b86;font-size:16px;line-height:1.5}
+.first-visit-label{display:block;margin:0 0 8px;font-size:15px;font-weight:850;color:#173f5e}
+.first-visit-combobox{position:relative}
+.first-visit-trigger{width:100%;min-height:54px;display:flex;align-items:center;gap:12px;padding:0 16px;color:#536f88;background:#fff;border:1.5px solid #2470a7;border-radius:9px;box-shadow:0 3px 10px rgba(20,74,113,.08);font-size:16px;text-align:left}
+.first-visit-trigger svg{width:20px}.first-visit-trigger .chevron{margin-left:auto}.first-visit-panel{position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:3;padding:12px;background:#fff;border:1px solid #d5e0e8;border-radius:8px;box-shadow:0 14px 34px rgba(9,47,78,.2)}
+.first-visit-panel[hidden]{display:none}
+.first-visit-search-wrap{display:flex;align-items:center;gap:9px;height:46px;padding:0 12px;border:1.5px solid #2675b3;border-radius:8px}
+.first-visit-search-wrap svg{width:19px;color:#5f7d95}.first-visit-search{min-width:0;flex:1;border:0;outline:0;color:#173f5e;background:transparent;font-size:16px}.first-visit-clear{width:30px;height:30px;border:0;background:transparent;color:#678197;font-size:23px;line-height:1}
+.municipality-onboarding-options{max-height:220px;overflow:auto;margin-top:9px;display:grid;gap:4px;scrollbar-width:thin}
+.municipality-onboarding-options button{width:100%;min-height:48px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;padding:8px 12px;color:#153f60;background:#fff;border:0;border-radius:8px;text-align:left}
+.municipality-onboarding-options button:hover,.municipality-onboarding-options button.is-selected{background:linear-gradient(90deg,#dceef8,#d9ebf8)}
+.municipality-onboarding-options button>span{display:grid;place-items:center}.municipality-onboarding-options button svg{width:19px;color:#1473a8}.municipality-onboarding-options button strong{font-size:16px}.municipality-onboarding-options button small,.municipality-onboarding-options button>i:last-child{display:none}
+.first-visit-availability{margin:12px 0 18px;color:#5c7890;font-size:13px}
+.first-visit-continue{width:100%;min-height:54px;border:0;border-radius:9px;color:#fff;background:linear-gradient(90deg,#086284,#07597d);font-size:17px;font-weight:850;box-shadow:0 7px 18px rgba(7,89,125,.18)}
+.first-visit-continue:disabled{opacity:.45;cursor:not-allowed}
+.municipality-onboarding-note{display:flex;align-items:center;justify-content:center;gap:9px;margin:28px 0 0;color:#fff!important;font-size:14px!important;position:absolute;top:100%;left:0;right:0}.municipality-onboarding-note svg{width:20px}
+@media(max-width:700px){.municipality-onboarding{place-items:start center;padding:24px 12px 72px}.municipality-onboarding-shell{gap:18px}.municipality-onboarding-shell>img{width:min(310px,78vw)}.municipality-onboarding-card{padding:25px 18px 24px;border-radius:16px}.municipality-onboarding-card h1{font-size:26px}.municipality-onboarding-card h1::before{font-size:1.15em}.municipality-onboarding-card>p:not(.municipality-onboarding-note){font-size:14px}.municipality-onboarding-note{position:static;margin:20px 0 -58px;color:#fff!important}.first-visit-panel{position:relative;top:5px;margin-bottom:5px}.municipality-onboarding-options{max-height:190px}}
