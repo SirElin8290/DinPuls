@@ -964,30 +964,118 @@ function initializeMunicipality() {
 function initializeFirstVisitMunicipality() {
   const onboarding = document.querySelector("#municipality-onboarding");
   const options = document.querySelector("#municipality-onboarding-options");
-  if (!onboarding || !options || window.DinPulsMunicipalityState?.hasExplicitChoice?.()) {
+  const search = document.querySelector("#municipality-onboarding-search");
+  const toggle = document.querySelector("#municipality-onboarding-toggle");
+  const continueButton = document.querySelector("#municipality-onboarding-continue");
+  if (!onboarding || !options || !search || !toggle || !continueButton || window.DinPulsMunicipalityState?.hasExplicitChoice?.()) {
     return Promise.resolve();
   }
 
   const municipalities = DinPulsMunicipality.getAll()
+    .filter((item) => item.active !== false && item.published !== false)
     .sort((left, right) => left.name.localeCompare(right.name, "sv-SE"));
-  options.innerHTML = municipalities.map((item) => `
-    <button type="button" data-first-municipality="${escapeAttribute(item.name)}" role="listitem">
-      <span><i data-lucide="map-pin"></i></span>
-      <strong>${escapeHtml(item.name)}</strong>
-      <small>${escapeHtml(item.county || "")}</small>
-      <i data-lucide="arrow-right"></i>
-    </button>`).join("");
+  let selectedMunicipality = null;
+  let activeIndex = -1;
+
+  const matchingMunicipalities = () => {
+    const query = search.value.trim().toLocaleLowerCase("sv-SE");
+    return query
+      ? municipalities.filter((item) => item.name.toLocaleLowerCase("sv-SE").includes(query))
+      : municipalities;
+  };
+
+  const renderOptions = () => {
+    const matches = matchingMunicipalities();
+    if (activeIndex >= matches.length) activeIndex = matches.length - 1;
+    options.innerHTML = matches.length
+      ? matches.map((item, index) => `
+        <button type="button" id="municipality-onboarding-option-${index}" data-first-municipality="${escapeAttribute(item.name)}" role="option" aria-selected="${item.name === selectedMunicipality}"${index === activeIndex ? ' class="is-active"' : ""}>
+          <i data-lucide="map-pin"></i><span>${escapeHtml(item.name)}</span><small>${escapeHtml(item.county || "")}</small>
+        </button>`).join("")
+      : '<p class="municipality-onboarding-empty">Ingen publicerad kommun matchar sökningen.</p>';
+    search.setAttribute("aria-activedescendant", activeIndex >= 0 ? `municipality-onboarding-option-${activeIndex}` : "");
+    if (window.lucide) lucide.createIcons();
+    return matches;
+  };
+
+  const openOptions = () => {
+    options.hidden = false;
+    search.setAttribute("aria-expanded", "true");
+    toggle.setAttribute("aria-label", "Dölj kommuner");
+  };
+
+  const closeOptions = () => {
+    options.hidden = true;
+    search.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Visa kommuner");
+    activeIndex = -1;
+    search.removeAttribute("aria-activedescendant");
+  };
+
+  const selectMunicipality = (name) => {
+    const match = municipalities.find((item) => item.name === name);
+    if (!match) return;
+    selectedMunicipality = match.name;
+    search.value = match.name;
+    continueButton.disabled = false;
+    renderOptions();
+    closeOptions();
+  };
+
+  renderOptions();
   onboarding.hidden = false;
   document.body.classList.add("municipality-onboarding-open");
   document.querySelector("[data-privacy-notice]")?.remove();
   if (window.lucide) lucide.createIcons();
 
   return new Promise((resolve) => {
+    search.addEventListener("focus", () => {
+      activeIndex = -1;
+      renderOptions();
+      openOptions();
+    });
+    search.addEventListener("input", () => {
+      selectedMunicipality = municipalities.some((item) => item.name === search.value.trim()) ? search.value.trim() : null;
+      continueButton.disabled = !selectedMunicipality;
+      activeIndex = -1;
+      renderOptions();
+      openOptions();
+    });
+    search.addEventListener("keydown", (event) => {
+      const matches = matchingMunicipalities();
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        openOptions();
+        activeIndex = event.key === "ArrowDown"
+          ? Math.min(activeIndex + 1, matches.length - 1)
+          : Math.max(activeIndex < 0 ? matches.length - 1 : activeIndex - 1, 0);
+        renderOptions();
+        options.querySelector(".is-active")?.scrollIntoView({ block: "nearest" });
+      } else if (event.key === "Enter" && activeIndex >= 0 && matches[activeIndex]) {
+        event.preventDefault();
+        selectMunicipality(matches[activeIndex].name);
+      } else if (event.key === "Escape") {
+        closeOptions();
+      }
+    });
+    toggle.addEventListener("click", () => {
+      if (options.hidden) {
+        renderOptions();
+        openOptions();
+        search.focus();
+      } else {
+        closeOptions();
+      }
+    });
     options.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-first-municipality]");
-      if (!button || button.disabled) return;
-      options.querySelectorAll("button").forEach((item) => { item.disabled = true; });
-      await DinPulsMunicipality.setMunicipality(button.dataset.firstMunicipality, { persist: true, force: true });
+      if (!button) return;
+      selectMunicipality(button.dataset.firstMunicipality);
+    });
+    continueButton.addEventListener("click", async () => {
+      if (!selectedMunicipality || continueButton.disabled) return;
+      continueButton.disabled = true;
+      await DinPulsMunicipality.setMunicipality(selectedMunicipality, { persist: true, force: true });
       onboarding.hidden = true;
       document.body.classList.remove("municipality-onboarding-open");
       document.dispatchEvent(new CustomEvent("dinpuls:municipality-onboarding-complete"));
