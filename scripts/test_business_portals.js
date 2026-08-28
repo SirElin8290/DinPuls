@@ -26,6 +26,11 @@ assert(worker.includes('billing_type') && worker.includes('signature_required') 
 assert(worker.includes('portalAuthVersion: "hmac-sha256-v1"'), "Worker-hälsan måste ange portalens autentiseringsversion");
 assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
 assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste visa kostnadsfria avtal korrekt");
+assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_banners"), "Bannerplanering måste lagras centralt i D1");
+assert(worker.includes("env.AD_ASSETS.put") && worker.includes("imageTypeMatches"), "Bannerbilder måste verifieras och lagras i privat R2");
+assert(worker.includes('/portal/company/banners') && worker.includes('currentBanner(request, env'), "Företags- och publik banner-API måste finnas");
+assert(company.includes('X-Banner-Start') && company.includes('Europe/Stockholm'), "Företagsportalen måste schemalägga och visa svensk tid");
+assert(company.includes('högst fyra') || worker.includes('högst fyra'), "Högst fyra kommande banners ska tillåtas per annonsplats");
 assert(config.enabled === true && /^https:\/\//.test(config.apiBase), "Företagsportalen måste ha en säker API-adress");
 
 console.log("✓ Admin- och företagsportalen saknar klientlösenord och använder rollseparerad Worker/D1-auth");
