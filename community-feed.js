@@ -1,6 +1,18 @@
 /* DinPuls community feed
    Source-first local information from approved community groups.
    No scraping is performed here. Only curated, approved data is rendered. */
+
+/* First-visit municipality UI is isolated so it can evolve without touching the main application bundle. */
+(() => {
+  const style = document.createElement("link");
+  style.rel = "stylesheet";
+  style.href = "first-visit.css?v=1";
+  document.head.appendChild(style);
+  const script = document.createElement("script");
+  script.src = "first-visit.js?v=2";
+  document.head.appendChild(script);
+})();
+
 (function initCommunityFeed(root) {
   "use strict";
 
