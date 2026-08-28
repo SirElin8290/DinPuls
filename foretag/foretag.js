@@ -43,12 +43,12 @@
 
   async function showApp() {
     const details = await api("/portal/company/me");
-    let schedule = { banners: [] }, stats = null, bannerBackendReady = true;
+    let schedule = { banners: [] }, stats = null, bannerScheduleReady = true;
     try { schedule = await api("/portal/company/banners"); }
-    catch { bannerBackendReady = false; }
+    catch { bannerScheduleReady = false; }
     try { stats = await api("/portal/company/stats"); }
     catch { stats = null; }
-    account = { ...details, banners: schedule.banners || [], stats, bannerBackendReady };
+    account = { ...details, banners: schedule.banners || [], stats, bannerScheduleReady };
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     renderCompany();
@@ -105,19 +105,15 @@
   function renderBannerSchedule() {
     const container = $("#bannerSchedule");
     if (!container || !account) return;
-    if (!account.bannerBackendReady) {
-      container.innerHTML = '<p class="muted">Bannerverktyget kunde inte nå lagringen just nu. Försök igen om en stund.</p>';
-      $("#scheduleCount").textContent = "Tillfälligt fel";
-      updateBannerButton();
-      return;
-    }
     const slotId = $("#bannerSlot").value;
     const banners = (account.banners || []).filter(item => item.slotId === slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const past = banners.filter(item => Date.parse(item.startAt) <= Date.now());
     const currentId = past.at(-1)?.id;
     const futureCount = banners.filter(item => Date.parse(item.startAt) > Date.now()).length;
-    $("#scheduleCount").textContent = `${futureCount} av 4 kommande`;
-    container.innerHTML = banners.length ? banners.map(item => {
+    $("#scheduleCount").textContent = account.bannerScheduleReady ? `${futureCount} av 4 kommande` : "Schema kunde inte läsas";
+    container.innerHTML = !account.bannerScheduleReady
+      ? '<p class="muted">Det befintliga bannerschemat kunde inte läsas. Du kan fortfarande prova att planera en ny banner; om servern stoppar uppladdningen visas det riktiga felet.</p>'
+      : banners.length ? banners.map(item => {
       const future = Date.parse(item.startAt) > Date.now();
       const state = future ? "Planerad" : item.id === currentId ? "Visas nu" : "Tidigare";
       return `<article class="scheduled-banner"><img src="${escapeHtml(apiBase + item.imageUrl)}" alt=""><div><strong>${escapeHtml(state)}</strong><span>${escapeHtml(formatSwedishDateTime(item.startAt))}</span><small>${escapeHtml(item.fileName)}</small></div>${future ? `<button type="button" class="remove-banner" data-banner-id="${escapeHtml(item.id)}">Ta bort</button>` : ""}</article>`;
@@ -131,7 +127,7 @@
   }
 
   function updateBannerButton() {
-    $("#saveBanner").disabled = !(account?.bannerBackendReady && selectedBannerFile && $("#bannerStart").value && $("#bannerSlot").value);
+    $("#saveBanner").disabled = !(selectedBannerFile && $("#bannerStart").value && $("#bannerSlot").value);
   }
 
   function defaultScheduleTime() {
