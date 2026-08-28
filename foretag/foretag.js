@@ -42,8 +42,10 @@
   }
 
   async function showApp() {
-    const [details, schedule] = await Promise.all([api("/portal/company/me"), api("/portal/company/banners")]);
-    account = { ...details, banners: schedule.banners || [] };
+    const details = await api("/portal/company/me");
+    let schedule = { banners: [] }, bannerBackendReady = true;
+    try { schedule = await api("/portal/company/banners"); } catch { bannerBackendReady = false; }
+    account = { ...details, banners: schedule.banners || [], bannerBackendReady };
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     renderCompany();
@@ -98,6 +100,11 @@
   function renderBannerSchedule() {
     const container = $("#bannerSchedule");
     if (!container || !account) return;
+    if (!account.bannerBackendReady) {
+      container.innerHTML = '<p class="muted">Bannerverktyget aktiveras just nu. Dina avtalsuppgifter och resten av portalen fungerar som vanligt.</p>';
+      $("#scheduleCount").textContent = "Aktivering pågår";
+      return;
+    }
     const slotId = $("#bannerSlot").value;
     const banners = (account.banners || []).filter(item => item.slotId === slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const past = banners.filter(item => Date.parse(item.startAt) <= Date.now());
@@ -117,7 +124,7 @@
   }
 
   function updateBannerButton() {
-    $("#saveBanner").disabled = !(selectedBannerFile && $("#bannerStart").value && $("#bannerSlot").value);
+    $("#saveBanner").disabled = !(account?.bannerBackendReady && selectedBannerFile && $("#bannerStart").value && $("#bannerSlot").value);
   }
 
   function defaultScheduleTime() {
