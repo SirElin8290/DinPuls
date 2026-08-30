@@ -1979,14 +1979,44 @@ function renderMissingPeople(config = DinPulsMunicipality.getConfig()) {
     list.innerHTML = `<div class="missing-people-unverified"><i data-lucide="shield-alert"></i><span><strong>Öppna Missing Peoples officiella lista</strong><small>DinPuls visar inga personuppgifter när den senaste kontrollen är för gammal.</small></span><a href="${MISSING_PEOPLE_SOURCE_URL}" target="_blank" rel="noopener noreferrer">Kontrollera hos Missing People <i data-lucide="arrow-up-right"></i></a></div>`;
   } else {
     const items = Array.isArray(missingPeopleData?.municipalities?.[config.name]?.items)
-      ? missingPeopleData.municipalities[config.name].items.slice(0, 4)
+      ? missingPeopleData.municipalities[config.name].items
       : [];
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const currentItems = items.filter(item => {
+      const published = new Date(item.publishedAt || "");
+      return Number.isNaN(published.getTime()) || published >= oneYearAgo;
+    }).slice(0, 4);
+    const olderItems = items.filter(item => {
+      const published = new Date(item.publishedAt || "");
+      return !Number.isNaN(published.getTime()) && published < oneYearAgo;
+    });
     status.textContent = `Kontrollerad ${generatedAt.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`;
     list.innerHTML = items.length
-      ? items.map(renderMissingPerson).join("")
+      ? `${currentItems.map(renderMissingPerson).join("")}${olderItems.length ? renderOlderMissingPeople(olderItems) : ""}`
       : `<div class="missing-people-empty"><i data-lucide="circle-check"></i><span><strong>Inga publicerade efterlysningar i området</strong><small>Den officiella listan är kontrollerad för ${escapeHtml(config.name)} och angränsande DinPuls-kommuner.</small></span></div>`;
   }
   if (window.lucide) lucide.createIcons();
+}
+
+function renderOlderMissingPeople(items) {
+  const visible = items.slice(0, 6);
+  return `<section class="missing-people-older" aria-label="Äldre aktiva efterlysningar">
+    <div class="missing-people-older-head"><span><i data-lucide="history"></i><strong>Äldre aktiva efterlysningar</strong></span><small>${items.length} ${items.length === 1 ? "fall" : "fall"} äldre än ett år</small></div>
+    <div class="missing-people-older-list">${visible.map(renderOlderMissingPerson).join("")}</div>
+  </section>`;
+}
+
+function renderOlderMissingPerson(item) {
+  const published = new Date(item.publishedAt || "");
+  const year = Number.isNaN(published.getTime()) ? "Äldre fall" : `Försvunnen sedan ${published.getFullYear()}`;
+  const place = item.originMunicipality || item.location || "närområdet";
+  return `<a class="missing-person-compact" href="${escapeAttribute(safeExternalUrl(item.url || MISSING_PEOPLE_SOURCE_URL))}" target="_blank" rel="noopener noreferrer">
+    <span class="missing-person-compact-icon"><i data-lucide="search"></i></span>
+    <span><strong>${escapeHtml(item.name || "Försvunnen person")}</strong><small>${escapeHtml(place)} · ${escapeHtml(year)}</small></span>
+    <span class="missing-person-compact-label">Äldre aktiv efterlysning</span>
+    <i data-lucide="arrow-up-right"></i>
+  </a>`;
 }
 
 function renderMissingPerson(item) {
