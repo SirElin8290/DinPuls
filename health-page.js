@@ -90,8 +90,8 @@ function renderHealthPage() {
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
   const allProviders = [
     ...(healthData.providers || []),
-    ...(healthPrivateData?.providers || []),
-    ...(healthPrivateSupplement?.providers || [])
+    ...(healthPrivateSupplement?.providers || []),
+    ...(healthPrivateData?.providers || [])
   ];
   const seen = new Set();
   const providers = allProviders
