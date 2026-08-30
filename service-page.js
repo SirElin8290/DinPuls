@@ -9,7 +9,7 @@ const serviceAdvertisers = {
       name: "Åslanda Handelsträdgård",
       image: "assets/ads/aslanda-handelstradgard.webp",
       url: "https://www.facebook.com/profile.php?id=61576659453588",
-      alt: "Åslanda Handelsträdgård – öppet torsdagar 14–18"
+      alt: "Åslanda Handelsträdgård – höstväxter och pumpor, öppet måndag till fredag 09–18 från 31 augusti"
     }
   }
 };
@@ -199,3 +199,4 @@ initializeServicePage().catch(error => {
   document.querySelector("#service-result-count").textContent = "Innehållet kunde inte laddas";
   document.querySelector("#service-empty").hidden = false;
 });
+
