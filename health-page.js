@@ -2,6 +2,7 @@ const healthState = window.DinPulsMunicipalityState;
 let healthMunicipality = healthState.getInitial();
 let healthData;
 let healthPrivateData;
+let healthPrivateSupplement;
 
 const escapeHealth = window.DinPulsSecurity.escapeHtml;
 const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -11,10 +12,11 @@ const DEFAULT_CATEGORY_ORDER = [
   "Vårdcentral & läkare",
   "Akut & jour",
   "Tandvård",
+  "Apotek",
   "Rehabilitering & fysioterapi",
   "Kiropraktor, naprapat & osteopat",
   "Massage & kroppsterapi",
-  "Medicinsk fotvård",
+  "Fotvård & medicinsk fotvård",
   "Optik & syn",
   "Psykisk hälsa & samtalsstöd",
   "Barnmorska & kvinnohälsa",
@@ -30,19 +32,21 @@ function regionDetails(county) {
 }
 
 function inferHealthCategory(provider) {
+  if (provider.category === "Medicinsk fotvård") return "Fotvård & medicinsk fotvård";
   if (provider.category) return provider.category;
   const text = [provider.name, provider.description].join(" ").toLocaleLowerCase("sv-SE");
   if (/jour|akut/.test(text)) return "Akut & jour";
   if (/tand|folktand/.test(text)) return "Tandvård";
+  if (/apotek|farmaci|läkemedel/.test(text)) return "Apotek";
   if (/fysioter|sjukgym|rehab|arbetster/.test(text)) return "Rehabilitering & fysioterapi";
   if (/kiroprakt|naprapat|osteopat/.test(text)) return "Kiropraktor, naprapat & osteopat";
   if (/massage|massör|kroppsterapi|fascia/.test(text)) return "Massage & kroppsterapi";
-  if (/fotvård|fotterap/.test(text)) return "Medicinsk fotvård";
+  if (/fotvård|fotterap/.test(text)) return "Fotvård & medicinsk fotvård";
   if (/optik|synundersök|glasögon|kontaktlins/.test(text)) return "Optik & syn";
   if (/psykolog|psykoter|samtal|beteendevet/.test(text)) return "Psykisk hälsa & samtalsstöd";
   if (/barnmorsk|kvinnohälsa|gravid|preventiv/.test(text)) return "Barnmorska & kvinnohälsa";
   if (/vaccin/.test(text)) return "Vaccination";
-  if (/företagshälsa|arbetsmedicin|ortoped/.test(text)) return "Företagshälsa & specialist";
+  if (/företagshälsa|arbetsmedicin|ortoped|specialist/.test(text)) return "Företagshälsa & specialist";
   if (/vårdcentral|läkare|primärvård/.test(text)) return "Vårdcentral & läkare";
   return "Övrig vård & hälsa";
 }
@@ -84,22 +88,30 @@ function renderHealthPage() {
   const municipalityData = healthData?.municipalities?.[healthMunicipality];
   if (!municipalityData) return;
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
-  const providers = [...(healthData.providers || []), ...(healthPrivateData?.providers || [])]
+  const allProviders = [
+    ...(healthData.providers || []),
+    ...(healthPrivateData?.providers || []),
+    ...(healthPrivateSupplement?.providers || [])
+  ];
+  const seen = new Set();
+  const providers = allProviders
     .map(provider => ({ ...provider, category: inferHealthCategory(provider) }))
-    .filter(provider =>
-      provider.municipality === healthMunicipality &&
-      [provider.name, provider.description, provider.sourceType, provider.category, provider.address, provider.phone]
+    .filter(provider => {
+      if (provider.municipality !== healthMunicipality) return false;
+      const key = `${provider.municipality}|${String(provider.name || "").toLocaleLowerCase("sv-SE")}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return [provider.name, provider.description, provider.sourceType, provider.category, provider.address, provider.phone]
         .join(" ")
         .toLocaleLowerCase("sv-SE")
-        .includes(query)
-    )
+        .includes(query);
+    })
     .sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
 
-  const categoryOrder = healthPrivateData?.categoryOrder || DEFAULT_CATEGORY_ORDER;
   const categories = [...new Set(providers.map(provider => provider.category))]
     .sort((first, second) => {
-      const firstIndex = categoryOrder.indexOf(first);
-      const secondIndex = categoryOrder.indexOf(second);
+      const firstIndex = DEFAULT_CATEGORY_ORDER.indexOf(first);
+      const secondIndex = DEFAULT_CATEGORY_ORDER.indexOf(second);
       if (firstIndex === -1 && secondIndex === -1) return first.localeCompare(second, "sv-SE");
       if (firstIndex === -1) return 1;
       if (secondIndex === -1) return -1;
@@ -136,14 +148,17 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const [officialResponse, privateResponse] = await Promise.all([
+  const [officialResponse, privateResponse, supplementResponse] = await Promise.all([
     fetch("data/health.json", { cache: "no-cache" }),
-    fetch("data/health-private.json", { cache: "no-cache" })
+    fetch("data/health-private.json", { cache: "no-cache" }),
+    fetch("data/health-private-supplement.json", { cache: "no-cache" })
   ]);
   if (!officialResponse.ok) throw new Error(`Vårddata kunde inte laddas (${officialResponse.status})`);
   healthData = await officialResponse.json();
-  healthPrivateData = privateResponse.ok ? await privateResponse.json() : { providers: [], categoryOrder: DEFAULT_CATEGORY_ORDER };
+  healthPrivateData = privateResponse.ok ? await privateResponse.json() : { providers: [] };
+  healthPrivateSupplement = supplementResponse.ok ? await supplementResponse.json() : { providers: [] };
   if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
+  if (!supplementResponse.ok) console.warn(`Kompletterande vårddata kunde inte laddas (${supplementResponse.status})`);
   const select = document.querySelector("#health-municipality");
   healthState.populateSelect(select, healthMunicipality);
   select.addEventListener("change", () => {
