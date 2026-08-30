@@ -20,23 +20,24 @@ def api_departure(hours=0):
 
 
 class UpdateTransportTests(unittest.TestCase):
-    def test_current_departures_do_not_trigger_deep_search(self):
-        with patch.object(transport, "fetch") as fetch:
+    def test_thin_current_departures_trigger_deep_search(self):
+        with patch.object(transport, "fetch", return_value={"departures": []}) as fetch:
             departures, _, retained, _, _ = transport.find_next_departures(
                 "key", "stop", NOW, {}, api_departure(1)
             )
         self.assertEqual(len(departures), 1)
         self.assertFalse(retained)
-        fetch.assert_not_called()
+        self.assertEqual(fetch.call_count, len(transport.LOOKAHEAD_OFFSETS_HOURS))
 
-    def test_new_search_replaces_later_cached_departure(self):
+    def test_new_search_is_merged_with_later_cached_departure(self):
         previous = {"departures": [transport.normalize(api_departure(5)["departures"][0])]}
         with patch.object(transport, "fetch", return_value=api_departure(1)) as fetch:
             departures, _, retained, _, _ = transport.find_next_departures("key", "stop", NOW, previous, {"departures": []})
         self.assertFalse(retained)
-        self.assertEqual(len(departures), 1)
+        self.assertEqual(len(departures), 2)
         self.assertEqual(departures[0]["scheduled"], api_departure(1)["departures"][0]["scheduled"])
-        fetch.assert_called_once()
+        self.assertEqual(departures[1]["scheduled"], api_departure(5)["departures"][0]["scheduled"])
+        self.assertEqual(fetch.call_count, len(transport.LOOKAHEAD_OFFSETS_HOURS))
 
     def test_cached_departure_is_fallback_after_empty_search(self):
         previous = {"departures": [transport.normalize(api_departure(5)["departures"][0])]}
@@ -47,7 +48,8 @@ class UpdateTransportTests(unittest.TestCase):
         self.assertEqual(fetch.call_count, len(transport.LOOKAHEAD_OFFSETS_HOURS))
 
     def test_searches_all_configured_windows_for_a_later_departure(self):
-        responses = [{"departures": []}, api_departure(12)]
+        responses = [{"departures": []} for _ in transport.LOOKAHEAD_OFFSETS_HOURS]
+        responses[-1] = api_departure(12)
         with patch.object(transport, "fetch", side_effect=responses) as fetch:
             departures, lookup, retained, _, _ = transport.find_next_departures("key", "stop", NOW, {}, {"departures": []})
         self.assertEqual(len(departures), 1)
@@ -64,11 +66,25 @@ class UpdateTransportTests(unittest.TestCase):
         retry_at = transport.parse_time(next_search, NOW.tzinfo)
         self.assertEqual(retry_at, NOW + timedelta(minutes=45))
 
-    def test_future_search_uses_two_spread_windows(self):
+    def test_future_search_uses_dense_spread_windows(self):
         windows = transport.future_query_times(NOW)
-        self.assertEqual(len(windows), 2)
-        self.assertEqual(windows[0], "2026-08-02T02:15")
+        self.assertEqual(len(windows), 6)
+        self.assertEqual(windows[0], "2026-08-01T23:15")
+        self.assertEqual(windows[1], "2026-08-02T00:15")
         self.assertEqual(windows[-1], "2026-08-02T10:15")
+
+    def test_current_engine_version_respects_deep_search_throttle(self):
+        previous = {
+            "engineVersion": transport.TRANSPORT_VERSION,
+            "nextSearchAfter": (NOW + timedelta(hours=1)).isoformat(timespec="minutes"),
+        }
+        with patch.object(transport, "fetch") as fetch:
+            departures, _, retained, _, _ = transport.find_next_departures(
+                "key", "stop", NOW, previous, api_departure(1)
+            )
+        self.assertEqual(len(departures), 1)
+        self.assertFalse(retained)
+        fetch.assert_not_called()
 
     def test_categorizes_train_and_bus(self):
         train = transport.normalize({"route": {"transport_mode": "TRAIN"}})
