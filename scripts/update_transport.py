@@ -18,8 +18,9 @@ OUTPUT = ROOT / "data" / "transport.json"
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 API_URL = "https://realtime-api.trafiklab.se/v1/departures"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
+TRANSPORT_VERSION = "0.21.3"
 MAX_DEPARTURES = 40
-LOOKAHEAD_OFFSETS_HOURS = (4, 12)
+LOOKAHEAD_OFFSETS_HOURS = (1, 2, 4, 6, 8, 12)
 DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
 FETCH_ATTEMPTS = 3
@@ -112,9 +113,9 @@ def fetch(api_key, area_id, query_time=None):
 
 
 def future_query_times(now, offsets=LOOKAHEAD_OFFSETS_HOURS):
-    """Sök ett fåtal spridda fönster så att nattuppehåll hittas utan onödiga API-anrop."""
-    first = now.replace(second=0, microsecond=0) + timedelta(hours=1)
-    return [(first + timedelta(hours=offset - 1)).strftime("%Y-%m-%dT%H:%M") for offset in offsets]
+    """Sök spridda 60-minutersfönster tätare när den första avgångstavlan är tunn."""
+    base = now.replace(second=0, microsecond=0)
+    return [(base + timedelta(hours=offset)).strftime("%Y-%m-%dT%H:%M") for offset in offsets]
 
 
 def should_deep_search(previous_stop, now):
@@ -196,10 +197,11 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
     lookup_time = previous_stop.get("lookupTime")
     next_search = previous_stop.get("nextSearchAfter")
     merged = merge_departures(now, current, retained)
+    engine_changed = previous_stop.get("engineVersion") != TRANSPORT_VERSION
 
-    # Ett enda eller ett fåtal träffar får inte längre stoppa framtidssökningen.
-    # Det var orsaken till att exempelvis Åmål kunde få en ensam tågtid och inga bussar.
-    if len(merged) < MIN_DEPARTURES_FOR_DEEP_SEARCH and should_deep_search(previous_stop, now):
+    # Ett enda eller ett fåtal träffar får inte stoppa framtidssökningen. Trafiklabs
+    # avgångstavla täcker bara 60 minuter, så tunna resultat behöver flera framtidsfönster.
+    if len(merged) < MIN_DEPARTURES_FOR_DEEP_SEARCH and (engine_changed or should_deep_search(previous_stop, now)):
         lookup_time = now.isoformat(timespec="minutes")
         future_departures_found = 0
         for query_time in future_query_times(now):
@@ -215,12 +217,12 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
             merged = merge_departures(now, current, retained)
             if len(merged) >= TARGET_DEPARTURES:
                 break
-        next_search = (
-            now + timedelta(
-                hours=DEEP_SEARCH_INTERVAL_HOURS if future_departures_found else 0,
-                minutes=0 if future_departures_found else EMPTY_RETRY_MINUTES,
-            )
-        ).isoformat(timespec="minutes")
+
+        # Om resultatet fortfarande är tunt försöker vi igen redan efter 45 minuter.
+        # Ett fylligt resultat behöver däremot bara djupsökas varannan timme.
+        retry_minutes = EMPTY_RETRY_MINUTES if len(merged) < MIN_DEPARTURES_FOR_DEEP_SEARCH else 0
+        retry_hours = 0 if retry_minutes else DEEP_SEARCH_INTERVAL_HOURS
+        next_search = (now + timedelta(hours=retry_hours, minutes=retry_minutes)).isoformat(timespec="minutes")
 
     departures = merge_departures(now, current, retained)
     retained_only = bool(departures) and all(item.get("stale") for item in departures)
@@ -286,6 +288,7 @@ def main():
                 "lookupTime": lookup_time,
                 "retained": retained,
                 "nextSearchAfter": next_search,
+                "engineVersion": TRANSPORT_VERSION,
                 "error": error_message,
                 "departures": departures,
             })
@@ -298,7 +301,7 @@ def main():
         return 1
 
     output = {
-        "version": "0.21.2",
+        "version": TRANSPORT_VERSION,
         "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Trafiklab",
         "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
