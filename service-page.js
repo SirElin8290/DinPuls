@@ -199,4 +199,3 @@ initializeServicePage().catch(error => {
   document.querySelector("#service-result-count").textContent = "Innehållet kunde inte laddas";
   document.querySelector("#service-empty").hidden = false;
 });
-
