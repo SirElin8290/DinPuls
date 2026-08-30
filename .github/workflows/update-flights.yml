@@ -56,9 +56,16 @@ jobs:
           assert airports == {'KSD', 'HFS', 'TYF', 'THN'}, f'Fel flygplatser: {airports}'
           assert data.get('audienceRules', {}).get('Värmland') == ['KSD', 'HFS', 'TYF']
           assert data.get('audienceRules', {}).get('Dalsland') == ['KSD', 'THN']
-          assert isinstance(data.get('departures'), list)
+          departures = data.get('departures', [])
+          assert isinstance(departures, list)
+          departure_airports = {item.get('airportId') for item in departures}
+          required = {'KSD', 'HFS', 'TYF', 'THN'}
+          assert required <= departure_airports, f'Saknar avgångar från: {sorted(required - departure_airports)}'
+          thn = [item for item in departures if item.get('airportId') == 'THN']
+          assert thn, 'Stallbacka saknar avgångar'
+          assert all(item.get('audiences') == ['Dalsland'] for item in thn)
           assert data.get('version') == '1.1.0'
-          print(f"Verifierade {len(data['departures'])} flygavgångar från fyra flygplatser")
+          print(f"Verifierade {len(departures)} flygavgångar från samtliga fyra flygplatser")
           if data.get('sourceErrors'):
               print('Källvarningar:', ' | '.join(data['sourceErrors']))
           PY
