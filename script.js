@@ -2042,6 +2042,7 @@ function renderMissingPerson(item) {
    DINPULS v0.8.0 – BUSS- OCH TÅGTIDER
 ========================================================= */
 let transportData = null;
+let flightData = null;
 let activeTransportMode = "all";
 let transportRefreshTimer = null;
 
@@ -2060,7 +2061,7 @@ async function initializeTransport() {
 
   document.querySelector("#transport-stop")?.addEventListener("change", renderTransport);
   DinPulsMunicipality.subscribe("transport", refreshTransportForMunicipality);
-  await loadTransport();
+  await Promise.all([loadTransport(), loadFlights()]);
   clearInterval(transportRefreshTimer);
   transportRefreshTimer = window.setInterval(() => {
     if (!document.hidden) loadTransport();
@@ -2102,6 +2103,19 @@ async function loadTransport() {
   }
 }
 
+
+async function loadFlights() {
+  try {
+    const response = await fetch(`data/flights.json`, { cache: "no-cache" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    flightData = await response.json();
+  } catch (error) {
+    console.error("Flygavgångarna kunde inte laddas:", error);
+    flightData = null;
+  }
+  if (transportData) renderTransport();
+}
+
 function populateTransportStops() {
   const select = document.querySelector("#transport-stop");
   if (!select || !transportData) return;
@@ -2120,6 +2134,7 @@ function renderTransport() {
   const empty = document.querySelector("#transport-empty");
   const alertBox = document.querySelector("#transport-alert");
   const select = document.querySelector("#transport-stop");
+  const selectWrap = document.querySelector("#transport-stop-select");
   if (!board || !transportData || !select) return;
 
   const municipality = DinPulsMunicipality.getName();
@@ -2127,37 +2142,47 @@ function renderTransport() {
   const stop = municipalityData?.stops?.find((item) => item.id === select.value) || municipalityData?.stops?.[0];
   const isDemo = transportData.source === "demo";
   const now = Date.now();
-  const departures = (stop?.departures || [])
-    .filter((item) => activeTransportMode === "all" || item.mode === activeTransportMode)
-    .filter((item) => isDemo || new Date(item.realtime || item.scheduled).getTime() >= now - 30000)
-    .slice(0, 10);
 
-  board.innerHTML = departures.map((item) => renderDeparture(item, isDemo)).join("");
+  const localDepartures = (stop?.departures || [])
+    .filter((item) => ["all", "bus", "train"].includes(activeTransportMode) && (activeTransportMode === "all" || item.mode === activeTransportMode))
+    .filter((item) => isDemo || new Date(item.realtime || item.scheduled).getTime() >= now - 30000);
+  const regionalFlights = (flightData?.departures || [])
+    .filter((item) => ["all", "flight"].includes(activeTransportMode))
+    .filter((item) => new Date(item.realtime || item.scheduled).getTime() >= now - 30000);
+  const departures = [...localDepartures, ...regionalFlights]
+    .sort((a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled))
+    .slice(0, 12);
+
+  if (selectWrap) selectWrap.hidden = activeTransportMode === "flight";
+  board.innerHTML = departures.map((item) => renderDeparture(item, isDemo && item.mode !== "flight")).join("");
   loading.hidden = true;
   board.hidden = departures.length === 0;
   empty.hidden = departures.length > 0;
   if (!departures.length) {
-    const modeLabel = activeTransportMode === "train" ? "tåg" : activeTransportMode === "bus" ? "bussar" : "avgångar";
+    const modeLabel = activeTransportMode === "train" ? "tåg" : activeTransportMode === "bus" ? "bussar" : activeTransportMode === "flight" ? "flyg" : "avgångar";
     empty.querySelector("strong").textContent = `Inga kommande ${modeLabel} hittades`;
-    empty.querySelector("span").textContent = stop?.error
-      ? "Trafiklab kunde inte nås. Senast sparade tider visas när de fortfarande gäller."
-      : "Nästa tidtabellsfönster kontrolleras automatiskt.";
+    empty.querySelector("span").textContent = activeTransportMode === "flight"
+      ? "Nästa publicerade flyg från Karlstad, Hagfors och Torsby visas automatiskt."
+      : stop?.error
+        ? "Trafiklab kunde inte nås. Senast sparade tider visas när de fortfarande gäller."
+        : "Nästa tidtabellsfönster kontrolleras automatiskt.";
   }
 
-  const alerts = stop?.alerts || [];
+  const alerts = activeTransportMode === "flight" ? [] : (stop?.alerts || []);
   alertBox.hidden = alerts.length === 0;
   alertBox.innerHTML = alerts.length ? `<i data-lucide="triangle-alert"></i><div><strong>Trafikinformation</strong>${alerts.map((message) => `<span>${escapeHtml(message)}</span>`).join("")}</div>` : "";
 
   const updated = document.querySelector("#transport-updated");
   if (updated) {
-    const timestamp = new Date(transportData.generatedAt);
-    const stale = !isDemo && !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > 50 * 60 * 1000;
+    const sourceData = activeTransportMode === "flight" ? flightData : transportData;
+    const timestamp = new Date(sourceData?.generatedAt || "");
+    const staleLimit = activeTransportMode === "flight" ? 12 * 60 * 60 * 1000 : 50 * 60 * 1000;
+    const stale = !Number.isNaN(timestamp.getTime()) && Date.now() - timestamp.getTime() > staleLimit;
     updated.classList.toggle("stale", stale);
-    updated.innerHTML = `<i data-lucide="${stale ? "clock-3" : "refresh-cw"}"></i>${isDemo ? "Demonstrationsdata" : Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : stale ? `Senast fungerande kontroll ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
+    updated.innerHTML = `<i data-lucide="${stale ? "clock-3" : "refresh-cw"}"></i>${Number.isNaN(timestamp.getTime()) ? "Tider kontrollerade" : activeTransportMode === "flight" ? `Flygtidtabeller kontrollerade ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : stale ? `Senast fungerande kontroll ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}` : `Uppdaterad ${timestamp.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   updateTransportSource(isDemo, stop, departures);
-  renderCompactTransport(departures, isDemo);
   updateQuickTransport();
   if (window.lucide) lucide.createIcons();
 }
@@ -2167,7 +2192,7 @@ function renderDeparture(item, isDemo = false) {
   const scheduled = new Date(item.scheduled);
   const actual = new Date(realtime);
   const delayMinutes = Number(item.delayMinutes) || 0;
-  const modeIcon = item.mode === "train" ? "train-front" : "bus-front";
+  const modeIcon = item.mode === "flight" ? "plane" : item.mode === "train" ? "train-front" : "bus-front";
   const status = isDemo
     ? '<span class="departure-status planned">Demodata</span>'
     : item.canceled
@@ -2181,10 +2206,14 @@ function renderDeparture(item, isDemo = false) {
         : '<span class="departure-status planned">Tidtabell</span>';
   const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
   const scheduledTime = Number.isNaN(scheduled.getTime()) ? "" : scheduled.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
+  const lineLabel = item.mode === "flight" ? (item.airport || item.line || item.operator || "Flyg") : (item.line || item.operator || "–");
+  const detail = item.mode === "flight"
+    ? [item.line, item.operator].filter(Boolean).join(" · ")
+    : `${item.operator || ""}${item.platform ? ` · Läge ${item.platform}` : ""}`;
   return `<article class="departure-row${item.canceled ? " is-canceled" : ""}">
     <span class="departure-mode ${item.mode}"><i data-lucide="${modeIcon}"></i></span>
-    <span class="departure-line">${escapeHtml(item.line || item.operator || "–")}</span>
-    <span class="departure-destination"><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(item.operator || "")}${item.platform ? ` · Läge ${escapeHtml(item.platform)}` : ""}</small></span>
+    <span class="departure-line">${escapeHtml(lineLabel)}</span>
+    <span class="departure-destination"><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(detail)}</small></span>
     <span class="departure-time"><strong>${time}</strong>${delayMinutes > 0 && scheduledTime ? `<small>${scheduledTime}</small>` : ""}</span>
     ${status}
   </article>`;
@@ -2193,18 +2222,31 @@ function renderDeparture(item, isDemo = false) {
 function updateTransportSource(isDemo, stop, departures) {
   const note = document.querySelector("#transport-source-note");
   const link = document.querySelector("#transport-source-link");
-  const retained = Boolean(stop?.retained) || departures.some((item) => item.stale);
+  if (activeTransportMode === "flight") {
+    if (note) note.innerHTML = '<i data-lucide="plane"></i>Regionala avgångar från Karlstad, Hagfors och Torsby · officiella flygplatstidtabeller';
+    if (link) {
+      link.hidden = false;
+      link.href = "https://www.ksdarprt.se/resmal/tidtabeller/";
+      link.textContent = "Officiella flygtidtabeller";
+    }
+    return;
+  }
+  const retained = Boolean(stop?.retained) || departures.some((item) => item.mode !== "flight" && item.stale);
   if (note) {
     note.textContent = isDemo
       ? "Exempeltider – inte liveinformation"
       : retained
         ? "Trafiklab – visar senast verifierade framtida avgångar medan nya tider hämtas"
+      : activeTransportMode === "all" && flightData?.departures?.length
+        ? "Lokala buss- och tågtider från Trafiklab · regionala flyg från officiella flygplatstidtabeller"
       : transportData.partial
         ? "Trafiklab – vissa hållplatser kunde inte uppdateras"
         : "Aktuella avgångar från Trafiklab";
   }
   if (link) {
     link.hidden = isDemo;
+    link.href = "https://www.trafiklab.se/";
+    link.textContent = "Data från Trafiklab.se";
   }
 }
 

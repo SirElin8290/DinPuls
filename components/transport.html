@@ -1,8 +1,8 @@
 <section class="transport-section" id="kollektivtrafik">
   <div class="section-heading transport-heading">
     <div>
-      <span class="section-kicker">Buss och tåg nära dig</span>
-      <h2>Avgångar från <span id="transport-place">Åmål</span></h2>
+      <span class="section-kicker">Resor och avgångar</span>
+      <h2>Avgångar · <span id="transport-place">Åmål</span></h2>
     </div>
     <span class="transport-updated" id="transport-updated"><i data-lucide="refresh-cw"></i> Laddar tider…</span>
   </div>
@@ -12,9 +12,10 @@
       <button class="transport-tab active" type="button" data-transport-mode="all" aria-selected="true"><i data-lucide="route"></i>Alla</button>
       <button class="transport-tab" type="button" data-transport-mode="bus" aria-selected="false"><i data-lucide="bus-front"></i>Buss</button>
       <button class="transport-tab" type="button" data-transport-mode="train" aria-selected="false"><i data-lucide="train-front"></i>Tåg</button>
+      <button class="transport-tab" type="button" data-transport-mode="flight" aria-selected="false"><i data-lucide="plane"></i>Flyg</button>
     </div>
-    <label class="transport-stop-select">
-      <span>Hållplats eller station</span>
+    <label class="transport-stop-select" id="transport-stop-select">
+      <span id="transport-stop-label">Hållplats eller station</span>
       <select id="transport-stop"></select>
     </label>
   </div>
@@ -25,7 +26,7 @@
   <div class="transport-empty" id="transport-empty" hidden>
     <i data-lucide="clock-alert"></i>
     <strong>Inga avgångar hittades</strong>
-    <span>Prova en annan hållplats eller välj ett annat trafikslag.</span>
+    <span>Nästa avgångsfönster kontrolleras automatiskt.</span>
   </div>
 
   <div class="transport-footer">
@@ -33,3 +34,10 @@
     <a id="transport-source-link" href="https://www.trafiklab.se/" target="_blank" rel="noopener noreferrer" hidden>Data från Trafiklab.se</a>
   </div>
 </section>
+
+<style id="dinpuls-flight-ui">
+  .departure-mode.flight{background:#efe9ff;color:#6542c7}
+  [data-theme="dark"] .departure-mode.flight{background:#2c2448;color:#b9a5ff}
+  .transport-regional-note{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+  .transport-regional-note svg{width:14px;height:14px}
+</style>
