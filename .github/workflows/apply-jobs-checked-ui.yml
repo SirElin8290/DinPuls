@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "scripts/apply_jobs_checked_ui.py"
+      - ".github/workflows/apply-jobs-checked-ui.yml"
 
 permissions:
   contents: write
@@ -22,7 +22,24 @@ jobs:
         with:
           python-version: "3.12"
       - name: Applicera ändringen
-        run: python scripts/apply_jobs_checked_ui.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('script.js')
+          text = path.read_text(encoding='utf-8')
+          old = '''    const timestamp = new Date(municipalityData.updatedAt || jobsData.generatedAt);
+              updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Uppdaterad ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;'''
+          new = '''    const timestamp = new Date(municipalityData.checkedAt || jobsData.generatedAt || municipalityData.updatedAt);
+              updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Kontrollerad ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;'''
+          if old not in text:
+              if new in text:
+                  print('Jobbmodulen är redan uppdaterad')
+              else:
+                  raise SystemExit('Kunde inte hitta jobbmodulens tidsstämpel')
+          else:
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+              print('Jobbmodulen visar nu senaste faktiska kontrolltid')
+          PY
       - name: Verifiera ändringen
         run: |
           python - <<'PY'
