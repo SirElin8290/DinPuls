@@ -24,6 +24,8 @@ DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
 FETCH_ATTEMPTS = 3
 FETCH_TIMEOUT_SECONDS = 25
+MIN_DEPARTURES_FOR_DEEP_SEARCH = 4
+TARGET_DEPARTURES = 10
 
 
 def load_json(path: Path, fallback):
@@ -193,8 +195,11 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
     payloads = [current_payload]
     lookup_time = previous_stop.get("lookupTime")
     next_search = previous_stop.get("nextSearchAfter")
+    merged = merge_departures(now, current, retained)
 
-    if not current and should_deep_search(previous_stop, now):
+    # Ett enda eller ett fåtal träffar får inte längre stoppa framtidssökningen.
+    # Det var orsaken till att exempelvis Åmål kunde få en ensam tågtid och inga bussar.
+    if len(merged) < MIN_DEPARTURES_FOR_DEEP_SEARCH and should_deep_search(previous_stop, now):
         lookup_time = now.isoformat(timespec="minutes")
         future_departures_found = 0
         for query_time in future_query_times(now):
@@ -207,7 +212,8 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
             normalized_future = normalize_departures(payload)
             future_departures_found += len(normalized_future)
             current.extend(normalized_future)
-            if normalized_future:
+            merged = merge_departures(now, current, retained)
+            if len(merged) >= TARGET_DEPARTURES:
                 break
         next_search = (
             now + timedelta(
@@ -216,7 +222,7 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
             )
         ).isoformat(timespec="minutes")
 
-    departures = merge_departures(now, current if current else retained)
+    departures = merge_departures(now, current, retained)
     retained_only = bool(departures) and all(item.get("stale") for item in departures)
     return departures, lookup_time, retained_only, next_search, payloads
 
@@ -292,7 +298,7 @@ def main():
         return 1
 
     output = {
-        "version": "0.21.1",
+        "version": "0.21.2",
         "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Trafiklab",
         "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
