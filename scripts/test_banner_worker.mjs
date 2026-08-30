@@ -23,7 +23,7 @@ const bundle = await build({
 const worker = new Miniflare({
   modules: true,
   script: bundle.outputFiles[0].text,
-  compatibilityDate: "2026-08-21",
+  compatibilityDate: "2026-08-06",
   compatibilityFlags: ["nodejs_compat"],
   bindings: {
     ADMIN_USERNAME: "localadmin",
