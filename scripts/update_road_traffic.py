@@ -7,6 +7,7 @@ import math
 import os
 import re
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -19,6 +20,8 @@ API_URL = "https://api.trafikinfo.trafikverket.se/v2/data.json"
 MAP_URL = "https://www.trafikverket.se/trafikinformation/vag/"
 RADIUS_KM = 35
 EXPIRED_GRACE = timedelta(minutes=15)
+FETCH_ATTEMPTS = 3
+FETCH_TIMEOUT_SECONDS = 45
 COUNTY_CODES = {
     "Västra Götalands län": "14",
     "Värmlands län": "17",
@@ -66,7 +69,6 @@ def first(data, *keys):
 
 
 def normalize_county_codes(value):
-    """Returnera Trafikverkets länskoder oavsett om API:t ger tal, text eller lista."""
     if isinstance(value, (list, tuple, set)):
         values = value
     else:
@@ -144,27 +146,43 @@ def fetch_situations(api_key):
         '<QUERY objecttype="Situation" namespace="road.trafficinfo" '
         'schemaversion="1.6" limit="5000"></QUERY></REQUEST>'
     ).encode()
-    request = Request(
-        API_URL,
-        data=body,
-        headers={"Content-Type": "text/xml", "User-Agent": "DinPuls/traffic"},
-    )
-    try:
-        with urlopen(request, timeout=45) as response:
-            payload = json.load(response)
-    except HTTPError as error:
-        details = error.read().decode("utf-8", "replace").replace(api_key, "***")[:1000]
-        raise RuntimeError(f"Trafikverket svarade HTTP {error.code}: {details}") from None
-    except URLError as error:
-        raise RuntimeError(f"Trafikverket kunde inte nås: {error.reason}") from None
+    last_error = "okänt fel"
 
-    situations = []
-    for result in payload.get("RESPONSE", {}).get("RESULT", []):
-        if isinstance(result, dict):
-            situations.extend(result.get("Situation", []))
-    if not situations:
-        raise RuntimeError("Trafikverket returnerade inga Situation-poster; befintlig data behålls")
-    return situations
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        request = Request(
+            API_URL,
+            data=body,
+            headers={"Content-Type": "text/xml", "User-Agent": "DinPuls/traffic"},
+        )
+        try:
+            with urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
+                payload = json.load(response)
+            situations = []
+            for result in payload.get("RESPONSE", {}).get("RESULT", []):
+                if isinstance(result, dict):
+                    situations.extend(result.get("Situation", []))
+            if not situations:
+                last_error = "Trafikverket returnerade inga Situation-poster"
+            else:
+                return situations
+        except HTTPError as error:
+            details = error.read().decode("utf-8", "replace").replace(api_key, "***")[:1000]
+            last_error = f"Trafikverket svarade HTTP {error.code}: {details}"
+            if 400 <= error.code < 500 and error.code not in {408, 429}:
+                break
+        except URLError as error:
+            last_error = f"Trafikverket kunde inte nås: {error.reason}"
+        except TimeoutError:
+            last_error = "Tidsgränsen mot Trafikverket överskreds"
+        except (ValueError, json.JSONDecodeError) as error:
+            last_error = f"Trafikverket returnerade ogiltig JSON: {error}"
+
+        if attempt < FETCH_ATTEMPTS:
+            delay = attempt * 4
+            print(f"Trafikhämtning försök {attempt} misslyckades ({last_error}). Försöker igen om {delay} s.")
+            time.sleep(delay)
+
+    raise RuntimeError(f"{last_error} efter {FETCH_ATTEMPTS} försök")
 
 
 def municipality_items(items, municipality):
@@ -201,12 +219,6 @@ def municipality_items(items, municipality):
 
 
 def assign_items_to_municipalities(items, municipalities):
-    """Tilldela varje trafikmeddelande till högst en av DinPuls kommuner.
-
-    Den tidigare 35-km-cirkeln kördes oberoende för varje kommun och skapade
-    därför många kopior i närliggande kommuner. Länskod används först när den
-    finns och därefter väljs den närmaste centralorten inom bevakningsradien.
-    """
     assignments = {municipality["name"]: [] for municipality in municipalities}
     for item in items:
         if item.get("latitude") is None or item.get("longitude") is None:
@@ -241,8 +253,14 @@ def main():
         return 1
 
     now = datetime.now(timezone.utc)
+    try:
+        situations = fetch_situations(api_key)
+    except RuntimeError as error:
+        print(f"VARNING: {error}. Befintlig trafikdata lämnas orörd.")
+        return 1
+
     normalized = []
-    for situation in fetch_situations(api_key):
+    for situation in situations:
         deviations = situation.get("Deviation") or []
         if isinstance(deviations, dict):
             deviations = [deviations]
@@ -261,7 +279,7 @@ def main():
         print(f"{municipality['name']}: {len(items)} vägmeddelanden")
 
     output = {
-        "version": "0.21.0",
+        "version": "0.21.1",
         "generatedAt": now.isoformat(timespec="seconds"),
         "active": True,
         "radiusKm": RADIUS_KM,
