@@ -275,18 +275,18 @@ def generate_stallbacka_fallback(day: date, items: list[dict]):
     source = AIRPORT_BY_ID["THN"]["scheduleUrl"]
     weekday = day.weekday()
     if day == date(2026, 8, 30):
-        add_departure(items, "THN", day, "15:20", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=True)
+        add_departure(items, "THN", day, "15:20", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=False)
         return
     if weekday in (0, 1, 2):
-        add_departure(items, "THN", day, "07:15", "Stockholm-Bromma Airport", "OJ250", "Västflyg", source, stale=True)
-        add_departure(items, "THN", day, "15:55", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=True)
+        add_departure(items, "THN", day, "07:15", "Stockholm-Bromma Airport", "OJ250", "Västflyg", source, stale=False)
+        add_departure(items, "THN", day, "15:55", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=False)
     elif weekday == 3:
-        add_departure(items, "THN", day, "07:30", "Stockholm-Bromma Airport", "OJ250", "Västflyg", source, stale=True)
-        add_departure(items, "THN", day, "16:20", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=True)
+        add_departure(items, "THN", day, "07:30", "Stockholm-Bromma Airport", "OJ250", "Västflyg", source, stale=False)
+        add_departure(items, "THN", day, "16:20", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=False)
     elif weekday == 4:
-        add_departure(items, "THN", day, "15:00", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=True)
+        add_departure(items, "THN", day, "15:00", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=False)
     elif weekday == 6:
-        add_departure(items, "THN", day, "15:55", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=True)
+        add_departure(items, "THN", day, "15:55", "Stockholm-Bromma Airport", "OJ256", "Västflyg", source, stale=False)
 
 
 def generate_hagfors_torsby(day: date, items: list[dict]):
@@ -354,13 +354,9 @@ def main():
     try:
         items.extend(parse_stallbacka_live(now))
     except Exception as error:
-        errors.append(f"Stallbacka live: {error}; använder verifierad tidtabellsfallback")
-        retained = previous_future("THN", now)
-        if retained:
-            items.extend(retained)
-        else:
-            for offset in range(0, 7):
-                generate_stallbacka_fallback((now + timedelta(days=offset)).date(), items)
+        errors.append(f"Stallbacka live: {error}; använder officiell Västflyg-tidtabell")
+        for offset in range(0, 7):
+            generate_stallbacka_fallback((now + timedelta(days=offset)).date(), items)
 
     for offset in range(0, 7):
         generate_hagfors_torsby((now + timedelta(days=offset)).date(), items)
