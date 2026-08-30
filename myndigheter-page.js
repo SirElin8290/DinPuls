@@ -7,16 +7,19 @@ const safeAuthorityUrl = window.DinPulsSecurity.safeExternalUrl;
 const safeAuthorityIcon = window.DinPulsSecurity.safeIconName;
 const authorityText = item => [item.name, item.description, item.group, item.terms, item.type].join(" ").toLocaleLowerCase("sv-SE");
 
-function municipalSearchUrl(service) {
+function municipalServiceTarget(service) {
   const municipality = authorityData.municipalities[authorityMunicipality];
-  return municipality.website;
+  const directUrl = municipality?.serviceUrls?.[service.id];
+  return { url: directUrl || municipality?.website || "", direct: Boolean(directUrl) };
 }
 
 function authorityCard(item, local = false) {
-  const url = local ? municipalSearchUrl(item) : item.url;
+  const localTarget = local ? municipalServiceTarget(item) : null;
+  const url = local ? localTarget.url : item.url;
   const type = local ? "Kommunal verksamhet" : item.type;
+  const label = local ? (localTarget.direct ? "Öppna rätt sida" : "Öppna kommunens webbplats") : "Öppna officiell webbplats";
   const actions = [
-    `<a href="${escapeAuthority(safeAuthorityUrl(url))}" target="_blank" rel="noopener noreferrer">${local ? "Öppna kommunens webbplats" : "Öppna officiell webbplats"}<i data-lucide="external-link"></i></a>`
+    `<a href="${escapeAuthority(safeAuthorityUrl(url))}" target="_blank" rel="noopener noreferrer">${label}<i data-lucide="external-link"></i></a>`
   ];
   if (!local && item.selfServiceUrl) actions.push(`<a href="${escapeAuthority(safeAuthorityUrl(item.selfServiceUrl))}" target="_blank" rel="noopener noreferrer">E-tjänster / Mina sidor</a>`);
   if (!local && item.contactUrl) actions.push(`<a href="${escapeAuthority(safeAuthorityUrl(item.contactUrl))}" target="_blank" rel="noopener noreferrer">Kontakta</a>`);
