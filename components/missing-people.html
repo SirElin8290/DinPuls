@@ -18,3 +18,92 @@
     <a href="https://www.missingpeople.se/efterlysningar/" target="_blank" rel="noopener noreferrer">Alla efterlysningar hos Missing People <i data-lucide="arrow-up-right"></i></a>
   </div>
 </section>
+
+<style>
+  /* Ett lugnt och genomarbetat tomläge när inga aktuella efterlysningar finns. */
+  .missing-people-empty{
+    position:relative;
+    isolation:isolate;
+    min-height:168px;
+    justify-content:flex-start;
+    overflow:hidden;
+    padding:28px 34px;
+    color:#426050;
+    background:
+      radial-gradient(circle at 90% 18%,rgba(32,156,75,.13),transparent 28%),
+      linear-gradient(135deg,#f8fcf9 0%,#f1f8f3 54%,#f8fbff 100%);
+    border:1px solid #cfe5d6;
+    border-radius:16px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+  }
+  .missing-people-empty::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    right:34px;
+    top:50%;
+    width:92px;
+    height:92px;
+    transform:translateY(-50%);
+    border:1px solid rgba(32,156,75,.14);
+    border-radius:50%;
+    box-shadow:0 0 0 18px rgba(32,156,75,.045),0 0 0 36px rgba(32,156,75,.025);
+  }
+  .missing-people-empty>svg{
+    width:44px;
+    height:44px;
+    padding:10px;
+    color:#17793b;
+    background:#e4f5e9;
+    border:1px solid #bfe2c9;
+    border-radius:50%;
+    box-shadow:0 6px 18px rgba(23,121,59,.10);
+  }
+  .missing-people-empty span{
+    max-width:620px;
+    gap:7px;
+  }
+  .missing-people-empty strong{
+    color:#173c27;
+    font-size:16px;
+    line-height:1.3;
+  }
+  .missing-people-empty small{
+    max-width:560px;
+    color:#587064;
+    font-size:12px;
+    line-height:1.6;
+  }
+  [data-theme="dark"] .missing-people-empty{
+    color:#b7d4c1;
+    background:
+      radial-gradient(circle at 90% 18%,rgba(68,190,108,.13),transparent 28%),
+      linear-gradient(135deg,#10271b,#102336 100%);
+    border-color:#315d40;
+  }
+  [data-theme="dark"] .missing-people-empty>svg{
+    color:#76d895;
+    background:#173d25;
+    border-color:#315d40;
+  }
+  [data-theme="dark"] .missing-people-empty strong{color:#e2f4e8}
+  [data-theme="dark"] .missing-people-empty small{color:#b7c9be}
+  @media(max-width:760px){
+    .missing-people-empty{
+      min-height:150px;
+      padding:23px 20px;
+      align-items:flex-start;
+    }
+    .missing-people-empty::before{
+      right:-18px;
+      width:76px;
+      height:76px;
+    }
+    .missing-people-empty>svg{
+      width:40px;
+      height:40px;
+    }
+    .missing-people-empty strong{font-size:14px}
+    .missing-people-empty small{font-size:11px}
+  }
+</style>
