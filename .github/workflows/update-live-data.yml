@@ -19,7 +19,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
@@ -29,23 +29,51 @@ jobs:
         with:
           python-version: "3.12"
 
-
       - name: Hämta vägtrafik
         env:
           TRAFIKVERKET_API_KEY: ${{ secrets.TRAFIKVERKET_API_KEY }}
         run: python scripts/update_road_traffic.py
 
+      - name: Verifiera färsk trafikdata
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path = Path("data/road-traffic.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          generated = datetime.fromisoformat(str(data.get("generatedAt", "")).replace("Z", "+00:00")).astimezone(timezone.utc)
+          age = (datetime.now(timezone.utc) - generated).total_seconds()
+          if age < 0 or age > 300:
+              raise SystemExit(f"road-traffic.json är inte färsk: {age:.0f} sekunder gammal")
+          if data.get("active") is not True:
+              raise SystemExit("road-traffic.json är inte markerad som aktiv")
+          municipalities = data.get("municipalities")
+          if not isinstance(municipalities, dict) or not municipalities:
+              raise SystemExit("road-traffic.json saknar kommunflöden")
+          print(f"Verifierad trafikdata: {len(municipalities)} kommuner, {age:.0f} sekunder gammal")
+          PY
+
       - name: Publicera vägtrafik
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/road-traffic.json
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then
+            echo "Ingen trafikförändring att publicera."
+            exit 0
+          fi
           git commit -m "Uppdatera vägtrafik"
-          for attempt in 1 2 3; do
-            git pull --rebase && git push && exit 0
+          for attempt in 1 2 3 4; do
+            echo "Publiceringsförsök $attempt av 4"
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "Vägtrafiken publicerad."
+              exit 0
+            fi
             git rebase --abort 2>/dev/null || true
-            sleep $((attempt * 3))
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 3))
           done
-          echo "Kunde inte publicera vägtrafiken efter tre försök" >&2
+          echo "Kunde inte publicera vägtrafiken efter fyra försök" >&2
           exit 1
