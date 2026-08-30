@@ -1,10 +1,27 @@
 const healthState = window.DinPulsMunicipalityState;
 let healthMunicipality = healthState.getInitial();
 let healthData;
+let healthPrivateData;
 
 const escapeHealth = window.DinPulsSecurity.escapeHtml;
 const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
 const safeHealthIcon = window.DinPulsSecurity.safeIconName;
+
+const DEFAULT_CATEGORY_ORDER = [
+  "Vårdcentral & läkare",
+  "Akut & jour",
+  "Tandvård",
+  "Rehabilitering & fysioterapi",
+  "Kiropraktor, naprapat & osteopat",
+  "Massage & kroppsterapi",
+  "Medicinsk fotvård",
+  "Optik & syn",
+  "Psykisk hälsa & samtalsstöd",
+  "Barnmorska & kvinnohälsa",
+  "Vaccination",
+  "Företagshälsa & specialist",
+  "Övrig vård & hälsa"
+];
 
 function regionDetails(county) {
   return county === "Värmlands län"
@@ -12,27 +29,98 @@ function regionDetails(county) {
     : { name: "1177 Västra Götaland", url: "https://www.1177.se/Vastra-Gotaland/" };
 }
 
+function inferHealthCategory(provider) {
+  if (provider.category) return provider.category;
+  const text = [provider.name, provider.description].join(" ").toLocaleLowerCase("sv-SE");
+  if (/jour|akut/.test(text)) return "Akut & jour";
+  if (/tand|folktand/.test(text)) return "Tandvård";
+  if (/fysioter|sjukgym|rehab|arbetster/.test(text)) return "Rehabilitering & fysioterapi";
+  if (/kiroprakt|naprapat|osteopat/.test(text)) return "Kiropraktor, naprapat & osteopat";
+  if (/massage|massör|kroppsterapi|fascia/.test(text)) return "Massage & kroppsterapi";
+  if (/fotvård|fotterap/.test(text)) return "Medicinsk fotvård";
+  if (/optik|synundersök|glasögon|kontaktlins/.test(text)) return "Optik & syn";
+  if (/psykolog|psykoter|samtal|beteendevet/.test(text)) return "Psykisk hälsa & samtalsstöd";
+  if (/barnmorsk|kvinnohälsa|gravid|preventiv/.test(text)) return "Barnmorska & kvinnohälsa";
+  if (/vaccin/.test(text)) return "Vaccination";
+  if (/företagshälsa|arbetsmedicin|ortoped/.test(text)) return "Företagshälsa & specialist";
+  if (/vårdcentral|läkare|primärvård/.test(text)) return "Vårdcentral & läkare";
+  return "Övrig vård & hälsa";
+}
+
+function healthPhoneHref(phone) {
+  const value = String(phone || "").trim();
+  if (!value) return "";
+  const cleaned = value.replace(/[^0-9+]/g, "");
+  return cleaned ? `tel:${cleaned}` : "";
+}
+
+function renderProviderCard(provider) {
+  const website = provider.url ? safeHealthUrl(provider.url) : "";
+  const phoneHref = healthPhoneHref(provider.phone);
+  const href = website || phoneHref;
+  const tag = href ? "a" : "article";
+  const linkAttributes = website
+    ? ` href="${escapeHealth(website)}" target="_blank" rel="noopener noreferrer"`
+    : phoneHref
+      ? ` href="${escapeHealth(phoneHref)}"`
+      : "";
+  const actionLabel = website ? "Öppna webbplats" : phoneHref ? "Ring" : "Kontaktuppgifter";
+  const actionIcon = website ? "external-link" : phoneHref ? "phone" : "map-pin";
+  const contact = [provider.phone, provider.address].filter(Boolean).map(value => `<span>${escapeHealth(value)}</span>`).join("");
+  return `
+    <${tag} class="health-category-card${href ? "" : " health-contact-only"}"${linkAttributes} aria-label="${escapeHealth(actionLabel)} för ${escapeHealth(provider.name)}">
+      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(safeHealthIcon(provider.icon || "heart-pulse"))}"></i></span>
+      <span>
+        <strong>${escapeHealth(provider.name)}</strong>
+        <small>${escapeHealth(provider.description || "Vård- och hälsotjänst")}</small>
+        ${contact ? `<span class="health-contact-lines">${contact}</span>` : ""}
+        <em>${escapeHealth(actionLabel)} · ${escapeHealth(provider.sourceType || "Verifierad verksamhet")}</em>
+      </span>
+      <i data-lucide="${actionIcon}"></i>
+    </${tag}>`;
+}
+
 function renderHealthPage() {
   const municipalityData = healthData?.municipalities?.[healthMunicipality];
   if (!municipalityData) return;
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
-  const providers = (healthData.providers || []).filter(provider =>
-    provider.municipality === healthMunicipality &&
-    [provider.name, provider.description, provider.sourceType].join(" ").toLocaleLowerCase("sv-SE").includes(query)
-  ).sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
+  const providers = [...(healthData.providers || []), ...(healthPrivateData?.providers || [])]
+    .map(provider => ({ ...provider, category: inferHealthCategory(provider) }))
+    .filter(provider =>
+      provider.municipality === healthMunicipality &&
+      [provider.name, provider.description, provider.sourceType, provider.category, provider.address, provider.phone]
+        .join(" ")
+        .toLocaleLowerCase("sv-SE")
+        .includes(query)
+    )
+    .sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
+
+  const categoryOrder = healthPrivateData?.categoryOrder || DEFAULT_CATEGORY_ORDER;
+  const categories = [...new Set(providers.map(provider => provider.category))]
+    .sort((first, second) => {
+      const firstIndex = categoryOrder.indexOf(first);
+      const secondIndex = categoryOrder.indexOf(second);
+      if (firstIndex === -1 && secondIndex === -1) return first.localeCompare(second, "sv-SE");
+      if (firstIndex === -1) return 1;
+      if (secondIndex === -1) return -1;
+      return firstIndex - secondIndex;
+    });
+
   const region = regionDetails(municipalityData.county);
   document.querySelectorAll("[data-health-municipality]").forEach(element => { element.textContent = healthMunicipality; });
   document.querySelector("#health-county").textContent = municipalityData.county;
   document.querySelector("#health-region-name").textContent = region.name;
   document.querySelector("#health-region-link").href = region.url;
   document.querySelector("#health-1177-link").href = healthData.officialCareUrl;
-  document.querySelector("#health-result-count").textContent = `${providers.length} mottagningar`;
-  document.querySelector("#health-category-grid").innerHTML = providers.map(provider => `
-    <a class="health-category-card" href="${escapeHealth(safeHealthUrl(provider.url))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna ${escapeHealth(provider.name)} hos ${escapeHealth(provider.sourceType)}">
-      <span class="portal-card-icon health"><i data-lucide="${escapeHealth(safeHealthIcon(provider.icon))}"></i></span>
-      <span><strong>${escapeHealth(provider.name)}</strong><small>${escapeHealth(provider.description)}</small><em>Direktlänk · ${escapeHealth(provider.sourceType)}</em></span>
-      <i data-lucide="external-link"></i>
-    </a>`).join("");
+  document.querySelector("#health-result-count").textContent = `${providers.length} verksamheter`;
+  document.querySelector("#health-category-grid").innerHTML = categories.map(category => {
+    const items = providers.filter(provider => provider.category === category);
+    return `
+      <section class="health-directory-group">
+        <div class="health-directory-group-heading"><h3>${escapeHealth(category)}</h3><span>${items.length}</span></div>
+        <div class="health-category-grid">${items.map(renderProviderCard).join("")}</div>
+      </section>`;
+  }).join("");
   document.querySelector("#health-empty").hidden = providers.length > 0;
   document.querySelector("#health-category-grid").hidden = providers.length === 0;
   document.title = `Vård och hälsa i ${healthMunicipality} – DinPuls`;
@@ -48,9 +136,14 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const response = await fetch("data/health.json", { cache: "no-cache" });
-  if (!response.ok) throw new Error(`Vårddata kunde inte laddas (${response.status})`);
-  healthData = await response.json();
+  const [officialResponse, privateResponse] = await Promise.all([
+    fetch("data/health.json", { cache: "no-cache" }),
+    fetch("data/health-private.json", { cache: "no-cache" })
+  ]);
+  if (!officialResponse.ok) throw new Error(`Vårddata kunde inte laddas (${officialResponse.status})`);
+  healthData = await officialResponse.json();
+  healthPrivateData = privateResponse.ok ? await privateResponse.json() : { providers: [], categoryOrder: DEFAULT_CATEGORY_ORDER };
+  if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
   const select = document.querySelector("#health-municipality");
   healthState.populateSelect(select, healthMunicipality);
   select.addEventListener("change", () => {
