@@ -1,58 +1,102 @@
 {
-  "version": "1.0.0",
-  "generatedAt": "2026-08-30T09:29:40+00:00",
-  "source": "Officiella flygplatstidtabeller",
-  "realtime": false,
+  "version": "1.1.0",
+  "generatedAt": "2026-08-30T09:39:52+00:00",
+  "source": "Officiella flygplatskällor",
   "regional": true,
+  "liveAirports": [
+    "KSD",
+    "THN"
+  ],
+  "scheduleAirports": [
+    "HFS",
+    "TYF"
+  ],
+  "audienceRules": {
+    "Värmland": [
+      "KSD",
+      "HFS",
+      "TYF"
+    ],
+    "Dalsland": [
+      "KSD",
+      "THN"
+    ]
+  },
   "airports": [
     {
       "id": "KSD",
       "name": "Karlstad Airport",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
+      "audiences": [
+        "Värmland",
+        "Dalsland"
+      ],
+      "live": true,
+      "sourceUrl": "https://www.ksdarprt.se/",
+      "scheduleUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
     },
     {
       "id": "HFS",
       "name": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
+      "live": false,
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "id": "TYF",
       "name": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
+      "live": false,
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
+    },
+    {
+      "id": "THN",
+      "name": "Göteborg Stallbacka Airport",
+      "audiences": [
+        "Dalsland"
+      ],
+      "live": true,
+      "sourceUrl": "https://gsairport.se/infor-resan/reseinformation/",
+      "scheduleUrl": "https://vastflyg.se/avgangstider/"
     }
+  ],
+  "sourceErrors": [
+    "Stallbacka: Stallbackas avgångsblock kunde inte hittas"
   ],
   "departures": [
     {
       "mode": "flight",
+      "airportId": "KSD",
       "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-08-30T13:45:00+02:00",
-      "realtime": "2026-08-30T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
+      "audiences": [
+        "Värmland",
+        "Dalsland"
+      ],
+      "direction": "Köpenhamn",
       "line": "OJ610",
-      "operator": "Sola Air",
+      "operator": "FLY SOLA AIR",
       "scheduled": "2026-08-30T16:30:00+02:00",
       "realtime": "2026-08-30T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": true,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
+      "sourceUrl": "https://www.ksdarprt.se/"
     },
     {
       "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON51",
       "operator": "Jonair",
@@ -60,27 +104,44 @@
       "realtime": "2026-08-31T06:05:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "KSD",
       "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
+      "audiences": [
+        "Värmland",
+        "Dalsland"
+      ],
+      "direction": "Köpenhamn",
       "line": "OJ600",
-      "operator": "Sola Air",
+      "operator": "FLY SOLA AIR",
       "scheduled": "2026-08-31T06:15:00+02:00",
       "realtime": "2026-08-31T06:15:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": true,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
+      "sourceUrl": "https://www.ksdarprt.se/"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON51",
       "operator": "Jonair",
@@ -88,41 +149,21 @@
       "realtime": "2026-08-31T06:40:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-08-31T13:45:00+02:00",
-      "realtime": "2026-08-31T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ610",
-      "operator": "Sola Air",
-      "scheduled": "2026-08-31T16:30:00+02:00",
-      "realtime": "2026-08-31T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON53",
       "operator": "Jonair",
@@ -130,13 +171,21 @@
       "realtime": "2026-08-31T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON53",
       "operator": "Jonair",
@@ -144,13 +193,21 @@
       "realtime": "2026-08-31T17:00:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON51",
       "operator": "Jonair",
@@ -158,27 +215,21 @@
       "realtime": "2026-09-01T06:05:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ600",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-01T06:15:00+02:00",
-      "realtime": "2026-09-01T06:15:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON51",
       "operator": "Jonair",
@@ -186,55 +237,21 @@
       "realtime": "2026-09-01T06:40:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-01T13:45:00+02:00",
-      "realtime": "2026-09-01T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ610",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-01T16:30:00+02:00",
-      "realtime": "2026-09-01T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Palma de Mallorca",
-      "line": "",
-      "operator": "Sunclass Airlines",
-      "scheduled": "2026-09-01T16:30:00+02:00",
-      "realtime": "2026-09-01T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON53",
       "operator": "Jonair",
@@ -242,13 +259,21 @@
       "realtime": "2026-09-01T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON53",
       "operator": "Jonair",
@@ -256,13 +281,21 @@
       "realtime": "2026-09-01T17:00:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON51",
       "operator": "Jonair",
@@ -270,27 +303,21 @@
       "realtime": "2026-09-02T06:05:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ600",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-02T06:15:00+02:00",
-      "realtime": "2026-09-02T06:15:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON51",
       "operator": "Jonair",
@@ -298,41 +325,21 @@
       "realtime": "2026-09-02T06:40:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-02T13:45:00+02:00",
-      "realtime": "2026-09-02T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ610",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-02T16:30:00+02:00",
-      "realtime": "2026-09-02T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON53",
       "operator": "Jonair",
@@ -340,13 +347,21 @@
       "realtime": "2026-09-02T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON53",
       "operator": "Jonair",
@@ -354,13 +369,21 @@
       "realtime": "2026-09-02T17:00:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON51",
       "operator": "Jonair",
@@ -368,27 +391,21 @@
       "realtime": "2026-09-03T06:05:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ600",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-03T06:15:00+02:00",
-      "realtime": "2026-09-03T06:15:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON51",
       "operator": "Jonair",
@@ -396,41 +413,21 @@
       "realtime": "2026-09-03T06:40:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-03T13:45:00+02:00",
-      "realtime": "2026-09-03T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ610",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-03T16:30:00+02:00",
-      "realtime": "2026-09-03T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON53",
       "operator": "Jonair",
@@ -438,13 +435,21 @@
       "realtime": "2026-09-03T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON53",
       "operator": "Jonair",
@@ -452,13 +457,21 @@
       "realtime": "2026-09-03T17:00:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON51",
       "operator": "Jonair",
@@ -466,27 +479,21 @@
       "realtime": "2026-09-04T06:05:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ600",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-04T06:15:00+02:00",
-      "realtime": "2026-09-04T06:15:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON51",
       "operator": "Jonair",
@@ -494,41 +501,21 @@
       "realtime": "2026-09-04T06:40:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     },
     {
       "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Stockholm Arlanda",
-      "line": "",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-04T13:45:00+02:00",
-      "realtime": "2026-09-04T13:45:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
-      "airport": "Karlstad Airport",
-      "direction": "Köpenhamn Kastrup",
-      "line": "OJ610",
-      "operator": "Sola Air",
-      "scheduled": "2026-09-04T16:30:00+02:00",
-      "realtime": "2026-09-04T16:30:00+02:00",
-      "delayMinutes": 0,
-      "isRealtime": false,
-      "canceled": false,
-      "platform": "",
-      "sourceUrl": "https://www.ksdarprt.se/resmal/tidtabeller/"
-    },
-    {
-      "mode": "flight",
+      "airportId": "TYF",
       "airport": "Torsby flygplats",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda via Hagfors",
       "line": "JON53",
       "operator": "Jonair",
@@ -536,13 +523,21 @@
       "realtime": "2026-09-04T16:30:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://torsby.se/torsbyflygplats/torsbyflygplats/tidtabell.4.5ab966ab193901545fff61a.html"
     },
     {
       "mode": "flight",
+      "airportId": "HFS",
       "airport": "Hagfors Airport",
+      "audiences": [
+        "Värmland"
+      ],
       "direction": "Stockholm Arlanda",
       "line": "JON53",
       "operator": "Jonair",
@@ -550,7 +545,11 @@
       "realtime": "2026-09-04T17:00:00+02:00",
       "delayMinutes": 0,
       "isRealtime": false,
+      "liveSource": false,
+      "statusText": "",
+      "departed": false,
       "canceled": false,
+      "stale": false,
       "platform": "",
       "sourceUrl": "https://www.hagfors.se/undersidor/trafik-och-infrastruktur/hagfors-airport.html"
     }
