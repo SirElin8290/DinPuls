@@ -9,7 +9,7 @@ on:
       - ".github/workflows/update-flights.yml"
       - "scripts/update_flights.py"
   schedule:
-    - cron: "11 */6 * * *"
+    - cron: "8,23,38,53 * * * *"
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
@@ -33,7 +33,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Bygg regional flygtidtabell
+      - name: Installera HTML-tolkning
+        run: python -m pip install --disable-pip-version-check beautifulsoup4
+
+      - name: Hämta aktuella flygavgångar
         run: python scripts/update_flights.py
 
       - name: Verifiera flygdata
@@ -48,9 +51,15 @@ jobs:
           age = (datetime.now(timezone.utc) - generated).total_seconds()
           assert 0 <= age <= 300, f'Flygdata är inte färsk: {age:.0f} sekunder'
           assert data.get('regional') is True
-          assert len(data.get('airports', [])) == 3
+          airports = {item.get('id') for item in data.get('airports', [])}
+          assert airports == {'KSD', 'HFS', 'TYF', 'THN'}, f'Fel flygplatser: {airports}'
+          assert data.get('audienceRules', {}).get('Värmland') == ['KSD', 'HFS', 'TYF']
+          assert data.get('audienceRules', {}).get('Dalsland') == ['KSD', 'THN']
           assert isinstance(data.get('departures'), list)
-          print(f"Verifierade {len(data['departures'])} flygavgångar från tre flygplatser")
+          assert data.get('version') == '1.1.0'
+          print(f"Verifierade {len(data['departures'])} flygavgångar från fyra flygplatser")
+          if data.get('sourceErrors'):
+              print('Källvarningar:', ' | '.join(data['sourceErrors']))
           PY
 
       - name: Publicera flygavgångar
