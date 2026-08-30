@@ -1,0 +1,115 @@
+/* DinPuls permanent säsongstema – styrs av data-season på <html>. */
+html[data-season]{
+  --season-accent:var(--blue700,#0a57c7);
+  --season-accent-2:var(--blue600,#0b69f0);
+  --season-soft:#eaf3ff;
+  --season-surface:#ffffff;
+  --season-bg:#f5f7fb;
+  --season-header-start:#082653;
+  --season-header-end:#0a57c7;
+  --season-glow:rgba(64,153,255,.35);
+}
+
+html[data-season="spring"]{
+  --season-accent:#3f7f55;
+  --season-accent-2:#78a85d;
+  --season-soft:#edf5e9;
+  --season-surface:#fffefa;
+  --season-bg:#f4f8f1;
+  --season-header-start:#173f50;
+  --season-header-end:#3f7f55;
+  --season-glow:rgba(170,213,121,.30);
+}
+
+html[data-season="summer"]{
+  --season-accent:#0a57c7;
+  --season-accent-2:#0b69f0;
+  --season-soft:#eaf3ff;
+  --season-surface:#ffffff;
+  --season-bg:#f5f7fb;
+  --season-header-start:#082653;
+  --season-header-end:#0a57c7;
+  --season-glow:rgba(64,153,255,.35);
+}
+
+html[data-season="autumn"]{
+  --season-accent:#a34d2d;
+  --season-accent-2:#c27a28;
+  --season-soft:#f7eadc;
+  --season-surface:#fffdf9;
+  --season-bg:#f5f1eb;
+  --season-header-start:#102a3c;
+  --season-header-end:#28584f;
+  --season-glow:rgba(196,112,46,.30);
+}
+
+html[data-season="winter"]{
+  --season-accent:#367ca3;
+  --season-accent-2:#72a9c3;
+  --season-soft:#eaf4f8;
+  --season-surface:#fbfdff;
+  --season-bg:#f1f6f9;
+  --season-header-start:#102b46;
+  --season-header-end:#356d86;
+  --season-glow:rgba(191,226,239,.28);
+}
+
+html[data-season] body{background:var(--season-bg);}
+html[data-season] .site-header{
+  background:
+    radial-gradient(circle at 15% 0%,var(--season-glow),transparent 32%),
+    linear-gradient(135deg,var(--season-header-start),var(--season-header-end));
+}
+html[data-season] .card,
+html[data-season] .quick-strip,
+html[data-season] .service-grid a,
+html[data-season] footer{background-color:var(--season-surface);}
+html[data-season] .card h2,
+html[data-season] .card-link,
+html[data-season] .heading>a,
+html[data-season] .center,
+html[data-season] footer nav a{color:var(--season-accent);}
+html[data-season] .main-nav a:hover,
+html[data-season] .main-nav a.active{color:var(--season-accent);border-color:var(--season-accent);}
+html[data-season] .section-kicker{color:var(--season-accent);}
+html[data-season] .seasonal-theme-badge{
+  position:relative;
+  isolation:isolate;
+  border-color:color-mix(in srgb,var(--season-accent-2) 45%,white);
+  background:color-mix(in srgb,var(--season-header-start) 72%,transparent);
+}
+html[data-season] .seasonal-theme-badge svg{color:#fff;}
+
+/* Diskreta säsongsdetaljer i headern – dekorativa och klickfria. */
+html[data-season] .site-header::after{
+  position:absolute;
+  right:18px;
+  bottom:5px;
+  z-index:0;
+  font-size:30px;
+  letter-spacing:7px;
+  opacity:.22;
+  pointer-events:none;
+  filter:saturate(.9);
+}
+html[data-season="spring"] .site-header::after{content:"❧  ❀  ❧";}
+html[data-season="summer"] .site-header::after{content:"☀";font-size:34px;opacity:.16;}
+html[data-season="autumn"] .site-header::after{content:"🍂  🍁  🍂";}
+html[data-season="winter"] .site-header::after{content:"❄  ❅  ❄";}
+html[data-season] .header-inner,
+html[data-season] .notification-panel{position:relative;z-index:1;}
+
+html[data-season="autumn"] .weather-compact svg{color:#e5a44a;}
+html[data-season="winter"] .weather-compact svg{color:#cdebf5;}
+html[data-season="spring"] .weather-compact svg{color:#b8d875;}
+
+/* Mörkt läge behåller sin kontrast; säsongen används främst som accent. */
+html[data-theme="dark"][data-season] body{--season-surface:#0e2035;--season-bg:#081827;}
+
+@media(max-width:760px){
+  html[data-season] .site-header::after{right:8px;bottom:4px;font-size:20px;letter-spacing:3px;opacity:.16;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-season] *{transition-duration:0s!important;animation-duration:0s!important;}
+}
