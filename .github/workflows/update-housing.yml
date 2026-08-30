@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "scripts/update_housing.py"
+      - "scripts/update_housing_sunne.py"
       - "scripts/test_update_housing.py"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
@@ -34,7 +35,27 @@ jobs:
           python-version: "3.12"
 
       - name: Hämta aktuella bostäder
-        run: python scripts/update_housing.py
+        run: |
+          python scripts/update_housing.py
+          python scripts/update_housing_sunne.py
+
+      - name: Verifiera Sunne-data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          sunne = data.get('municipalities', {}).get('Sunne', {})
+          assert sunne.get('total', 0) > 0, 'Sunne saknar bostadsobjekt efter hämtning'
+          assert len(sunne.get('listings', [])) == sunne.get('total'), 'Sunnes total matchar inte listan'
+          assert sunne.get('stale') is False, 'Sunne-data är markerad stale'
+          assert not sunne.get('errors'), f"Sunne har källfel: {sunne.get('errors')}"
+          for item in sunne.get('listings', []):
+              assert item.get('address'), 'Sunne-objekt saknar adress'
+              assert item.get('url'), 'Sunne-objekt saknar länk'
+              assert item.get('provider') == 'Sunne Fastighets AB'
+          print(f"Verifierat: Sunne har {sunne['total']} aktuella bostadsobjekt")
+          PY
 
       - name: Testa bostadslogiken
         run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py
