@@ -2064,12 +2064,12 @@ async function initializeTransport() {
   await Promise.all([loadTransport(), loadFlights()]);
   clearInterval(transportRefreshTimer);
   transportRefreshTimer = window.setInterval(() => {
-    if (!document.hidden) loadTransport();
+    if (!document.hidden) Promise.all([loadTransport(), loadFlights()]);
   }, 15 * 60 * 1000);
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) loadTransport();
+    if (!document.hidden) Promise.all([loadTransport(), loadFlights()]);
   });
-  window.addEventListener("online", loadTransport);
+  window.addEventListener("online", () => Promise.all([loadTransport(), loadFlights()]));
 }
 
 async function loadTransport() {
@@ -2146,8 +2146,13 @@ function renderTransport() {
   const localDepartures = (stop?.departures || [])
     .filter((item) => ["all", "bus", "train"].includes(activeTransportMode) && (activeTransportMode === "all" || item.mode === activeTransportMode))
     .filter((item) => isDemo || new Date(item.realtime || item.scheduled).getTime() >= now - 30000);
+  const flightAudience = ["Åmål", "Bengtsfors", "Mellerud", "Dals-Ed", "Färgelanda"].includes(municipality)
+    ? "Dalsland"
+    : "Värmland";
   const regionalFlights = (flightData?.departures || [])
     .filter((item) => ["all", "flight"].includes(activeTransportMode))
+    .filter((item) => !Array.isArray(item.audiences) || item.audiences.includes(flightAudience))
+    .filter((item) => !item.departed)
     .filter((item) => new Date(item.realtime || item.scheduled).getTime() >= now - 30000);
   const departures = [...localDepartures, ...regionalFlights]
     .sort((a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled))
@@ -2162,7 +2167,9 @@ function renderTransport() {
     const modeLabel = activeTransportMode === "train" ? "tåg" : activeTransportMode === "bus" ? "bussar" : activeTransportMode === "flight" ? "flyg" : "avgångar";
     empty.querySelector("strong").textContent = `Inga kommande ${modeLabel} hittades`;
     empty.querySelector("span").textContent = activeTransportMode === "flight"
-      ? "Nästa publicerade flyg från Karlstad, Hagfors och Torsby visas automatiskt."
+      ? flightAudience === "Dalsland"
+        ? "Nästa publicerade flyg från Karlstad och Göteborg Stallbacka visas automatiskt."
+        : "Nästa publicerade flyg från Karlstad, Hagfors och Torsby visas automatiskt."
       : stop?.error
         ? "Trafiklab kunde inte nås. Senast sparade tider visas när de fortfarande gäller."
         : "Nästa tidtabellsfönster kontrolleras automatiskt.";
@@ -2193,7 +2200,10 @@ function renderDeparture(item, isDemo = false) {
   const actual = new Date(realtime);
   const delayMinutes = Number(item.delayMinutes) || 0;
   const modeIcon = item.mode === "flight" ? "plane" : item.mode === "train" ? "train-front" : "bus-front";
-  const status = isDemo
+  const flightStatus = item.mode === "flight" && item.statusText
+    ? `<span class="departure-status ${item.canceled ? "canceled" : delayMinutes > 0 ? "delayed" : "realtime"}">${escapeHtml(item.statusText)}</span>`
+    : "";
+  const status = flightStatus || (isDemo
     ? '<span class="departure-status planned">Demodata</span>'
     : item.canceled
     ? '<span class="departure-status canceled">Inställd</span>'
@@ -2203,7 +2213,7 @@ function renderDeparture(item, isDemo = false) {
         ? '<span class="departure-status planned">Senast verifierad</span>'
       : item.isRealtime
         ? '<span class="departure-status realtime">Realtid</span>'
-        : '<span class="departure-status planned">Tidtabell</span>';
+        : '<span class="departure-status planned">Tidtabell</span>');
   const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
   const scheduledTime = Number.isNaN(scheduled.getTime()) ? "" : scheduled.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
   const lineLabel = item.mode === "flight" ? (item.airport || item.line || item.operator || "Flyg") : (item.line || item.operator || "–");
@@ -2223,11 +2233,15 @@ function updateTransportSource(isDemo, stop, departures) {
   const note = document.querySelector("#transport-source-note");
   const link = document.querySelector("#transport-source-link");
   if (activeTransportMode === "flight") {
-    if (note) note.innerHTML = '<i data-lucide="plane"></i>Regionala avgångar från Karlstad, Hagfors och Torsby · officiella flygplatstidtabeller';
+    const municipality = DinPulsMunicipality.getName();
+    const dalsland = ["Åmål", "Bengtsfors", "Mellerud", "Dals-Ed", "Färgelanda"].includes(municipality);
+    if (note) note.innerHTML = dalsland
+      ? '<i data-lucide="plane"></i>Karlstad + Göteborg Stallbacka · officiella live- och tidtabellskällor'
+      : '<i data-lucide="plane"></i>Karlstad + Hagfors + Torsby · officiella live- och tidtabellskällor';
     if (link) {
       link.hidden = false;
-      link.href = "https://www.ksdarprt.se/resmal/tidtabeller/";
-      link.textContent = "Officiella flygtidtabeller";
+      link.href = dalsland ? "https://gsairport.se/infor-resan/reseinformation/" : "https://www.ksdarprt.se/";
+      link.textContent = "Öppna officiell flyginformation";
     }
     return;
   }
