@@ -976,6 +976,7 @@ function initializeFirstVisitMunicipality() {
     .sort((left, right) => left.name.localeCompare(right.name, "sv-SE"));
   let selectedMunicipality = null;
   let activeIndex = -1;
+  document.querySelector('link[href*="first-visit.css"]')?.remove();
 
   const matchingMunicipalities = () => {
     const query = search.value.trim().toLocaleLowerCase("sv-SE");
@@ -989,7 +990,7 @@ function initializeFirstVisitMunicipality() {
     if (activeIndex >= matches.length) activeIndex = matches.length - 1;
     options.innerHTML = matches.length
       ? matches.map((item, index) => `
-        <button type="button" id="municipality-onboarding-option-${index}" data-first-municipality="${escapeAttribute(item.name)}" role="option" aria-selected="${item.name === selectedMunicipality}"${index === activeIndex ? ' class="is-active"' : ""}>
+        <button type="button" id="municipality-onboarding-option-${index}" data-onboarding-municipality="${escapeAttribute(item.name)}" role="option" aria-selected="${item.name === selectedMunicipality}"${index === activeIndex ? ' class="is-active"' : ""}>
           <i data-lucide="map-pin"></i><span>${escapeHtml(item.name)}</span><small>${escapeHtml(item.county || "")}</small>
         </button>`).join("")
       : '<p class="municipality-onboarding-empty">Ingen publicerad kommun matchar sökningen.</p>';
@@ -1068,9 +1069,9 @@ function initializeFirstVisitMunicipality() {
       }
     });
     options.addEventListener("click", async (event) => {
-      const button = event.target.closest("[data-first-municipality]");
+      const button = event.target.closest("[data-onboarding-municipality]");
       if (!button) return;
-      selectMunicipality(button.dataset.firstMunicipality);
+      selectMunicipality(button.dataset.onboardingMunicipality);
     });
     continueButton.addEventListener("click", async () => {
       if (!selectedMunicipality || continueButton.disabled) return;
