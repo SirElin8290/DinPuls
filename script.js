@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.24.7";
+const DINPULS_VERSION = "0.24.8";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -2154,9 +2154,14 @@ function renderTransport() {
     .filter((item) => !Array.isArray(item.audiences) || item.audiences.includes(flightAudience))
     .filter((item) => !item.departed)
     .filter((item) => new Date(item.realtime || item.scheduled).getTime() >= now - 30000);
-  const departures = [...localDepartures, ...regionalFlights]
-    .sort((a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled))
-    .slice(0, 12);
+  const byDepartureTime = (a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled);
+  const sortedLocal = [...localDepartures].sort(byDepartureTime);
+  const sortedFlights = [...regionalFlights].sort(byDepartureTime);
+  const departures = activeTransportMode === "all"
+    ? [...sortedLocal, ...sortedFlights.slice(0, 2)].sort(byDepartureTime).slice(0, 6)
+    : activeTransportMode === "flight"
+      ? sortedFlights.slice(0, 6)
+      : sortedLocal.slice(0, 8);
 
   if (selectWrap) selectWrap.hidden = activeTransportMode === "flight";
   board.innerHTML = departures.map((item) => renderDeparture(item, isDemo && item.mode !== "flight")).join("");
@@ -2199,7 +2204,11 @@ function renderDeparture(item, isDemo = false) {
   const scheduled = new Date(item.scheduled);
   const actual = new Date(realtime);
   const delayMinutes = Number(item.delayMinutes) || 0;
-  const modeIcon = item.mode === "flight" ? "plane" : item.mode === "train" ? "train-front" : "bus-front";
+  const modeIconMarkup = item.mode === "flight"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5c1.5-1.5 1.5-3 1-4s-2.5-.5-4 1L13 8 4.8 6.2 3 8l6.5 3.5L6 15H3l-1 1 4 2 2 4 1-1v-3l3.5-3.5L16 21z"/></svg>'
+    : item.mode === "train"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16M8 19l-2 3m10-3 2 3M8 7h.01M16 7h.01"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16M8 7h.01M16 7h.01M6 19v2m12-2v2M8 15h.01M16 15h.01"/></svg>';
   const flightStatus = item.mode === "flight" && item.statusText
     ? `<span class="departure-status ${item.canceled ? "canceled" : delayMinutes > 0 ? "delayed" : "realtime"}">${escapeHtml(item.statusText)}</span>`
     : "";
@@ -2215,16 +2224,24 @@ function renderDeparture(item, isDemo = false) {
         ? '<span class="departure-status realtime">Realtid</span>'
         : '<span class="departure-status planned">Tidtabell</span>');
   const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
+  const departureDayKey = Number.isNaN(actual.getTime()) ? "" : stockholmDateKey(actual);
+  const todayKey = stockholmDateKey(new Date());
+  const tomorrowKey = stockholmDateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));
+  const dayLabel = !departureDayKey || departureDayKey === todayKey
+    ? ""
+    : departureDayKey === tomorrowKey
+      ? "i morgon"
+      : actual.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, weekday: "short" }).replace('.', '');
   const scheduledTime = Number.isNaN(scheduled.getTime()) ? "" : scheduled.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
   const lineLabel = item.mode === "flight" ? (item.airport || item.line || item.operator || "Flyg") : (item.line || item.operator || "–");
   const detail = item.mode === "flight"
     ? [item.line, item.operator].filter(Boolean).join(" · ")
     : `${item.operator || ""}${item.platform ? ` · Läge ${item.platform}` : ""}`;
   return `<article class="departure-row${item.canceled ? " is-canceled" : ""}">
-    <span class="departure-mode ${item.mode}"><i data-lucide="${modeIcon}"></i></span>
+    <span class="departure-mode ${item.mode}">${modeIconMarkup}</span>
     <span class="departure-line">${escapeHtml(lineLabel)}</span>
     <span class="departure-destination"><strong>${escapeHtml(item.direction || "Destination saknas")}</strong><small>${escapeHtml(detail)}</small></span>
-    <span class="departure-time"><strong>${time}</strong>${delayMinutes > 0 && scheduledTime ? `<small>${scheduledTime}</small>` : ""}</span>
+    <span class="departure-time"><strong>${time}</strong>${dayLabel ? `<small class="departure-day">${escapeHtml(dayLabel)}</small>` : ""}${delayMinutes > 0 && scheduledTime ? `<small class="departure-scheduled">${scheduledTime}</small>` : ""}</span>
     ${status}
   </article>`;
 }
