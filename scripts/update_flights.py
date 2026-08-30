@@ -69,7 +69,7 @@ def fetch_html(url: str) -> str:
     request = Request(
         url,
         headers={
-            "User-Agent": "DinPuls/1.0 (+https://dinpuls.se; public flight information)",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
             "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.7",
         },
     )
