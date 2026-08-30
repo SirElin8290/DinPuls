@@ -64,7 +64,8 @@ replacement = r'''def parse_stallbacka_live(now: datetime) -> list[dict]:
 
 
 def generate_karlstad_fallback'''
-new_text, count = re.subn(r'def parse_stallbacka_live\(now: datetime\) -> list\[dict\]:.*?\n\ndef generate_karlstad_fallback', replacement, text, count=1, flags=re.S)
+pattern = r'def parse_stallbacka_live\(now: datetime\) -> list\[dict\]:.*?\n\ndef generate_karlstad_fallback'
+new_text, count = re.subn(pattern, lambda _: replacement, text, count=1, flags=re.S)
 if count != 1:
     raise SystemExit("Kunde inte hitta Stallbacka-parsern")
 path.write_text(new_text, encoding="utf-8")
