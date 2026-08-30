@@ -21,17 +21,20 @@ const bundle = await build({
 });
 
 const worker = new Miniflare({
-  modules: true,
-  script: bundle.outputFiles[0].text,
-  compatibilityDate: "2026-08-21",
-  compatibilityFlags: ["nodejs_compat"],
-  bindings: {
-    ADMIN_USERNAME: "localadmin",
-    ADMIN_PASSWORD: "LocalAdmin-Test-2026",
-    PORTAL_PASSWORD_PEPPER: "LocalPepper-Test-2026"
-  },
-  d1Databases: { DB: "banner-test-db" },
-  r2Buckets: ["AD_ASSETS"]
+  workers: [{
+    name: "dinpuls-banner-test",
+    modules: true,
+    script: bundle.outputFiles[0].text,
+    compatibilityDate: "2026-08-21",
+    compatibilityFlags: ["nodejs_compat"],
+    bindings: {
+      ADMIN_USERNAME: "localadmin",
+      ADMIN_PASSWORD: "LocalAdmin-Test-2026",
+      PORTAL_PASSWORD_PEPPER: "LocalPepper-Test-2026"
+    },
+    d1Databases: { DB: "banner-test-db" },
+    r2Buckets: ["AD_ASSETS"]
+  }]
 });
 
 const endpoint = "http://dinpuls.test";
