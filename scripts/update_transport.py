@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -21,6 +22,8 @@ MAX_DEPARTURES = 40
 LOOKAHEAD_OFFSETS_HOURS = (4, 12)
 DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
+FETCH_ATTEMPTS = 3
+FETCH_TIMEOUT_SECONDS = 25
 
 
 def load_json(path: Path, fallback):
@@ -77,17 +80,33 @@ def future_departures(stop, now):
 def fetch(api_key, area_id, query_time=None):
     time_path = f"/{quote(query_time)}" if query_time else ""
     url = f"{API_URL}/{quote(area_id)}{time_path}?key={quote(api_key)}"
-    request = Request(url, headers={"User-Agent": "DinPuls/transport"})
-    try:
-        with urlopen(request, timeout=25) as response:
-            payload = json.load(response)
-    except HTTPError as error:
-        raise RuntimeError(f"Trafiklab svarade med HTTP {error.code}") from None
-    except URLError as error:
-        raise RuntimeError(f"Trafiklab kunde inte nås: {error.reason}") from None
-    if not isinstance(payload.get("departures"), list):
-        raise RuntimeError("Trafiklab-svaret saknar departures")
-    return payload
+    last_error = "okänt fel"
+
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        request = Request(url, headers={"User-Agent": "DinPuls/transport"})
+        try:
+            with urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
+                payload = json.load(response)
+            if not isinstance(payload.get("departures"), list):
+                raise RuntimeError("Trafiklab-svaret saknar departures")
+            return payload
+        except HTTPError as error:
+            last_error = f"Trafiklab svarade med HTTP {error.code}"
+            if 400 <= error.code < 500 and error.code not in {408, 429}:
+                break
+        except URLError as error:
+            last_error = f"Trafiklab kunde inte nås: {error.reason}"
+        except TimeoutError:
+            last_error = "Tidsgränsen mot Trafiklab överskreds"
+        except (json.JSONDecodeError, RuntimeError) as error:
+            last_error = str(error)
+
+        if attempt < FETCH_ATTEMPTS:
+            delay = attempt * 2
+            print(f"{area_id}: hämtningsförsök {attempt} misslyckades ({last_error}). Försöker igen om {delay} s.")
+            time.sleep(delay)
+
+    raise RuntimeError(f"{last_error} efter {FETCH_ATTEMPTS} försök")
 
 
 def future_query_times(now, offsets=LOOKAHEAD_OFFSETS_HOURS):
@@ -192,15 +211,11 @@ def find_next_departures(api_key, area_id, now, previous_stop, current_payload):
                 break
         next_search = (
             now + timedelta(
-                hours=DEEP_SEARCH_INTERVAL_HOURS
-                if future_departures_found
-                else 0,
+                hours=DEEP_SEARCH_INTERVAL_HOURS if future_departures_found else 0,
                 minutes=0 if future_departures_found else EMPTY_RETRY_MINUTES,
             )
         ).isoformat(timespec="minutes")
 
-    # Tidigare data är en reserv, inte ett parallellt tidtabellsfönster.
-    # Så snart API:t ger färska avgångar ska de gamla reservavgångarna bort.
     departures = merge_departures(now, current if current else retained)
     retained_only = bool(departures) and all(item.get("stale") for item in departures)
     return departures, lookup_time, retained_only, next_search, payloads
@@ -277,7 +292,7 @@ def main():
         return 1
 
     output = {
-        "version": "0.21.0",
+        "version": "0.21.1",
         "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Trafiklab",
         "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
