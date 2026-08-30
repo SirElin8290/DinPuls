@@ -1,0 +1,72 @@
+.health-directory-groups {
+  display: grid;
+  gap: 28px;
+}
+
+.health-directory-group {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.health-directory-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.health-directory-group-heading h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.health-directory-group-heading span {
+  min-width: 30px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.health-directory-group .health-category-grid {
+  margin: 0;
+}
+
+.health-contact-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  opacity: 0.78;
+}
+
+.health-contact-lines span {
+  display: inline-block;
+}
+
+.health-contact-only {
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .health-directory-groups {
+    gap: 22px;
+  }
+
+  .health-directory-group-heading {
+    align-items: flex-start;
+  }
+
+  .health-contact-lines {
+    display: grid;
+    gap: 2px;
+  }
+}
