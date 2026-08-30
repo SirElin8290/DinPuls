@@ -23,7 +23,11 @@ const bundle = await build({
 const worker = new Miniflare({
   workers: [{
     name: "dinpuls-banner-test",
-    config: {},
+    config: {
+      type: "worker",
+      name: "dinpuls-banner-test",
+      compatibilityDate: "2026-08-21"
+    },
     modules: true,
     script: bundle.outputFiles[0].text,
     compatibilityDate: "2026-08-21",
