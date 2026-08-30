@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Engångsfix: kör workflowet och ersätt Stallbacka-parsern i flygmotorn.
 from pathlib import Path
 import re
 
@@ -9,8 +10,6 @@ replacement = r'''def parse_stallbacka_live(now: datetime) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     lines = [re.sub(r"\s+", " ", line).strip() for line in soup.get_text("\n", strip=True).splitlines() if line.strip()]
 
-    # Flygplatsens WordPress-sida kan servera svenska eller engelska rubriker
-    # beroende på cache/edge. Leta därför efter båda och acceptera whitespace.
     departure_labels = {"avgångar", "departures"}
     arrival_labels = {"ankomster", "arrivals"}
     start = None
@@ -25,8 +24,6 @@ replacement = r'''def parse_stallbacka_live(now: datetime) -> list[dict]:
             break
 
     if start is None or end is None or end <= start:
-        # Reserv: sök rubrikblocket i hela sidtexten. Detta fångar varianter där
-        # rubrik och innehåll hamnat i samma DOM-nod.
         page_text = "\n".join(lines)
         match = re.search(r"(?:^|\n)(?:Avgångar|Departures)\s*\n(.*?)(?:\n)(?:Ankomster|Arrivals)(?:\n|$)", page_text, flags=re.I | re.S)
         if not match:
@@ -61,8 +58,6 @@ replacement = r'''def parse_stallbacka_live(now: datetime) -> list[dict]:
         )
         i += consumed
     if not items:
-        # Skriv en diagnostik som går att förstå i workflow-loggen utan att
-        # exponera hela sidans HTML.
         candidates = [line for line in lines if re.fullmatch(r"\d{1,2}[:.]\d{2}", line) or re.fullmatch(r"[A-Z0-9]{2,4}\s?\d{2,4}", line, flags=re.I)]
         raise RuntimeError(f"Stallbackas liveavgångar kunde inte tolkas; kandidater={candidates[:12]}")
     return items
