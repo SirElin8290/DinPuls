@@ -1,0 +1,42 @@
+name: Applicera säsongsmotor på alla sidor
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-season-cache-bump.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Höj cacheversion för säsongsmotorn
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          changed = []
+          for path in Path('.').glob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              updated = re.sub(r'dp-core\.js\?version=[^"\']+', 'dp-core.js?version=0.26.0', text)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(path.name)
+          print('Uppdaterade:', ', '.join(changed) if changed else 'inga')
+          PY
+      - name: Spara
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add '*.html'
+          if ! git diff --cached --quiet; then
+            git commit -m "Aktivera säsongsmotorn på alla sidor"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
