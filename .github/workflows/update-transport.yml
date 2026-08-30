@@ -23,7 +23,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
@@ -39,6 +39,30 @@ jobs:
         env:
           TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
         run: python scripts/update_transport.py
+
+      - name: Verifiera färsk transportdata
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path = Path("data/transport.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          generated = datetime.fromisoformat(str(data.get("generatedAt", "")).replace("Z", "+00:00"))
+          age = datetime.now(timezone.utc) - generated.astimezone(timezone.utc)
+          municipalities = data.get("municipalities") or {}
+          stops = sum(len((entry or {}).get("stops") or []) for entry in municipalities.values())
+
+          if age.total_seconds() < 0 or age.total_seconds() > 300:
+              raise SystemExit(f"Transportfilen är inte färsk: {age.total_seconds():.0f} sekunder gammal")
+          if data.get("source") != "Trafiklab":
+              raise SystemExit("Transportfilen saknar Trafiklab som källa")
+          if not municipalities or stops == 0:
+              raise SystemExit("Transportfilen saknar kommuner eller hållplatser")
+
+          print(f"Transportdata verifierad: {len(municipalities)} kommuner, {stops} hållplatser, {age.total_seconds():.0f} sekunder gammal")
+          PY
 
       - name: Spara ny trafikdata konfliktsäkert
         shell: bash
