@@ -35,3 +35,5 @@ jobs:
         run: |
           for file in *.js scripts/*.js; do node --check "$file"; done
           for test in scripts/test_*.js; do node "$test"; done
+          npm ci
+          npm run test:banner
