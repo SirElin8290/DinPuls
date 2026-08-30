@@ -2,9 +2,9 @@
 <html lang="sv" data-portal="health">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Vårdcentraler, 1177, apotek och lokala hälsoverksamheter nära dig.">
+  <meta name="description" content="Vårdcentraler, tandvård, rehabilitering, massage, kiropraktik, optik, fotvård och andra lokala hälsoverksamheter nära dig.">
   <title>Vård och hälsa – DinPuls</title>
-  <link rel="stylesheet" href="styles.css?version=0.24.3"><link rel="stylesheet" href="portal-pages.css?version=0.24.3">
+  <link rel="stylesheet" href="styles.css?version=0.24.3"><link rel="stylesheet" href="portal-pages.css?version=0.24.3"><link rel="stylesheet" href="health-page.css?version=0.26.0">
   <link rel="icon" href="favicon.ico?version=0.23.4" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.4">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.4">
@@ -14,7 +14,7 @@
 <body>
   <header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg?version=0.23.4" alt="DinPuls" width="620" height="150"></a><a href="index.html">← Till startsidan</a></header>
   <main class="portal-main">
-    <section class="portal-hero health-page"><span class="section-kicker">DinPuls Vård och hälsa</span><h1>Rätt kontakt i <span data-health-municipality>Åmål</span></h1><p>Akut hjälp, offentlig vård, apotek och lokala behandlingsverksamheter samlade på ett ställe.</p></section>
+    <section class="portal-hero health-page"><span class="section-kicker">DinPuls Vård och hälsa</span><h1>Rätt kontakt i <span data-health-municipality>Åmål</span></h1><p>Akut hjälp, offentlig vård och lokala vård- och hälsotjänster samlade på ett ställe.</p></section>
 
     <section class="health-urgent" aria-label="Viktiga vårdnummer">
       <a class="health-urgent-card emergency" href="tel:112"><i data-lucide="siren"></i><span><small>Fara för liv</small><strong>Ring 112</strong><em>Akut nödsituation</em></span></a>
@@ -28,7 +28,7 @@
     <section class="portal-content health-content">
       <div class="portal-toolbar health-toolbar">
         <label>Kommun<select id="health-municipality"></select></label>
-        <label>Sök vård eller behandling<input id="health-search" type="search" placeholder="Exempel: apotek, fysioterapi eller massage"></label>
+        <label>Sök vård eller behandling<input id="health-search" type="search" placeholder="Exempel: tandvård, kiropraktor, fotvård eller massage"></label>
       </div>
       <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="2"></div>
 
@@ -43,16 +43,16 @@
       <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="3"></div>
 
       <section id="lokal-halsa" class="health-section">
-        <div class="portal-result-heading"><div><span class="section-kicker">Lokala direktkontakter</span><h2>Vård och rehabilitering</h2></div><span id="health-result-count"></span></div>
-        <p class="health-directory-note">Varje kort öppnar mottagningens aktuella sida hos 1177 eller vårdgivaren. DinPuls ger inga medicinska råd och rekommenderar eller rangordnar inte verksamheter.</p>
-        <div id="health-category-grid" class="health-category-grid"></div>
-        <div id="health-empty" class="portal-empty" hidden>Ingen verifierad mottagning matchar sökningen ännu.</div>
+        <div class="portal-result-heading"><div><span class="section-kicker">Lokala direktkontakter</span><h2>Vård, behandling och hälsa</h2></div><span id="health-result-count"></span></div>
+        <p class="health-directory-note">Egen webbplats används när den har kunnat verifieras. Om webbplats saknas visas tillgängliga kontaktuppgifter. DinPuls ger inga medicinska råd och rekommenderar eller rangordnar inte verksamheter.</p>
+        <div id="health-category-grid" class="health-directory-groups"></div>
+        <div id="health-empty" class="portal-empty" hidden>Ingen verifierad verksamhet matchar sökningen ännu.</div>
       </section>
 
       <div class="strategic-ad-slot" data-strategic-ad="vard" data-ad-position="4"></div>
     </section>
   </main>
-  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.24.0"></script><script src="portal-ads.js?version=0.25.1"></script><script src="municipality-engine.js?version=0.24.6"></script><script src="health-page.js?version=0.24.6"></script>
+  <script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js?version=0.24.0"></script><script src="portal-ads.js?version=0.25.1"></script><script src="municipality-engine.js?version=0.24.6"></script><script src="health-page.js?version=0.26.0"></script>
   <script src="privacy-controls.js?version=0.25.2"></script>
 </body>
 </html>
