@@ -2504,8 +2504,8 @@ function renderJobs() {
 
   const updated = document.querySelector("#jobs-updated");
   if (updated) {
-    const timestamp = new Date(municipalityData.updatedAt || jobsData.generatedAt);
-    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Uppdaterad ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;
+    const timestamp = new Date(municipalityData.checkedAt || jobsData.generatedAt || municipalityData.updatedAt);
+    updated.innerHTML = `<i data-lucide="refresh-cw"></i>${Number.isNaN(timestamp.getTime()) ? "Annonser kontrollerade" : `Kontrollerad ${timestamp.toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}`;
   }
 
   const sourceLink = document.querySelector("#jobs-source-link");
