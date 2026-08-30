@@ -1,0 +1,79 @@
+name: Kompaktera transportmodulen
+
+on:
+  push:
+    paths:
+      - '.github/workflows/compact-transport-home.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Begränsa avgångar och gör trafikslag tydliga
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          script = Path('script.js')
+          text = script.read_text(encoding='utf-8')
+          text = text.replace('const DINPULS_VERSION = "0.24.7";', 'const DINPULS_VERSION = "0.24.8";')
+
+          old = '''  const departures = [...localDepartures, ...regionalFlights]\n    .sort((a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled))\n    .slice(0, 12);'''
+          new = '''  const byDepartureTime = (a, b) => new Date(a.realtime || a.scheduled) - new Date(b.realtime || b.scheduled);\n  const sortedLocal = [...localDepartures].sort(byDepartureTime);\n  const sortedFlights = [...regionalFlights].sort(byDepartureTime);\n  const departures = activeTransportMode === "all"\n    ? [...sortedLocal, ...sortedFlights.slice(0, 2)].sort(byDepartureTime).slice(0, 6)\n    : activeTransportMode === "flight"\n      ? sortedFlights.slice(0, 6)\n      : sortedLocal.slice(0, 8);'''
+          if old not in text:
+              raise SystemExit('Kunde inte hitta avgångsbegränsningen i script.js')
+          text = text.replace(old, new, 1)
+
+          old = '  const modeIcon = item.mode === "flight" ? "plane" : item.mode === "train" ? "train-front" : "bus-front";'
+          new = '''  const modeIconMarkup = item.mode === "flight"\n    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5c1.5-1.5 1.5-3 1-4s-2.5-.5-4 1L13 8 4.8 6.2 3 8l6.5 3.5L6 15H3l-1 1 4 2 2 4 1-1v-3l3.5-3.5L16 21z"/></svg>'\n    : item.mode === "train"\n      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16M8 19l-2 3m10-3 2 3M8 7h.01M16 7h.01"/></svg>'\n      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16M8 7h.01M16 7h.01M6 19v2m12-2v2M8 15h.01M16 15h.01"/></svg>';'''
+          if old not in text:
+              raise SystemExit('Kunde inte hitta modeIcon i script.js')
+          text = text.replace(old, new, 1)
+
+          old = '  const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });'
+          new = '''  const time = Number.isNaN(actual.getTime()) ? "--:--" : actual.toLocaleTimeString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" });\n  const departureDayKey = Number.isNaN(actual.getTime()) ? "" : stockholmDateKey(actual);\n  const todayKey = stockholmDateKey(new Date());\n  const tomorrowKey = stockholmDateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));\n  const dayLabel = !departureDayKey || departureDayKey === todayKey\n    ? ""\n    : departureDayKey === tomorrowKey\n      ? "i morgon"\n      : actual.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, weekday: "short" }).replace('.', '');'''
+          if old not in text:
+              raise SystemExit('Kunde inte hitta tidsformatet i script.js')
+          text = text.replace(old, new, 1)
+
+          old = '<span class="departure-mode ${item.mode}"><i data-lucide="${modeIcon}"></i></span>'
+          new = '<span class="departure-mode ${item.mode}">${modeIconMarkup}</span>'
+          if old not in text:
+              raise SystemExit('Kunde inte hitta ikonmarkup i script.js')
+          text = text.replace(old, new, 1)
+
+          old = '<span class="departure-time"><strong>${time}</strong>${delayMinutes > 0 && scheduledTime ? `<small>${scheduledTime}</small>` : ""}</span>'
+          new = '<span class="departure-time"><strong>${time}</strong>${dayLabel ? `<small class="departure-day">${escapeHtml(dayLabel)}</small>` : ""}${delayMinutes > 0 && scheduledTime ? `<small class="departure-scheduled">${scheduledTime}</small>` : ""}</span>'
+          if old not in text:
+              raise SystemExit('Kunde inte hitta tidsmarkup i script.js')
+          text = text.replace(old, new, 1)
+          script.write_text(text, encoding='utf-8')
+
+          styles = Path('styles.css')
+          css = styles.read_text(encoding='utf-8')
+          css = css.replace('.departure-time small{text-decoration:line-through;color:var(--muted,#748092)}', '.departure-time small{color:var(--muted,#748092)}.departure-time .departure-day{text-decoration:none;font-size:.68rem}.departure-time .departure-scheduled{text-decoration:line-through}')
+          styles.write_text(css, encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html = html.replace('data-version="0.24.7"', 'data-version="0.24.8"', 1)
+          html = html.replace('name="dinpuls-version" content="0.24.7"', 'name="dinpuls-version" content="0.24.8"', 1)
+          html = html.replace('styles.css?version=0.24.5', 'styles.css?version=0.24.6', 1)
+          html = html.replace('script.js?version=0.25.6', 'script.js?version=0.25.7', 1)
+          index.write_text(html, encoding='utf-8')
+          PY
+      - name: Spara ändringen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add script.js styles.css index.html
+          git commit -m "Gör avgångsmodulen kompakt och tydlig"
+          git pull --rebase origin main
+          git push origin HEAD:main
