@@ -29,3 +29,4 @@ if ".missing-people-older{" not in component:
 COMPONENT.write_text(component, encoding="utf-8")
 
 print("Missing People: 1-årsgräns och kompakt äldre-visning applicerad")
+# workflow-trigger: 2026-08-30
