@@ -7,6 +7,7 @@ import html
 import json
 import re
 import sys
+import time
 import unicodedata
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -22,6 +23,8 @@ USER_AGENT = "DinPuls/0.24 (+https://dinpuls.se/)"
 MUNICIPALITY_CONFIG = json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]
 MUNICIPALITIES = [item["name"] for item in MUNICIPALITY_CONFIG]
 MAX_AGE_MINUTES = 90
+FETCH_ATTEMPTS = 3
+FETCH_TIMEOUT_SECONDS = 30
 
 NEIGHBORS = {item["name"]: item.get("neighbors", []) for item in MUNICIPALITY_CONFIG}
 PLACE_ALIASES = {item["name"]: item.get("missingPeopleAliases", []) for item in MUNICIPALITY_CONFIG}
@@ -145,16 +148,28 @@ def distribute(items: list[dict]) -> dict:
 
 
 def fetch_page() -> str:
-    request = Request(SOURCE_URL, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"})
-    try:
-        with urlopen(request, timeout=30) as response:
-            return response.read().decode("utf-8", errors="replace")
-    except HTTPError as error:
-        raise RuntimeError(f"HTTP {error.code} från Missing People") from None
-    except URLError as error:
-        raise RuntimeError(f"Kunde inte nå Missing People: {error.reason}") from None
-    except TimeoutError:
-        raise RuntimeError("Tidsgränsen mot Missing People överskreds") from None
+    last_error = "okänt fel"
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        request = Request(SOURCE_URL, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"})
+        try:
+            with urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
+                return response.read().decode("utf-8", errors="replace")
+        except HTTPError as error:
+            last_error = f"HTTP {error.code} från Missing People"
+            # 4xx-fel (utom 408/429) är normalt inte tillfälliga och ska inte hamras.
+            if 400 <= error.code < 500 and error.code not in {408, 429}:
+                break
+        except URLError as error:
+            last_error = f"Kunde inte nå Missing People: {error.reason}"
+        except TimeoutError:
+            last_error = "Tidsgränsen mot Missing People överskreds"
+
+        if attempt < FETCH_ATTEMPTS:
+            delay = attempt * 3
+            print(f"Hämtningsförsök {attempt} misslyckades ({last_error}). Försöker igen om {delay} s.")
+            time.sleep(delay)
+
+    raise RuntimeError(f"{last_error} efter {FETCH_ATTEMPTS} försök")
 
 
 def main() -> int:
