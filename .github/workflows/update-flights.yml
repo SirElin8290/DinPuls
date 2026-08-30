@@ -1,0 +1,75 @@
+name: Uppdatera flygavgångar
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/update-flights.yml"
+      - "scripts/update_flights.py"
+  schedule:
+    - cron: "11 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-flight-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bygg regional flygtidtabell
+        run: python scripts/update_flights.py
+
+      - name: Verifiera flygdata
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          p = Path('data/flights.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+          generated = datetime.fromisoformat(data['generatedAt'].replace('Z', '+00:00')).astimezone(timezone.utc)
+          age = (datetime.now(timezone.utc) - generated).total_seconds()
+          assert 0 <= age <= 300, f'Flygdata är inte färsk: {age:.0f} sekunder'
+          assert data.get('regional') is True
+          assert len(data.get('airports', [])) == 3
+          assert isinstance(data.get('departures'), list)
+          print(f"Verifierade {len(data['departures'])} flygavgångar från tre flygplatser")
+          PY
+
+      - name: Publicera flygavgångar
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/flights.json
+          if git diff --cached --quiet; then
+            echo "Flygfilen är redan aktuell."
+            exit 0
+          fi
+          git commit -m "Uppdatera flygavgångar"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 2))
+          done
+          exit 1
