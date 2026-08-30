@@ -100,7 +100,7 @@
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
     if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
-    if (contract.status === "Aktivt") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
+    if (contract.status === "Aktivt") return `${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
     return "";
   }
 
@@ -126,8 +126,16 @@
   }
 
   async function changeStatus(id, status) {
-    await api(`/portal/admin/contracts/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) });
+    const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) });
     await refreshContracts();
+    if (status === "Aktivt" && result.onboarding === "sent") alert("Avtalet är aktivt och välkomstmejlet har skickats.");
+    if (status === "Aktivt" && result.onboarding === "email-not-configured") alert("Avtalet är aktivt, men mejlet kunde inte skickas. Kontrollera e-postinställningarna och välj sedan Skicka ny aktiveringslänk.");
+  }
+
+  async function resendActivation(id) {
+    const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/activation`, { method: "POST" });
+    await refreshContracts();
+    alert(result.message || "En ny aktiveringslänk har skickats.");
   }
 
   function openContract(id) {
@@ -140,6 +148,7 @@
     dialog.innerHTML = `<button class="dialog-x" type="button">×</button><span class="eyebrow">ANNONSAVTAL v${escapeHtml(contract.contractVersion)}</span><h2>${escapeHtml(contract.company)}</h2><p class="muted">${escapeHtml(contract.id)} · ${escapeHtml(contract.status)}</p><div class="contact-details"><div><small>Kommun</small><strong>${escapeHtml(contract.municipality)}</strong></div><div><small>Period</small><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></div><div><small>Månadspris</small><strong>${money(contract.monthlyTotal)}</strong></div><div><small>Årsvärde</small><strong>${money(contract.annualTotal)}</strong></div><div><small>Debitering</small><strong>${billingLabel}</strong></div><div><small>Förnyelse</small><strong>${renewalLabel}</strong></div><div><small>Signatur</small><strong>${contract.signatureRequired ? "Krävs" : "Krävs inte"}</strong></div><div><small>Kontakt</small><strong>${escapeHtml(contract.contact)}<br>${escapeHtml(contract.phone)}</strong></div><div><small>E-post</small><strong>${escapeHtml(contract.email)}</strong></div></div>${contract.valueNote ? `<p><b>Avtalsnotering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}<h3>Annonsplatser</h3><p>${(contract.placements || []).map(item => `<b>${escapeHtml(item.slotId)}</b> – ${escapeHtml(item.location)}`).join("<br>")}</p><div class="actions">${statusActions(contract)}</div>`;
     dialog.querySelector(".dialog-x").onclick = () => dialog.close();
     dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
+    dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
     dialog.showModal();
   }
 
@@ -236,7 +245,7 @@
     const annualPrice = Number(form.get("annualPrice"));
     const startDate = form.get("startDate");
     const billingType = form.get("billingType") || "paid";
-    const payload = { id: contractNumber(), contractVersion: CONTRACT_VERSION, company: form.get("company"), orgNo: form.get("orgNo"), contact: form.get("contact"), email: form.get("email"), phone: form.get("phone"), temporaryPassword: form.get("temporaryPassword"), municipality, placements, price: billingType === "complimentary" ? 0 : price, annualPrice, monthlyTotal: billingType === "complimentary" ? 0 : price * placements.length, annualTotal: billingType === "complimentary" ? 0 : annualPrice * placements.length, billingType, valueNote: form.get("valueNote"), renewalType: form.get("renewalType"), signatureRequired: form.get("signatureRequired") === "true", startDate, endDate: endDateFrom(startDate) };
+    const payload = { id: contractNumber(), contractVersion: CONTRACT_VERSION, company: form.get("company"), orgNo: form.get("orgNo"), contact: form.get("contact"), email: form.get("email"), phone: form.get("phone"), municipality, placements, price: billingType === "complimentary" ? 0 : price, annualPrice, monthlyTotal: billingType === "complimentary" ? 0 : price * placements.length, annualTotal: billingType === "complimentary" ? 0 : annualPrice * placements.length, billingType, valueNote: form.get("valueNote"), renewalType: form.get("renewalType"), signatureRequired: form.get("signatureRequired") === "true", startDate, endDate: endDateFrom(startDate) };
     try {
       await api("/portal/admin/contracts", { method: "POST", body: JSON.stringify(payload) });
       event.target.reset(); $("#placements").innerHTML = ""; $("#contractForm").hidden = true;

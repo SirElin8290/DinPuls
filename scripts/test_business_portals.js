@@ -5,6 +5,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const admin = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 const company = fs.readFileSync(path.join(root, "foretag/foretag.js"), "utf8");
+const account = fs.readFileSync(path.join(root, "foretag/konto.js"), "utf8");
 const worker = fs.readFileSync(path.join(root, "cloudflare/push-worker.js"), "utf8");
 const config = JSON.parse(fs.readFileSync(path.join(root, "data/business-config.json"), "utf8"));
 
@@ -24,6 +25,12 @@ assert(worker.includes('/portal/auth/admin') && worker.includes('/portal/auth/co
 assert(worker.includes('/portal/admin/contracts') && worker.includes('/portal/company/me'), "Rollseparerade portalvägar måste finnas");
 assert(worker.includes('billing_type') && worker.includes('signature_required') && worker.includes('renewal_type'), "Avtal måste stödja debitering, signaturval och förnyelse");
 assert(worker.includes('portalAuthVersion: "hmac-sha256-v1"'), "Worker-hälsan måste ange portalens autentiseringsversion");
+assert(worker.includes("portal_activation_tokens") && worker.includes("activate-account") && worker.includes("reset-password"), "Aktivering och återställning måste använda permanenta engångstoken i D1");
+assert(worker.includes("await sha256(token)") && !account.includes("RESEND_API_KEY") && !account.includes("PORTAL_PASSWORD_PEPPER"), "Token ska hash-lagras och inga hemligheter får finnas i frontend");
+assert(worker.includes("ACCOUNT_TOKEN_HOURS = 48") && worker.includes("used_at IS NULL"), "Kontolänkar ska gälla 48 timmar och vara engångslänkar");
+assert(worker.includes("RESEND_API_KEY") && worker.includes("PORTAL_EMAIL_FROM"), "Transaktionell e-post ska använda Cloudflare-miljövariabler/secrets");
+assert(!admin.includes("temporaryPassword") && !fs.readFileSync(path.join(root, "admin/index.html"), "utf8").includes("temporaryPassword"), "Admin ska inte tilldela företagslösenord");
+assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes('href="konto.html"') && account.includes('/portal/account/reset/request'), "Glömt lösenord ska använda det riktiga återställningsflödet");
 assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
 assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste visa kostnadsfria avtal korrekt");
 assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_banners"), "Bannerplanering måste lagras centralt i D1");

@@ -52,6 +52,13 @@ async function ensureDatabase(env) {
   if (!(userColumns.results || []).some(column => column.name === "password_iterations")) {
     await env.DB.prepare("ALTER TABLE business_users ADD COLUMN password_iterations INTEGER NOT NULL DEFAULT 10000").run();
   }
+  const existingUserColumns = new Set((userColumns.results || []).map(column => column.name));
+  for (const [name, definition] of [
+    ["activated_at", "TEXT"],
+    ["welcome_sent_at", "TEXT"]
+  ]) {
+    if (!existingUserColumns.has(name)) await env.DB.prepare(`ALTER TABLE business_users ADD COLUMN ${name} ${definition}`).run();
+  }
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_contracts (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_version TEXT NOT NULL, municipality TEXT NOT NULL, " +
@@ -83,6 +90,13 @@ async function ensureDatabase(env) {
     "attempt_key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, reset_at TEXT NOT NULL)"
   ).run();
   await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS portal_activation_tokens (" +
+    "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, token_hash TEXT NOT NULL UNIQUE, purpose TEXT NOT NULL, " +
+    "expires_at TEXT NOT NULL, used_at TEXT, created_at TEXT NOT NULL, " +
+    "FOREIGN KEY(company_user_id) REFERENCES business_users(id))"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS portal_tokens_user_purpose ON portal_activation_tokens (company_user_id, purpose, used_at, expires_at)").run();
+  await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_banners (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_id TEXT NOT NULL, slot_id TEXT NOT NULL, " +
     "object_key TEXT NOT NULL UNIQUE, file_name TEXT NOT NULL, content_type TEXT NOT NULL, file_size INTEGER NOT NULL, " +
@@ -102,6 +116,9 @@ const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
 const BILLING_TYPES = new Set(["paid", "complimentary"]);
 const RENEWAL_TYPES = new Set(["annual-review", "none"]);
 const SESSION_HOURS = 8;
+const ACCOUNT_TOKEN_HOURS = 48;
+const TOKEN_PURPOSES = new Set(["activate-account", "reset-password"]);
+const PUBLIC_PORTAL_URL = "https://dinpuls.se/foretag/konto.html";
 
 function bytesToHex(bytes) {
   return [...bytes].map(value => value.toString(16).padStart(2, "0")).join("");
@@ -137,6 +154,15 @@ function cleanText(value, maximum = 200) {
 
 function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
+}
+
+function validPassword(value) {
+  return typeof value === "string" && value.length >= 12 && value.length <= 200 &&
+    /[a-zåäö]/.test(value) && /[A-ZÅÄÖ]/.test(value) && /\d/.test(value);
+}
+
+function htmlEscape(value) {
+  return String(value || "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
 }
 
 function validDate(value) {
@@ -387,6 +413,105 @@ async function companyLogin(request, env) {
   return json(request, { ok: true, ...(await createSession(env, "company", user.id)) });
 }
 
+async function createAccountToken(env, companyUserId, purpose) {
+  if (!TOKEN_PURPOSES.has(purpose)) throw new Error("Ogiltigt tokenändamål");
+  const token = bytesToHex(crypto.getRandomValues(new Uint8Array(32)));
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + ACCOUNT_TOKEN_HOURS * 60 * 60 * 1000).toISOString();
+  await env.DB.prepare("UPDATE portal_activation_tokens SET used_at = ? WHERE company_user_id = ? AND purpose = ? AND used_at IS NULL")
+    .bind(now.toISOString(), companyUserId, purpose).run();
+  await env.DB.prepare("INSERT INTO portal_activation_tokens (id, company_user_id, token_hash, purpose, expires_at, used_at, created_at) VALUES (?, ?, ?, ?, ?, NULL, ?)")
+    .bind(crypto.randomUUID(), companyUserId, await sha256(token), purpose, expiresAt, now.toISOString()).run();
+  return { token, expiresAt };
+}
+
+function accountLink(token, purpose) {
+  return `${PUBLIC_PORTAL_URL}#token=${encodeURIComponent(token)}&purpose=${encodeURIComponent(purpose)}`;
+}
+
+async function sendAccountEmail(env, user, token, purpose) {
+  if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM) throw new Error("E-posttjänsten är inte konfigurerad.");
+  const activation = purpose === "activate-account";
+  const subject = activation ? "Välkommen till DinPuls – skapa ditt företagskonto" : "Återställ lösenordet till DinPuls företagsportal";
+  const title = activation ? "Välkommen till DinPuls" : "Återställ ditt lösenord";
+  const button = activation ? "Skapa ditt lösenord" : "Välj ett nytt lösenord";
+  const introduction = activation
+    ? `Avtalet för ${htmlEscape(user.company)} är nu aktiverat. I företagsportalen kan ni hantera banners och schemaläggning samt se statistik och avtalsinformation.`
+    : "Vi har fått en begäran om att återställa lösenordet till ert företagskonto.";
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: env.PORTAL_EMAIL_FROM,
+      to: [user.email],
+      subject,
+      html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>${title}</h1><p>Hej ${htmlEscape(user.contact || user.company)},</p><p>${introduction}</p><p style="margin:30px 0"><a href="${accountLink(token, purpose)}" style="background:#8d4d24;color:#fff;text-decoration:none;padding:14px 22px;border-radius:8px;font-weight:700">${button}</a></p><p>Länken gäller i 48 timmar och kan bara användas en gång.</p><p>Om ni behöver hjälp, kontakta DinPuls genom kontaktuppgifterna på dinpuls.se.</p></div>`,
+      text: `Hej ${user.contact || user.company},\n\n${activation ? `Avtalet för ${user.company} är nu aktiverat.` : "Vi har fått en begäran om lösenordsåterställning."}\n\n${button}: ${accountLink(token, purpose)}\n\nLänken gäller i 48 timmar och kan bara användas en gång.\n\nDinPuls`
+    })
+  });
+  if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
+}
+
+async function issueAndSendAccountToken(env, user, purpose) {
+  const created = await createAccountToken(env, user.id, purpose);
+  await sendAccountEmail(env, user, created.token, purpose);
+  return created;
+}
+
+async function verifyAccountToken(request, env) {
+  const body = await readBody(request);
+  const token = String(body?.token || "");
+  const purpose = cleanText(body?.purpose, 30);
+  if (!/^[0-9a-f]{64}$/i.test(token) || !TOKEN_PURPOSES.has(purpose)) return json(request, { ok: false, state: "invalid", error: "Länken är ogiltig." }, 400);
+  const row = await env.DB.prepare("SELECT t.expires_at, t.used_at, u.company FROM portal_activation_tokens t JOIN business_users u ON u.id = t.company_user_id WHERE t.token_hash = ? AND t.purpose = ?")
+    .bind(await sha256(token), purpose).first();
+  if (!row) return json(request, { ok: false, state: "invalid", error: "Länken är ogiltig." }, 404);
+  if (row.used_at) return json(request, { ok: false, state: "used", error: "Länken har redan använts." }, 409);
+  if (Date.parse(row.expires_at) <= Date.now()) return json(request, { ok: false, state: "expired", error: "Länken har gått ut." }, 410);
+  return json(request, { ok: true, state: "valid", company: row.company, expiresAt: row.expires_at, purpose });
+}
+
+async function completeAccountPassword(request, env, expectedPurpose = "") {
+  if (!env.PORTAL_PASSWORD_PEPPER) return json(request, { ok: false, error: "Företagsinloggningen är inte konfigurerad." }, 503);
+  const body = await readBody(request);
+  const token = String(body?.token || "");
+  const purpose = expectedPurpose || cleanText(body?.purpose, 30);
+  const password = String(body?.password || "");
+  const confirmation = String(body?.passwordConfirmation || "");
+  if (!/^[0-9a-f]{64}$/i.test(token) || !TOKEN_PURPOSES.has(purpose)) return json(request, { ok: false, state: "invalid", error: "Länken är ogiltig." }, 400);
+  if (password !== confirmation) return json(request, { ok: false, error: "Lösenorden är inte likadana." }, 400);
+  if (!validPassword(password)) return json(request, { ok: false, error: "Lösenordet måste ha minst 12 tecken samt innehålla stor bokstav, liten bokstav och siffra." }, 400);
+  const tokenHash = await sha256(token);
+  const row = await env.DB.prepare("SELECT id, company_user_id, expires_at, used_at FROM portal_activation_tokens WHERE token_hash = ? AND purpose = ?").bind(tokenHash, purpose).first();
+  if (!row) return json(request, { ok: false, state: "invalid", error: "Länken är ogiltig." }, 404);
+  if (row.used_at) return json(request, { ok: false, state: "used", error: "Länken har redan använts." }, 409);
+  if (Date.parse(row.expires_at) <= Date.now()) return json(request, { ok: false, state: "expired", error: "Länken har gått ut." }, 410);
+  const now = new Date().toISOString();
+  const consumed = await env.DB.prepare("UPDATE portal_activation_tokens SET used_at = ? WHERE id = ? AND used_at IS NULL AND expires_at > ?").bind(now, row.id, now).run();
+  if (!consumed.meta.changes) return json(request, { ok: false, state: "used", error: "Länken har redan använts eller gått ut." }, 409);
+  const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+  await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, password_iterations = 0, active = 1, activated_at = COALESCE(activated_at, ?), updated_at = ? WHERE id = ?")
+    .bind(salt, await hashPassword(password, salt, env.PORTAL_PASSWORD_PEPPER), now, now, row.company_user_id).run();
+  await env.DB.prepare("DELETE FROM portal_sessions WHERE role = 'company' AND subject_id = ?").bind(String(row.company_user_id)).run();
+  return json(request, { ok: true, state: "complete", message: purpose === "activate-account" ? "Kontot är aktiverat. Du kan nu logga in." : "Lösenordet är ändrat. Du kan nu logga in." });
+}
+
+async function requestPasswordReset(request, env) {
+  const body = await readBody(request);
+  const email = cleanText(body?.email, 254).toLowerCase();
+  const limit = await checkLoginLimit(request, env, email, "password-reset");
+  if (!limit.allowed) return json(request, { ok: true, message: "Om adressen finns skickas en återställningslänk." });
+  await recordLoginFailure(env, limit.key);
+  if (validEmail(email)) {
+    const user = await env.DB.prepare("SELECT id, email, company, contact FROM business_users WHERE email = ? AND active = 1").bind(email).first();
+    if (user) {
+      try { await issueAndSendAccountToken(env, user, "reset-password"); }
+      catch (error) { console.error("DinPuls lösenordsåterställning:", error); }
+    }
+  }
+  return json(request, { ok: true, message: "Om adressen finns skickas en återställningslänk." });
+}
+
 function contractFromRow(row) {
   return {
     id: row.id, contractVersion: row.contract_version, company: row.company, orgNo: row.org_no,
@@ -396,11 +521,12 @@ function contractFromRow(row) {
     endDate: row.end_date, includedChanges: Number(row.included_changes), usedChanges: Number(row.used_changes),
     billingType: row.billing_type || "paid", valueNote: row.value_note || "",
     renewalType: row.renewal_type || "annual-review", signatureRequired: Boolean(Number(row.signature_required)),
-    status: row.status, created: row.created_at, updated: row.updated_at
+    status: row.status, activatedAt: row.activated_at || null, welcomeSentAt: row.welcome_sent_at || null,
+    created: row.created_at, updated: row.updated_at
   };
 }
 
-const CONTRACT_SELECT = "SELECT c.*, u.company, u.org_no, u.contact, u.email, u.phone FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id";
+const CONTRACT_SELECT = "SELECT c.*, u.company, u.org_no, u.contact, u.email, u.phone, u.activated_at, u.welcome_sent_at FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id";
 
 async function listContracts(request, env) {
   if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
@@ -410,10 +536,8 @@ async function listContracts(request, env) {
 
 async function createContract(request, env) {
   if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
-  if (!env.PORTAL_PASSWORD_PEPPER) return json(request, { ok: false, error: "Företagsinloggningen är inte konfigurerad." }, 503);
   const body = await readBody(request);
   const email = cleanText(body.email, 254).toLowerCase();
-  const password = String(body.temporaryPassword || "");
   const company = cleanText(body.company), orgNo = cleanText(body.orgNo, 30), contact = cleanText(body.contact);
   const phone = cleanText(body.phone, 40), municipality = cleanText(body.municipality, 80);
   const billingType = cleanText(body.billingType, 30) || "paid";
@@ -424,20 +548,20 @@ async function createContract(request, env) {
     slotId: cleanText(item.slotId, 40), module: cleanText(item.module, 100), group: cleanText(item.group, 100),
     label: cleanText(item.label, 160), location: cleanText(item.location, 240), page: cleanText(item.page, 100)
   })) : [];
-  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || password.length < 12 || password.length > 200 || !validDate(body.startDate) || !validDate(body.endDate) || !BILLING_TYPES.has(billingType) || !RENEWAL_TYPES.has(renewalType)) {
-    return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter. Företagslösenordet måste ha minst 12 tecken." }, 400);
+  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !BILLING_TYPES.has(billingType) || !RENEWAL_TYPES.has(renewalType)) {
+    return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
   }
   const now = new Date().toISOString();
   let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();
   if (!user) {
     const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, password_iterations, company, org_no, contact, phone, municipality, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(email, salt, await hashPassword(password, salt, env.PORTAL_PASSWORD_PEPPER), 0, company, orgNo, contact, phone, municipality, now, now).run();
+    const unusableHash = await sha256(bytesToHex(crypto.getRandomValues(new Uint8Array(32))));
+    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, password_iterations, company, org_no, contact, phone, municipality, active, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, 0, ?, ?)")
+      .bind(email, salt, unusableHash, company, orgNo, contact, phone, municipality, now, now).run();
     user = { id: result.meta.last_row_id };
   } else {
-    const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-    await env.DB.prepare("UPDATE business_users SET password_salt = ?, password_hash = ?, password_iterations = ?, company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, active = 1, updated_at = ? WHERE id = ?")
-      .bind(salt, await hashPassword(password, salt, env.PORTAL_PASSWORD_PEPPER), 0, company, orgNo, contact, phone, municipality, now, user.id).run();
+    await env.DB.prepare("UPDATE business_users SET company = ?, org_no = ?, contact = ?, phone = ?, municipality = ?, updated_at = ? WHERE id = ?")
+      .bind(company, orgNo, contact, phone, municipality, now, user.id).run();
   }
   const id = cleanText(body.id, 40);
   if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
@@ -456,8 +580,41 @@ async function updateContractStatus(request, env, id) {
   const body = await readBody(request);
   const status = cleanText(body.status, 20);
   if (!PORTAL_STATUSES.has(status)) return json(request, { ok: false, error: "Ogiltig avtalsstatus." }, 400);
-  const result = await env.DB.prepare("UPDATE ad_contracts SET status = ?, updated_at = ? WHERE id = ?").bind(status, new Date().toISOString(), id).run();
-  return result.meta.changes ? json(request, { ok: true }) : json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  const contract = await env.DB.prepare("SELECT c.status, c.company_user_id, u.email, u.company, u.contact, u.activated_at, u.welcome_sent_at FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id WHERE c.id = ?").bind(id).first();
+  if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  const now = new Date().toISOString();
+  await env.DB.prepare("UPDATE ad_contracts SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
+  let onboarding = "unchanged";
+  if (contract.status !== "Aktivt" && status === "Aktivt" && !contract.activated_at && !contract.welcome_sent_at) {
+    const claim = await env.DB.prepare("UPDATE business_users SET welcome_sent_at = ?, updated_at = ? WHERE id = ? AND welcome_sent_at IS NULL AND activated_at IS NULL").bind(now, now, contract.company_user_id).run();
+    if (claim.meta.changes) {
+      try {
+        await issueAndSendAccountToken(env, { ...contract, id: contract.company_user_id }, "activate-account");
+        onboarding = "sent";
+      } catch (error) {
+        await env.DB.prepare("UPDATE business_users SET welcome_sent_at = NULL WHERE id = ? AND welcome_sent_at = ?").bind(contract.company_user_id, now).run();
+        console.error("DinPuls välkomstmejl:", error);
+        onboarding = "email-not-configured";
+      }
+    }
+  }
+  return json(request, { ok: true, onboarding });
+}
+
+async function resendActivation(request, env, contractId) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const contract = await env.DB.prepare("SELECT u.id, u.email, u.company, u.contact, u.activated_at FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id WHERE c.id = ?").bind(contractId).first();
+  if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  if (contract.activated_at) return json(request, { ok: false, error: "Företagskontot är redan aktiverat." }, 409);
+  try {
+    await issueAndSendAccountToken(env, contract, "activate-account");
+    const now = new Date().toISOString();
+    await env.DB.prepare("UPDATE business_users SET welcome_sent_at = ?, updated_at = ? WHERE id = ?").bind(now, now, contract.id).run();
+    return json(request, { ok: true, message: "En ny aktiveringslänk har skickats." });
+  } catch (error) {
+    console.error("DinPuls ny aktiveringslänk:", error);
+    return json(request, { ok: false, error: "Aktiveringsmejlet kunde inte skickas. Kontrollera e-postinställningarna." }, 502);
+  }
 }
 
 async function companyAccount(request, env) {
@@ -587,6 +744,7 @@ export default {
           database: "connected",
           vapidConfigured: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT),
           portalConfigured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD && env.PORTAL_PASSWORD_PEPPER),
+          portalEmailConfigured: Boolean(env.RESEND_API_KEY && env.PORTAL_EMAIL_FROM),
           portalAuthVersion: "hmac-sha256-v1"
         });
       }
@@ -599,10 +757,16 @@ export default {
       if (request.method === "POST" && url.pathname === "/portal/auth/admin") return adminLogin(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/company") return companyLogin(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/logout") return logoutPortal(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/account/token/verify") return verifyAccountToken(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/account/password") return completeAccountPassword(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/account/reset/request") return requestPasswordReset(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/account/reset/complete") return completeAccountPassword(request, env, "reset-password");
       if (request.method === "GET" && url.pathname === "/portal/admin/contracts") return listContracts(request, env);
       if (request.method === "POST" && url.pathname === "/portal/admin/contracts") return createContract(request, env);
       const contractMatch = /^\/portal\/admin\/contracts\/([^/]+)$/.exec(url.pathname);
       if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
+      const activationMatch = /^\/portal\/admin\/contracts\/([^/]+)\/activation$/.exec(url.pathname);
+      if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);

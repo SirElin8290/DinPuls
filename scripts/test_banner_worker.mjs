@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 
 const bundle = await build({
-  entryPoints: ["cloudflare/push-worker.js"],
+  stdin: {
+    contents: await readFile(new URL("../cloudflare/push-worker.js", import.meta.url), "utf8"),
+    loader: "js",
+    sourcefile: "cloudflare/push-worker.js"
+  },
   bundle: true,
   format: "esm",
   platform: "browser",
@@ -84,16 +90,45 @@ try {
     renewalType: "annual-review",
     signatureRequired: false,
     startDate: today,
-    endDate: nextYear,
-    temporaryPassword: companyPassword
+    endDate: nextYear
   }, admin.token), 201);
 
-  await responseJson(await jsonRequest(`/portal/admin/contracts/${contractId}`, "PATCH", { status: "Aktivt" }, admin.token), 200);
+  const activation = await responseJson(await jsonRequest(`/portal/admin/contracts/${contractId}`, "PATCH", { status: "Aktivt" }, admin.token), 200);
+  assert.equal(activation.onboarding, "email-not-configured");
+  const database = await worker.getD1Database("DB");
+  const user = await database.prepare("SELECT id, active FROM business_users WHERE email = ?").bind("banner-test@example.invalid").first();
+  assert.equal(Number(user.active), 0, "Nya konton ska inte vara aktiva innan lösenordet valts");
+  const tokenCount = await database.prepare("SELECT COUNT(*) AS count FROM portal_activation_tokens WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(user.id).first();
+  assert.equal(Number(tokenCount.count), 1, "Aktivering ska skapa exakt en aktiv token");
+  await jsonRequest(`/portal/admin/contracts/${contractId}`, "PATCH", { status: "Aktivt" }, admin.token);
+  const tokenCountAfterDuplicate = await database.prepare("SELECT COUNT(*) AS count FROM portal_activation_tokens WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(user.id).first();
+  assert.equal(Number(tokenCountAfterDuplicate.count), 1, "Dubbel statusuppdatering får inte skapa flera aktiveringstoken");
 
-  const company = await responseJson(await jsonRequest("/portal/auth/company", "POST", {
+  const activationToken = "a".repeat(64);
+  const activationHash = createHash("sha256").update(activationToken).digest("hex");
+  await database.prepare("UPDATE portal_activation_tokens SET token_hash = ? WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(activationHash, user.id).run();
+  await responseJson(await jsonRequest("/portal/account/token/verify", "POST", { token: activationToken, purpose: "activate-account" }), 200);
+  await responseJson(await jsonRequest("/portal/account/password", "POST", { token: activationToken, purpose: "activate-account", password: companyPassword, passwordConfirmation: companyPassword }), 200);
+  await responseJson(await jsonRequest("/portal/account/password", "POST", { token: activationToken, purpose: "activate-account", password: companyPassword, passwordConfirmation: companyPassword }), 409);
+  await responseJson(await jsonRequest("/portal/account/token/verify", "POST", { token: "f".repeat(64), purpose: "activate-account" }), 404);
+
+  let company = await responseJson(await jsonRequest("/portal/auth/company", "POST", {
     email: "banner-test@example.invalid",
     password: companyPassword
   }), 200);
+
+  const expiredToken = "b".repeat(64);
+  await database.prepare("INSERT INTO portal_activation_tokens (id, company_user_id, token_hash, purpose, expires_at, used_at, created_at) VALUES (?, ?, ?, 'reset-password', ?, NULL, ?)")
+    .bind(crypto.randomUUID(), user.id, createHash("sha256").update(expiredToken).digest("hex"), new Date(Date.now() - 1000).toISOString(), new Date(Date.now() - 3600000).toISOString()).run();
+  await responseJson(await jsonRequest("/portal/account/token/verify", "POST", { token: expiredToken, purpose: "reset-password" }), 410);
+
+  const resetRequest = await responseJson(await jsonRequest("/portal/account/reset/request", "POST", { email: "banner-test@example.invalid" }), 200);
+  assert.match(resetRequest.message, /Om adressen finns/);
+  const resetToken = "c".repeat(64);
+  await database.prepare("UPDATE portal_activation_tokens SET token_hash = ? WHERE company_user_id = ? AND purpose = 'reset-password' AND used_at IS NULL AND expires_at > ?").bind(createHash("sha256").update(resetToken).digest("hex"), user.id, new Date().toISOString()).run();
+  const resetPassword = "Changed-Company-2026!";
+  await responseJson(await jsonRequest("/portal/account/reset/complete", "POST", { token: resetToken, password: resetPassword, passwordConfirmation: resetPassword }), 200);
+  company = await responseJson(await jsonRequest("/portal/auth/company", "POST", { email: "banner-test@example.invalid", password: resetPassword }), 200);
 
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
   const upload = async (name, startAt, targetUrl) => responseJson(await request("/portal/company/banners", {
@@ -135,7 +170,7 @@ try {
   assert.equal(stats.clicks, 1);
   assert.equal(stats.ctr, 100);
 
-  console.log("Bannerkedjan godkänd: R2-uppladdning, schemabyte, gammal banner, klicklänk, visning, klick och CTR.");
+  console.log("Onboarding och bannerkedja godkända: engångstoken, aktivering, återställning, inloggning, R2, schemabyte och statistik.");
 } finally {
   await worker.dispose();
 }

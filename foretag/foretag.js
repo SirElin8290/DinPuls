@@ -151,7 +151,6 @@
         await showApp();
       } catch (error) { showLogin(error.message); }
     };
-    $("#forgot").onclick = event => { event.preventDefault(); alert("Kontakta DinPuls för säker återställning av företagskontot."); };
     $("#logout").onclick = async () => { try { await api("/portal/auth/logout", { method: "POST" }); } catch {} sessionStorage.removeItem(TOKEN_KEY); account = null; showLogin(); };
     $$(".nav-item").forEach(item => item.onclick = () => showView(item.dataset.view));
     $$('[data-open]').forEach(button => button.onclick = () => showView(button.dataset.open));

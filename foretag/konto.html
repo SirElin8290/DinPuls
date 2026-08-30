@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Företagskonto · DinPuls.se</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="konto.css?v=1">
+</head>
+<body>
+  <main class="account-stage">
+    <div class="account-brand"><img src="../assets/compass-mark.svg" alt=""><span>DinPuls.se</span></div>
+    <section class="account-card" aria-live="polite">
+      <p class="label">FÖRETAGSPORTAL</p>
+      <div id="loading"><h1>Kontrollerar länken…</h1><p>Vänta ett ögonblick.</p></div>
+      <div id="statusView" hidden><h1 id="statusTitle"></h1><p id="statusMessage"></p><a class="button" href="./">Till inloggningen</a></div>
+      <form id="passwordForm" hidden>
+        <h1 id="formTitle">Skapa ditt lösenord</h1>
+        <p id="companyText"></p>
+        <label>Nytt lösenord<input id="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="200" required></label>
+        <label>Bekräfta lösenord<input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="200" required></label>
+        <p class="hint">Minst 12 tecken, med stor bokstav, liten bokstav och siffra.</p>
+        <button class="button" type="submit">Spara lösenord</button>
+        <p id="formError" class="error" role="alert" hidden></p>
+      </form>
+      <form id="resetRequestForm" hidden>
+        <h1>Glömt lösenord</h1>
+        <p>Fyll i e-postadressen för företagskontot. Om adressen finns skickar vi en säker återställningslänk.</p>
+        <label>E-post<input id="resetEmail" type="email" autocomplete="email" required></label>
+        <button class="button" type="submit">Skicka återställningslänk</button>
+        <p id="resetMessage" role="status" hidden></p>
+      </form>
+    </section>
+  </main>
+  <script src="konto.js?v=1"></script>
+</body>
+</html>
