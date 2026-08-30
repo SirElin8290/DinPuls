@@ -21,7 +21,7 @@ assert(information.includes("Valfri besöksstatistik") && information.includes("
 
 for (const file of publicPages) {
   const html = fs.readFileSync(file, "utf8");
-  assert(html.includes("privacy-controls.js?version=0.25.1"), `${path.basename(file)} saknar aktuell samtyckeskod`);
+  assert(html.includes("privacy-controls.js?version=0.25.2"), `${path.basename(file)} saknar aktuell samtyckeskod`);
   assert(!html.includes("googletagmanager.com/gtag/js"), `${path.basename(file)} får inte ladda Google statiskt före samtycke`);
 }
 
@@ -30,6 +30,6 @@ for (const privatePage of ["admin/index.html", "foretag/index.html"]) {
   assert(!html.includes("privacy-controls.js") && !html.includes("googletagmanager.com"), `${privatePage} ska inte analyseras`);
 }
 
-assert(fs.readFileSync(path.join(root, "innebandyregler/index.html"), "utf8").includes("../privacy-controls.js?version=0.25.1"), "Regelgeneratorn ska ha samma aktiva samtyckesval");
+assert(fs.readFileSync(path.join(root, "innebandyregler/index.html"), "utf8").includes("../privacy-controls.js?version=0.25.2"), "Regelgeneratorn ska ha samma aktiva samtyckesval");
 
 console.log("✓ GA4 laddas endast efter aktivt samtycke och kan återkallas");
