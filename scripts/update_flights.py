@@ -116,4 +116,5 @@ def main():
 
 
 if __name__ == "__main__":
+    # Körs av GitHub Actions och kan även köras manuellt lokalt.
     raise SystemExit(main())
