@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Hämtar aktuella platsannonser för DinPuls startkommuner.
 
-Kommunernas JobSearch-id:n läses från data/municipalities.json. Jobbfilen
-ersätts bara när minst en hämtning lyckas och innehållet faktiskt förändras.
+Kommunernas JobSearch-id:n läses från data/municipalities.json. Varje lyckad
+kommunhämtning får checkedAt, medan updatedAt bara ändras när annonserna
+faktiskt förändras. Tillfälliga API-fel provas om innan tidigare data används.
 """
 from __future__ import annotations
 
 import json
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -18,6 +20,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 OUTPUT = ROOT / "data" / "jobs.json"
 API_URL = "https://jobsearch.api.jobtechdev.se/search"
+FETCH_ATTEMPTS = 3
+FETCH_TIMEOUT_SECONDS = 30
 SOURCE = {
     "name": "Arbetsförmedlingen – Platsbanken",
     "url": "https://jobsearch.api.jobtechdev.se/",
@@ -41,19 +45,27 @@ def fetch_jobs(municipality_id: str) -> dict:
     })
     request = Request(
         f"{API_URL}?{query}",
-        headers={"User-Agent": "DinPuls/0.8.0 (+https://sirelin8290.github.io/DinPuls/)"},
+        headers={"User-Agent": "DinPuls/0.8.0 (+https://dinpuls.se/)"},
     )
-    try:
-        with urlopen(request, timeout=30) as response:
-            payload = json.load(response)
-    except HTTPError as error:
-        raise RuntimeError(f"JobSearch svarade med HTTP {error.code}") from None
-    except URLError as error:
-        raise RuntimeError(f"JobSearch kunde inte nås: {error.reason}") from None
-
-    if not isinstance(payload.get("hits"), list):
-        raise RuntimeError("JobSearch-svaret saknar hits")
-    return payload
+    last_error = None
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        try:
+            with urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
+                payload = json.load(response)
+            if not isinstance(payload.get("hits"), list):
+                raise RuntimeError("JobSearch-svaret saknar hits")
+            return payload
+        except HTTPError as error:
+            last_error = RuntimeError(f"JobSearch svarade med HTTP {error.code}")
+            if 400 <= error.code < 500 and error.code not in (408, 429):
+                break
+        except URLError as error:
+            last_error = RuntimeError(f"JobSearch kunde inte nås: {error.reason}")
+        except (TimeoutError, OSError, json.JSONDecodeError, RuntimeError) as error:
+            last_error = error
+        if attempt < FETCH_ATTEMPTS:
+            time.sleep(attempt * 2)
+    raise RuntimeError(str(last_error or "JobSearch kunde inte hämtas"))
 
 
 def nested_label(item: dict, key: str) -> str:
@@ -100,6 +112,10 @@ def load_json(path: Path, fallback: dict) -> dict:
         return fallback
 
 
+def content_without_timestamps(data: dict) -> dict:
+    return {key: value for key, value in data.items() if key not in {"updatedAt", "checkedAt"}}
+
+
 def main() -> int:
     config = load_json(MUNICIPALITY_FILE, {})
     existing = load_json(OUTPUT, {"municipalities": {}})
@@ -109,9 +125,12 @@ def main() -> int:
     failed = []
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
+    configured_names = []
     for municipality in config.get("municipalities", []):
         name = str(municipality.get("name") or "").strip()
         municipality_id = str(municipality.get("jobSearchMunicipalityId") or "").strip()
+        if name:
+            configured_names.append(name)
         if not name or not municipality_id:
             failed.append(name or "Namnlös kommun")
             if name in previous_municipalities:
@@ -125,19 +144,15 @@ def main() -> int:
                 job for job in jobs
                 if job["id"] and job["webpageUrl"] and same_municipality(job, name)
             ]
-            # JobSearch kan returnera rikstäckande annonser eller annonser
-            # vars faktiska arbetsplats ligger i en annan kommun. DinPuls
-            # redovisar därför antalet verifierade kommunträffar, inte API:ets
-            # bredare totalsiffra.
-            total = len(jobs)
             refreshed = {
                 "municipalityId": municipality_id,
-                "total": int(total or 0),
+                "total": len(jobs),
                 "jobs": jobs,
             }
             previous = previous_municipalities.get(name, {})
-            previous_content = {key: value for key, value in previous.items() if key != "updatedAt"}
-            refreshed["updatedAt"] = previous.get("updatedAt", now) if refreshed == previous_content else now
+            changed = content_without_timestamps(refreshed) != content_without_timestamps(previous)
+            refreshed["updatedAt"] = now if changed else previous.get("updatedAt", now)
+            refreshed["checkedAt"] = now
             municipalities[name] = refreshed
             successful += 1
             print(f"{name}: {len(jobs)} verifierade annonser i kommunen")
@@ -151,23 +166,23 @@ def main() -> int:
         print("Ingen kommun kunde uppdateras; behåller befintlig jobs.json")
         return 1
 
-    candidate = {"source": SOURCE, "municipalities": municipalities}
-    comparable_existing = {
-        "source": existing.get("source"),
-        "municipalities": existing.get("municipalities"),
+    # En partiell körning får behålla tidigare kommuninnehåll, men workflowen
+    # kan ändå upptäcka att checkedAt inte är färskt för den kommunen.
+    output = {
+        "generatedAt": now,
+        "source": SOURCE,
+        "municipalities": municipalities,
+        "successfulMunicipalities": successful,
+        "configuredMunicipalities": len(configured_names),
+        "failedMunicipalities": failed,
     }
-    if candidate == comparable_existing:
-        print("Inga jobbannonser har förändrats; lämnar jobs.json orörd")
-        return 0
-
-    output = {"generatedAt": now, **candidate}
     temporary = OUTPUT.with_suffix(".json.tmp")
     temporary.write_text(
         json.dumps(output, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     temporary.replace(OUTPUT)
-    print(f"Skrev {OUTPUT} för {successful} kommuner")
+    print(f"Skrev {OUTPUT} för {successful}/{len(configured_names)} kommuner")
     if failed:
         print("Behöll tidigare data där det gick för: " + ", ".join(failed))
     return 0
