@@ -30,21 +30,14 @@ jobs:
               text = p.read_text(encoding='utf-8')
               count = text.count(old)
               if count != 1:
-                  raise SystemExit(f'{path}: förväntade exakt 1 träff, fick {count}')
+                  raise SystemExit(f'{path}: förväntade exakt 1 träff för {old[:80]!r}, fick {count}')
               p.write_text(text.replace(old, new, 1), encoding='utf-8')
 
           worker = 'cloudflare/push-worker.js'
+
           replace_once(worker,
-          '''function validDate(value) {
-            return /^\\d{4}-\\d{2}-\\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
-          }
-
-          function validDateTime(value) {''',
-          '''function validDate(value) {
-            return /^\\d{4}-\\d{2}-\\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
-          }
-
-          function isTwelveMonthContract(startDate, endDate) {
+          'function validDateTime(value) {',
+          '''function isTwelveMonthContract(startDate, endDate) {
             if (!validDate(startDate) || !validDate(endDate)) return false;
             const expectedEnd = new Date(`${startDate}T12:00:00Z`);
             expectedEnd.setUTCFullYear(expectedEnd.getUTCFullYear() + 1);
@@ -55,20 +48,16 @@ jobs:
           function validDateTime(value) {''')
 
           replace_once(worker,
-          '''  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
-            return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
-          }
-          const now = new Date().toISOString();''',
-          '''  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
-            return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
-          }
-          if (!isTwelveMonthContract(body.startDate, body.endDate)) {
-            return json(request, { ok: false, error: "Avtalsperioden måste vara exakt 12 månader från startdatum, med slutdatum dagen före motsvarande datum följande år." }, 400);
-          }
-          const now = new Date().toISOString();''')
+          '''  const now = new Date().toISOString();
+            let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();''',
+          '''  if (!isTwelveMonthContract(body.startDate, body.endDate)) {
+              return json(request, { ok: false, error: "Avtalsperioden måste vara exakt 12 månader från startdatum, med slutdatum dagen före motsvarande datum följande år." }, 400);
+            }
+            const now = new Date().toISOString();
+            let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();''')
 
           replace_once(worker,
-          '''function contractFromRow(row) {''',
+          'function contractFromRow(row) {',
           '''async function resendSignedContractEmail(request, env, id) {
             if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
             if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet i R2 är inte konfigurerat." }, 503);
@@ -94,35 +83,19 @@ jobs:
           function contractFromRow(row) {''')
 
           replace_once(worker,
-          '''      const activationMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/activation$/.exec(url.pathname);
-                if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
-                if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);''',
-          '''      const activationMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/activation$/.exec(url.pathname);
-                if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
-                const contractEmailMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/email$/.exec(url.pathname);
+          '''      if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);''',
+          '''      const contractEmailMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/email$/.exec(url.pathname);
                 if (request.method === "POST" && contractEmailMatch) return resendSignedContractEmail(request, env, decodeURIComponent(contractEmailMatch[1]));
                 if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);''')
 
           admin = 'admin/admin.js'
           replace_once(admin,
-          '''    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;''',
-          '''    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;''')
+          '''<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button>` : ""}''',
+          '''<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}''')
 
           replace_once(admin,
-          '''  async function resendActivation(id) {
-            const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/activation`, { method: "POST" });
-            await refreshContracts();
-            alert(result.message || "En ny aktiveringslänk har skickats.");
-          }
-
-          function openContract(id) {''',
-          '''  async function resendActivation(id) {
-            const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/activation`, { method: "POST" });
-            await refreshContracts();
-            alert(result.message || "En ny aktiveringslänk har skickats.");
-          }
-
-          async function resendContractCopy(id) {
+          '''  function openContract(id) {''',
+          '''  async function resendContractCopy(id) {
             const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/email`, { method: "POST" });
             await refreshContracts();
             alert(result.message || "Den signerade avtalskopian har skickats igen.");
@@ -131,30 +104,26 @@ jobs:
           function openContract(id) {''')
 
           replace_once(admin,
-          '''    dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
-            dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));''',
-          '''    dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
-            dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
+          '''    dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));''',
+          '''    dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
             dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));''')
 
           company = 'foretag/foretag.js'
           replace_once(company, '<h3>Omfattning och villkor</h3>', '<h3>Sammanfattning av avtalet</h3>')
-          old_copy = '''<p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p>'''
-          new_copy = '''<p class="contract-copy-date">Detta är en portalöversikt. Den signerade originalkopian finns som PDF och är den låsta avtalsversionen.</p>'''
-          replace_once(company, old_copy, new_copy)
+          replace_once(company,
+          '''<p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p>''',
+          '''<p class="contract-copy-date">Detta är en portalöversikt. Den signerade originalkopian finns som PDF och är den låsta avtalsversionen.</p>''')
 
           replace_once('foretag/index.html', '>Hämta signerad PDF</button>', '>Hämta signerad originalkopia (PDF)</button>')
 
-          validate = '.github/workflows/validate-launch.yml'
-          replace_once(validate,
+          replace_once('.github/workflows/validate-launch.yml',
           '''          for file in *.js scripts/*.js; do node --check "$file"; done''',
           '''          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done''')
 
-          tests = 'scripts/test_business_portals.js'
-          replace_once(tests,
+          replace_once('scripts/test_business_portals.js',
           '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");''',
           '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");
-          assert(worker.includes("resendSignedContractEmail") && worker.includes('/email') && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den redan signerade avtalskopian utan att ändra avtalet");
+          assert(worker.includes("resendSignedContractEmail") && worker.includes("contractEmailMatch") && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den signerade avtalskopian utan att ändra avtalet");
           assert(worker.includes("isTwelveMonthContract") && worker.includes("Avtalsperioden måste vara exakt 12 månader"), "Backend måste validera exakt 12 månaders avtalsperiod");''')
 
           print('Riktade avtalsfixar applicerade.')
