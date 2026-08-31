@@ -19,18 +19,17 @@ def replace_javascript_registry(path: Path, pattern: str, replacement: str) -> N
 
 
 def sync_runtime_registries(municipalities: list[dict]) -> None:
+    """Synka endast klientregistret som fortfarande behöver en byggd lista.
+
+    Cloudflare Workern importerar data/municipalities.json direkt och ska därför
+    inte längre ha eller genereras från en separat kommunlista.
+    """
     names = [item["name"] for item in municipalities]
     engine_names = ", ".join(json.dumps(name, ensure_ascii=False) for name in names)
     replace_javascript_registry(
         ROOT / "municipality-engine.js",
         r"const MUNICIPALITIES = Object\.freeze\(\[.*?\]\);",
         f"const MUNICIPALITIES = Object.freeze([{engine_names}]);",
-    )
-    worker_names = ", ".join(json.dumps(name, ensure_ascii=False) for name in names)
-    replace_javascript_registry(
-        ROOT / "cloudflare" / "push-worker.js",
-        r"const MUNICIPALITIES = new Set\(\[.*?\]\);",
-        f"const MUNICIPALITIES = new Set([{worker_names}]);",
     )
 
 
@@ -76,6 +75,8 @@ def default_for(filename: str, municipality: dict) -> object:
     name, website = municipality["name"], municipality["website"]
     directory = municipality.get("associationDirectoryUrl") or website
     providers = municipality.get("housingProviders") or []
+    configured_stops = municipality.get("transportStops") or []
+    first_stop = configured_stops[0] if configured_stops else None
     return {
         "arenas.json": {"coordinates": [municipality["latitude"], municipality["longitude"]], "arenas": []},
         "authorities.json": {"website": website}, "cinemas.json": [],
@@ -96,8 +97,12 @@ def default_for(filename: str, municipality: dict) -> object:
         "sport-seasons.json": [], "sport-sources.json": [],
         "sports-curated.json": {"directoryUrl": directory, "clubs": [], "liveSources": []},
         "sports.json": {"directoryUrl": directory, "clubs": [], "liveSources": []},
-        "stop-candidates.json": {"selectedId": None, "selectedName": None, "candidates": []},
-        "transport.json": {"stops": []},
+        "stop-candidates.json": {
+            "selectedId": first_stop.get("id") if first_stop else None,
+            "selectedName": first_stop.get("name") if first_stop else None,
+            "candidates": [],
+        },
+        "transport.json": {"stops": configured_stops},
         "weather-live.json": {"coordinates": {"latitude": municipality["latitude"], "longitude": municipality["longitude"]}},
     }[filename]
 
