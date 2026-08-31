@@ -1,6 +1,6 @@
 {
   "version": "0.21.0",
-  "generatedAt": "2026-08-31T15:00:03+00:00",
+  "generatedAt": "2026-08-31T20:45:35+00:00",
   "sources": [
     {
       "id": "crisis",
@@ -37,7 +37,7 @@
   "municipalities": {
     "Åmål": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -84,7 +84,7 @@
     },
     "Säffle": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -131,7 +131,7 @@
     },
     "Bengtsfors": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -178,7 +178,7 @@
     },
     "Mellerud": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -224,8 +224,19 @@
       ]
     },
     "Årjäng": {
-      "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "items": [
+        {
+          "id": "traffic-740000364-0",
+          "category": "traffic",
+          "severity": "warning",
+          "priority": 70,
+          "title": "Försening på linje 700 mot Grums Årjäng Töcksfors",
+          "publishedAt": "2026-08-31T20:11:10+00:00",
+          "source": "Trafiklab",
+          "url": "https://www.trafiklab.se/"
+        }
+      ],
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -277,7 +288,7 @@
     },
     "Arvika": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -324,7 +335,7 @@
     },
     "Grums": {
       "items": [],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -382,7 +393,7 @@
           "url": "trafik.html?kommun=Kil&event=GUIDb84fb9e3-6452-421b-8d6f-0083ca01833f-1"
         }
       ],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -430,17 +441,27 @@
     "Sunne": {
       "items": [
         {
+          "id": "police-651168",
+          "category": "police",
+          "severity": "warning",
+          "priority": 78,
+          "title": "31 augusti 17.05, Trafikbrott, Sunne",
+          "publishedAt": "2026-08-31 17:06:04 +02:00",
+          "source": "Polisen",
+          "url": "https://polisen.se/aktuellt/handelser/2026/augusti/31/31-augusti-17.05-trafikbrott-sunne/"
+        },
+        {
           "id": "traffic-740000184-0",
           "category": "traffic",
           "severity": "warning",
           "priority": 70,
           "title": "Linje 202, 207, 209 och 303: Hållplats Vinkelvägen, Torsby stängs från och med 20 augusti till och med 4 september",
-          "publishedAt": "2026-08-31T07:31:07+00:00",
+          "publishedAt": "2026-08-31T20:11:10+00:00",
           "source": "Trafiklab",
           "url": "https://www.trafiklab.se/"
         }
       ],
-      "checkedAt": "2026-08-31T15:00:03+00:00",
+      "checkedAt": "2026-08-31T20:45:35+00:00",
       "sourceHealth": [
         {
           "id": "crisis",
@@ -484,7 +505,64 @@
           "status": "ok"
         }
       ]
+    },
+    "Eda": {
+      "items": [
+        {
+          "id": "crisis-23400",
+          "category": "crisis",
+          "severity": "danger",
+          "priority": 100,
+          "title": "Varningslarmet SE-Alert testas",
+          "publishedAt": "2026-08-25T08:48:44+02:00",
+          "source": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/nyheter/2026/augusti/varningslarmet-se-alert-testas-i-stockholmsomradet-och-pa-gotland/"
+        }
+      ],
+      "checkedAt": "2026-08-31T20:45:35+00:00",
+      "sourceHealth": [
+        {
+          "id": "crisis",
+          "name": "Krisinformation.se",
+          "url": "https://www.krisinformation.se/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "weather",
+          "name": "SMHI varningar",
+          "url": "https://www.smhi.se/vader/varningar-och-meddelanden/varningar-och-meddelanden",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "police",
+          "name": "Polisen",
+          "url": "https://polisen.se/aktuellt/polisens-nyheter/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "road",
+          "name": "Trafikverket",
+          "url": "https://www.trafikverket.se/trafikinformation/vag/",
+          "automated": true,
+          "status": "ok"
+        },
+        {
+          "id": "sos",
+          "name": "SOS Alarm / 112-appen",
+          "url": "https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/",
+          "automated": false,
+          "note": "112-appen saknar publik händelse-API. Direkt integration kräver avtal med SOS Alarm.",
+          "status": "reference"
+        },
+        {
+          "name": "Eda kommun",
+          "url": "https://eda.se/",
+          "status": "ok"
+        }
+      ]
     }
-  ,
-"Eda":{"items":[],"checkedAt":null,"sourceHealth":[]}}
+  }
 }
