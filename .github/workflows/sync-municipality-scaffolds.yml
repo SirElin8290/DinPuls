@@ -1,0 +1,80 @@
+name: Synka nya kommuner
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/municipalities.json"
+      - "scripts/sync_municipality_scaffolds.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-municipality-scaffolds
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Synka kommunregister och säkra grundposter
+        run: python scripts/sync_municipality_scaffolds.py
+
+      - name: Verifiera resultatet
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          names = [item['name'] for item in config['municipalities']]
+          engine = Path('municipality-engine.js').read_text(encoding='utf-8')
+          for name in names:
+              assert f'"{name}"' in engine, f'{name} saknas i municipality-engine.js'
+
+          for path in sorted(Path('data').glob('*.json')):
+              payload = json.loads(path.read_text(encoding='utf-8'))
+              municipalities = payload.get('municipalities')
+              if not isinstance(municipalities, dict):
+                  continue
+              missing = [name for name in names if name not in municipalities]
+              assert not missing, f'{path}: saknar {missing}'
+
+          print(f'Kommunscaffolding verifierad för {len(names)} kommuner')
+          PY
+          node --check municipality-engine.js
+
+      - name: Publicera synkroniserade grundposter
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add municipality-engine.js data/*.json
+          if git diff --cached --quiet; then
+            echo "Kommunregistren är redan synkroniserade."
+            exit 0
+          fi
+          git commit -m "Synka kommunernas grunddata"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 2))
+          done
+          exit 1
