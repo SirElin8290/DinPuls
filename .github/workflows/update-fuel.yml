@@ -2,6 +2,13 @@ name: Uppdatera tank- och laddstationer
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/municipalities.json"
+      - "scripts/update_fuel.py"
+      - ".github/workflows/update-fuel.yml"
   schedule:
     - cron: "17 */6 * * *"
 
