@@ -1,7 +1,11 @@
 const ALLOWED_ORIGINS = new Set(["https://dinpuls.se", "https://www.dinpuls.se"]);
-const MUNICIPALITIES = new Set(["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil", "Sunne"]);
+const MUNICIPALITIES = new Set(municipalityConfig.municipalities.map(item => item.name));
 const REQUIRED_CATEGORIES = ["extreme-weather", "missing-people", "important"];
 const OPTIONAL_CATEGORIES = new Set(["traffic", "transport", "news", "events", "jobs", "housing", "sport"]);
+
+function isSupportedMunicipality(value) {
+  return typeof value === "string" && MUNICIPALITIES.has(value);
+}
 
 function corsHeaders(request) {
   const origin = request.headers.get("Origin") || "";
@@ -293,7 +297,7 @@ async function deleteCompanyBanner(request, env, id) {
 }
 
 async function currentBanner(request, env, slotId, municipality) {
-  if (!MUNICIPALITIES.has(municipality)) return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
+  if (!isSupportedMunicipality(municipality)) return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
   const now = new Date().toISOString();
   const today = stockholmDateKey(now);
   const due = await env.DB.prepare("SELECT b.id FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id WHERE b.slot_id=? AND c.municipality=? AND c.status='Aktivt' AND b.start_at<=? AND b.published_at IS NULL AND c.start_date<=? AND c.end_date>=? ORDER BY b.start_at ASC")
@@ -754,7 +758,7 @@ async function createContract(request, env) {
     slotId: cleanText(item.slotId, 40), module: cleanText(item.module, 100), group: cleanText(item.group, 100),
     label: cleanText(item.label, 160), location: cleanText(item.location, 240), page: cleanText(item.page, 100)
   })) : [];
-  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
+  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !isSupportedMunicipality(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
     return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
   }
   if (!isTwelveMonthContract(body.startDate, body.endDate)) {
@@ -924,7 +928,7 @@ async function saveSubscription(request, env) {
   const auth = subscription?.keys?.auth;
   const municipality = body?.municipality;
   if (typeof endpoint !== "string" || !endpoint.startsWith("https://") || endpoint.length > 4096 ||
-      typeof p256dh !== "string" || typeof auth !== "string" || !MUNICIPALITIES.has(municipality)) {
+      typeof p256dh !== "string" || typeof auth !== "string" || !isSupportedMunicipality(municipality)) {
     return json(request, { ok: false, error: "Ogiltig pushprenumeration eller kommun." }, 400);
   }
   const hash = await endpointHash(endpoint);
@@ -962,7 +966,7 @@ async function sendTestNotification(request, env) {
     return json(request, { ok: false, error: "Obehörig testsändning." }, 401);
   }
   const body = await request.json();
-  if (!MUNICIPALITIES.has(body?.municipality)) {
+  if (!isSupportedMunicipality(body?.municipality)) {
     return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
   }
   const row = await env.DB.prepare(
@@ -1073,3 +1077,4 @@ export default {
 import webpush from "web-push";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { BILLING, CONTRACT_TERMS, CONTRACT_VERSION, calculateContractPrice, stableStringify } from "./contract-v4.js";
+import municipalityConfig from "../data/municipalities.json";

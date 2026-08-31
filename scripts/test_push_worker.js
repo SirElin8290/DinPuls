@@ -5,9 +5,16 @@ const worker = fs.readFileSync("cloudflare/push-worker.js", "utf8");
 const config = fs.readFileSync("wrangler.jsonc", "utf8");
 
 const municipalities = JSON.parse(fs.readFileSync("data/municipalities.json", "utf8")).municipalities.map(item => item.name);
+const supportedMunicipalities = new Set(municipalities);
 for (const municipality of municipalities) {
-  assert(worker.includes(`"${municipality}"`), `Kommun saknas i pushservern: ${municipality}`);
+  assert(supportedMunicipalities.has(municipality), `Aktiv kommun nekas: ${municipality}`);
 }
+assert(!supportedMunicipalities.has("Påhittad kommun"), "En påhittad kommun får inte godkännas");
+assert(worker.includes('import municipalityConfig from "../data/municipalities.json"'));
+assert(worker.includes("new Set(municipalityConfig.municipalities.map(item => item.name))"));
+assert(worker.includes("function isSupportedMunicipality(value)"));
+assert((worker.match(/isSupportedMunicipality\(/g) || []).length >= 5, "Avtal, annonser och push ska använda samma kommunvalidering");
+assert(!worker.includes('new Set(["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil", "Sunne"])'), "Den gamla manuella niokommunlistan finns kvar");
 for (const category of ["extreme-weather", "missing-people", "important"]) {
   assert(worker.includes(`"${category}"`), `Obligatorisk kategori saknas: ${category}`);
 }
