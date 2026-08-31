@@ -1,0 +1,176 @@
+name: Täta avtalsdiagnostikens sista luckor
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-contract-diagnostics-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Applicera riktade ändringar
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: förväntade exakt 1 träff, fick {count}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          worker = 'cloudflare/push-worker.js'
+          replace_once(worker,
+          '''function validDate(value) {
+            return /^\\d{4}-\\d{2}-\\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
+          }
+
+          function validDateTime(value) {''',
+          '''function validDate(value) {
+            return /^\\d{4}-\\d{2}-\\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
+          }
+
+          function isTwelveMonthContract(startDate, endDate) {
+            if (!validDate(startDate) || !validDate(endDate)) return false;
+            const expectedEnd = new Date(`${startDate}T12:00:00Z`);
+            expectedEnd.setUTCFullYear(expectedEnd.getUTCFullYear() + 1);
+            expectedEnd.setUTCDate(expectedEnd.getUTCDate() - 1);
+            return expectedEnd.toISOString().slice(0, 10) === endDate;
+          }
+
+          function validDateTime(value) {''')
+
+          replace_once(worker,
+          '''  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
+            return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
+          }
+          const now = new Date().toISOString();''',
+          '''  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
+            return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
+          }
+          if (!isTwelveMonthContract(body.startDate, body.endDate)) {
+            return json(request, { ok: false, error: "Avtalsperioden måste vara exakt 12 månader från startdatum, med slutdatum dagen före motsvarande datum följande år." }, 400);
+          }
+          const now = new Date().toISOString();''')
+
+          replace_once(worker,
+          '''function contractFromRow(row) {''',
+          '''async function resendSignedContractEmail(request, env, id) {
+            if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+            if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet i R2 är inte konfigurerat." }, 503);
+            const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id = ?`).bind(id).first();
+            if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+            if (!contract.signed_at || !contract.signed_pdf_object_key || contract.status !== "Aktivt") {
+              return json(request, { ok: false, error: "Avtalet är inte färdigsignerat eller saknar arkiverad PDF." }, 409);
+            }
+            const object = await env.AD_ASSETS.get(contract.signed_pdf_object_key);
+            if (!object) return json(request, { ok: false, error: "Den signerade PDF-filen saknas i avtalsarkivet." }, 404);
+            const pdfBytes = new Uint8Array(await object.arrayBuffer());
+            try {
+              await sendSignedContractEmail(env, contract, pdfBytes);
+              const sentAt = new Date().toISOString();
+              await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(sentAt, id).run();
+              return json(request, { ok: true, message: "Den signerade avtalskopian har skickats igen.", sentAt });
+            } catch (error) {
+              await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error?.message || "Okänt e-postfel", 300), id).run();
+              return json(request, { ok: false, error: "Avtalskopian kunde inte skickas. Det signerade avtalet och PDF-filen ligger kvar oförändrade." }, 502);
+            }
+          }
+
+          function contractFromRow(row) {''')
+
+          replace_once(worker,
+          '''      const activationMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/activation$/.exec(url.pathname);
+                if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
+                if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);''',
+          '''      const activationMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/activation$/.exec(url.pathname);
+                if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
+                const contractEmailMatch = /^\\/portal\\/admin\\/contracts\\/([^/]+)\\/email$/.exec(url.pathname);
+                if (request.method === "POST" && contractEmailMatch) return resendSignedContractEmail(request, env, decodeURIComponent(contractEmailMatch[1]));
+                if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);''')
+
+          admin = 'admin/admin.js'
+          replace_once(admin,
+          '''    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;''',
+          '''    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;''')
+
+          replace_once(admin,
+          '''  async function resendActivation(id) {
+            const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/activation`, { method: "POST" });
+            await refreshContracts();
+            alert(result.message || "En ny aktiveringslänk har skickats.");
+          }
+
+          function openContract(id) {''',
+          '''  async function resendActivation(id) {
+            const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/activation`, { method: "POST" });
+            await refreshContracts();
+            alert(result.message || "En ny aktiveringslänk har skickats.");
+          }
+
+          async function resendContractCopy(id) {
+            const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/email`, { method: "POST" });
+            await refreshContracts();
+            alert(result.message || "Den signerade avtalskopian har skickats igen.");
+          }
+
+          function openContract(id) {''')
+
+          replace_once(admin,
+          '''    dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
+            dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));''',
+          '''    dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
+            dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
+            dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));''')
+
+          company = 'foretag/foretag.js'
+          replace_once(company, '<h3>Omfattning och villkor</h3>', '<h3>Sammanfattning av avtalet</h3>')
+          old_copy = '''<p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p>'''
+          new_copy = '''<p class="contract-copy-date">Detta är en portalöversikt. Den signerade originalkopian finns som PDF och är den låsta avtalsversionen.</p>'''
+          replace_once(company, old_copy, new_copy)
+
+          replace_once('foretag/index.html', '>Hämta signerad PDF</button>', '>Hämta signerad originalkopia (PDF)</button>')
+
+          validate = '.github/workflows/validate-launch.yml'
+          replace_once(validate,
+          '''          for file in *.js scripts/*.js; do node --check "$file"; done''',
+          '''          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done''')
+
+          tests = 'scripts/test_business_portals.js'
+          replace_once(tests,
+          '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");''',
+          '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");
+          assert(worker.includes("resendSignedContractEmail") && worker.includes('/email') && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den redan signerade avtalskopian utan att ändra avtalet");
+          assert(worker.includes("isTwelveMonthContract") && worker.includes("Avtalsperioden måste vara exakt 12 månader"), "Backend måste validera exakt 12 månaders avtalsperiod");''')
+
+          print('Riktade avtalsfixar applicerade.')
+          PY
+
+      - name: Kontrollera JavaScript och portaltester
+        run: |
+          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done
+          for test in scripts/test_*.js; do node "$test"; done
+          npm ci
+          npm run test:banner
+
+      - name: Commit och push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin/admin.js cloudflare/push-worker.js foretag/foretag.js foretag/index.html .github/workflows/validate-launch.yml scripts/test_business_portals.js
+          git commit -m "Täta avtalsdiagnostikens sista luckor"
+          git push origin main
