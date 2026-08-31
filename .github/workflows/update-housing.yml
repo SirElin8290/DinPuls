@@ -39,6 +39,24 @@ jobs:
           python scripts/update_housing.py
           python scripts/update_housing_sunne.py
 
+      - name: Verifiera kommunregistret i bostadsdatan
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          actual = set((data.get('municipalities') or {}).keys())
+          assert actual == expected, f'Bostadskommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
+          for item in config.get('municipalities', []):
+              name = item['name']
+              municipality = data['municipalities'][name]
+              assert isinstance(municipality.get('listings'), list), f'{name} saknar bostadslista'
+              assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
+          print(f'Bostadsdata innehåller alla {len(expected)} kommuner')
+          PY
+
       - name: Verifiera Sunne-data
         run: |
           python - <<'PY'
