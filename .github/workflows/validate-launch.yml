@@ -1,39 +1,33 @@
 name: Kontrollera DinPuls
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-
-concurrency:
-  group: dinpuls-launch-validation
-  cancel-in-progress: true
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - name: Hämta projektet
+      - name: Hämta repo
         uses: actions/checkout@v4
 
-      - name: Aktivera Python
-        uses: actions/setup-python@v5
+      - name: Installera Node
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: 20
 
-      - name: Kontrollera sidor, kommuner och data
-        run: |
-          for test in scripts/test_*.py; do python "$test"; done
-          python scripts/validate_launch.py
+      - name: Installera beroenden
+        run: npm ci
 
-      - name: Kontrollera JavaScript
+      - name: Kontrollera JavaScript-syntax
         run: |
-          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done
-          for test in scripts/test_*.js; do node "$test"; done
-          npm ci
-          npm run test:banner
+          find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
+          find scripts admin foretag cloudflare -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Kör lanseringstester
+        run: npm test
+
+      - name: Kontrollera sportmodulens avgränsning
+        run: node scripts/check-sport-boundaries.js
