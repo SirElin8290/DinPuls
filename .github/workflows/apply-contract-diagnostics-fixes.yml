@@ -116,10 +116,6 @@ jobs:
 
           replace_once('foretag/index.html', '>Hämta signerad PDF</button>', '>Hämta signerad originalkopia (PDF)</button>')
 
-          replace_once('.github/workflows/validate-launch.yml',
-          '''          for file in *.js scripts/*.js; do node --check "$file"; done''',
-          '''          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done''')
-
           replace_once('scripts/test_business_portals.js',
           '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");''',
           '''assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");
@@ -147,6 +143,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add admin/admin.js cloudflare/push-worker.js foretag/foretag.js foretag/index.html .github/workflows/validate-launch.yml scripts/test_business_portals.js scripts/test_banner_worker.mjs
+          git add admin/admin.js cloudflare/push-worker.js foretag/foretag.js foretag/index.html scripts/test_business_portals.js scripts/test_banner_worker.mjs
           git commit -m "Täta avtalsdiagnostikens sista luckor"
           git push origin main
