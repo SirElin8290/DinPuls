@@ -40,7 +40,7 @@
     const aliases=clubAliases(club,sport);
     const home=normalize(match.homeTeam);
     const away=normalize(match.awayTeam);
-    return aliases.some(alias=>home.includes(alias)||away.includes(alias)||alias.includes(home)||alias.includes(away));
+    return aliases.some(alias=>home===alias||away===alias||home.startsWith(`${alias} `)||away.startsWith(`${alias} `)||alias.startsWith(`${home} `)||alias.startsWith(`${away} `));
   }
 
   function clubMatches(club,sport){
