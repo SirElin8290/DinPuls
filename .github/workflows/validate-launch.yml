@@ -33,7 +33,7 @@ jobs:
 
       - name: Kontrollera JavaScript
         run: |
-          for file in *.js scripts/*.js; do node --check "$file"; done
+          for file in *.js admin/*.js foretag/*.js cloudflare/*.js scripts/*.js; do [ -f "$file" ] && node --check "$file"; done
           for test in scripts/test_*.js; do node "$test"; done
           npm ci
           npm run test:banner
