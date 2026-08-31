@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const CONTRACT_VERSION = "3.0";
+  const CONTRACT_VERSION = "4.0";
   const TOKEN_KEY = "dp-admin-session";
   const AD_SLOTS = window.DINPULS_AD_INVENTORY || [];
   const $ = selector => document.querySelector(selector);
@@ -97,10 +97,11 @@
   }
 
   function statusActions(contract) {
+    if (contract.contractVersion === "4.0" && contract.status === "Utkast") return `<span class="badge draft">Väntar på båda underskrifterna</span>`;
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
     if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
-    if (contract.status === "Aktivt") return `${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
+    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
     return "";
   }
 
@@ -143,12 +144,13 @@
     if (!contract) return;
     let dialog = $("#contractDialog");
     if (!dialog) { dialog = document.createElement("dialog"); dialog.id = "contractDialog"; dialog.className = "company-dialog"; document.body.append(dialog); }
-    const billingLabel = contract.billingType === "complimentary" ? "Kostnadsfri plats" : "Ordinarie betalande";
+    const billingLabel = contract.billingType === "complimentary" ? "Kostnadsfri" : contract.billingType === "annual" ? "Årsvis i förskott" : "Månadsvis";
     const renewalLabel = contract.renewalType === "annual-review" ? "Årlig förnyelseprövning" : "Ingen uppföljning";
-    dialog.innerHTML = `<button class="dialog-x" type="button">×</button><span class="eyebrow">ANNONSAVTAL v${escapeHtml(contract.contractVersion)}</span><h2>${escapeHtml(contract.company)}</h2><p class="muted">${escapeHtml(contract.id)} · ${escapeHtml(contract.status)}</p><div class="contact-details"><div><small>Kommun</small><strong>${escapeHtml(contract.municipality)}</strong></div><div><small>Period</small><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></div><div><small>Månadspris</small><strong>${money(contract.monthlyTotal)}</strong></div><div><small>Årsvärde</small><strong>${money(contract.annualTotal)}</strong></div><div><small>Debitering</small><strong>${billingLabel}</strong></div><div><small>Förnyelse</small><strong>${renewalLabel}</strong></div><div><small>Signatur</small><strong>${contract.signatureRequired ? "Krävs" : "Krävs inte"}</strong></div><div><small>Kontakt</small><strong>${escapeHtml(contract.contact)}<br>${escapeHtml(contract.phone)}</strong></div><div><small>E-post</small><strong>${escapeHtml(contract.email)}</strong></div></div>${contract.valueNote ? `<p><b>Avtalsnotering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}<h3>Annonsplatser</h3><p>${(contract.placements || []).map(item => `<b>${escapeHtml(item.slotId)}</b> – ${escapeHtml(item.location)}`).join("<br>")}</p><div class="actions">${statusActions(contract)}</div>`;
+    dialog.innerHTML = `<button class="dialog-x" type="button">×</button><span class="eyebrow">ANNONSAVTAL v${escapeHtml(contract.contractVersion)}</span><h2>${escapeHtml(contract.company)}</h2><p class="muted">${escapeHtml(contract.id)} · ${escapeHtml(contract.status)}</p><div class="contact-details"><div><small>Kommun</small><strong>${escapeHtml(contract.municipality)}</strong></div><div><small>Period</small><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></div><div><small>Månadspris</small><strong>${money(contract.monthlyTotal)}</strong></div><div><small>Avtalsvärde</small><strong>${money(contract.annualTotal)}</strong></div><div><small>Debitering</small><strong>${billingLabel}</strong></div><div><small>Signering</small><strong>${contract.signedAt ? escapeHtml(new Date(contract.signedAt).toLocaleString("sv-SE")) : "Ej slutförd"}</strong></div><div><small>Kund</small><strong>${escapeHtml(contract.customerSignerName || "–")}<br>${escapeHtml(contract.customerSignerTitle || "")}</strong></div><div><small>DinPuls</small><strong>${escapeHtml(contract.dinpulsSignerName || "–")}<br>${escapeHtml(contract.dinpulsSignerTitle || "")}</strong></div><div><small>PDF/mejl</small><strong>${contract.hasSignedPdf ? "Arkiverad" : "Saknas"} · ${escapeHtml(contract.contractEmailStatus || "ej skickat")}</strong></div></div>${contract.valueNote ? `<p><b>Avtalsnotering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}<h3>Annonsplatser</h3><p>${(contract.placements || []).map(item => `<b>${escapeHtml(item.slotId)}</b> – ${escapeHtml(item.location)}`).join("<br>")}</p><div class="actions">${statusActions(contract)}</div>`;
     dialog.querySelector(".dialog-x").onclick = () => dialog.close();
     dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
     dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
+    dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));
     dialog.showModal();
   }
 
@@ -231,7 +233,13 @@
   function installContractTermsFields() {
     const grid = $("#contractForm .grid2");
     if (!grid || grid.querySelector('[name="billingType"]')) return;
-    grid.insertAdjacentHTML("beforeend", `<label>Debitering<select name="billingType"><option value="paid">Ordinarie betalande</option><option value="complimentary">Kostnadsfri plats</option></select></label><label>Förnyelse<select name="renewalType"><option value="annual-review">Årlig förnyelseprövning</option><option value="none">Ingen uppföljning</option></select></label><label>Signatur krävs<select name="signatureRequired"><option value="false">Nej</option><option value="true">Ja</option></select></label><label>Avtalsnotering<input name="valueNote" maxlength="240" placeholder="Kostnadsfri annonsplats, ordinarie värde 5 000 kr exkl. moms per år"></label>`);
+    grid.insertAdjacentHTML("beforeend", `<label>Betalningsform<select name="billingType" required><option value="monthly">Månadsvis – 500 kr/plats/månad</option><option value="annual">Årsvis – 5 000 kr/plats/12 månader</option><option value="complimentary">Kostnadsfri</option></select></label><label>Förnyelse<select name="renewalType"><option value="annual-review">Ingen automatisk förnyelse</option><option value="none">Ingen uppföljning</option></select></label><label>Avtalsnotering<input name="valueNote" maxlength="240" placeholder="Eventuella särskilda individuella villkor"></label>`);
+  }
+
+  async function downloadPdf(id) {
+    const response = await fetch(`${apiBase}/portal/admin/contracts/${encodeURIComponent(id)}/pdf`, { headers: { Authorization: `Bearer ${token()}` } });
+    if (!response.ok) return alert((await response.json().catch(() => ({}))).error || "PDF-filen kunde inte hämtas.");
+    const link = document.createElement("a"); link.href = URL.createObjectURL(await response.blob()); link.download = `DinPuls-annonsavtal-${id}.pdf`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
   async function submitContract(event) {
@@ -241,15 +249,18 @@
     const ids = $$(".placement").map(row => row.querySelector(".slot").value);
     if (!ids.length || new Set(ids).size !== ids.length) return alert("Välj minst en unik annonsplats.");
     const placements = ids.map(id => { const slot = slotById(id); return { slotId: id, module: slot.module, group: slot.group, label: slot.label, location: slot.location, page: slot.page }; });
-    const price = Number(form.get("price"));
-    const annualPrice = Number(form.get("annualPrice"));
     const startDate = form.get("startDate");
-    const billingType = form.get("billingType") || "paid";
-    const payload = { id: contractNumber(), contractVersion: CONTRACT_VERSION, company: form.get("company"), orgNo: form.get("orgNo"), contact: form.get("contact"), email: form.get("email"), phone: form.get("phone"), municipality, placements, price: billingType === "complimentary" ? 0 : price, annualPrice, monthlyTotal: billingType === "complimentary" ? 0 : price * placements.length, annualTotal: billingType === "complimentary" ? 0 : annualPrice * placements.length, billingType, valueNote: form.get("valueNote"), renewalType: form.get("renewalType"), signatureRequired: form.get("signatureRequired") === "true", startDate, endDate: endDateFrom(startDate) };
+    const billingType = form.get("billingType");
+    const signatures = window.DinPulsContractWizard?.signatures();
+    if (!signatures?.valid) return alert("Fyll i namn och befattning och skriv båda underskrifterna.");
+    const id = contractNumber();
+    const payload = { id, contractVersion: CONTRACT_VERSION, company: form.get("company"), orgNo: form.get("orgNo"), contact: form.get("contact"), email: form.get("email"), phone: form.get("phone"), municipality, placements, billingType, valueNote: form.get("valueNote"), renewalType: form.get("renewalType"), termsReviewed: true, startDate, endDate: endDateFrom(startDate) };
     try {
-      await api("/portal/admin/contracts", { method: "POST", body: JSON.stringify(payload) });
+      const created = await api("/portal/admin/contracts", { method: "POST", body: JSON.stringify(payload) });
+      const signed = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/sign`, { method: "POST", body: JSON.stringify({ ...signatures, snapshotHash: created.snapshotHash }) });
       event.target.reset(); $("#placements").innerHTML = ""; $("#contractForm").hidden = true;
       await refreshContracts();
+      alert(`Avtalet är signerat, låst och aktiverat. PDF: ${signed.pdfHash.slice(0, 12)}…${signed.emailStatus === "failed" ? "\nAvtalsmejlet kunde inte skickas, men signeringen och PDF-filen är bevarade." : ""}`);
     } catch (error) { alert(error.message); }
   }
 

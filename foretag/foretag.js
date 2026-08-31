@@ -75,7 +75,7 @@
     $("#bannerViews").textContent = Number(stats.impressions || 0).toLocaleString("sv-SE");
     $("#bannerClicks").textContent = Number(stats.clicks || 0).toLocaleString("sv-SE");
     $("#bannerCtr").textContent = `${Number(stats.ctr || 0).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} %`;
-    const priceLabel = contract?.billingType === "complimentary" ? "Kostnadsfri annonsplats" : `${Number(contract?.monthlyTotal || 0).toLocaleString("sv-SE")} kr / månad exkl. moms`;
+    const priceLabel = contract?.billingType === "complimentary" ? "Kostnadsfri annonsplats" : contract?.billingType === "annual" ? `${Number(contract?.annualTotal || 0).toLocaleString("sv-SE")} kr / 12 månader exkl. moms` : `${Number(contract?.monthlyTotal || 0).toLocaleString("sv-SE")} kr / månad exkl. moms`;
     $("#contractSummary").innerHTML = contract ? `<p>Avtalsperiod<br><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></p><p>Månader kvar<br><strong class="months">${monthsLeft(contract.endDate)} månader</strong></p><p>Annonsplatser<br><strong>${placements.map(item => escapeHtml(item.slotId)).join(", ") || "–"}</strong></p><p>Avtalspris<br><strong>${priceLabel}</strong></p>` : "<p>Inget aktivt avtal hittades.</p>";
     const banners = account.banners || [];
     $("#companyBannerRows").innerHTML = placements.length ? placements.map(placement => {
@@ -87,7 +87,7 @@
     }).join("") : '<p class="muted">Inga annonsplatser i ett aktivt avtal.</p>';
     $("#bannerSlot").innerHTML = placements.map(placement => `<option value="${escapeHtml(placement.slotId)}">${escapeHtml(placement.slotId)} · ${escapeHtml(placement.location)}</option>`).join("");
     const included = Number(contract?.includedChanges || 0);
-    $("#companyContractDetail").innerHTML = contract ? `<article class="panel contract-document"><h3>Annonsavtal ${escapeHtml(contract.id)}</h3><dl class="contract-list"><div><dt>Företag</dt><dd>${escapeHtml(profile.company)}</dd></div><div><dt>Organisationsnummer</dt><dd>${escapeHtml(profile.orgNo)}</dd></div><div><dt>Avtalsversion</dt><dd>${escapeHtml(contract.contractVersion)}</dd></div><div><dt>Avtalsperiod</dt><dd>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</dd></div><div><dt>Pris</dt><dd>${priceLabel}</dd></div><div><dt>Förnyelse</dt><dd>${contract.renewalType === "annual-review" ? "Prövas gemensamt efter 12 månader" : "Avslutas vid periodens slut"}</dd></div><div><dt>Signatur</dt><dd>${contract.signatureRequired ? "Krävs" : "Krävs inte"}</dd></div></dl>${contract.valueNote ? `<p><b>Särskild notering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}</article><article class="panel contract-terms"><h3>Omfattning och villkor</h3><p><b>Annonsplatser:</b><br>${placements.map(item => `${escapeHtml(item.slotId)} – ${escapeHtml(item.location)}`).join("<br>")}</p><ol><li>DinPuls visar företagets material på de annonsplatser och under den period som anges ovan.</li><li>Företaget ansvarar för att bilder, texter, länkar och rättigheter till materialet är korrekta.</li><li>Upp till fyra kommande banners kan planeras per annonsplats. Publicerat material kan stoppas av DinPuls om det är olagligt, vilseledande eller tekniskt skadligt.</li><li>Statistik i portalen är en teknisk mätning och garanterar inte ett visst antal visningar, klick eller affärer.</li><li>${included} bannerbyten ingår under avtalsperioden. Avtalet förnyas inte automatiskt utan den förnyelseprövning som anges ovan.</li></ol><p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p></article>` : '<article class="panel"><h3>Inget aktivt avtal</h3><p>Kontakta DinPuls om du förväntar dig att se ett aktivt avtal.</p></article>';
+    $("#companyContractDetail").innerHTML = contract ? `<article class="panel contract-document"><h3>Annonsavtal ${escapeHtml(contract.id)}</h3><dl class="contract-list"><div><dt>Företag</dt><dd>${escapeHtml(profile.company)}</dd></div><div><dt>Organisationsnummer</dt><dd>${escapeHtml(profile.orgNo)}</dd></div><div><dt>Avtalsversion</dt><dd>${escapeHtml(contract.contractVersion)}</dd></div><div><dt>Avtalsperiod</dt><dd>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</dd></div><div><dt>Pris</dt><dd>${priceLabel}</dd></div><div><dt>Förnyelse</dt><dd>${contract.renewalType === "annual-review" ? "Prövas gemensamt efter 12 månader" : "Avslutas vid periodens slut"}</dd></div><div><dt>Signatur</dt><dd>${contract.signedAt ? `Signerades ${escapeHtml(new Date(contract.signedAt).toLocaleString("sv-SE"))}` : "Ej färdigsignerat"}</dd></div></dl>${contract.valueNote ? `<p><b>Särskild notering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}</article><article class="panel contract-terms"><h3>Omfattning och villkor</h3><p><b>Annonsplatser:</b><br>${placements.map(item => `${escapeHtml(item.slotId)} – ${escapeHtml(item.location)}`).join("<br>")}</p><ol><li>DinPuls visar företagets material på de annonsplatser och under den period som anges ovan.</li><li>Företaget ansvarar för att bilder, texter, länkar och rättigheter till materialet är korrekta.</li><li>Fyra faktiska bannerbyten ingår per annonsplats och påbörjad 30-dagarsperiod. Framtida schemaläggning räknas först vid publicering. Publicerat material kan stoppas av DinPuls om det är olagligt, vilseledande eller tekniskt skadligt.</li><li>Statistik i portalen är en teknisk mätning och garanterar inte ett visst antal visningar, klick eller affärer.</li><li>Fyra bannerbyten per plats återställs för varje ny 30-dagarsperiod. Avtalet förnyas inte automatiskt utan den förnyelseprövning som anges ovan.</li></ol><p class="contract-copy-date">Avtalskopian skapades ${escapeHtml(new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" }).format(new Date()))}.</p></article>` : '<article class="panel"><h3>Inget aktivt avtal</h3><p>Kontakta DinPuls om du förväntar dig att se ett aktivt avtal.</p></article>';
     $("#printContract").hidden = !contract;
     $("#profileCompany").value = profile.company || "";
     $("#profileOrg").value = profile.orgNo || "";
@@ -110,7 +110,9 @@
     const past = banners.filter(item => Date.parse(item.startAt) <= Date.now());
     const currentId = past.at(-1)?.id;
     const futureCount = banners.filter(item => Date.parse(item.startAt) > Date.now()).length;
-    $("#scheduleCount").textContent = account.bannerScheduleReady ? `${futureCount} av 4 kommande` : "Schema kunde inte läsas";
+    const latestPeriod = Math.max(-1, ...banners.filter(item => item.publishedAt).map(item => Number(item.changePeriod)));
+    const publishedThisPeriod = banners.filter(item => item.publishedAt && Number(item.changePeriod) === latestPeriod).length;
+    $("#scheduleCount").textContent = account.bannerScheduleReady ? `${publishedThisPeriod} av 4 publicerade · ${futureCount} planerade` : "Schema kunde inte läsas";
     container.innerHTML = !account.bannerScheduleReady
       ? '<p class="muted">Det befintliga bannerschemat kunde inte läsas. Du kan fortfarande prova att planera en ny banner; om servern stoppar uppladdningen visas det riktiga felet.</p>'
       : banners.length ? banners.map(item => {
@@ -196,7 +198,13 @@
         alert("Kontaktuppgifterna är uppdaterade.");
       } catch (error) { alert(error.message); }
     };
-    $("#printContract").onclick = () => window.print();
+    $("#printContract").onclick = async () => {
+      const id = account?.contract?.id;
+      if (!id || !account.contract.hasSignedPdf) return alert("Det finns ännu ingen signerad PDF-kopia.");
+      const response = await fetch(`${apiBase}/portal/company/contracts/${encodeURIComponent(id)}/pdf`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!response.ok) return alert((await response.json().catch(() => ({}))).error || "PDF-filen kunde inte hämtas.");
+      const link = document.createElement("a"); link.href = URL.createObjectURL(await response.blob()); link.download = `DinPuls-annonsavtal-${id}.pdf`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    };
     if (token()) { try { await showApp(); } catch (error) { showLogin(error.message); } } else showLogin();
   }
 

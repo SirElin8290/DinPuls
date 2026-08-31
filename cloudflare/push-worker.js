@@ -74,7 +74,13 @@ async function ensureDatabase(env) {
     ["billing_type", "TEXT NOT NULL DEFAULT 'paid'"],
     ["value_note", "TEXT NOT NULL DEFAULT ''"],
     ["renewal_type", "TEXT NOT NULL DEFAULT 'annual-review'"],
-    ["signature_required", "INTEGER NOT NULL DEFAULT 0"]
+    ["signature_required", "INTEGER NOT NULL DEFAULT 0"],
+    ["customer_signer_name", "TEXT"], ["customer_signer_title", "TEXT"],
+    ["dinpuls_signer_name", "TEXT"], ["dinpuls_signer_title", "TEXT"],
+    ["customer_signature_object_key", "TEXT"], ["dinpuls_signature_object_key", "TEXT"],
+    ["signed_at", "TEXT"], ["contract_snapshot_json", "TEXT"], ["contract_snapshot_hash", "TEXT"],
+    ["signed_pdf_object_key", "TEXT"], ["signed_pdf_hash", "TEXT"],
+    ["contract_email_sent_at", "TEXT"], ["contract_email_status", "TEXT"], ["contract_email_error", "TEXT"]
   ]) {
     if (!existingContractColumns.has(name)) await env.DB.prepare(`ALTER TABLE ad_contracts ADD COLUMN ${name} ${definition}`).run();
   }
@@ -104,6 +110,19 @@ async function ensureDatabase(env) {
     "FOREIGN KEY(company_user_id) REFERENCES business_users(id), FOREIGN KEY(contract_id) REFERENCES ad_contracts(id))"
   ).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_banners_schedule ON ad_banners (contract_id, slot_id, start_at)").run();
+  const bannerColumns = await env.DB.prepare("PRAGMA table_info(ad_banners)").all();
+  const existingBannerColumns = new Set((bannerColumns.results || []).map(column => column.name));
+  for (const [name, definition] of [["published_at", "TEXT"], ["change_period", "INTEGER"]]) {
+    if (!existingBannerColumns.has(name)) await env.DB.prepare(`ALTER TABLE ad_banners ADD COLUMN ${name} ${definition}`).run();
+  }
+  await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS limit_published_banner_changes BEFORE UPDATE OF published_at ON ad_banners WHEN OLD.published_at IS NULL AND NEW.published_at IS NOT NULL BEGIN SELECT CASE WHEN (SELECT COUNT(*) FROM ad_banners b WHERE b.contract_id=NEW.contract_id AND b.slot_id=NEW.slot_id AND b.change_period=NEW.change_period AND b.published_at IS NOT NULL) >= 4 THEN RAISE(ABORT, 'BANNER_CHANGE_LIMIT') END; END").run();
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS contract_slot_reservations (contract_id TEXT NOT NULL, municipality TEXT NOT NULL, slot_id TEXT NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(contract_id, slot_id), FOREIGN KEY(contract_id) REFERENCES ad_contracts(id))"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS contract_slot_period ON contract_slot_reservations(municipality, slot_id, start_date, end_date)").run();
+  await env.DB.prepare(
+    "CREATE TRIGGER IF NOT EXISTS prevent_contract_slot_overlap BEFORE INSERT ON contract_slot_reservations BEGIN SELECT CASE WHEN EXISTS (SELECT 1 FROM contract_slot_reservations r WHERE r.municipality = NEW.municipality AND r.slot_id = NEW.slot_id AND r.start_date <= NEW.end_date AND r.end_date >= NEW.start_date AND r.contract_id <> NEW.contract_id) THEN RAISE(ABORT, 'SLOT_PERIOD_OCCUPIED') END; END"
+  ).run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_daily_stats (" +
     "banner_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, day TEXT NOT NULL, impressions INTEGER NOT NULL DEFAULT 0, clicks INTEGER NOT NULL DEFAULT 0, " +
@@ -113,7 +132,7 @@ async function ensureDatabase(env) {
 }
 
 const PORTAL_STATUSES = new Set(["Utkast", "Skickat", "Aktivt", "Avslutat"]);
-const BILLING_TYPES = new Set(["paid", "complimentary"]);
+const BILLING_TYPES = new Set(["monthly", "annual", "complimentary", "paid"]);
 const RENEWAL_TYPES = new Set(["annual-review", "none"]);
 const SESSION_HOURS = 8;
 const ACCOUNT_TOKEN_HOURS = 48;
@@ -187,7 +206,8 @@ function stockholmDateKey(value) {
 function bannerFromRow(row) {
   return { id: row.id, slotId: row.slot_id, fileName: row.file_name, contentType: row.content_type,
     fileSize: Number(row.file_size), targetUrl: row.target_url || "", startAt: row.start_at,
-    imageUrl: `/ads/assets/${encodeURIComponent(row.id)}`, createdAt: row.created_at };
+    imageUrl: `/ads/assets/${encodeURIComponent(row.id)}`, createdAt: row.created_at,
+    publishedAt: row.published_at || null, changePeriod: row.change_period == null ? null : Number(row.change_period) };
 }
 
 async function activeCompanyContract(env, companyUserId) {
@@ -197,6 +217,12 @@ async function activeCompanyContract(env, companyUserId) {
 
 function contractHasSlot(contract, slotId) {
   try { return JSON.parse(contract?.placements || "[]").some(item => item.slotId === slotId); } catch { return false; }
+}
+
+function bannerChangePeriod(startDate, startAt) {
+  const firstDay = Date.parse(`${startDate}T00:00:00Z`);
+  const publishDay = Date.parse(`${stockholmDateKey(startAt)}T00:00:00Z`);
+  return Math.max(0, Math.floor((publishDay - firstDay) / 2592000000));
 }
 
 async function listCompanyBanners(request, env) {
@@ -232,9 +258,6 @@ async function uploadCompanyBanner(request, env) {
   if (!contract || !contractHasSlot(contract, slotId)) return json(request, { ok: false, error: "Annonsplatsen ingår inte i ditt aktiva avtal." }, 403);
   const scheduledDate = stockholmDateKey(startAt);
   if (scheduledDate < contract.start_date || scheduledDate > contract.end_date) return json(request, { ok: false, error: "Publiceringsdatumet måste ligga inom avtalsperioden." }, 400);
-  const upcoming = await env.DB.prepare("SELECT COUNT(*) AS count FROM ad_banners WHERE company_user_id = ? AND contract_id = ? AND slot_id = ? AND start_at > ?")
-    .bind(session.subject_id, contract.id, slotId, new Date().toISOString()).first();
-  if (Number(upcoming?.count || 0) >= 4) return json(request, { ok: false, error: "Du kan ha högst fyra kommande banners per annonsplats." }, 409);
   const buffer = await request.arrayBuffer();
   const bytes = new Uint8Array(buffer);
   if (bytes.byteLength !== size || !imageTypeMatches(bytes, contentType)) return json(request, { ok: false, error: "Bildfilen kunde inte verifieras." }, 400);
@@ -244,8 +267,8 @@ async function uploadCompanyBanner(request, env) {
   await env.AD_ASSETS.put(objectKey, buffer, { httpMetadata: { contentType, cacheControl: "public, max-age=300" } });
   const now = new Date().toISOString();
   try {
-    await env.DB.prepare("INSERT INTO ad_banners (id, company_user_id, contract_id, slot_id, object_key, file_name, content_type, file_size, target_url, start_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(id, session.subject_id, contract.id, slotId, objectKey, fileName, contentType, size, targetUrl, startAt, now, now).run();
+    await env.DB.prepare("INSERT INTO ad_banners (id, company_user_id, contract_id, slot_id, object_key, file_name, content_type, file_size, target_url, start_at, change_period, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(id, session.subject_id, contract.id, slotId, objectKey, fileName, contentType, size, targetUrl, startAt, bannerChangePeriod(contract.start_date, startAt), now, now).run();
   } catch (error) { await env.AD_ASSETS.delete(objectKey); throw error; }
   return json(request, { ok: true, banner: bannerFromRow({ id, slot_id: slotId, file_name: fileName, content_type: contentType, file_size: size, target_url: targetUrl, start_at: startAt, created_at: now }) }, 201);
 }
@@ -265,8 +288,14 @@ async function currentBanner(request, env, slotId, municipality) {
   if (!MUNICIPALITIES.has(municipality)) return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
   const now = new Date().toISOString();
   const today = stockholmDateKey(now);
-  const row = await env.DB.prepare("SELECT b.* FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id WHERE b.slot_id = ? AND c.municipality = ? AND c.status = 'Aktivt' AND b.start_at <= ? AND c.start_date <= ? AND c.end_date >= ? ORDER BY b.start_at DESC LIMIT 1")
-    .bind(slotId, municipality, now, today, today).first();
+  const due = await env.DB.prepare("SELECT b.id FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id WHERE b.slot_id=? AND c.municipality=? AND c.status='Aktivt' AND b.start_at<=? AND b.published_at IS NULL AND c.start_date<=? AND c.end_date>=? ORDER BY b.start_at ASC")
+    .bind(slotId, municipality, now, today, today).all();
+  for (const banner of due.results || []) {
+    try { await env.DB.prepare("UPDATE ad_banners SET published_at=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(now, now, banner.id).run(); }
+    catch (error) { if (!String(error).includes("BANNER_CHANGE_LIMIT")) throw error; }
+  }
+  const row = await env.DB.prepare("SELECT b.* FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id WHERE b.slot_id=? AND c.municipality=? AND c.status='Aktivt' AND b.published_at IS NOT NULL AND c.start_date<=? AND c.end_date>=? ORDER BY b.start_at DESC LIMIT 1")
+    .bind(slotId, municipality, today, today).first();
   return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
 }
 
@@ -280,7 +309,7 @@ async function recordBannerEvent(request, env) {
   const today = stockholmDateKey(new Date().toISOString());
   const banner = await env.DB.prepare(
     "SELECT b.company_user_id FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id " +
-    "WHERE b.id = ? AND c.status = 'Aktivt' AND c.start_date <= ? AND c.end_date >= ?"
+    "WHERE b.id = ? AND b.published_at IS NOT NULL AND c.status = 'Aktivt' AND c.start_date <= ? AND c.end_date >= ?"
   ).bind(bannerId, today, today).first();
   if (!banner) return json(request, { ok: false, error: "Annonsen är inte aktiv." }, 404);
   const impressions = eventType === "impression" ? 1 : 0;
@@ -428,7 +457,7 @@ async function requireSession(request, env, role) {
   if (!token) return null;
   const tokenHash = await sha256(token);
   const row = await env.DB.prepare("SELECT role, subject_id, expires_at FROM portal_sessions WHERE token_hash = ?").bind(tokenHash).first();
-  if (!row || row.role !== role || Date.parse(row.expires_at) <= Date.now()) {
+  if (!row || (role && row.role !== role) || Date.parse(row.expires_at) <= Date.now()) {
     await env.DB.prepare("DELETE FROM portal_sessions WHERE token_hash = ?").bind(tokenHash).run();
     return null;
   }
@@ -572,6 +601,89 @@ async function requestPasswordReset(request, env) {
   return json(request, { ok: true, message: "Om adressen finns skickas en återställningslänk." });
 }
 
+function snapshotForContract(input, placements, price) {
+  return {
+    document: "DinPuls Annonsavtal v4.0",
+    contractVersion: CONTRACT_VERSION,
+    contractNumber: input.id,
+    company: { name: input.company, orgNo: input.orgNo, contact: input.contact, email: input.email, phone: input.phone },
+    municipality: input.municipality,
+    placements,
+    period: { startDate: input.startDate, endDate: input.endDate },
+    billing: { ...price, placementCount: placements.length },
+    specialTerms: input.valueNote || "",
+    terms: CONTRACT_TERMS
+  };
+}
+
+function dataUrlBytes(value) {
+  const match = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(String(value || ""));
+  if (!match) throw new Error("SIGNATURE_INVALID");
+  const binary = atob(match[1]);
+  if (binary.length < 60 || binary.length > 300000) throw new Error("SIGNATURE_INVALID");
+  return Uint8Array.from(binary, character => character.charCodeAt(0));
+}
+
+function wrapPdfText(font, text, size, maxWidth) {
+  const words = String(text).split(/\s+/); const lines = []; let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) line = candidate;
+    else { if (line) lines.push(line); line = word; }
+  }
+  if (line) lines.push(line); return lines;
+}
+
+async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
+  const pdf = await PDFDocument.create();
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const pageSize = [595.28, 841.89]; const margin = 48; const maxWidth = pageSize[0] - margin * 2;
+  let page; let y;
+  const newPage = () => { page = pdf.addPage(pageSize); y = pageSize[1] - margin; page.drawText("DinPuls Annonsavtal v4.0", { x: margin, y, size: 15, font: bold, color: rgb(0.09, 0.21, 0.30) }); y -= 28; };
+  const ensure = height => { if (y - height < margin) newPage(); };
+  const drawLines = (text, size = 9.5, font = regular, gap = 13) => { const lines = wrapPdfText(font, text, size, maxWidth); ensure(lines.length * gap + 8); for (const line of lines) { page.drawText(line, { x: margin, y, size, font, color: rgb(0.12, 0.16, 0.18) }); y -= gap; } y -= 5; };
+  newPage();
+  drawLines(`Avtalsnummer: ${snapshot.contractNumber}`, 11, bold, 15);
+  drawLines(`Företag: ${snapshot.company.name} (${snapshot.company.orgNo})`);
+  drawLines(`Kontakt: ${snapshot.company.contact}, ${snapshot.company.email}, ${snapshot.company.phone}`);
+  drawLines(`Kommun och period: ${snapshot.municipality}, ${snapshot.period.startDate} – ${snapshot.period.endDate}`);
+  drawLines(`Annonsplatser: ${snapshot.placements.map(item => `${item.slotId} – ${item.location}`).join("; ")}`);
+  drawLines(`Betalning: ${snapshot.billing.label}; ${snapshot.billing.unitPrice} kr per plats; ${snapshot.billing.placementCount} plats(er); total debitering ${snapshot.billing.invoiceTotal} kr ${snapshot.billing.interval}; exklusive moms; ${snapshot.billing.paymentTerms}.`);
+  if (snapshot.specialTerms) drawLines(`Särskilda villkor: ${snapshot.specialTerms}`);
+  for (const term of snapshot.terms) { ensure(40); drawLines(term.title, 10, bold, 14); for (const paragraph of term.paragraphs) drawLines(paragraph); }
+  newPage(); drawLines("UNDERSKRIFTER", 13, bold, 18);
+  drawLines("Genom att skriva under bekräftar jag att jag har rätt att företräda företaget och att jag godkänner avtalet och dess villkor.");
+  const customerImage = await pdf.embedPng(signatures.customer.bytes);
+  const dinpulsImage = await pdf.embedPng(signatures.dinpuls.bytes);
+  page.drawImage(customerImage, { x: margin, y: y - 95, width: 210, height: 80 });
+  page.drawImage(dinpulsImage, { x: 335, y: y - 95, width: 210, height: 80 }); y -= 110;
+  page.drawText(`Företaget: ${signatures.customer.name}`, { x: margin, y, size: 9, font: bold });
+  page.drawText(signatures.customer.title, { x: margin, y: y - 13, size: 9, font: regular });
+  page.drawText(`DinPuls: ${signatures.dinpuls.name}`, { x: 335, y, size: 9, font: bold });
+  page.drawText(signatures.dinpuls.title, { x: 335, y: y - 13, size: 9, font: regular }); y -= 34;
+  drawLines(`Signeringstidpunkt: ${signedAt}`);
+  drawLines(`Avtalssnapshot SHA-256: ${snapshotHash}`, 8);
+  pdf.setTitle(`DinPuls Annonsavtal ${snapshot.contractNumber}`); pdf.setSubject(`Signerad v4.0-avtalskopia, SHA-256 ${snapshotHash}`);
+  return pdf.save();
+}
+
+function uint8ToBase64(bytes) {
+  let value = ""; for (let index = 0; index < bytes.length; index += 0x8000) value += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+  return btoa(value);
+}
+
+async function sendSignedContractEmail(env, contract, pdfBytes) {
+  if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM) throw new Error("E-posttjänsten är inte konfigurerad.");
+  const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({
+    from: env.PORTAL_EMAIL_FROM, to: [contract.email], subject: "Välkommen till DinPuls – ert signerade annonsavtal",
+    html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>Välkommen till DinPuls</h1><p>Hej ${htmlEscape(contract.contact || contract.company)},</p><p>Avtalet för ${htmlEscape(contract.company)} är nu signerat av båda parter och aktiverat. Samma signerade PDF finns bifogad och i företagsportalen.</p><p>I portalen kan ni hantera banners, schemaläggning, statistik och avtalsinformation.</p><p>Vänliga hälsningar<br>DinPuls</p></div>`,
+    text: `Hej ${contract.contact || contract.company},\n\nErt annonsavtal är signerat av båda parter och aktiverat. Den signerade PDF-kopian finns bifogad och i företagsportalen.\n\nVänliga hälsningar\nDinPuls`,
+    attachments: [{ filename: `DinPuls-annonsavtal-${contract.id}.pdf`, content: uint8ToBase64(pdfBytes) }]
+  }) });
+  if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
+}
+
 function contractFromRow(row) {
   return {
     id: row.id, contractVersion: row.contract_version, company: row.company, orgNo: row.org_no,
@@ -582,6 +694,11 @@ function contractFromRow(row) {
     billingType: row.billing_type || "paid", valueNote: row.value_note || "",
     renewalType: row.renewal_type || "annual-review", signatureRequired: Boolean(Number(row.signature_required)),
     status: row.status, activatedAt: row.activated_at || null, welcomeSentAt: row.welcome_sent_at || null,
+    customerSignerName: row.customer_signer_name || null, customerSignerTitle: row.customer_signer_title || null,
+    dinpulsSignerName: row.dinpuls_signer_name || null, dinpulsSignerTitle: row.dinpuls_signer_title || null,
+    signedAt: row.signed_at || null, snapshotHash: row.contract_snapshot_hash || null,
+    pdfHash: row.signed_pdf_hash || null, hasSignedPdf: Boolean(row.signed_pdf_object_key),
+    contractEmailStatus: row.contract_email_status || null, contractEmailSentAt: row.contract_email_sent_at || null,
     created: row.created_at, updated: row.updated_at
   };
 }
@@ -600,15 +717,14 @@ async function createContract(request, env) {
   const email = cleanText(body.email, 254).toLowerCase();
   const company = cleanText(body.company), orgNo = cleanText(body.orgNo, 30), contact = cleanText(body.contact);
   const phone = cleanText(body.phone, 40), municipality = cleanText(body.municipality, 80);
-  const billingType = cleanText(body.billingType, 30) || "paid";
+  const billingType = cleanText(body.billingType, 30);
   const renewalType = cleanText(body.renewalType, 30) || "annual-review";
   const valueNote = cleanText(body.valueNote, 240);
-  const signatureRequired = body.signatureRequired === true ? 1 : 0;
   const placements = Array.isArray(body.placements) ? body.placements.slice(0, 20).map(item => ({
     slotId: cleanText(item.slotId, 40), module: cleanText(item.module, 100), group: cleanText(item.group, 100),
     label: cleanText(item.label, 160), location: cleanText(item.location, 240), page: cleanText(item.page, 100)
   })) : [];
-  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !BILLING_TYPES.has(billingType) || !RENEWAL_TYPES.has(renewalType)) {
+  if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
     return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
   }
   const now = new Date().toISOString();
@@ -625,14 +741,77 @@ async function createContract(request, env) {
   }
   const id = cleanText(body.id, 40);
   if (!/^DP-\d{4}-\d{4}$/.test(id)) return json(request, { ok: false, error: "Ogiltigt avtalsnummer." }, 400);
+  const price = calculateContractPrice(billingType, placements.length);
+  const snapshot = snapshotForContract({ id, company, orgNo, contact, email, phone, municipality, startDate: body.startDate, endDate: body.endDate, valueNote }, placements, price);
+  const snapshotJson = stableStringify(snapshot);
+  const snapshotHash = await sha256(snapshotJson);
   try {
-    await env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, value_note, renewal_type, signature_required, start_date, end_date, included_changes, used_changes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'Utkast', ?, ?)")
-      .bind(id, user.id, "3.0", municipality, JSON.stringify(placements), Number(body.price), Number(body.annualPrice), Number(body.monthlyTotal), Number(body.annualTotal), billingType, valueNote, renewalType, signatureRequired, body.startDate, body.endDate, 4, now, now).run();
+    await env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, value_note, renewal_type, signature_required, start_date, end_date, included_changes, used_changes, status, contract_snapshot_json, contract_snapshot_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 4, 0, 'Utkast', ?, ?, ?, ?)")
+      .bind(id, user.id, CONTRACT_VERSION, municipality, JSON.stringify(placements), price.unitPrice, billingType === "annual" ? price.unitPrice : 0, price.monthlyTotal, price.annualTotal, billingType, valueNote, renewalType, body.startDate, body.endDate, snapshotJson, snapshotHash, now, now).run();
   } catch (error) {
     if (String(error).includes("UNIQUE")) return json(request, { ok: false, error: "Avtalsnumret finns redan." }, 409);
     throw error;
   }
-  return json(request, { ok: true, id }, 201);
+  return json(request, { ok: true, id, snapshot, snapshotHash }, 201);
+}
+
+async function signContract(request, env, id) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet i R2 är inte konfigurerat." }, 503);
+  const body = await readBody(request);
+  const customerName = cleanText(body.customerSignerName), customerTitle = cleanText(body.customerSignerTitle);
+  const dinpulsName = cleanText(body.dinpulsSignerName), dinpulsTitle = cleanText(body.dinpulsSignerTitle);
+  if (!customerName || !customerTitle || !dinpulsName || !dinpulsTitle) return json(request, { ok: false, error: "Namn och befattning krävs för båda parter." }, 400);
+  let customerBytes; let dinpulsBytes;
+  try { customerBytes = dataUrlBytes(body.customerSignature); dinpulsBytes = dataUrlBytes(body.dinpulsSignature); }
+  catch { return json(request, { ok: false, error: "Båda signaturerna måste vara ritade och giltiga." }, 400); }
+  const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id = ?`).bind(id).first();
+  if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  if (contract.contract_version !== CONTRACT_VERSION) return json(request, { ok: false, error: "Endast v4-avtal kan signeras i detta flöde." }, 409);
+  if (contract.signed_at || contract.status === "Aktivt") return json(request, { ok: false, error: "Avtalet är redan signerat och låst." }, 409);
+  const calculatedHash = await sha256(contract.contract_snapshot_json || "");
+  if (!contract.contract_snapshot_json || !safeEqual(calculatedHash, contract.contract_snapshot_hash)) return json(request, { ok: false, error: "Avtalets låsta innehåll kunde inte verifieras." }, 409);
+  if (body.snapshotHash && !safeEqual(body.snapshotHash, calculatedHash)) return json(request, { ok: false, error: "Förhandsgranskningen matchar inte avtalet som ska signeras." }, 409);
+  const overlap = await env.DB.prepare(`SELECT r.contract_id, r.slot_id FROM contract_slot_reservations r WHERE r.municipality = ? AND r.start_date <= ? AND r.end_date >= ? AND r.contract_id <> ? AND r.slot_id IN (${JSON.parse(contract.placements).map(() => "?").join(",")}) LIMIT 1`)
+    .bind(contract.municipality, contract.end_date, contract.start_date, id, ...JSON.parse(contract.placements).map(item => item.slotId)).first();
+  if (overlap) return json(request, { ok: false, error: `Annonsplats ${overlap.slot_id} är redan reserverad under perioden.` }, 409);
+  const legacyContracts = await env.DB.prepare("SELECT id, placements FROM ad_contracts WHERE municipality=? AND status='Aktivt' AND start_date<=? AND end_date>=? AND id<>?").bind(contract.municipality, contract.end_date, contract.start_date, id).all();
+  const requestedSlots = new Set(JSON.parse(contract.placements).map(item => item.slotId));
+  const legacyConflict = (legacyContracts.results || []).find(row => { try { return JSON.parse(row.placements || "[]").some(item => requestedSlots.has(item.slotId)); } catch { return false; } });
+  if (legacyConflict) return json(request, { ok: false, error: "En annonsplats är redan upptagen av ett aktivt befintligt avtal under perioden." }, 409);
+  const signedAt = new Date().toISOString();
+  const pdfBytes = await buildSignedPdf(JSON.parse(contract.contract_snapshot_json), { customer: { name: customerName, title: customerTitle, bytes: customerBytes }, dinpuls: { name: dinpulsName, title: dinpulsTitle, bytes: dinpulsBytes } }, signedAt, calculatedHash);
+  const pdfHash = bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", pdfBytes)));
+  const baseKey = `contracts/${id}/${calculatedHash}`;
+  const customerKey = `${baseKey}/customer-signature.png`, dinpulsKey = `${baseKey}/dinpuls-signature.png`, pdfKey = `${baseKey}/signed-contract.pdf`;
+  if (await env.AD_ASSETS.head(pdfKey)) return json(request, { ok: false, error: "En signerad avtalskopia finns redan och får inte skrivas över." }, 409);
+  await env.AD_ASSETS.put(customerKey, customerBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash } });
+  await env.AD_ASSETS.put(dinpulsKey, dinpulsBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash } });
+  await env.AD_ASSETS.put(pdfKey, pdfBytes, { httpMetadata: { contentType: "application/pdf", contentDisposition: `attachment; filename="DinPuls-annonsavtal-${id}.pdf"`, cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash, pdfHash } });
+  const placements = JSON.parse(contract.placements);
+  const statements = placements.map(item => env.DB.prepare("INSERT INTO contract_slot_reservations(contract_id, municipality, slot_id, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(id, contract.municipality, item.slotId, contract.start_date, contract.end_date, signedAt));
+  statements.push(env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, dinpuls_signer_name=?, dinpuls_signer_title=?, customer_signature_object_key=?, dinpuls_signature_object_key=?, signed_at=?, signed_pdf_object_key=?, signed_pdf_hash=?, status='Aktivt', updated_at=? WHERE id=? AND status='Utkast' AND signed_at IS NULL").bind(customerName, customerTitle, dinpulsName, dinpulsTitle, customerKey, dinpulsKey, signedAt, pdfKey, pdfHash, signedAt, id));
+  try { await env.DB.batch(statements); }
+  catch (error) { console.error("DinPuls avtalslåsning:", error); await Promise.all([customerKey, dinpulsKey, pdfKey].map(key => env.AD_ASSETS.delete(key))); return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "Annonsplatsen hann reserveras av ett annat avtal. Avtalet aktiverades inte." : "Avtalet kunde inte låsas i databasen." }, 409); }
+  let emailStatus = "sent";
+  try { await sendSignedContractEmail(env, { ...contract, id }, pdfBytes); await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(new Date().toISOString(), id).run(); }
+  catch (error) { emailStatus = "failed"; await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error.message, 300), id).run(); }
+  let onboarding = "unchanged";
+  if (!contract.activated_at && !contract.welcome_sent_at) {
+    const claimed = await env.DB.prepare("UPDATE business_users SET welcome_sent_at=?, updated_at=? WHERE id=? AND welcome_sent_at IS NULL AND activated_at IS NULL").bind(signedAt, signedAt, contract.company_user_id).run();
+    if (claimed.meta.changes) try { await issueAndSendAccountToken(env, { ...contract, id: contract.company_user_id }, "activate-account"); onboarding = "sent"; } catch { onboarding = "failed"; await env.DB.prepare("UPDATE business_users SET welcome_sent_at=NULL WHERE id=? AND activated_at IS NULL").bind(contract.company_user_id).run(); }
+  }
+  return json(request, { ok: true, status: "Aktivt", snapshotHash: calculatedHash, pdfHash, emailStatus, onboarding });
+}
+
+async function downloadContractPdf(request, env, id) {
+  const session = await requireSession(request, env);
+  if (!session || !["admin", "company"].includes(session.role)) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const row = await env.DB.prepare("SELECT company_user_id, signed_pdf_object_key FROM ad_contracts WHERE id=?").bind(id).first();
+  if (!row || !row.signed_pdf_object_key || (session.role === "company" && String(row.company_user_id) !== String(session.subject_id))) return json(request, { ok: false, error: "Den signerade avtalskopian finns inte eller tillhör inte kontot." }, 404);
+  const object = await env.AD_ASSETS.get(row.signed_pdf_object_key);
+  if (!object?.body) return json(request, { ok: false, error: "PDF-filen saknas i avtalsarkivet." }, 404);
+  return new Response(object.body, { headers: { ...corsHeaders(request), "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="DinPuls-annonsavtal-${id}.pdf"`, "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" } });
 }
 
 async function updateContractStatus(request, env, id) {
@@ -642,6 +821,8 @@ async function updateContractStatus(request, env, id) {
   if (!PORTAL_STATUSES.has(status)) return json(request, { ok: false, error: "Ogiltig avtalsstatus." }, 400);
   const contract = await env.DB.prepare("SELECT c.status, c.company_user_id, u.email, u.company, u.contact, u.activated_at, u.welcome_sent_at FROM ad_contracts c JOIN business_users u ON u.id = c.company_user_id WHERE c.id = ?").bind(id).first();
   if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  const versionRow = await env.DB.prepare("SELECT contract_version FROM ad_contracts WHERE id=?").bind(id).first();
+  if (versionRow?.contract_version === CONTRACT_VERSION && status === "Aktivt") return json(request, { ok: false, error: "v4-avtal aktiveras endast automatiskt efter två giltiga signaturer och skapad PDF." }, 409);
   const now = new Date().toISOString();
   await env.DB.prepare("UPDATE ad_contracts SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
   let onboarding = "unchanged";
@@ -823,6 +1004,10 @@ export default {
       if (request.method === "POST" && url.pathname === "/portal/account/reset/complete") return completeAccountPassword(request, env, "reset-password");
       if (request.method === "GET" && url.pathname === "/portal/admin/contracts") return listContracts(request, env);
       if (request.method === "POST" && url.pathname === "/portal/admin/contracts") return createContract(request, env);
+      const signContractMatch = /^\/portal\/admin\/contracts\/([^/]+)\/sign$/.exec(url.pathname);
+      if (request.method === "POST" && signContractMatch) return signContract(request, env, decodeURIComponent(signContractMatch[1]));
+      const pdfContractMatch = /^\/portal\/(?:admin|company)\/contracts\/([^/]+)\/pdf$/.exec(url.pathname);
+      if (request.method === "GET" && pdfContractMatch) return downloadContractPdf(request, env, decodeURIComponent(pdfContractMatch[1]));
       const contractMatch = /^\/portal\/admin\/contracts\/([^/]+)$/.exec(url.pathname);
       if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
       const activationMatch = /^\/portal\/admin\/contracts\/([^/]+)\/activation$/.exec(url.pathname);
@@ -850,3 +1035,5 @@ export default {
   }
 };
 import webpush from "web-push";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { BILLING, CONTRACT_TERMS, CONTRACT_VERSION, calculateContractPrice, stableStringify } from "./contract-v4.js";

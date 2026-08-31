@@ -1,15 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 
 const bundle = await build({
-  stdin: {
-    contents: await readFile(new URL("../cloudflare/push-worker.js", import.meta.url), "utf8"),
-    loader: "js",
-    sourcefile: "cloudflare/push-worker.js"
-  },
+  entryPoints: [new URL("../cloudflare/push-worker.js", import.meta.url).pathname.replace(/^\/(.:)/, "$1")],
   bundle: true,
   format: "esm",
   platform: "browser",
@@ -41,6 +37,7 @@ const worker = new Miniflare({
 });
 
 const endpoint = "http://dinpuls.test";
+const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
 
 async function request(path, options = {}) {
   return worker.dispatchFetch(`${endpoint}${path}`, options);
@@ -81,26 +78,36 @@ try {
     phone: "0000000000",
     municipality: "Årjäng",
     placements: [{ slotId: "SERV-01", module: "Service", group: "Service och hantverk", label: "Test", location: "Service och hantverk", page: "service.html" }],
-    price: 0,
-    annualPrice: 0,
-    monthlyTotal: 0,
-    annualTotal: 0,
     billingType: "complimentary",
     valueNote: "Lokalt automatiskt test",
     renewalType: "annual-review",
-    signatureRequired: false,
+    termsReviewed: true,
     startDate: today,
     endDate: nextYear
   }, admin.token), 201);
 
-  const activation = await responseJson(await jsonRequest(`/portal/admin/contracts/${contractId}`, "PATCH", { status: "Aktivt" }, admin.token), 200);
-  assert.equal(activation.onboarding, "email-not-configured");
+  const signature = `data:image/png;base64,${pngBase64}`;
+  const signed = await responseJson(await jsonRequest(`/portal/admin/contracts/${contractId}/sign`, "POST", { customerSignerName: "Kund Test", customerSignerTitle: "Behörig företrädare", dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature }, admin.token), 200);
+  assert.equal(signed.status, "Aktivt");
+  assert.match(signed.snapshotHash, /^[0-9a-f]{64}$/);
+  assert.match(signed.pdfHash, /^[0-9a-f]{64}$/);
+  const adminPdf = await request(`/portal/admin/contracts/${contractId}/pdf`, { headers: { Authorization: `Bearer ${admin.token}` } });
+  assert.equal(adminPdf.status, 200); assert.equal(adminPdf.headers.get("content-type"), "application/pdf");
+  const adminPdfBytes = Buffer.from(await adminPdf.arrayBuffer());
+  assert.equal(adminPdfBytes.subarray(0, 4).toString(), "%PDF");
+  if (process.env.DINPULS_TEST_PDF_PATH) await writeFile(process.env.DINPULS_TEST_PDF_PATH, adminPdfBytes);
+  assert.equal((await request(`/portal/admin/contracts/${contractId}/pdf`)).status, 401, "PDF får aldrig vara publik");
+  const conflictingId = `DP-${today.slice(0, 4)}-9002`;
+  await responseJson(await jsonRequest("/portal/admin/contracts", "POST", { id: conflictingId, company: "Krocktest", orgNo: "111111-1111", contact: "Krock", email: "collision@example.invalid", phone: "000", municipality: "Årjäng", placements: [{ slotId: "SERV-01", module: "Service", group: "Service och hantverk", label: "Test", location: "Service och hantverk", page: "service.html" }], billingType: "monthly", valueNote: "", renewalType: "annual-review", termsReviewed: true, startDate: today, endDate: nextYear }, admin.token), 201);
+  await responseJson(await jsonRequest(`/portal/admin/contracts/${conflictingId}/sign`, "POST", { customerSignerName: "Krock", customerSignerTitle: "VD", dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature }, admin.token), 409);
   const database = await worker.getD1Database("DB");
+  const serverPriced = await database.prepare("SELECT price, monthly_total, annual_total, status FROM ad_contracts WHERE id=?").bind(conflictingId).first();
+  assert.deepEqual([Number(serverPriced.price), Number(serverPriced.monthly_total), Number(serverPriced.annual_total), serverPriced.status], [500, 500, 6000, "Utkast"], "Månadspris och totalsummor ska räknas på servern och krockande avtal får inte aktiveras");
   const user = await database.prepare("SELECT id, active FROM business_users WHERE email = ?").bind("banner-test@example.invalid").first();
   assert.equal(Number(user.active), 0, "Nya konton ska inte vara aktiva innan lösenordet valts");
   const tokenCount = await database.prepare("SELECT COUNT(*) AS count FROM portal_activation_tokens WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(user.id).first();
   assert.equal(Number(tokenCount.count), 1, "Aktivering ska skapa exakt en aktiv token");
-  await jsonRequest(`/portal/admin/contracts/${contractId}`, "PATCH", { status: "Aktivt" }, admin.token);
+  await jsonRequest(`/portal/admin/contracts/${contractId}/sign`, "POST", { customerSignerName: "Kund Test", customerSignerTitle: "Behörig företrädare", dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature }, admin.token);
   const tokenCountAfterDuplicate = await database.prepare("SELECT COUNT(*) AS count FROM portal_activation_tokens WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(user.id).first();
   assert.equal(Number(tokenCountAfterDuplicate.count), 1, "Dubbel statusuppdatering får inte skapa flera aktiveringstoken");
 
@@ -129,8 +136,10 @@ try {
   const resetPassword = "Changed-Company-2026!";
   await responseJson(await jsonRequest("/portal/account/reset/complete", "POST", { token: resetToken, password: resetPassword, passwordConfirmation: resetPassword }), 200);
   company = await responseJson(await jsonRequest("/portal/auth/company", "POST", { email: "banner-test@example.invalid", password: resetPassword }), 200);
+  const companyPdf = await request(`/portal/company/contracts/${contractId}/pdf`, { headers: { Authorization: `Bearer ${company.token}` } });
+  assert.equal(companyPdf.status, 200, "Företaget ska kunna hämta samma signerade PDF");
 
-  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+  const png = Buffer.from(pngBase64, "base64");
   const upload = async (name, startAt, targetUrl) => responseJson(await request("/portal/company/banners", {
     method: "POST",
     headers: {
@@ -157,6 +166,14 @@ try {
   const afterSwitch = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
   assert.equal(afterSwitch.banner.id, second.banner.id, "Den nya bannern ska visas efter bytestiden");
   assert.equal(afterSwitch.banner.targetUrl, "https://example.com/ny");
+
+  const third = await upload("tre.png", new Date(Date.now() - 900).toISOString(), "https://example.com/tre");
+  const fourth = await upload("fyra.png", new Date(Date.now() - 800).toISOString(), "https://example.com/fyra");
+  const fifth = await upload("fem.png", new Date(Date.now() - 700).toISOString(), "https://example.com/fem");
+  await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
+  const publicationRows = await database.prepare("SELECT id, published_at FROM ad_banners WHERE contract_id=? AND slot_id='SERV-01' ORDER BY start_at").bind(contractId).all();
+  assert.equal(publicationRows.results.filter(row => row.published_at).length, 4, "Bara fyra byten får publiceras i samma 30-dagarsperiod");
+  assert.equal(publicationRows.results.find(row => row.id === fifth.banner.id).published_at, null, "Det femte materialet ska förbli opublicerat");
 
   const asset = await request(second.banner.imageUrl);
   assert.equal(asset.status, 200);

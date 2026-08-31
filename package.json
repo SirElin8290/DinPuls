@@ -6,11 +6,13 @@
     "test:banner": "node scripts/test_banner_worker.mjs"
   },
   "dependencies": {
+    "pdf-lib": "1.17.1",
     "web-push": "3.6.7"
   },
   "devDependencies": {
     "esbuild": "0.28.1",
     "miniflare": "5.20260730.0-alpha",
-    "wrangler": "4.118.0"
-  }
+    "wrangler": "4.127.1"
+  },
+  "overrides": { "undici": "7.29.0" }
 }

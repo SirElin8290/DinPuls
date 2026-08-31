@@ -7,6 +7,7 @@ const admin = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 const company = fs.readFileSync(path.join(root, "foretag/foretag.js"), "utf8");
 const account = fs.readFileSync(path.join(root, "foretag/konto.js"), "utf8");
 const worker = fs.readFileSync(path.join(root, "cloudflare/push-worker.js"), "utf8");
+const contractV4 = fs.readFileSync(path.join(root, "cloudflare/contract-v4.js"), "utf8");
 const config = JSON.parse(fs.readFileSync(path.join(root, "data/business-config.json"), "utf8"));
 
 for (const [name, source] of [["admin", admin], ["företag", company]]) {
@@ -29,6 +30,9 @@ assert(worker.includes("portal_activation_tokens") && worker.includes("activate-
 assert(worker.includes("await sha256(token)") && !account.includes("RESEND_API_KEY") && !account.includes("PORTAL_PASSWORD_PEPPER"), "Token ska hash-lagras och inga hemligheter får finnas i frontend");
 assert(worker.includes("ACCOUNT_TOKEN_HOURS = 48") && worker.includes("used_at IS NULL"), "Kontolänkar ska gälla 48 timmar och vara engångslänkar");
 assert(worker.includes("RESEND_API_KEY") && worker.includes("PORTAL_EMAIL_FROM"), "Transaktionell e-post ska använda Cloudflare-miljövariabler/secrets");
+assert((contractV4.match(/"title": "\d+\./g) || []).length === 14 && contractV4.includes("Fyra gånger per påbörjad 30-dagarsperiod") === false && contractV4.includes("upp till fyra gånger per påbörjad 30-dagarsperiod"), "v4 måste innehålla alla 14 beslutade villkorspunkter");
+assert(worker.includes("contract_snapshot_hash") && worker.includes("signed_pdf_hash") && worker.includes("prevent_contract_slot_overlap"), "v4 ska hash-låsas, PDF-arkiveras och skyddas mot platskrockar");
+assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");
 assert(!admin.includes("temporaryPassword") && !fs.readFileSync(path.join(root, "admin/index.html"), "utf8").includes("temporaryPassword"), "Admin ska inte tilldela företagslösenord");
 assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes('href="konto.html"') && account.includes('/portal/account/reset/request'), "Glömt lösenord ska använda det riktiga återställningsflödet");
 assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
@@ -37,12 +41,12 @@ assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_banners"), "Bannerplanerin
 assert(worker.includes("env.AD_ASSETS.put") && worker.includes("imageTypeMatches"), "Bannerbilder måste verifieras och lagras i privat R2");
 assert(worker.includes('/portal/company/banners') && worker.includes('currentBanner(request, env'), "Företags- och publik banner-API måste finnas");
 assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_daily_stats") && worker.includes('/portal/company/stats') && worker.includes('/ads/events'), "Daglig annonsstatistik måste lagras centralt och visas för företaget");
-assert(company.includes('window.print()') && company.includes('Avtalet förnyas inte automatiskt'), "Företaget måste kunna skriva ut en tydlig avtalskopia");
+assert(company.includes('/pdf') && company.includes('Avtalet förnyas inte automatiskt'), "Företaget måste kunna hämta den signerade PDF-kopian");
 for (const id of [...company.matchAll(/\$\("#([A-Za-z][\w-]*)"\)/g)].map(match => match[1])) {
   assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes(`id="${id}"`), `Företagsportalen hänvisar till ett HTML-fält som saknas: ${id}`);
 }
 assert(company.includes('X-Banner-Start') && company.includes('Europe/Stockholm'), "Företagsportalen måste schemalägga och visa svensk tid");
-assert(company.includes('högst fyra') || worker.includes('högst fyra'), "Högst fyra kommande banners ska tillåtas per annonsplats");
+assert(worker.includes('BANNER_CHANGE_LIMIT'), "Högst fyra verkliga bannerbyten ska tillåtas per annonsplats och period");
 assert(config.enabled === true && /^https:\/\//.test(config.apiBase), "Företagsportalen måste ha en säker API-adress");
 
 console.log("✓ Admin- och företagsportalen saknar klientlösenord och använder rollseparerad Worker/D1-auth");
