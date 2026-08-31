@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/update-jobs.yml"
       - "scripts/update_jobs.py"
+      - "data/municipalities.json"
   schedule:
     - cron: "17 */2 * * *"
 
@@ -51,7 +52,7 @@ jobs:
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
           expected = {
               item['name'] for item in config.get('municipalities', [])
-              if item.get('name') and item.get('jobSearchMunicipalityId')
+              if item.get('name') and (item.get('jobSearchMunicipalityId') or item.get('code'))
           }
           municipalities = data.get('municipalities', {})
           assert set(municipalities) == expected, f'Kommuner saknas/fel: expected={sorted(expected)}, got={sorted(municipalities)}'
