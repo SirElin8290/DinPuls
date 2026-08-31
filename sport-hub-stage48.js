@@ -62,7 +62,7 @@
   function clubMatchSummary(club,sport){
     const now=Date.now();
     const matches=clubMatches(club,sport);
-    const previous=[...matches].filter(match=>finished(match)||new Date(match.startTime).getTime()<now).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime))[0];
+    const previous=[...matches].filter(finished).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime))[0];
     const next=matches.find(match=>!finished(match)&&new Date(match.startTime).getTime()>=now);
     const standing=clubStanding(club,sport);
     if(!previous&&!next&&!standing)return '';
