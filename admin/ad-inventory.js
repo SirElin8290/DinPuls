@@ -21,7 +21,9 @@
     { key: "NYH", module: "Nyheter", page: "nyheter.html", count: 4, locations: ["Efter sidhuvudet", "Efter nyhetsfiltren", "I nyhetsflödet", "Efter svenska och internationella källor"] },
     { key: "SERV", module: "Service & hantverk", page: "service.html", count: 4, locations: ["Efter introduktionen", "Efter servicefiltren", "Efter företagskatalogen", "Efter informationen för lokala företag"] },
     { key: "TRAF", module: "Trafik", page: "trafik.html", count: 4, locations: ["Efter introduktionen", "Efter trafikfiltren", "I trafikflödet", "Efter officiella trafikkällor"] },
-    { key: "VARD", module: "Vård & hälsa", page: "vard.html", count: 4, locations: ["Efter akuta vårdkontakter", "Efter vårdfiltren", "Mellan offentlig vård och lokala mottagningar", "Efter lokala mottagningar"] }
+    { key: "VARD", module: "Vård & hälsa", page: "vard.html", count: 4, locations: ["Efter akuta vårdkontakter", "Efter vårdfiltren", "Mellan offentlig vård och lokala mottagningar", "Efter lokala mottagningar"] },
+    { key: "SPORT", module: "Idrott & motion", page: "sport.html", count: 8, locations: ["Efter sportöversikten", "Tidigt i sportflödet", "Efter cirka en fjärdedel av sporterna", "Före mitten av sportflödet", "Efter mitten av sportflödet", "Efter cirka tre fjärdedelar av sporterna", "Sent i sportflödet", "Efter sportflödet"] },
+    { key: "FRIT", module: "Fritid & föreningsliv", page: "fritid.html", count: 4, locations: ["Efter sök- och kommunfiltret", "Efter första delen av fritidskategorierna", "Efter andra delen av fritidskategorierna", "Efter fritidsflödet"] }
   ];
 
   const subpageSlots = subpages.flatMap(page => Array.from({ length: page.count }, (_, index) => {
