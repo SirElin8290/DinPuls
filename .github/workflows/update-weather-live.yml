@@ -39,6 +39,26 @@ jobs:
           XWEATHER_CLIENT_SECRET: ${{ secrets.XWEATHER_CLIENT_SECRET }}
         run: python scripts/update_weather_live.py
 
+      - name: Verifiera kommunregistret i väderdatan
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          data = json.loads(Path('data/weather-live.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          actual = set((data.get('municipalities') or {}).keys())
+          assert actual == expected, f'Väderkommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
+          for item in config.get('municipalities', []):
+              name = item['name']
+              weather = data['municipalities'][name]
+              coordinates = weather.get('coordinates') or {}
+              assert float(coordinates.get('latitude')) == float(item['latitude']), f'{name}: fel latitud'
+              assert float(coordinates.get('longitude')) == float(item['longitude']), f'{name}: fel longitud'
+          print(f'Vederdata innehåller alla {len(expected)} kommuner')
+          PY
+
       - name: Publicera väderläge
         run: |
           git config user.name "github-actions[bot]"
