@@ -188,6 +188,14 @@ function validDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T12:00:00Z`));
 }
 
+function isTwelveMonthContract(startDate, endDate) {
+  if (!validDate(startDate) || !validDate(endDate)) return false;
+  const expectedEnd = new Date(`${startDate}T12:00:00Z`);
+  expectedEnd.setUTCFullYear(expectedEnd.getUTCFullYear() + 1);
+  expectedEnd.setUTCDate(expectedEnd.getUTCDate() - 1);
+  return expectedEnd.toISOString().slice(0, 10) === endDate;
+}
+
 function validDateTime(value) {
   return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && !Number.isNaN(Date.parse(value));
 }
@@ -684,6 +692,28 @@ async function sendSignedContractEmail(env, contract, pdfBytes) {
   if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
 }
 
+async function resendSignedContractEmail(request, env, id) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet i R2 är inte konfigurerat." }, 503);
+  const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id = ?`).bind(id).first();
+  if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  if (!contract.signed_at || !contract.signed_pdf_object_key || contract.status !== "Aktivt") {
+    return json(request, { ok: false, error: "Avtalet är inte färdigsignerat eller saknar arkiverad PDF." }, 409);
+  }
+  const object = await env.AD_ASSETS.get(contract.signed_pdf_object_key);
+  if (!object) return json(request, { ok: false, error: "Den signerade PDF-filen saknas i avtalsarkivet." }, 404);
+  const pdfBytes = new Uint8Array(await object.arrayBuffer());
+  try {
+    await sendSignedContractEmail(env, contract, pdfBytes);
+    const sentAt = new Date().toISOString();
+    await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(sentAt, id).run();
+    return json(request, { ok: true, message: "Den signerade avtalskopian har skickats igen.", sentAt });
+  } catch (error) {
+    await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error?.message || "Okänt e-postfel", 300), id).run();
+    return json(request, { ok: false, error: "Avtalskopian kunde inte skickas. Det signerade avtalet och PDF-filen ligger kvar oförändrade." }, 502);
+  }
+}
+
 function contractFromRow(row) {
   return {
     id: row.id, contractVersion: row.contract_version, company: row.company, orgNo: row.org_no,
@@ -726,6 +756,9 @@ async function createContract(request, env) {
   })) : [];
   if (!company || !orgNo || !contact || !validEmail(email) || !phone || !MUNICIPALITIES.has(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
     return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
+  }
+  if (!isTwelveMonthContract(body.startDate, body.endDate)) {
+    return json(request, { ok: false, error: "Avtalsperioden måste vara exakt 12 månader från startdatum, med slutdatum dagen före motsvarande datum följande år." }, 400);
   }
   const now = new Date().toISOString();
   let user = await env.DB.prepare("SELECT id FROM business_users WHERE email = ?").bind(email).first();
@@ -1013,6 +1046,8 @@ export default {
       if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
       const activationMatch = /^\/portal\/admin\/contracts\/([^/]+)\/activation$/.exec(url.pathname);
       if (request.method === "POST" && activationMatch) return resendActivation(request, env, decodeURIComponent(activationMatch[1]));
+      const contractEmailMatch = /^\/portal\/admin\/contracts\/([^/]+)\/email$/.exec(url.pathname);
+      if (request.method === "POST" && contractEmailMatch) return resendSignedContractEmail(request, env, decodeURIComponent(contractEmailMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);

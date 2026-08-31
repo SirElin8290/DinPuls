@@ -101,7 +101,7 @@
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
     if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
-    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
+    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
     return "";
   }
 
@@ -139,7 +139,13 @@
     alert(result.message || "En ny aktiveringslänk har skickats.");
   }
 
-  function openContract(id) {
+  async function resendContractCopy(id) {
+  const result = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/email`, { method: "POST" });
+  await refreshContracts();
+  alert(result.message || "Den signerade avtalskopian har skickats igen.");
+}
+
+function openContract(id) {
     const contract = contractCache.find(item => item.id === id);
     if (!contract) return;
     let dialog = $("#contractDialog");
@@ -150,7 +156,8 @@
     dialog.querySelector(".dialog-x").onclick = () => dialog.close();
     dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
     dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
-    dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));
+    dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
+  dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));
     dialog.showModal();
   }
 

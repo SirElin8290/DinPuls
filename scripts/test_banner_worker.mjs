@@ -66,7 +66,10 @@ try {
   }), 200);
 
   const today = new Date().toISOString().slice(0, 10);
-  const nextYear = `${Number(today.slice(0, 4)) + 1}${today.slice(4)}`;
+  const contractEnd = new Date(`${today}T12:00:00Z`);
+  contractEnd.setUTCFullYear(contractEnd.getUTCFullYear() + 1);
+  contractEnd.setUTCDate(contractEnd.getUTCDate() - 1);
+  const nextYear = contractEnd.toISOString().slice(0, 10);
   const companyPassword = "Company-Test-2026!";
   const contractId = `DP-${today.slice(0, 4)}-9001`;
   await responseJson(await jsonRequest("/portal/admin/contracts", "POST", {
