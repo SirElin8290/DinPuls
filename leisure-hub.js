@@ -9,7 +9,7 @@
     musik:{title:"Musik, kör & scen",icon:"music-2",accent:"rose",text:"Körer, musikgrupper och lokala scenaktiviteter."},
     skapande:{title:"Konst, hantverk & skapande",icon:"palette",accent:"purple",text:"Måla, skriva, forma och skapa tillsammans."},
     spel:{title:"Spel, gaming & cosplay",icon:"gamepad-2",accent:"blue",text:"Brädspel, rollspel, gaming och fantasifulla möten."},
-    djur:{title:"Djur, hund & häst",icon:"paw-print",accent:"orange",text:"Hundklubbar, ridverksamhet och aktiviteter med djur."},
+    djur:{title:"Djur, hund & häst",icon:"paw-print",accent:"orange",text:"Hundklubbar, djurföreningar och andra aktiviteter med djur."},
     kultur:{title:"Kultur & berättande",icon:"theater",accent:"violet",text:"Litteratur, lokal kultur och möten mellan människor."},
     gemenskap:{title:"Hembygd, byalag & gemenskap",icon:"heart-handshake",accent:"cyan",text:"Mötesplatser, lokalhistoria och föreningar som håller bygden levande."}
   };
@@ -47,7 +47,7 @@
         const visible = expanded ? group.items : group.items.slice(0,INITIAL_ROWS);
         const more = group.items.length - visible.length;
         return `<article class="leisure-module" data-accent="${group.meta.accent}"><header><span class="leisure-module-icon"><i data-lucide="${group.meta.icon}"></i></span><div><span class="section-kicker">Fritid nära dig</span><h2>${esc(group.meta.title)}</h2><p>${esc(group.meta.text)}</p></div><b>${group.items.length}</b></header><div class="leisure-activities">${visible.map(activityRow).join("")}${more>0?`<button class="leisure-show-more" type="button" data-expand="${esc(key)}">Visa ${more} till <i data-lucide="chevron-down"></i></button>`:""}</div></article>`;
-      }).join("") + (current().directoryUrl?`<aside class="leisure-register"><span><i data-lucide="list-tree"></i></span><div><strong>Saknas något?</strong><p>DinPuls kartläggning växer. Kommunens register kan innehålla fler verksamheter.</p></div><a href="${esc(safeUrl(current().directoryUrl))}" target="_blank" rel="noopener noreferrer">Öppna föreningsregistret <i data-lucide="external-link"></i></a></aside>`:"");
+      }).join("") + (current().directoryUrl?`<aside class="leisure-register"><span><i data-lucide="list-tree"></i></span><div><strong>Saknas något?</strong><p>DinPuls kartläggning bygger på kommunala register och verifierade direkta länkar och växer löpande. Kommunens register kan innehålla fler verksamheter.</p></div><a href="${esc(safeUrl(current().directoryUrl))}" target="_blank" rel="noopener noreferrer">Öppna föreningsregistret <i data-lucide="external-link"></i></a></aside>`:"");
       view.querySelectorAll("[data-expand]").forEach(button=>button.addEventListener("click",()=>{expandedCategories.add(button.dataset.expand);render();}));
     }
     if (window.lucide) window.lucide.createIcons();
