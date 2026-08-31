@@ -126,6 +126,13 @@ jobs:
           assert(worker.includes("resendSignedContractEmail") && worker.includes("contractEmailMatch") && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den signerade avtalskopian utan att ändra avtalet");
           assert(worker.includes("isTwelveMonthContract") && worker.includes("Avtalsperioden måste vara exakt 12 månader"), "Backend måste validera exakt 12 månaders avtalsperiod");''')
 
+          replace_once('scripts/test_banner_worker.mjs',
+          '''  const nextYear = `${Number(today.slice(0, 4)) + 1}${today.slice(4)}`;''',
+          '''  const contractEnd = new Date(`${today}T12:00:00Z`);
+            contractEnd.setUTCFullYear(contractEnd.getUTCFullYear() + 1);
+            contractEnd.setUTCDate(contractEnd.getUTCDate() - 1);
+            const nextYear = contractEnd.toISOString().slice(0, 10);''')
+
           print('Riktade avtalsfixar applicerade.')
           PY
 
@@ -140,6 +147,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add admin/admin.js cloudflare/push-worker.js foretag/foretag.js foretag/index.html .github/workflows/validate-launch.yml scripts/test_business_portals.js
+          git add admin/admin.js cloudflare/push-worker.js foretag/foretag.js foretag/index.html .github/workflows/validate-launch.yml scripts/test_business_portals.js scripts/test_banner_worker.mjs
           git commit -m "Täta avtalsdiagnostikens sista luckor"
           git push origin main
