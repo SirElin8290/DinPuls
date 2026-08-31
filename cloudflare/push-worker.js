@@ -825,6 +825,7 @@ async function updateContractStatus(request, env, id) {
   if (versionRow?.contract_version === CONTRACT_VERSION && status === "Aktivt") return json(request, { ok: false, error: "v4-avtal aktiveras endast automatiskt efter två giltiga signaturer och skapad PDF." }, 409);
   const now = new Date().toISOString();
   await env.DB.prepare("UPDATE ad_contracts SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
+  if (status === "Avslutat") await env.DB.prepare("DELETE FROM contract_slot_reservations WHERE contract_id = ?").bind(id).run();
   let onboarding = "unchanged";
   if (contract.status !== "Aktivt" && status === "Aktivt" && !contract.activated_at && !contract.welcome_sent_at) {
     const claim = await env.DB.prepare("UPDATE business_users SET welcome_sent_at = ?, updated_at = ? WHERE id = ? AND welcome_sent_at IS NULL AND activated_at IS NULL").bind(now, now, contract.company_user_id).run();
