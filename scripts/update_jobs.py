@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Hämtar aktuella platsannonser för DinPuls startkommuner.
 
-Kommunernas JobSearch-id:n läses från data/municipalities.json. Varje lyckad
-kommunhämtning får checkedAt, medan updatedAt bara ändras när annonserna
-faktiskt förändras. Tillfälliga API-fel provas om innan tidigare data används.
-Kommuner som ännu saknar JobSearch-id hoppas över explicit i stället för att
-markeras som tekniska fel; det gör stegvis kommunaktivering säker och synlig.
+Kommunernas JobSearch-id:n läses från data/municipalities.json. Om ett särskilt
+JobSearch-id saknas används kommunens centrala SCB-kod som fallback, vilket gör
+att en ny kommun inte behöver ett extra manuellt jobb-ID för att kunna testas.
+Varje lyckad kommunhämtning får checkedAt, medan updatedAt bara ändras när
+annonserna faktiskt förändras. Tillfälliga API-fel provas om innan tidigare
+data används. Kommuner som ännu saknar både JobSearch-id och kommunkod hoppas
+över explicit i stället för att markeras som tekniska fel.
 """
 from __future__ import annotations
 
@@ -131,7 +133,9 @@ def main() -> int:
     configured_names = []
     for municipality in config.get("municipalities", []):
         name = str(municipality.get("name") or "").strip()
-        municipality_id = str(municipality.get("jobSearchMunicipalityId") or "").strip()
+        municipality_id = str(
+            municipality.get("jobSearchMunicipalityId") or municipality.get("code") or ""
+        ).strip()
         if name:
             configured_names.append(name)
         if not name:
@@ -191,7 +195,7 @@ def main() -> int:
     temporary.replace(OUTPUT)
     print(f"Skrev {OUTPUT} för {successful}/{len(configured_names)} kommuner")
     if skipped:
-        print("Hoppade över kommuner utan JobSearch-id: " + ", ".join(skipped))
+        print("Hoppade över kommuner utan JobSearch-id eller kommunkod: " + ", ".join(skipped))
     if failed:
         print("Behöll tidigare data där det gick för: " + ", ".join(failed))
     return 0
