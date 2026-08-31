@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node scripts/test_leisure_quality.js && node scripts/test_leisure_ui.js && node scripts/test_sport_portal.js && node scripts/test_ad_inventory.js && node scripts/test_banner_worker.mjs",
-    "test:banner": "node scripts/test_banner_worker.mjs"
+    "test": "node scripts/test_leisure_quality.js && node scripts/test_leisure_ui.js && node scripts/test_sport_portal.js && node scripts/test_ad_inventory.js && python3 scripts/test_push_notifications.py && node scripts/test_push_worker.js && node scripts/test_banner_worker.mjs",
+    "test:banner": "node scripts/test_banner_worker.mjs",
+    "test:push": "python3 scripts/test_push_notifications.py && node scripts/test_push_worker.js"
   },
   "dependencies": {
     "pdf-lib": "1.17.1",
