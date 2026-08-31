@@ -40,6 +40,16 @@ for (const [municipality, payload] of Object.entries(leisure.municipalities)) {
     assert(Array.isArray(activity.tags) && activity.tags.length > 0, `${municipality}/${activity.name}: taggar saknas`);
     assert.doesNotThrow(() => new URL(activity.url), `${municipality}/${activity.name}: ogiltig URL`);
     assert.equal(new URL(activity.url).protocol, "https:", `${municipality}/${activity.name}: URL ska använda HTTPS`);
+    for (const field of ["calendarUrl", "activityUrl"]) {
+      if (!activity[field]) continue;
+      assert.doesNotThrow(() => new URL(activity[field]), `${municipality}/${activity.name}: ogiltig ${field}`);
+      assert.equal(new URL(activity[field]).protocol, "https:", `${municipality}/${activity.name}: ${field} ska använda HTTPS`);
+    }
+    if (activity.targetAudience) assert(Array.isArray(activity.targetAudience), `${municipality}/${activity.name}: targetAudience ska vara en lista`);
+    if (activity.source) {
+      assert.equal(typeof activity.source.label, "string", `${municipality}/${activity.name}: källnamn saknas`);
+      if (activity.source.url) assert.equal(new URL(activity.source.url).protocol, "https:", `${municipality}/${activity.name}: källänk ska använda HTTPS`);
+    }
   }
 
   // Samma datastruktur används av leisure-hub.js; denna projektion ska alltid kunna renderas.

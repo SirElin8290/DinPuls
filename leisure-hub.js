@@ -3,6 +3,7 @@
   const state = window.DinPulsMunicipalityState;
   const esc = window.DinPulsSecurity.escapeHtml;
   const safeUrl = window.DinPulsSecurity.safeExternalUrl;
+  const cards = window.DinPulsLeisureCards;
   const params = new URLSearchParams(location.search);
   const META = {
     natur:{title:"Scouter, natur & friluftsliv",icon:"compass",accent:"green",text:"Scouter, fåglar, odling och upplevelser utomhus."},
@@ -22,18 +23,11 @@
   const current = () => municipality === ALL_MUNICIPALITIES
     ? {activities:Object.entries(data?.municipalities||{}).flatMap(([name,payload])=>(payload.activities||[]).map(item=>({...item,municipality:name}))),directoryUrl:""}
     : data?.municipalities?.[municipality] || {activities:[],directoryUrl:""};
-  const searchable = item => normalize([item.name,item.categoryLabel,item.type,...(item.tags||[])].join(" "));
-
-  function activityRow(item){
-    return `<a class="leisure-activity" href="${esc(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer"><span class="leisure-activity-mark"><i data-lucide="${item.type === "Kommunal verksamhet" ? "landmark" : item.type === "Fritidsverksamhet" ? "sparkles" : "users"}"></i></span><span><strong>${esc(item.name)}</strong><small>${item.municipality?`${esc(item.municipality)} · `:""}${esc(item.categoryLabel)} · ${esc(item.type)}</small></span><i data-lucide="external-link"></i></a>`;
-  }
-
   function render(){
     const query = normalize(document.querySelector("#leisure-search")?.value);
     const requested = normalize(params.get("kategori"));
     let items = current().activities || [];
-    if (query) items = items.filter(item => searchable(item).includes(query));
-    else if (requested && META[requested]) items = items.filter(item => item.category === requested);
+    items = cards.filterActivities(items,{query,category:requested && META[requested] ? requested : ""});
     const groups = Object.entries(META).map(([id,meta]) => ({id,meta,items:items.filter(item=>item.category===id)})).filter(group=>group.items.length);
     const view = document.querySelector("#leisure-view");
     const status = document.querySelector("#leisure-search-status");
@@ -46,7 +40,7 @@
         const expanded = query || expandedCategories.has(key);
         const visible = expanded ? group.items : group.items.slice(0,INITIAL_ROWS);
         const more = group.items.length - visible.length;
-        return `<article class="leisure-module" data-accent="${group.meta.accent}"><header><span class="leisure-module-icon"><i data-lucide="${group.meta.icon}"></i></span><div><span class="section-kicker">Fritid nära dig</span><h2>${esc(group.meta.title)}</h2><p>${esc(group.meta.text)}</p></div><b>${group.items.length}</b></header><div class="leisure-activities">${visible.map(activityRow).join("")}${more>0?`<button class="leisure-show-more" type="button" data-expand="${esc(key)}">Visa ${more} till <i data-lucide="chevron-down"></i></button>`:""}</div></article>`;
+        return `<article class="leisure-module" data-accent="${group.meta.accent}"><header><span class="leisure-module-icon"><i data-lucide="${group.meta.icon}"></i></span><div><span class="section-kicker">Fritid nära dig</span><h2>${esc(group.meta.title)}</h2><p>${esc(group.meta.text)}</p></div><b>${group.items.length}</b></header><div class="leisure-activities">${visible.map(cards.activityCard).join("")}${more>0?`<button class="leisure-show-more" type="button" data-expand="${esc(key)}">Visa ${more} till <i data-lucide="chevron-down"></i></button>`:""}</div></article>`;
       }).join("") + (current().directoryUrl?`<aside class="leisure-register"><span><i data-lucide="list-tree"></i></span><div><strong>Saknas något?</strong><p>DinPuls kartläggning bygger på kommunala register och verifierade direkta länkar och växer löpande. Kommunens register kan innehålla fler verksamheter.</p></div><a href="${esc(safeUrl(current().directoryUrl))}" target="_blank" rel="noopener noreferrer">Öppna föreningsregistret <i data-lucide="external-link"></i></a></aside>`:"");
       view.querySelectorAll("[data-expand]").forEach(button=>button.addEventListener("click",()=>{expandedCategories.add(button.dataset.expand);render();}));
     }
