@@ -41,10 +41,12 @@ jobs:
           const d = require('./data/sport-feeds.json');
           const failures = d.sources.filter(s => s.status !== 'ok');
           const matches = Object.values(d.municipalities).reduce((sum, item) => sum + (item.matches?.length || 0), 0);
-          console.table(d.sources.map(s => ({id:s.id,status:s.status,matches:s.matchCount,message:s.message||''})));
-          console.log(`Totalt ${matches} matcher.`);
+          const standings = Object.values(d.municipalities).reduce((sum, item) => sum + (item.standings?.length || 0), 0);
+          console.table(d.sources.map(s => ({id:s.id,status:s.status,matches:s.matchCount,standings:s.standingCount||0,message:s.message||''})));
+          console.log(`Totalt ${matches} matcher och ${standings} tabeller.`);
           if (failures.length) console.warn(`${failures.length} källor kunde inte läsas; sidan använder officiella reservlänkar och behåller tidigare data.`);
           if (matches < 1) console.warn('Inga matcher kunde läsas in; föreningar och officiella källor visas fortfarande.');
+          if (standings < 1) throw new Error('Ingen verifierad tabell kunde läsas in.');
           NODE
 
       - name: Spara uppdaterat sportflöde

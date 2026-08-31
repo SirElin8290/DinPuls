@@ -10,13 +10,13 @@
   let municipality = state.getInitial();
   let requested = params.get("kategori") || params.get("sport") || "all";
   let data;
-  const current = () => data?.municipalities?.[municipality] || {clubs:[],liveSources:[],matches:[]};
+  const current = () => data?.municipalities?.[municipality] || {clubs:[],liveSources:[],matches:[],standings:[]};
   const sports = () => [...new Set((current().clubs||[]).flatMap(club=>club.sports||[]))].sort((a,b)=>a.localeCompare(b,"sv"));
   const normalize = value => String(value||"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const meta = sport => META[sport] || ["users","blue"];
   const validMatch = match => match?.sport && match.homeTeam && match.awayTeam && !Number.isNaN(new Date(match.startTime).getTime());
   const finished = match => ["finished","final","ended"].includes(String(match.status||"").toLowerCase()) || (Number.isFinite(Number(match.homeScore)) && Number.isFinite(Number(match.awayScore)));
-  const dateTime = value => new Date(value).toLocaleString("sv-SE",{timeZone:"Europe/Stockholm",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const dateTime = (value,timeTbd=false) => new Date(value).toLocaleString("sv-SE",timeTbd?{timeZone:"Europe/Stockholm",weekday:"short",day:"numeric",month:"short"}:{timeZone:"Europe/Stockholm",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+(timeTbd?" · tid ej fastställd":"");
 
   function providers(sport){
     const items=(current().liveSources||[]).filter(source=>source.sport===sport).map(source=>({...source,local:true}));
@@ -31,16 +31,26 @@
   }
 
   function clubAliases(club,sport){
-    const aliases=[club.name];
-    (club.teams||[]).filter(team=>team.sport===sport).forEach(team=>aliases.push(team.name,`${club.name} ${team.name}`));
-    return aliases.map(normalize).filter(Boolean);
+    const aliases=[club.name,...(club.aliases||[])];
+    (club.teams||[]).filter(team=>team.sport===sport).forEach(team=>aliases.push(...(team.aliases||[]),`${club.name} ${team.name}`));
+    return [...new Set(aliases.map(normalize).filter(Boolean))];
   }
 
   function belongsToClub(match,club,sport){
     const aliases=clubAliases(club,sport);
     const home=normalize(match.homeTeam);
     const away=normalize(match.awayTeam);
-    return aliases.some(alias=>home===alias||away===alias||home.startsWith(`${alias} `)||away.startsWith(`${alias} `)||alias.startsWith(`${home} `)||alias.startsWith(`${away} `));
+    return aliases.some(alias=>home===alias||away===alias);
+  }
+
+  function clubStanding(club,sport){
+    for(const table of current().standings||[]){
+      if(table.sport!==sport)continue;
+      const aliases=clubAliases(club,sport);
+      const row=(table.rows||[]).find(item=>aliases.includes(normalize(item.team)));
+      if(row)return {table,row};
+    }
+    return null;
   }
 
   function clubMatches(club,sport){
@@ -54,17 +64,27 @@
     const matches=clubMatches(club,sport);
     const previous=[...matches].filter(match=>finished(match)||new Date(match.startTime).getTime()<now).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime))[0];
     const next=matches.find(match=>!finished(match)&&new Date(match.startTime).getTime()>=now);
-    if(!previous&&!next)return '';
-    const previousHtml=previous?`<span><small>Senaste match</small><strong>${esc(previous.homeTeam)} ${Number.isFinite(Number(previous.homeScore))?esc(previous.homeScore):"–"}–${Number.isFinite(Number(previous.awayScore))?esc(previous.awayScore):"–"} ${esc(previous.awayTeam)}</strong><em>${esc(dateTime(previous.startTime))}${previous.competition?` · ${esc(previous.competition)}`:""}</em></span>`:'';
-    const nextHtml=next?`<span><small>Nästa match</small><strong>${esc(next.homeTeam)} – ${esc(next.awayTeam)}</strong><em>${esc(dateTime(next.startTime))}${next.competition?` · ${esc(next.competition)}`:""}</em></span>`:'';
-    return `<div class="activity-club-form">${previousHtml}${nextHtml}</div>`;
+    const standing=clubStanding(club,sport);
+    if(!previous&&!next&&!standing)return '';
+    const previousHtml=previous?`<span><small>Senaste match</small><strong>${esc(previous.homeTeam)} ${Number.isFinite(Number(previous.homeScore))?esc(previous.homeScore):"–"}–${Number.isFinite(Number(previous.awayScore))?esc(previous.awayScore):"–"} ${esc(previous.awayTeam)}</strong><em>${esc(dateTime(previous.startTime,previous.timeTbd))}${previous.competition?` · ${esc(previous.competition)}`:""}</em></span>`:'';
+    const nextHtml=next?`<span><small>Nästa match</small><strong>${esc(next.homeTeam)} – ${esc(next.awayTeam)}</strong><em>${esc(dateTime(next.startTime,next.timeTbd))}${next.competition?` · ${esc(next.competition)}`:""}</em></span>`:'';
+    const standingHtml=standing?`<span><small>Tabell</small><strong>${esc(standing.row.position)}:a · ${Number.isFinite(Number(standing.row.points))?`${esc(standing.row.points)} p`:`${esc(standing.row.played)} matcher`}</strong><em>${esc(standing.table.competition)} · ${freshness(standing.table.updatedAt)}</em></span>`:'';
+    return `<div class="activity-club-form">${previousHtml}${nextHtml}${standingHtml}</div>`;
+  }
+
+  function freshness(value){
+    const time=new Date(value).getTime();
+    if(!Number.isFinite(time))return "uppdateringstid saknas";
+    const age=Date.now()-time;
+    const label=new Date(time).toLocaleString("sv-SE",{timeZone:"Europe/Stockholm",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+    return `${age>24*60*60*1000?"kan vara inaktuell · ":"uppdaterad "}${label}`;
   }
 
   function matchRows(sport){
     const oldest=Date.now()-180*86400000;
     const matches=(current().matches||[]).filter(match=>validMatch(match)&&match.sport===sport&&new Date(match.startTime).getTime()>oldest).sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
     if(!matches.length)return '<div class="activity-data-missing"><i data-lucide="link"></i><span><strong>Automatisk matchdata saknas</strong><small>Använd länken till lagets eller förbundets aktuella resultat- och matchsida.</small></span></div>';
-    return '<div class="activity-matches">'+matches.slice(-5).map(match=>`<article><time>${esc(dateTime(match.startTime))}</time><span><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc(match.competition||match.venue||"Match")}</small></span><b>${finished(match)?`${esc(match.homeScore)}–${esc(match.awayScore)}`:"Kommande"}</b>${match.sourceUrl?`<a href="${esc(safeUrl(match.sourceUrl))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna originalkällan">↗</a>`:""}</article>`).join("")+"</div>";
+    return '<div class="activity-matches">'+matches.slice(-5).map(match=>`<article><time>${esc(dateTime(match.startTime,match.timeTbd))}</time><span><strong>${esc(match.homeTeam)} – ${esc(match.awayTeam)}</strong><small>${esc(match.competition||match.venue||"Match")}</small></span><b>${finished(match)?`${esc(match.homeScore)}–${esc(match.awayScore)}`:"Kommande"}</b>${match.sourceUrl?`<a href="${esc(safeUrl(match.sourceUrl))}" target="_blank" rel="noopener noreferrer" aria-label="Öppna originalkällan">↗</a>`:""}</article>`).join("")+"</div>";
   }
 
   function sportModule(sport, query=""){
@@ -74,7 +94,10 @@
       const teams=(club.teams||[]).filter(team=>team.sport===sport);
       const teamLinks=teams.length?`<div class="activity-teams" aria-label="Lag i ${esc(club.name)}">${teams.map(team=>`<a href="${esc(safeUrl(team.url||club.url))}" target="_blank" rel="noopener noreferrer"><span>${esc(team.name)}</span><small>Matcher, resultat och tabell</small><i data-lucide="external-link"></i></a>`).join("")}</div>`:"";
       const summary=clubMatchSummary(club,sport);
-      return `<section class="activity-club"><a class="activity-club-main" href="${esc(safeUrl(club.url))}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${teams.length?`${teams.length} ${teams.length===1?"lag":"lag"} · ${esc(club.source||"Föreningen")}`:esc(club.source||"Föreningen")}</small></span><i data-lucide="external-link"></i></a>${summary}${teamLinks}</section>`;
+      const standing=clubStanding(club,sport);
+      const matchSource=clubMatches(club,sport).find(match=>match.sourceUrl)?.sourceUrl;
+      const actions=(standing||matchSource)?`<div class="activity-club-actions">${matchSource?`<a href="${esc(safeUrl(matchSource))}" target="_blank" rel="noopener noreferrer">Matcher &amp; resultat</a>`:""}${standing?.table.sourceUrl?`<a href="${esc(safeUrl(standing.table.sourceUrl))}" target="_blank" rel="noopener noreferrer">Fullständig tabell</a>`:""}<a href="${esc(safeUrl(club.url))}" target="_blank" rel="noopener noreferrer">Föreningen</a></div>`:"";
+      return `<section class="activity-club"><a class="activity-club-main" href="${esc(safeUrl(club.url))}" target="_blank" rel="noopener noreferrer"><i data-lucide="shield"></i><span><strong>${esc(club.name)}</strong><small>${teams.length?`${teams.length} ${teams.length===1?"lag":"lag"} · ${esc(club.source||"Föreningen")}`:esc(club.source||"Föreningen")}</small></span><i data-lucide="external-link"></i></a>${summary}${actions}${teamLinks}</section>`;
     }).join("");
     return `<article class="activity-module" data-accent="${accent}"><header><span class="activity-icon"><i data-lucide="${icon}"></i></span><div><span class="section-kicker">Idrott</span><h2>${esc(sport)}</h2><p>${clubs.length} ${clubs.length===1?"lokal förening":"lokala föreningar"}</p></div></header><div class="activity-clubs">${clubLinks}</div>${matchRows(sport)}${sourceLinks(sport)}</article>`;
   }
@@ -86,7 +109,8 @@
     const options=[...sports()];
     select.innerHTML='<option value="all">Alla aktiviteter</option>'+options.map(item=>`<option value="${esc(item)}">${esc(item)}</option>`).join("");
     select.value=options.includes(requested)?requested:"all";
-    document.querySelector("#sport-hub-freshness").innerHTML=`<i data-lucide="shield-check"></i> ${sports().length} idrotter · officiella källor och kommunens föreningsregister`;
+    const status=current().dataStatus;
+    document.querySelector("#sport-hub-freshness").innerHTML=`<i data-lucide="shield-check"></i> ${sports().length} idrotter · ${status?.generatedAt?freshness(status.generatedAt):"officiella källor och föreningsregister"}`;
   }
 
   function render(){

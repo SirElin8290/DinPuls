@@ -29,6 +29,11 @@ function parseDate(value) {
     const short = text.match(/\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](20\d{2}))?\s+(\d{1,2})[:.](\d{2})\b/);
     if (short) match = [short[0], short[3] || new Date().getFullYear(), short[2], short[1], short[4], short[5]];
   }
+  if (!match) {
+    const months = { jan: 1, feb: 2, mar: 3, apr: 4, maj: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, nov: 11, dec: 12 };
+    const swedish = text.toLocaleLowerCase("sv-SE").match(/(?:mån|tis|ons|tor|fre|lör|sön)?\s*(\d{1,2})\s+(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\s+(20\d{2})(?:,?\s+(\d{1,2}):(\d{2}))?/);
+    if (swedish) match = [swedish[0], swedish[3], months[swedish[2]], swedish[1], swedish[4] || 0, swedish[5] || 0];
+  }
   if (!match) return null;
   const wanted = [
     Number(match[1]),
@@ -59,6 +64,19 @@ function parseDate(value) {
   );
   const date = new Date(utcGuess - (stockholmAtGuess - utcGuess));
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+const normalizeTeam = value => cleanText(value).toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+
+function sourceTeamNames(source) {
+  return [source.teamFilter, ...(source.teamAliases || [])].map(normalizeTeam).filter(Boolean);
+}
+
+function sourceIncludesTeam(match, source) {
+  const wanted = sourceTeamNames(source);
+  if (!wanted.length) return true;
+  const teams = [normalizeTeam(match.homeTeam), normalizeTeam(match.awayTeam)];
+  return wanted.some(alias => teams.includes(alias));
 }
 
 function parseGenericClubCalendar(html, source) {
@@ -96,6 +114,7 @@ function makeMatch(source, dateText, homeTeam, awayTeam, homeScore, awayScore, v
     sport: source.sport,
     competition: source.competition || "",
     startTime: start.toISOString(),
+    timeTbd: !/\d{1,2}[:.]\d{2}/.test(cleanText(dateText)),
     status: finished ? "finished" : "scheduled",
     homeTeam,
     awayTeam,
@@ -132,9 +151,55 @@ function parseSwehockey(html, source) {
   return [...seen.values()];
 }
 
+function parseLagetDivision(html, source) {
+  const tables = [...String(html).matchAll(/<table\b[^>]*>([\s\S]*?)<\/table>/gi)].map(hit => hit[1]);
+  const matches = [];
+  let standings = null;
+  for (const table of tables) {
+    const rows = [...table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)]
+      .map(row => [...row[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(cell => cleanText(cell[1])))
+      .filter(cells => cells.length);
+    if (!rows.length) continue;
+    const header = rows[0].map(normalizeTeam);
+    if (header.includes("lag") && header.includes("m") && header.includes("p")) {
+      const hasGoals = header.includes("+") && header.includes("-");
+      const body = rows.slice(1).filter(cells => /^\d+$/.test(cells[0]) && cells[1]);
+      if (body.length) {
+        standings = {
+          id: stableId([source.id, source.competition, "standings"]),
+          sourceId: source.id,
+          sourceName: source.sourceName,
+          sourceUrl: source.standingsUrl || source.sourceUrl,
+          municipality: source.municipality,
+          sport: source.sport,
+          competition: source.competition || "",
+          updatedAt: new Date().toISOString(),
+          rows: body.map(cells => ({
+            position: Number(cells[0]), team: cells[1], played: Number(cells[2]), won: Number(cells[3]), drawn: Number(cells[4]), lost: Number(cells[5]),
+            goalsFor: hasGoals ? Number(cells[6]) : null, goalsAgainst: hasGoals ? Number(cells[7]) : null,
+            goalDifference: hasGoals ? Number(cells[8]) : null, points: Number(cells[hasGoals ? 9 : 6])
+          }))
+        };
+      }
+      continue;
+    }
+    for (const cells of rows) {
+      if (cells.length < 2) continue;
+      const dateText = cells[0];
+      const teams = cells[1].match(/^(.+?)\s+[–-]\s+(.+)$/);
+      if (!teams) continue;
+      const score = (cells[2] || "").match(/^(\d{1,3})\s*[–-]\s*(\d{1,3})$/);
+      const match = makeMatch(source, dateText, teams[1], teams[2], score ? Number(score[1]) : NaN, score ? Number(score[2]) : NaN, "");
+      if (match) matches.push(match);
+    }
+  }
+  return { matches: [...new Map(matches.map(match => [match.id, match])).values()], standings: standings ? [standings] : [] };
+}
+
 const adapters = {
   "swehockey-schedule-html": parseSwehockey,
-  "club-calendar-html": parseGenericClubCalendar
+  "club-calendar-html": parseGenericClubCalendar,
+  "laget-division-html": parseLagetDivision
 };
 
 async function fetchText(url) {
@@ -152,12 +217,14 @@ async function collectSource(source) {
   try {
     const adapter = adapters[source.adapter];
     if (!adapter) throw new Error(`Okänd eller ej verifierad adapter: ${source.adapter}`);
-    const rawMatches = adapter(await fetchText(source.sourceUrl), source);
-    const matches = rawMatches.filter(match => !source.teamFilter || [match.homeTeam, match.awayTeam].some(team => team.toLowerCase().includes(source.teamFilter.toLowerCase())));
-    if (!matches.length) throw new Error(`Källan hämtades men inga matcher matchade ${source.teamFilter || "urvalet"}`);
-    return { health: { id: source.id, provider: source.sourceName, sport: source.sport, municipality: source.municipality, status: "ok", matchCount: matches.length, checkedAt: new Date().toISOString(), sourceUrl: source.sourceUrl }, matches };
+    const parsed = adapter(await fetchText(source.sourceUrl), source);
+    const rawMatches = Array.isArray(parsed) ? parsed : parsed.matches || [];
+    const matches = rawMatches.filter(match => sourceIncludesTeam(match, source));
+    const standings = Array.isArray(parsed) ? [] : parsed.standings || [];
+    if (!matches.length && !standings.length) throw new Error(`Källan hämtades men ingen sportdata matchade ${source.teamFilter || "urvalet"}`);
+    return { health: { id: source.id, provider: source.sourceName, sport: source.sport, municipality: source.municipality, status: "ok", matchCount: matches.length, standingCount: standings.length, checkedAt: new Date().toISOString(), sourceUrl: source.sourceUrl }, matches, standings };
   } catch (error) {
-    return { health: { id: source.id, provider: source.sourceName, sport: source.sport, municipality: source.municipality, status: "error", matchCount: 0, checkedAt: new Date().toISOString(), sourceUrl: source.sourceUrl, message: String(error?.message || error), startedAt }, matches: [] };
+    return { health: { id: source.id, provider: source.sourceName, sport: source.sport, municipality: source.municipality, status: "error", matchCount: 0, standingCount: 0, checkedAt: new Date().toISOString(), sourceUrl: source.sourceUrl, message: String(error?.message || error), startedAt }, matches: [], standings: [] };
   }
 }
 
@@ -165,9 +232,9 @@ async function main() {
   const config = JSON.parse(await readFile(SOURCES_PATH, "utf8"));
   let previous = { municipalities: {} };
   try { previous = JSON.parse(await readFile(OUTPUT_PATH, "utf8")); } catch {}
-  const output = { version: 2, generatedAt: new Date().toISOString(), sources: [], municipalities: {} };
+  const output = { version: 3, generatedAt: new Date().toISOString(), sources: [], municipalities: {} };
   for (const [municipality, sources] of Object.entries(config.municipalities || {})) {
-    output.municipalities[municipality] = { matches: [] };
+    output.municipalities[municipality] = { matches: [], standings: [] };
     for (const source of sources.filter(item => item.enabled !== false)) {
       const result = await collectSource({ ...source, municipality: source.municipality || municipality });
       if (result.health.status === "error") {
@@ -177,15 +244,22 @@ async function main() {
           result.health.retainedCount = retained.length;
           result.health.message = `${result.health.message}. ${retained.length} tidigare matcher behölls.`;
         }
+        const retainedStandings = (previous.municipalities?.[municipality]?.standings || []).filter(table => table.sourceId === source.id);
+        if (retainedStandings.length) {
+          result.standings.push(...retainedStandings);
+          result.health.retainedStandingCount = retainedStandings.length;
+        }
       }
       output.sources.push(result.health);
       output.municipalities[municipality].matches.push(...result.matches);
+      output.municipalities[municipality].standings.push(...result.standings);
     }
   }
   await writeFile(OUTPUT_PATH, `${JSON.stringify(output, null, 2)}\n`, "utf8");
   const total = Object.values(output.municipalities).reduce((sum, item) => sum + item.matches.length, 0);
   const failures = output.sources.filter(source => source.status === "error");
-  console.log(`Sportflöde skapat: ${output.sources.length} aktiva källor, ${total} matcher, ${failures.length} fel.`);
+  const tables = Object.values(output.municipalities).reduce((sum, item) => sum + item.standings.length, 0);
+  console.log(`Sportflöde skapat: ${output.sources.length} aktiva källor, ${total} matcher, ${tables} tabeller, ${failures.length} fel.`);
 }
 
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,7 +1,7 @@
 (()=>{
   "use strict";
   const nativeFetch=window.fetch.bind(window);
-  const ENGINE_VERSION="1.0.0";
+  const ENGINE_VERSION="1.1.0";
   const STATUS_MAP={scheduled:"scheduled",notstarted:"scheduled",upcoming:"scheduled",live:"live",inprogress:"live",playing:"live",finished:"finished",final:"finished",ended:"finished",postponed:"postponed",cancelled:"cancelled",canceled:"cancelled"};
   const text=value=>String(value??"").trim();
   const numberOrNull=value=>value===""||value===null||value===undefined?null:Number.isFinite(Number(value))?Number(value):null;
@@ -19,6 +19,7 @@
       sport:text(raw.sport||defaults.sport||"Sport"),
       competition:text(raw.competition||raw.series||raw.tournament),
       startTime:normalizeDate(raw.startTime||raw.start||raw.date||raw.kickoff),
+      timeTbd:Boolean(raw.timeTbd),
       status:normalizeStatus(raw.status),
       clock:text(raw.clock||raw.minute||raw.period),
       homeTeam:text(raw.homeTeam||raw.home||raw.teamHome),
@@ -44,6 +45,24 @@
     return [...map.values()].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
   }
 
+  function normalizeStandingRow(raw){
+    const row={
+      position:numberOrNull(raw.position),team:text(raw.team||raw.name),played:numberOrNull(raw.played),won:numberOrNull(raw.won),drawn:numberOrNull(raw.drawn),lost:numberOrNull(raw.lost),
+      goalsFor:numberOrNull(raw.goalsFor),goalsAgainst:numberOrNull(raw.goalsAgainst),goalDifference:numberOrNull(raw.goalDifference),points:numberOrNull(raw.points)
+    };
+    return row.position&&row.team?row:null;
+  }
+
+  function normalizeStandings(raw,defaults={}){
+    const table={
+      id:text(raw.id),sourceId:text(raw.sourceId||defaults.sourceId),sourceName:text(raw.sourceName||defaults.sourceName),sourceUrl:text(raw.sourceUrl||defaults.sourceUrl),
+      municipality:text(raw.municipality||defaults.municipality),sport:text(raw.sport||defaults.sport),competition:text(raw.competition||raw.series),
+      updatedAt:normalizeDate(raw.updatedAt||defaults.updatedAt),rows:(raw.rows||[]).map(normalizeStandingRow).filter(Boolean)
+    };
+    if(!table.id)table.id=[table.sourceId,table.sport,table.competition].join("|").toLowerCase();
+    return table.sport&&table.competition&&table.rows.length?table:null;
+  }
+
   function mergeData(base,feed){
     const merged=structuredClone(base||{});
     merged.engine={version:ENGINE_VERSION,loadedAt:new Date().toISOString(),feedGeneratedAt:feed?.generatedAt||null};
@@ -53,8 +72,11 @@
       const target=merged.municipalities[municipality]||(merged.municipalities[municipality]={clubs:[],liveSources:[]});
       const rawMatches=[...(target.matches||[]),...(target.fixtures||[]),...(payload.matches||[]),...(payload.fixtures||[])];
       target.matches=deduplicate(rawMatches.map(raw=>normalizeMatch(raw,{municipality,updatedAt:feed.generatedAt})));
+      const rawStandings=[...(target.standings||[]),...(payload.standings||[])];
+      target.standings=[...new Map(rawStandings.map(raw=>normalizeStandings(raw,{municipality,updatedAt:feed.generatedAt})).filter(Boolean).map(table=>[table.id,table])).values()];
       target.dataStatus={
         matchCount:target.matches.length,
+        standingCount:target.standings.length,
         generatedAt:feed.generatedAt||merged.generatedAt||null,
         stale:feed.generatedAt?Date.now()-new Date(feed.generatedAt).getTime()>6*60*60*1000:true
       };
@@ -63,7 +85,8 @@
       if(target.dataStatus)return;
       const rawMatches=[...(target.matches||[]),...(target.fixtures||[])];
       target.matches=deduplicate(rawMatches.map(raw=>normalizeMatch(raw,{municipality,updatedAt:merged.generatedAt})));
-      target.dataStatus={matchCount:target.matches.length,generatedAt:merged.generatedAt||null,stale:true};
+      target.standings=(target.standings||[]).map(raw=>normalizeStandings(raw,{municipality,updatedAt:merged.generatedAt})).filter(Boolean);
+      target.dataStatus={matchCount:target.matches.length,standingCount:target.standings.length,generatedAt:merged.generatedAt||null,stale:true};
     });
     return merged;
   }
@@ -85,5 +108,5 @@
     const url=typeof input==="string"?input:input?.url||"";
     return /(?:^|\/)data\/sports\.json(?:\?|$)/.test(url)?loadMergedSportsData(input,options):nativeFetch(input,options);
   };
-  window.DinPulsSportEngine={version:ENGINE_VERSION,normalizeMatch,mergeData};
+  window.DinPulsSportEngine={version:ENGINE_VERSION,normalizeMatch,normalizeStandings,mergeData};
 })();
