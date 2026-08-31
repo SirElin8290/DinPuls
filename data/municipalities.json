@@ -1,5 +1,5 @@
 {
-  "version": "0.14.0",
+  "version": "0.15.0",
   "defaultMunicipality": "Åmål",
   "municipalities": [
     {
@@ -348,6 +348,37 @@
       "heroImage": null,
       "transportStops": [
         {"id": "740000184", "name": "Sunne station"}
+      ]
+    },
+    {
+      "name": "Eda",
+      "slug": "eda",
+      "code": "1730",
+      "county": "Värmlands län",
+      "latitude": 59.884,
+      "longitude": 12.304,
+      "website": "https://eda.se/",
+      "associationDirectoryUrl": "https://eda.ibgo.se/AssociationRegister",
+      "associationImport": {"parser": "ibgo", "host": "https://eda.ibgo.se", "district": ""},
+      "newsListing": {"url": "https://eda.se/nyheter", "source": "Eda kommun", "pathContains": "__"},
+      "newsSearchTerms": ["eda", "charlottenberg", "åmotfors", "koppom", "skillingmark", "skillingsfors", "eda glasbruk", "lässerud", "adolfsfors", "häljeboda"],
+      "localityAliases": ["eda", "charlottenberg", "åmotfors", "koppom", "skillingmark", "skillingsfors", "eda glasbruk", "lässerud", "adolfsfors", "häljeboda"],
+      "missingPeopleAliases": ["Eda", "Charlottenberg", "Åmotfors", "Koppom", "Skillingmark", "Skillingsfors", "Eda Glasbruk", "Lässerud", "Adolfsfors", "Häljeboda"],
+      "neighbors": ["Arvika", "Årjäng"],
+      "launchMode": "pilot",
+      "eventSources": [
+        {"name": "Evenemang i Eda", "type": "Visit Värmland", "url": "https://www.visitvarmland.com/eda/evenemang", "icon": "map", "automatic": true},
+        {"name": "Eda kommun – uppleva och göra", "type": "Kommunal guide", "url": "https://eda.se/uppleva", "icon": "landmark"}
+      ],
+      "lunchSources": [
+        {"id": "kallmans-konditori", "name": "Källmans Konditori", "url": "https://xn--kllmans-5wa.se/lunch/", "address": "Storgatan 14, Charlottenberg", "hours": "Lunch vardagar", "parser": "weekday-headings"}
+      ],
+      "housingProviders": [
+        {"name": "Eda Bostads AB", "url": "https://bostadsbolaget.eda.se/ledigt/lagenhet", "official": true}
+      ],
+      "heroImage": null,
+      "transportStops": [
+        {"id": "740000048", "name": "Charlottenberg station"}
       ]
     }
   ]
