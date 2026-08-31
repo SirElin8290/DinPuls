@@ -4,6 +4,8 @@
 Kommunernas JobSearch-id:n läses från data/municipalities.json. Varje lyckad
 kommunhämtning får checkedAt, medan updatedAt bara ändras när annonserna
 faktiskt förändras. Tillfälliga API-fel provas om innan tidigare data används.
+Kommuner som ännu saknar JobSearch-id hoppas över explicit i stället för att
+markeras som tekniska fel; det gör stegvis kommunaktivering säker och synlig.
 """
 from __future__ import annotations
 
@@ -123,6 +125,7 @@ def main() -> int:
     municipalities = {}
     successful = 0
     failed = []
+    skipped = []
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     configured_names = []
@@ -131,8 +134,11 @@ def main() -> int:
         municipality_id = str(municipality.get("jobSearchMunicipalityId") or "").strip()
         if name:
             configured_names.append(name)
-        if not name or not municipality_id:
-            failed.append(name or "Namnlös kommun")
+        if not name:
+            failed.append("Namnlös kommun")
+            continue
+        if not municipality_id:
+            skipped.append(name)
             if name in previous_municipalities:
                 municipalities[name] = previous_municipalities[name]
             continue
@@ -163,17 +169,18 @@ def main() -> int:
                 municipalities[name] = previous_municipalities[name]
 
     if successful == 0:
-        print("Ingen kommun kunde uppdateras; behåller befintlig jobs.json")
+        print("Ingen konfigurerad kommun kunde uppdateras; behåller befintlig jobs.json")
         return 1
 
     # En partiell körning får behålla tidigare kommuninnehåll, men workflowen
-    # kan ändå upptäcka att checkedAt inte är färskt för den kommunen.
+    # kan ändå upptäcka att checkedAt inte är färskt för en konfigurerad kommun.
     output = {
         "generatedAt": now,
         "source": SOURCE,
         "municipalities": municipalities,
         "successfulMunicipalities": successful,
         "configuredMunicipalities": len(configured_names),
+        "skippedMunicipalities": skipped,
         "failedMunicipalities": failed,
     }
     temporary = OUTPUT.with_suffix(".json.tmp")
@@ -183,6 +190,8 @@ def main() -> int:
     )
     temporary.replace(OUTPUT)
     print(f"Skrev {OUTPUT} för {successful}/{len(configured_names)} kommuner")
+    if skipped:
+        print("Hoppade över kommuner utan JobSearch-id: " + ", ".join(skipped))
     if failed:
         print("Behöll tidigare data där det gick för: " + ", ".join(failed))
     return 0
