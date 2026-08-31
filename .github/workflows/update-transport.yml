@@ -49,6 +49,11 @@ jobs:
 
           path = Path("data/transport.json")
           data = json.loads(path.read_text(encoding="utf-8"))
+          config = json.loads(Path("data/municipalities.json").read_text(encoding="utf-8"))
+          expected = {
+              item["name"] for item in config.get("municipalities", [])
+              if item.get("name") and item.get("transportStops")
+          }
           generated = datetime.fromisoformat(str(data.get("generatedAt", "")).replace("Z", "+00:00"))
           age = datetime.now(timezone.utc) - generated.astimezone(timezone.utc)
           municipalities = data.get("municipalities") or {}
@@ -58,8 +63,15 @@ jobs:
               raise SystemExit(f"Transportfilen är inte färsk: {age.total_seconds():.0f} sekunder gammal")
           if data.get("source") != "Trafiklab":
               raise SystemExit("Transportfilen saknar Trafiklab som källa")
+          if set(municipalities) != expected:
+              raise SystemExit(f"Transportkommuner saknas/fel: expected={sorted(expected)}, got={sorted(municipalities)}")
           if not municipalities or stops == 0:
               raise SystemExit("Transportfilen saknar kommuner eller hållplatser")
+          for name, municipality in municipalities.items():
+              configured = {str(stop["id"]) for stop in next(item for item in config["municipalities"] if item["name"] == name).get("transportStops", [])}
+              actual = {str(stop.get("id")) for stop in (municipality or {}).get("stops", [])}
+              if actual != configured:
+                  raise SystemExit(f"{name}: hållplatser matchar inte central konfiguration: expected={sorted(configured)}, got={sorted(actual)}")
 
           print(f"Transportdata verifierad: {len(municipalities)} kommuner, {stops} hållplatser, {age.total_seconds():.0f} sekunder gammal")
           PY
