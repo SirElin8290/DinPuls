@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - ".github/workflows/update-live-data.yml"
+      - "data/municipalities.json"
       - "scripts/update_road_traffic.py"
   schedule:
     - cron: "7,22,37,52 * * * *"
@@ -52,6 +53,10 @@ jobs:
           municipalities = data.get("municipalities")
           if not isinstance(municipalities, dict) or not municipalities:
               raise SystemExit("road-traffic.json saknar kommunflöden")
+          config = json.loads(Path("data/municipalities.json").read_text(encoding="utf-8"))
+          expected = {item["name"] for item in config.get("municipalities", []) if item.get("name")}
+          if set(municipalities) != expected:
+              raise SystemExit(f"Trafikkommuner avviker: expected={sorted(expected)}, got={sorted(municipalities)}")
           print(f"Verifierad trafikdata: {len(municipalities)} kommuner, {age:.0f} sekunder gammal")
           PY
 
