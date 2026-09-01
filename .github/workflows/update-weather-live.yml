@@ -9,6 +9,12 @@ on:
       - "data/municipalities.json"
   schedule:
     - cron: "3,13,23,33,43,53 * * * *"
+  workflow_run:
+    workflows:
+      - "Uppdatera kollektivtrafik"
+      - "Uppdatera dagens lunch"
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -19,6 +25,7 @@ concurrency:
 
 jobs:
   update:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -68,17 +75,33 @@ jobs:
           print(f'Vederdata innehåller alla {len(expected)} kommuner')
           PY
 
-      - name: Publicera väderläge
+      - name: Publicera väderläge konfliktsäkert
+        shell: bash
+        env:
+          XWEATHER_CLIENT_ID: ${{ secrets.XWEATHER_CLIENT_ID }}
+          XWEATHER_CLIENT_SECRET: ${{ secrets.XWEATHER_CLIENT_SECRET }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/weather-live.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Uppdatera väderläget"
-          for attempt in 1 2 3; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            git rebase --abort 2>/dev/null || true
-            sleep $((attempt * 3))
+          for attempt in 1 2 3 4; do
+            echo "Publiceringsförsök $attempt av 4"
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/update_weather_live.py
+            git add data/weather-live.json
+            if git diff --cached --quiet; then
+              echo "Väderfilen är redan aktuell."
+              exit 0
+            fi
+            git commit -m "Uppdatera väderläget"
+            if git push origin HEAD:main; then
+              echo "Nytt väderläge publicerat."
+              exit 0
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              sleep $((attempt * 2))
+            fi
           done
-          echo "Kunde inte publicera väderläget efter tre försök" >&2
+          echo "Kunde inte publicera väderläget efter fyra försök" >&2
           exit 1

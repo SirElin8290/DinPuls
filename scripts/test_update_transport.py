@@ -23,6 +23,9 @@ def api_departure(hours=0):
 
 
 class UpdateTransportTests(unittest.TestCase):
+    def setUp(self):
+        transport._last_request_started = 0.0
+
     def test_registry_loader_keeps_municipality_without_stop(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "municipalities.json"
@@ -115,6 +118,13 @@ class UpdateTransportTests(unittest.TestCase):
         })
         self.assertEqual(departure["scheduled"], "2026-08-11T08:20:00+02:00")
         self.assertEqual(departure["realtime"], "2026-08-11T08:22:00+02:00")
+
+    def test_requests_are_globally_paced(self):
+        with patch.object(transport.time, "monotonic", side_effect=[10.1, 10.1]), patch.object(transport.time, "sleep") as sleep:
+            transport._last_request_started = 10.0
+            transport.pace_request()
+        sleep.assert_called_once()
+        self.assertAlmostEqual(sleep.call_args.args[0], transport.MIN_REQUEST_INTERVAL_SECONDS - 0.1)
 
 
 if __name__ == "__main__":

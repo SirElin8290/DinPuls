@@ -25,8 +25,11 @@ DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
 FETCH_ATTEMPTS = 3
 FETCH_TIMEOUT_SECONDS = 25
+MIN_REQUEST_INTERVAL_SECONDS = 0.35
+MAX_RATE_LIMIT_DELAY_SECONDS = 15
 MIN_DEPARTURES_FOR_DEEP_SEARCH = 4
 TARGET_DEPARTURES = 10
+_last_request_started = 0.0
 
 
 def load_json(path: Path, fallback):
@@ -80,12 +83,23 @@ def future_departures(stop, now):
     )[:MAX_DEPARTURES]
 
 
+def pace_request():
+    """Undvik täta anropsskurar när flera kommuner uppdateras i samma körning."""
+    global _last_request_started
+    elapsed = time.monotonic() - _last_request_started
+    if _last_request_started and elapsed < MIN_REQUEST_INTERVAL_SECONDS:
+        time.sleep(MIN_REQUEST_INTERVAL_SECONDS - elapsed)
+    _last_request_started = time.monotonic()
+
+
 def fetch(api_key, area_id, query_time=None):
     time_path = f"/{quote(query_time)}" if query_time else ""
     url = f"{API_URL}/{quote(area_id)}{time_path}?key={quote(api_key)}"
     last_error = "okänt fel"
 
     for attempt in range(1, FETCH_ATTEMPTS + 1):
+        retry_after = None
+        pace_request()
         request = Request(url, headers={"User-Agent": "DinPuls/transport"})
         try:
             with urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
@@ -97,6 +111,7 @@ def fetch(api_key, area_id, query_time=None):
             last_error = f"Trafiklab svarade med HTTP {error.code}"
             if 400 <= error.code < 500 and error.code not in {408, 429}:
                 break
+            retry_after = error.headers.get("Retry-After") if error.headers else None
         except URLError as error:
             last_error = f"Trafiklab kunde inte nås: {error.reason}"
         except TimeoutError:
@@ -105,7 +120,8 @@ def fetch(api_key, area_id, query_time=None):
             last_error = str(error)
 
         if attempt < FETCH_ATTEMPTS:
-            delay = attempt * 2
+            requested_delay = int(retry_after) if str(retry_after).isdigit() else attempt * 2
+            delay = min(max(requested_delay, attempt * 2), MAX_RATE_LIMIT_DELAY_SECONDS)
             print(f"{area_id}: hämtningsförsök {attempt} misslyckades ({last_error}). Försöker igen om {delay} s.")
             time.sleep(delay)
 
