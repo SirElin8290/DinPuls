@@ -318,8 +318,6 @@ def events_from_filter_api(markup: str, municipality: str, source: dict) -> list
             continue
         item_url = urljoin(source["url"], str(item.get("Url") or source["url"]))
         event_category, label = category(title)
-        # Återkommande kalendrar kan innehålla hundratals datum. Tolv framtida
-        # tillfällen per post räcker för en snabb lokal kalender utan dubblettbrus.
         future = [row for row in occurrence_dates(item) if row[1] >= today][:12]
         for start, end, time_label in future:
             identifier = hashlib.sha1(
@@ -338,6 +336,18 @@ def events_from_filter_api(markup: str, municipality: str, source: dict) -> list
                 "url": item_url,
             })
     return results
+
+
+def merge_event_rows(existing: list[dict], collected: list[dict]) -> list[dict]:
+    """Slår ihop event så färsk automatdata ersätter cache, medan verifierat vinner."""
+    unique = {}
+    for item in collected + existing:
+        title_key = re.sub(r"\W+", "", str(item.get("title", "")).casefold())
+        key = f"{title_key}|{item.get('startDate')}"
+        current = unique.get(key)
+        if not current or item.get("verified"):
+            unique[key] = item
+    return list(unique.values())
 
 
 def main() -> int:
@@ -399,17 +409,11 @@ def main() -> int:
                 health.append({"name": source["name"], "url": source["url"], "status": "error", "events": 0, "checkedAt": now, "message": str(error)[:180]})
                 print(f"VARNING {municipality}: {source['name']} – {error}")
 
-        unique = {}
-        for item in existing + collected:
-            title_key = re.sub(r"\W+", "", str(item.get("title", "")).casefold())
-            key = f"{title_key}|{item.get('startDate')}"
-            current = unique.get(key)
-            if not current or item.get("verified"):
-                unique[key] = item
-        ordered = sorted(unique.values(), key=lambda item: (item.get("startDate") or "", item.get("title") or ""))
+        ordered = sorted(
+            merge_event_rows(existing, collected),
+            key=lambda item: (item.get("startDate") or "", item.get("title") or ""),
+        )
         selected = ordered[:80]
-        # Stora manuellt verifierade evenemang får aldrig trängas undan när en
-        # automatisk kalender innehåller fler än 80 mindre aktiviteter.
         selected_keys = {item.get("id") for item in selected}
         for verified in (item for item in ordered if item.get("verified") and item.get("id") not in selected_keys):
             replace_at = next((index for index in range(len(selected) - 1, -1, -1) if not selected[index].get("verified")), None)
