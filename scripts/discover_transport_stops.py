@@ -3,6 +3,8 @@
 
 API-nyckeln läses enbart från TRAFIKLAB_API_KEY och skrivs aldrig till fil.
 Manuellt granskade hållplats-id:n läses ur den centrala kommunfilen.
+Om kommunnamnet inte är samma som kollektivtrafikens huvudort kan
+transportSearchName anges i data/municipalities.json.
 Kandidater sparas fortsatt i data/stop-candidates.json.
 """
 from __future__ import annotations
@@ -21,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITY_FILE = ROOT / "data" / "municipalities.json"
 CANDIDATE_FILE = ROOT / "data" / "stop-candidates.json"
 API_KEY = os.getenv("TRAFIKLAB_API_KEY", "").strip()
+
 
 def normalize_name(value: str) -> str:
     value = unicodedata.normalize("NFKC", str(value)).casefold().strip()
@@ -94,8 +97,9 @@ def main() -> int:
 
     for municipality in config.get("municipalities", []):
         name = municipality["name"]
+        search_name = str(municipality.get("transportSearchName") or name).strip()
         try:
-            groups = fetch_candidates(name)
+            groups = fetch_candidates(search_name)
         except RuntimeError as error:
             print(f"{name}: {error}")
             return 1
@@ -105,14 +109,14 @@ def main() -> int:
             str(stop.get("id")) for stop in configured_stops
             if str(stop.get("id", "")).isdigit()
         }
-        selected = choose_safe(name, groups, configured_ids)
+        selected = choose_safe(search_name, groups, configured_ids)
         if len(configured_stops) == 1 and configured_ids:
             # ID:t i centralkonfigurationen är manuellt verifierat. Använd det
-            # även om Trafiklabs
-            # namnsökning tillfälligt ändrar sortering eller inte returnerar det.
+            # även om Trafiklabs namnsökning tillfälligt ändrar sortering eller inte returnerar det.
             selected = configured_stops[0]
         candidates = [public_candidate(group) for group in groups[:10]]
         result["municipalities"][name] = {
+            "searchName": search_name,
             "selectedId": str(selected.get("id")) if selected else None,
             "selectedName": str(selected.get("name")) if selected else None,
             "candidates": candidates,
@@ -124,9 +128,9 @@ def main() -> int:
                 "name": str(selected["name"]),
             }]
             selected_count += 1
-            print(f"{name}: säker träff hittad ({selected['name']})")
+            print(f"{name}: säker träff hittad via {search_name} ({selected['name']})")
         else:
-            print(f"{name}: ingen säker exakt träff; lämnar hållplats-id tomt")
+            print(f"{name}: ingen säker exakt träff via {search_name}; lämnar hållplats-id tomt")
 
     MUNICIPALITY_FILE.write_text(
         json.dumps(config, ensure_ascii=False, indent=2) + "\n",
