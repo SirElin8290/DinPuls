@@ -1,5 +1,6 @@
 import json
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 import update_events
@@ -27,6 +28,16 @@ class EventUpdateTests(unittest.TestCase):
 
     def test_expired_catalog_event_is_removed(self):
         self.assertIsNone(update_events.catalog_event({"title":"Gammalt", "startDate":"2020-01-01"}, "Åmål"))
+
+    def test_visit_varmland_time_label_uses_swedish_summer_time(self):
+        start = int(datetime(2026, 9, 5, 8, 0, tzinfo=timezone.utc).timestamp())
+        end = int(datetime(2026, 9, 5, 15, 0, tzinfo=timezone.utc).timestamp())
+        self.assertEqual(update_events.visit_varmland_time_label(start, end), "10:00–17:00")
+
+    def test_visit_varmland_all_day_midnight_is_not_shown_as_clock_time(self):
+        start = int(datetime(2026, 8, 29, 22, 0, tzinfo=timezone.utc).timestamp())
+        end = int(datetime(2026, 9, 29, 22, 0, tzinfo=timezone.utc).timestamp())
+        self.assertEqual(update_events.visit_varmland_time_label(start, end), "Se källan")
 
 
 if __name__ == "__main__":
