@@ -87,7 +87,7 @@ def default_for(filename: str, municipality: dict) -> object:
         "housing.json": {"total": 0, "listings": [], "providers": providers},
         "important-sources.json": [{"name": f"{name} kommun", "url": website}],
         "important.json": {"items": [], "checkedAt": None, "sourceHealth": []},
-        "jobs.json": {"municipalityId": municipality.get("jobSearchMunicipalityId"), "total": 0, "jobs": []},
+        "jobs.json": {"municipalityId": municipality.get("jobSearchMunicipalityId") or municipality.get("code"), "total": 0, "jobs": []},
         "leisure-curated.json": {"directoryUrl": directory, "activities": []},
         "leisure.json": {"directoryUrl": directory, "activities": []},
         "lunch-sources.json": municipality.get("lunchSources", []),
