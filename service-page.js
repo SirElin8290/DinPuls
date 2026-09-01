@@ -2,6 +2,7 @@ const serviceState = window.DinPulsMunicipalityState;
 let serviceMunicipality = serviceState.getInitial();
 let serviceData;
 let serviceSupplement;
+let serviceLaunchSupplement;
 
 const serviceAdvertisers = {
   "Årjäng": {
@@ -105,7 +106,8 @@ function allServiceBusinesses() {
   const seen = new Set();
   return [
     ...(serviceData?.businesses || []),
-    ...(serviceSupplement?.businesses || [])
+    ...(serviceSupplement?.businesses || []),
+    ...(serviceLaunchSupplement?.businesses || [])
   ]
     .map(business => ({ ...business, category: inferServiceCategory(business) }))
     .filter(business => {
@@ -165,14 +167,17 @@ function renderServiceAds() {
 }
 
 async function initializeServicePage() {
-  const [baseResponse, supplementResponse] = await Promise.all([
+  const [baseResponse, supplementResponse, launchSupplementResponse] = await Promise.all([
     fetch("data/service.json", { cache: "no-cache" }),
-    fetch("data/service-private-supplement.json", { cache: "no-cache" })
+    fetch("data/service-private-supplement.json", { cache: "no-cache" }),
+    fetch("data/service-launch-supplement.json", { cache: "no-cache" })
   ]);
   if (!baseResponse.ok) throw new Error(`Servicedata kunde inte laddas (${baseResponse.status})`);
   serviceData = await baseResponse.json();
   serviceSupplement = supplementResponse.ok ? await supplementResponse.json() : { businesses: [] };
+  serviceLaunchSupplement = launchSupplementResponse.ok ? await launchSupplementResponse.json() : { businesses: [] };
   if (!supplementResponse.ok) console.warn(`Kompletterande servicedata kunde inte laddas (${supplementResponse.status})`);
+  if (!launchSupplementResponse.ok) console.warn(`Lanseringens kompletterande servicedata kunde inte laddas (${launchSupplementResponse.status})`);
 
   const municipalitySelect = document.querySelector("#service-municipality");
   const groupSelect = document.querySelector("#service-group");
