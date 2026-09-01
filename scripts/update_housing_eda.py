@@ -50,6 +50,22 @@ def detail_ids(markup: str) -> set[str]:
     return ids
 
 
+def diagnostics(markup: str, label: str) -> None:
+    scripts = re.findall(r"<script\b[^>]*\bsrc=[\"']([^\"']+)", markup, flags=re.I)
+    forms = re.findall(r"<form\b[^>]*\baction=[\"']([^\"']+)", markup, flags=re.I)
+    urls = sorted(set(re.findall(r"https?://[^\"'<>\s]+", html.unescape(markup))))
+    interesting = [url for url in urls if any(word in url.lower() for word in ("api", "ledig", "objekt", "object", "market", "rental"))]
+    print(f"DIAG {label}: html={len(markup)} bytes")
+    print(f"DIAG {label}: scripts={scripts[-12:]}")
+    print(f"DIAG {label}: forms={forms[-8:]}")
+    print(f"DIAG {label}: interesting_urls={interesting[-20:]}")
+    for token in ("ledigt", "detail", "objekt", "object", "api", "rental", "vacant"):
+        positions = [m.start() for m in re.finditer(token, markup, flags=re.I)][:3]
+        for position in positions:
+            snippet = re.sub(r"\s+", " ", markup[max(0, position-180):position+300])
+            print(f"DIAG {label} {token}: {snippet[:480]}")
+
+
 def number(value: str) -> int | float | None:
     cleaned = value.replace(" ", "").replace("\xa0", "").replace(",", ".")
     cleaned = re.sub(r"[^0-9.]", "", cleaned)
@@ -66,18 +82,15 @@ def parse_detail(identifier: str) -> dict:
     url = urljoin(BASE_URL, f"ledigt/detalj/id/{identifier}")
     markup = fetch_text(url)
     text = plain_text(markup)
-
     title_match = re.search(r"Bostad\s+([0-9]+(?:[,.][0-9]+)?)\s+ROK(?:VR)?\s+på\s+(.+?),\s+ledig lägenhet i\s+([^\n]+)", text, flags=re.I)
     if not title_match:
         raise RuntimeError(f"kunde inte tolka rubriken för objekt {identifier}")
     rooms = number(title_match.group(1))
     address = title_match.group(2).strip()
     area = title_match.group(3).strip()
-
     price_match = re.search(r"([0-9][0-9 \u00a0]*)\s*kr", text, flags=re.I)
     size_match = re.search(r"([0-9]+(?:[,.][0-9]+)?)\s*m(?:\^?\{?2\}?|²)", text, flags=re.I)
     availability_match = re.search(r"Tillgänglig\s+fr\.o\.m\s*:?\s*([^\n]+)", text, flags=re.I)
-
     return {
         "id": identifier,
         "address": address,
@@ -96,19 +109,24 @@ def main() -> int:
     previous = (data.get("municipalities") or {}).get("Eda", {})
     found_ids: set[str] = set()
     source_errors: list[str] = []
-
+    diagnostic_pages: list[tuple[str, str]] = []
     for url in AREA_URLS:
         try:
-            found_ids.update(detail_ids(fetch_text(url)))
+            markup = fetch_text(url)
+            diagnostic_pages.append((url, markup))
+            found_ids.update(detail_ids(markup))
         except RuntimeError as error:
-            # Skillingsfors kan sakna en egen områdessida när inget objekt är publicerat.
             source_errors.append(str(error))
-
-    # Ledigt-sidan kan bära länkar även om en områdessida ändras.
     try:
-        found_ids.update(detail_ids(fetch_text(PROVIDER_URL)))
+        markup = fetch_text(PROVIDER_URL)
+        diagnostic_pages.append((PROVIDER_URL, markup))
+        found_ids.update(detail_ids(markup))
     except RuntimeError as error:
         source_errors.append(str(error))
+
+    if not found_ids:
+        for label, markup in diagnostic_pages:
+            diagnostics(markup, label)
 
     listings = []
     detail_errors = []
@@ -117,38 +135,22 @@ def main() -> int:
             listings.append(parse_detail(identifier))
         except RuntimeError as error:
             detail_errors.append(str(error))
-
-    # Eda Bostads uppger att alla uppsagda lägenheter publiceras på webbplatsen.
-    # Om vi plötsligt hittar noll objekt samtidigt som tidigare data finns betraktas
-    # det som ett insamlingsfel, inte som bevis för noll lediga lägenheter.
     if not listings and previous.get("listings"):
-        raise RuntimeError(
-            f"Eda Bostads gav 0 tolkbara objekt; behåller inte ett falskt tomläge. "
-            f"Tidigare fanns {len(previous['listings'])} objekt."
-        )
+        raise RuntimeError(f"Eda Bostads gav 0 tolkbara objekt; tidigare fanns {len(previous['listings'])} objekt")
     if not listings and not found_ids:
-        raise RuntimeError("Eda Bostads gav inga objektslänkar; importen avbryts")
+        raise RuntimeError("Eda Bostads gav inga objektslänkar; se DIAG-rader ovan")
 
     listings.sort(key=lambda item: (item.get("area") or "", item.get("address") or "", item.get("id") or ""))
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    eda = {
-        "total": len(listings),
-        "listings": listings,
+    data.setdefault("municipalities", {})["Eda"] = {
+        "total": len(listings), "listings": listings,
         "providers": [{"name": "Eda Bostads AB", "url": PROVIDER_URL, "official": True}],
-        "errors": detail_errors,
-        "sourceWarnings": source_errors,
-        "stale": False,
-        "checkedAt": now,
-        "updatedAt": now,
+        "errors": detail_errors, "sourceWarnings": source_errors, "stale": False,
+        "checkedAt": now, "updatedAt": now,
     }
-    data.setdefault("municipalities", {})["Eda"] = eda
     data["generatedAt"] = now
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Eda, Eda Bostads AB: {len(listings)} objekt")
-    if source_errors:
-        print("Källvarningar:", " | ".join(source_errors))
-    if detail_errors:
-        print("Objektvarningar:", " | ".join(detail_errors))
     return 0
 
 
