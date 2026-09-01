@@ -23,6 +23,7 @@ SPORT_HINTS = {
     "Båtsport": ("båtklubb", "segelklubb", "segelsällskap"),
     "Brukshund": ("brukshund",),
     "Ridsport": ("ryttar", "ridklubb", "ridsällskap", "ridsport"),
+    "Skidor": ("slalom", "slalomklubb", "skidklubb"),
 }
 
 
