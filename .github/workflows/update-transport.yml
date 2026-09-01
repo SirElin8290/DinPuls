@@ -87,6 +87,8 @@ jobs:
 
       - name: Spara ny trafikdata konfliktsäkert
         shell: bash
+        env:
+          TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
