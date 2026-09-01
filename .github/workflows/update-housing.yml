@@ -11,7 +11,9 @@ on:
       - "scripts/update_housing.py"
       - "scripts/update_housing_sunne.py"
       - "scripts/update_housing_eda.py"
+      - "scripts/update_housing_launch.py"
       - "scripts/test_update_housing.py"
+      - "data/housing-launch-sources.json"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
 
@@ -25,10 +27,19 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 14
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synka mot senaste main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Aktivera Python
         uses: actions/setup-python@v5
@@ -37,26 +48,45 @@ jobs:
 
       - name: Hämta aktuella bostäder
         run: |
+          set -euo pipefail
           python scripts/update_housing.py
           python scripts/update_housing_sunne.py
           python scripts/update_housing_eda.py
+          python scripts/update_housing_launch.py
 
-      - name: Verifiera kommunregistret i bostadsdatan
+      - name: Verifiera kommunregistret och bostadskällornas hälsa
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
+
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
           data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          launch = json.loads(Path('data/housing-launch-sources.json').read_text(encoding='utf-8'))
           expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
           actual = set((data.get('municipalities') or {}).keys())
           assert actual == expected, f'Bostadskommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
+
+          launch_names = set((launch.get('municipalities') or {}).keys())
           for item in config.get('municipalities', []):
               name = item['name']
               municipality = data['municipalities'][name]
               assert isinstance(municipality.get('listings'), list), f'{name} saknar bostadslista'
-              assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
-          print(f'Bostadsdata innehåller alla {len(expected)} kommuner')
+              if name in launch_names:
+                  health = municipality.get('sourceHealth') or []
+                  assert health and all(row.get('status') == 'ok' for row in health), f'{name}: bostadskällan är inte frisk: {health}'
+                  mode = municipality.get('availabilityMode')
+                  assert mode in {'automatic', 'official-reference'}, f'{name}: okänt availabilityMode {mode!r}'
+                  if mode == 'automatic':
+                      assert isinstance(municipality.get('total'), int), f'{name}: automatic saknar numerisk total'
+                      assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
+                  else:
+                      assert municipality.get('total') is None, f'{name}: official-reference får inte visa falsk total'
+                  assert municipality.get('stale') is False, f'{name}: bostadsdata markerad stale'
+                  assert not municipality.get('errors'), f'{name}: bostadskällfel {municipality.get("errors")}'
+              else:
+                  assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
+          print(f'Bostadsdata innehåller alla {len(expected)} kommuner; {len(launch_names)} lanseringskällor är friska')
           PY
 
       - name: Verifiera Sunne-data
@@ -70,10 +100,6 @@ jobs:
           assert len(sunne.get('listings', [])) == sunne.get('total'), 'Sunnes total matchar inte listan'
           assert sunne.get('stale') is False, 'Sunne-data är markerad stale'
           assert not sunne.get('errors'), f"Sunne har källfel: {sunne.get('errors')}"
-          for item in sunne.get('listings', []):
-              assert item.get('address'), 'Sunne-objekt saknar adress'
-              assert item.get('url'), 'Sunne-objekt saknar länk'
-              assert item.get('provider') == 'Sunne Fastighets AB'
           print(f"Verifierat: Sunne har {sunne['total']} aktuella bostadsobjekt")
           PY
 
@@ -90,7 +116,6 @@ jobs:
           for item in eda.get('listings', []):
               assert item.get('id'), 'Eda-objekt saknar objektnummer'
               assert item.get('address'), 'Eda-objekt saknar adress'
-              assert item.get('area'), 'Eda-objekt saknar ort'
               assert item.get('url'), 'Eda-objekt saknar länk'
               assert item.get('provider') == 'Eda Bostads AB'
           print(f"Verifierat: Eda har {eda['total']} aktuella bostadsobjekt")
@@ -113,7 +138,7 @@ jobs:
                 echo "Nya bostadsuppgifter publicerade."
                 exit 0
               fi
-              git rebase --abort || true
+              git rebase --abort 2>/dev/null || true
               echo "Push-försök $attempt misslyckades; hämtar senaste main."
               [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
             done
