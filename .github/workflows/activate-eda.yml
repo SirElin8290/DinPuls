@@ -1,0 +1,123 @@
+name: Aktivera Eda
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/activate-eda.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-activate-eda
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lägg till Eda centralt
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('data/municipalities.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          if any(item.get('name') == 'Eda' for item in data.get('municipalities', [])):
+              print('Eda finns redan i kommunregistret.')
+          else:
+              data['municipalities'].append({
+                  'name': 'Eda',
+                  'slug': 'eda',
+                  'code': '1730',
+                  'county': 'Värmlands län',
+                  'latitude': 59.884,
+                  'longitude': 12.303,
+                  'website': 'https://www.eda.se/',
+                  'associationDirectoryUrl': 'https://eda.ibgo.se/AssociationRegister',
+                  'associationImport': {'parser': 'ibgo', 'host': 'https://eda.ibgo.se', 'district': ''},
+                  'newsListing': {'url': 'https://www.eda.se/', 'source': 'Eda kommun', 'pathContains': '__'},
+                  'newsSearchTerms': ['eda', 'charlottenberg', 'åmotfors', 'koppom', 'skillingsfors', 'skillingmark', 'morokulien'],
+                  'localityAliases': ['eda', 'charlottenberg', 'åmotfors', 'koppom', 'skillingsfors', 'skillingmark', 'morokulien', 'eda glasbruk', 'adolfsfors'],
+                  'missingPeopleAliases': ['Eda', 'Charlottenberg', 'Åmotfors', 'Koppom', 'Skillingsfors', 'Skillingmark', 'Morokulien', 'Eda Glasbruk'],
+                  'neighbors': ['Årjäng', 'Arvika'],
+                  'launchMode': 'pilot',
+                  'eventSources': [
+                      {'name': 'Evenemang i Eda', 'type': 'Visit Värmland', 'url': 'https://www.visitvarmland.com/eda/evenemang/', 'icon': 'map', 'automatic': True},
+                      {'name': 'Eda kommun – uppleva och göra', 'type': 'Kommunal guide', 'url': 'https://www.eda.se/uppleva', 'icon': 'landmark'}
+                  ],
+                  'housingProviders': [
+                      {'name': 'Eda Bostads AB', 'url': 'https://bostadsbolaget.eda.se/ledigt/lagenhet', 'official': True}
+                  ],
+                  'heroImage': None,
+                  'transportStops': []
+              })
+              data['version'] = '0.15.0'
+              path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+              print('Eda tillagd i centrala kommunregistret.')
+          PY
+
+      - name: Skapa grundposter i alla kommunmoduler
+        run: python scripts/sync_municipality_scaffolds.py
+
+      - name: Verifiera Eda-scaffold
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          eda = next(item for item in config['municipalities'] if item['name'] == 'Eda')
+          assert eda['code'] == '1730'
+          assert eda['associationImport']['host'] == 'https://eda.ibgo.se'
+          assert eda['housingProviders'][0]['name'] == 'Eda Bostads AB'
+
+          engine = Path('municipality-engine.js').read_text(encoding='utf-8')
+          assert '"Eda"' in engine
+
+          missing = []
+          for path in sorted(Path('data').glob('*.json')):
+              payload = json.loads(path.read_text(encoding='utf-8'))
+              municipalities = payload.get('municipalities')
+              if isinstance(municipalities, dict) and 'Eda' not in municipalities:
+                  missing.append(path.name)
+          assert not missing, f'Eda saknas i kommunfiler: {missing}'
+          print('Eda finns centralt och har scaffold i alla kommunfiler.')
+          PY
+          node --check municipality-engine.js
+
+      - name: Publicera Eda och scaffold
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/municipalities.json municipality-engine.js data/*.json
+          if git diff --cached --quiet; then
+            echo "Eda är redan aktiverad."
+            exit 0
+          fi
+          git commit -m "Aktivera Eda kommun"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 2))
+          done
+          exit 1
