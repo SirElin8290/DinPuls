@@ -88,6 +88,7 @@ function renderHealthPage() {
   const municipalityData = healthData?.municipalities?.[healthMunicipality];
   if (!municipalityData) return;
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
+  const selectedCategory = document.querySelector("#health-group")?.value || "";
   const allProviders = [
     ...(healthData.providers || []),
     ...(healthPrivateSupplement?.providers || []),
@@ -104,7 +105,7 @@ function renderHealthPage() {
       return [provider.name, provider.description, provider.sourceType, provider.category, provider.address, provider.phone]
         .join(" ")
         .toLocaleLowerCase("sv-SE")
-        .includes(query);
+        .includes(query) && (!selectedCategory || provider.category === selectedCategory);
     })
     .sort((first, second) => first.name.localeCompare(second.name, "sv-SE"));
 
@@ -160,12 +161,20 @@ async function initializeHealthPage() {
   if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
   if (!supplementResponse.ok) console.warn(`Kompletterande vårddata kunde inte laddas (${supplementResponse.status})`);
   const select = document.querySelector("#health-municipality");
+  const categorySelect = document.querySelector("#health-group");
   healthState.populateSelect(select, healthMunicipality);
+  const allCategories = [...new Set([
+    ...(healthData.providers || []),
+    ...(healthPrivateSupplement.providers || []),
+    ...(healthPrivateData.providers || [])
+  ].map(inferHealthCategory))].sort((first, second) => first.localeCompare(second, "sv-SE"));
+  categorySelect.innerHTML = `<option value="">Alla kategorier</option>${allCategories.map(category => `<option value="${escapeHealth(category)}">${escapeHealth(category)}</option>`).join("")}`;
   select.addEventListener("change", () => {
     healthMunicipality = healthState.set(select.value);
     renderHealthPage();
   });
   document.querySelector("#health-search")?.addEventListener("input", renderHealthPage);
+  categorySelect.addEventListener("change", renderHealthPage);
   renderHealthAds();
   renderHealthPage();
 }

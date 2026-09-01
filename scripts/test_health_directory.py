@@ -31,12 +31,13 @@ class HealthDirectoryTests(unittest.TestCase):
     def setUpClass(cls):
         cls.main_data = json.loads((ROOT / "data" / "health-private.json").read_text(encoding="utf-8"))
         cls.supplement_data = json.loads((ROOT / "data" / "health-private-supplement.json").read_text(encoding="utf-8"))
+        cls.official_data = json.loads((ROOT / "data" / "health.json").read_text(encoding="utf-8"))
         cls.main_providers = cls.main_data.get("providers", [])
         cls.supplement_providers = cls.supplement_data.get("providers", [])
         cls.providers = cls.main_providers + cls.supplement_providers
 
-    def test_all_municipalities_have_private_entries(self):
-        covered = {item.get("municipality") for item in self.providers}
+    def test_all_municipalities_have_health_entries(self):
+        covered = {item.get("municipality") for item in self.providers + self.official_data.get("providers", [])}
         self.assertEqual(set(MUNICIPALITIES), covered)
 
     def test_every_entry_is_contactable_and_categorized(self):

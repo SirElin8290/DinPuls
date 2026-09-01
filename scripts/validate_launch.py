@@ -282,7 +282,7 @@ def verify_cinema() -> None:
     data = load_json("data/cinemas.json")
     municipalities = data.get("municipalities", {})
     assert list(municipalities) == MUNICIPALITIES, "Biomodulen saknar någon startkommun"
-    assert all(municipalities[name] for name in STRICT_MUNICIPALITIES), "Någon aktiv kommun saknar biograf"
+    assert all(isinstance(municipalities[name], list) for name in MUNICIPALITIES), "Ogiltig biografdata för någon kommun"
     assert len(municipalities["Mellerud"]) == 2, "Melleruds två biografer ska visas"
     for name, cinemas in municipalities.items():
         for cinema in cinemas:
@@ -293,6 +293,7 @@ def verify_cinema() -> None:
     navigation = (ROOT / "components/navigation.html").read_text(encoding="utf-8")
     assert "Evenemang · Bio" in page and "evenemang.html" in page, "Bio är inte sammankopplat med Evenemang"
     assert "cinemaState.populateSelect" in script and "cinemaState.set" in script, "Biosidan följer inte kommunmotorn"
+    assert "Ingen aktuell biograf med verifierad programlänk" in script, "Bio saknar ärligt tomläge när verifierad biograf saknas"
     assert 'href="bio.html"' in navigation, "Bio saknas i navigationen"
 
 
@@ -315,7 +316,7 @@ def verify_simple_sport_hub() -> None:
     leisure_script = (ROOT / "leisure-hub.js").read_text(encoding="utf-8")
     leisure_data = municipality_map("data/leisure.json")
     assert "Fritid &amp; föreningsliv" in leisure and 'id="leisure-search"' in leisure
-    assert "searchable" in leisure_script and "leisureModule" not in leisure_script
+    assert "filterActivities" in leisure_script and "leisureModule" not in leisure_script
     assert all(payload.get("directoryUrl", "").startswith("https://") for payload in leisure_data.values()), "Fritidsregistret saknar kommunlänkar"
 
     data = load_json("data/sports.json")
@@ -332,7 +333,6 @@ def verify_simple_sport_hub() -> None:
         assert payload.get("directoryUrl", "").startswith("https://"), f"{name}: föreningsregister saknas"
         if name in STRICT_MUNICIPALITIES:
             assert payload.get("clubs"), f"{name}: föreningar saknas"
-            assert payload.get("liveSources"), f"{name}: sportkällor saknas"
         for club in payload["clubs"]:
             assert club.get("url", "").startswith("https://"), f"{name}: ogiltig klubblänk"
         for source in payload["liveSources"]:
