@@ -29,5 +29,8 @@ jobs:
       - name: Kör lanseringstester
         run: npm test
 
+      - name: Kontrollera kommunernas datatäckning
+        run: python scripts/audit_municipality_readiness.py
+
       - name: Kontrollera sportmodulens avgränsning
         run: node scripts/check-sport-boundaries.js
