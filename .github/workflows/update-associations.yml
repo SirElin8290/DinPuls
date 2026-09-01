@@ -8,8 +8,10 @@ on:
     paths:
       - "data/municipalities.json"
       - "data/leisure-curated.json"
+      - "data/leisure-enrichment.json"
       - "data/sports-curated.json"
       - "scripts/import_associations.py"
+      - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
       - ".github/workflows/update-associations.yml"
   schedule:
@@ -40,6 +42,9 @@ jobs:
       - name: Importera föreningsregister
         run: python scripts/import_associations.py
 
+      - name: Applicera verifierad fritidsberikning
+        run: python scripts/apply_leisure_enrichment.py
+
       - name: Säkerställ gränsen mellan Fritid och Idrott
         run: python scripts/normalize_association_boundaries.py
 
@@ -57,6 +62,7 @@ jobs:
           print(f'Verifierade föreningsdata för {len(expected)} kommuner')
           PY
           node scripts/test_leisure_quality.js
+          node scripts/test_leisure_ui.js
 
       - name: Publicera föreningsdata
         shell: bash
