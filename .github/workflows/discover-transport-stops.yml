@@ -2,19 +2,36 @@ name: Hitta hållplatser och aktivera trafikdata
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/municipalities.json"
+      - "scripts/discover_transport_stops.py"
+      - ".github/workflows/discover-transport-stops.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: dinpuls-transport-data
+  group: dinpuls-transport-discovery
   cancel-in-progress: false
 
 jobs:
   discover-and-update:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Synka mot senaste main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -26,10 +43,23 @@ jobs:
         env:
           TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
         run: python scripts/update_transport.py
-      - name: Spara hållplatser och trafikdata
+      - name: Spara hållplatser och trafikdata konfliktsäkert
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/municipalities.json data/stop-candidates.json data/transport.json
-          git diff --cached --quiet || git commit -m "Aktivera riktiga hållplatser och avgångar"
-          git push
+          if git diff --cached --quiet; then
+            echo "Hållplatserna är redan aktuella."
+            exit 0
+          fi
+          git commit -m "Aktivera riktiga hållplatser och avgångar"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+          done
+          exit 1
