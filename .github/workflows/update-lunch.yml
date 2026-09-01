@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "data/lunch-sources.json"
+      - "data/lunch-launch-supplement.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
       - "scripts/test_update_lunch.py"
@@ -27,6 +28,15 @@ jobs:
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synka mot senaste main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Aktivera Python
         uses: actions/setup-python@v5
@@ -39,16 +49,20 @@ jobs:
           python scripts/test_update_lunch.py
           python scripts/update_lunch.py
 
-      - name: Verifiera att alla kommuner finns med
+      - name: Verifiera att alla kommuner finns med och att lanseringskommunerna har matkälla
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
           lunch = json.loads(Path('data/lunch.json').read_text(encoding='utf-8'))
+          launch = json.loads(Path('data/lunch-launch-supplement.json').read_text(encoding='utf-8'))
           expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
           got = set(lunch.get('municipalities', {}))
           assert got == expected, f'Lunchkommuner avviker: expected={sorted(expected)}, got={sorted(got)}'
+          for name in launch.get('municipalities', {}):
+              entry = lunch['municipalities'][name]
+              assert entry.get('restaurants') or entry.get('referenceSources'), f'{name}: saknar både lunchrestaurang och lokal matguide'
           print(f'Verifierade lunchdata för {len(expected)} kommuner')
           PY
 
@@ -61,13 +75,13 @@ jobs:
           git add data/lunch.json
           if ! git diff --cached --quiet; then
             git commit -m "Uppdatera dagens lunch"
-            for attempt in 1 2 3; do
-              git pull --rebase origin main
-              if git push origin HEAD:main; then
+            for attempt in 1 2 3 4; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
                 exit 0
               fi
-              echo "Push-försök ${attempt} misslyckades, hämtar main igen"
+              git rebase --abort 2>/dev/null || true
+              [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
             done
-            echo "Kunde inte publicera lunchdata efter tre försök" >&2
+            echo "Kunde inte publicera lunchdata efter fyra försök" >&2
             exit 1
           fi
