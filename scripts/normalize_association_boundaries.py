@@ -22,6 +22,7 @@ SPORT_HINTS = {
     "Parasport": ("parasport",),
     "Båtsport": ("båtklubb", "segelklubb", "segelsällskap"),
     "Brukshund": ("brukshund",),
+    "Ridsport": ("ryttar", "ridklubb", "ridsällskap", "ridsport"),
 }
 
 
