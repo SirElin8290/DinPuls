@@ -31,6 +31,14 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
+      - name: Installera Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installera beroenden
+        run: npm ci
+
       - name: Aktivera Python
         uses: actions/setup-python@v5
         with:
