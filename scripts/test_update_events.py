@@ -39,6 +39,24 @@ class EventUpdateTests(unittest.TestCase):
         end = int(datetime(2026, 9, 29, 22, 0, tzinfo=timezone.utc).timestamp())
         self.assertEqual(update_events.visit_varmland_time_label(start, end), "Se källan")
 
+    def test_fresh_automatic_event_replaces_cached_duplicate(self):
+        existing = [{"title":"Hemvändardag", "startDate":"2026-09-05", "time":"08:00–14:00"}]
+        collected = [{"title":"Hemvändardag", "startDate":"2026-09-05", "time":"10:00–16:00"}]
+        merged = update_events.merge_event_rows(existing, collected)
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["time"], "10:00–16:00")
+
+    def test_verified_event_keeps_priority_over_automatic_duplicate(self):
+        existing = [{"title":"Testdag", "startDate":"2099-09-05", "time":"08:00"}]
+        collected = [
+            {"title":"Testdag", "startDate":"2099-09-05", "time":"10:00"},
+            {"title":"Testdag", "startDate":"2099-09-05", "time":"11:00", "verified":True},
+        ]
+        merged = update_events.merge_event_rows(existing, collected)
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["time"], "11:00")
+        self.assertTrue(merged[0]["verified"])
+
 
 if __name__ == "__main__":
     unittest.main()
