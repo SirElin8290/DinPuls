@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "lunch-sources.json"
+LAUNCH_SUPPLEMENT = ROOT / "data" / "lunch-launch-supplement.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
@@ -143,7 +144,6 @@ def parse_weekday_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
 
 
 def parse_all_days_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
-    """Tolkar en verifierad veckomeny där samma rätter gäller alla vardagar."""
     parser = TextExtractor()
     parser.feed(page)
     lines = parser.text_lines()
@@ -158,9 +158,25 @@ def parse_all_days_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
             break
         if active and useful_dish(line) and len(dishes) < 5:
             dishes.append(line)
-    return extract_week(lines), {
-        day: list(dishes) for day in ("monday", "tuesday", "wednesday", "thursday", "friday")
-    }
+    return extract_week(lines), {day: list(dishes) for day in ("monday", "tuesday", "wednesday", "thursday", "friday")}
+
+
+def merge_config(config: dict) -> dict:
+    """Add verified launch sources without rewriting the established source catalog."""
+    if not LAUNCH_SUPPLEMENT.exists():
+        return config
+    launch = json.loads(LAUNCH_SUPPLEMENT.read_text(encoding="utf-8"))
+    municipalities = config.setdefault("municipalities", {})
+    references = config.setdefault("referenceSources", {})
+    for name, sources in (launch.get("municipalities") or {}).items():
+        current = municipalities.setdefault(name, [])
+        seen = {str(item.get("id")) for item in current if isinstance(item, dict)}
+        current.extend(item for item in sources if isinstance(item, dict) and str(item.get("id")) not in seen)
+    for name, sources in (launch.get("referenceSources") or {}).items():
+        current = references.setdefault(name, [])
+        seen = {str(item.get("url")) for item in current if isinstance(item, dict)}
+        current.extend(item for item in sources if isinstance(item, dict) and str(item.get("url")) not in seen)
+    return config
 
 
 def validate_config(config: dict) -> None:
@@ -180,6 +196,7 @@ def validate_config(config: dict) -> None:
 
 
 def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
+    config = merge_config(config)
     validate_config(config)
     current_week = now.isocalendar().week
     municipalities = {}
@@ -200,19 +217,12 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
                     page = fetcher(source["url"])
                     if source.get("parser") == "all-days-heading":
                         week, days = parse_all_days_menu(page)
-                        # Den stående vardagsrätten är den aktuella menyn på sidan.
-                        # Äldre veckonummer kan förekomma i sidfot eller semesterinformation.
                         if any(days.values()):
                             week = current_week
                     else:
                         week, days = parse_weekday_menu(page)
                     if source.get("id") == "mickans-grill":
-                        # Mickans visar inget pris i DinPuls. Ett felaktigt "$9.95"
-                        # från källsidans metadata ska inte behandlas som en maträtt.
-                        days = {
-                            day: [dish for dish in dishes if dish != "$9.95"]
-                            for day, dishes in days.items()
-                        }
+                        days = {day: [dish for dish in dishes if dish != "$9.95"] for day, dishes in days.items()}
                     item["weekNumber"] = week
                     item["days"] = days if week == current_week else {}
                     item["status"] = "current" if week == current_week and any(days.values()) else "outdated"
@@ -230,7 +240,7 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
         }
 
     return {
-        "version": "0.21.2",
+        "version": "0.21.3",
         "generatedAt": now.isoformat(timespec="seconds"),
         "timezone": "Europe/Stockholm",
         "currentWeek": current_week,
