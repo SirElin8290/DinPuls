@@ -83,6 +83,7 @@ MELLERUD_PAGES = {
     "ovrigt": "ovriga",
 }
 SKIP = ("politisk", "parti", "arbetarekommun", "moderata", "centerpart", "socialdemokrat", "vänsterpart", "sverigedemokrat", "liberalerna")
+EXCLUDED_ASSOCIATION_NAMES = {"aziz muradi", "årjängstravet"}
 
 # Verifierade egna webbplatser eller direkta organisationssidor. Dessa ska
 # alltid vinna över kommunernas registerlänkar vid en ny import.
@@ -197,7 +198,7 @@ def leisure_meta(name: str, activity: str, category: str) -> tuple[str, str, lis
 
 def should_skip(name: str, category: str) -> bool:
     text = f"{name} {category}".lower()
-    return any(word in text for word in SKIP) or "vägförening" in text
+    return name.casefold().strip() in EXCLUDED_ASSOCIATION_NAMES or any(word in text for word in SKIP) or "vägförening" in text
 
 
 def add_registry_rows(municipality: str, rows: list[dict], leisure: list[dict], sports: list[dict]):
@@ -277,8 +278,10 @@ def dedupe(items: list[dict], manual: list[dict], municipality: str) -> list[dic
             "spfseniorergrumsbyggden":"spfseniorernagrumsbygden",
         }
         return aliases.get(key, key)
-    merged = {key_for(item["name"]): item for item in items}
+    merged = {key_for(item["name"]): item for item in items if not should_skip(item["name"], "")}
     for item in manual:
+        if should_skip(item["name"], ""):
+            continue
         key = key_for(item["name"])
         if key in merged:
             generated = merged[key]
