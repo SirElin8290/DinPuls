@@ -1,0 +1,75 @@
+name: Uppdatera föreningar och idrott
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/municipalities.json"
+      - "data/leisure-curated.json"
+      - "data/sports-curated.json"
+      - "scripts/import_associations.py"
+      - ".github/workflows/update-associations.yml"
+  schedule:
+    - cron: "20 3 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-association-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Importera föreningsregister
+        run: python scripts/import_associations.py
+
+      - name: Verifiera alla kommuner
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          for filename in ('data/leisure.json', 'data/sports.json'):
+              data = json.loads(Path(filename).read_text(encoding='utf-8'))
+              got = set(data.get('municipalities', {}))
+              assert got == expected, f'{filename}: expected={sorted(expected)}, got={sorted(got)}'
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner')
+          PY
+
+      - name: Publicera föreningsdata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/leisure.json data/sports.json
+          if git diff --cached --quiet; then
+            echo "Föreningsdatan är redan aktuell."
+            exit 0
+          fi
+          git commit -m "Uppdatera föreningar och idrott"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 2))
+          done
+          exit 1
