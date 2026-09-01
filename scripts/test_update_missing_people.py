@@ -32,7 +32,7 @@ class MissingPeopleTests(unittest.TestCase):
     def test_place_is_mapped_to_exact_municipality(self):
         self.assertEqual(missing.municipality_for("TÖSSE"), "Åmål")
         self.assertEqual(missing.municipality_for("DALS LÅNGED"), "Bengtsfors")
-        self.assertIsNone(missing.municipality_for("KARLSTAD"))
+        self.assertEqual(missing.municipality_for("KARLSTAD"), "Karlstad")
 
     def test_neighbor_case_is_visible_but_labeled(self):
         data = missing.distribute(missing.parse_people(SAMPLE))
