@@ -59,6 +59,11 @@ async function responseJson(response, expectedStatus) {
 try {
   const health = await responseJson(await request("/health"), 200);
   assert.equal(health.database, "connected");
+  assert.equal(health.portalConfigured, true);
+  assert.equal(health.adAssetsConfigured, true);
+  assert.equal(health.portalEmailConfigured, false);
+  assert.deepEqual(Object.keys(health).filter(key => /password|secret|token|api.?key|username|private/i.test(key)), [], "Health får inte exponera hemlighetsfält");
+  assert.ok(!JSON.stringify(health).includes("LocalAdmin-Test-2026"));
 
   const admin = await responseJson(await jsonRequest("/portal/auth/admin", "POST", {
     username: "localadmin",

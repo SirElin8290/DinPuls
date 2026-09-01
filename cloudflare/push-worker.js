@@ -1024,6 +1024,7 @@ export default {
           vapidConfigured: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT),
           portalConfigured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD && env.PORTAL_PASSWORD_PEPPER),
           portalEmailConfigured: Boolean(env.RESEND_API_KEY && env.PORTAL_EMAIL_FROM),
+          adAssetsConfigured: Boolean(env.AD_ASSETS),
           portalAuthVersion: "hmac-sha256-v1"
         });
       }

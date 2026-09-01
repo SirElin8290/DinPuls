@@ -59,7 +59,35 @@
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     scrollTo(0, 0);
-    await refreshContracts();
+    await Promise.all([refreshContracts(), refreshSystemStatus()]);
+  }
+
+  function installSystemStatus() {
+    const panel = document.querySelector(".status-panel");
+    if (!panel) return;
+    panel.innerHTML = `<div class="panel-heading"><div><h2>Systemstatus</h2><p>Kommersiell infrastruktur för företagskunder.</p></div><button id="refreshSystemStatus" class="text-button" type="button">Kontrollera igen</button></div><div id="systemStatus" class="status-list" aria-live="polite"><p class="muted">Kontrollerar systemet…</p></div>`;
+    $("#refreshSystemStatus").onclick = refreshSystemStatus;
+  }
+
+  async function refreshSystemStatus() {
+    const target = $("#systemStatus");
+    if (!target || !apiBase) return;
+    target.innerHTML = '<p class="muted">Kontrollerar systemet…</p>';
+    try {
+      const response = await fetch(`${apiBase}/health`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const health = await response.json();
+      const checks = [
+        ["Portalserver", health.ok === true, "Aktiv", "Fel"],
+        ["Databas", health.database === "connected", "Ansluten", "Fel"],
+        ["Admin/företagsauth", health.portalConfigured === true, "Konfigurerad", "Saknas"],
+        ["Företagsmejl", health.portalEmailConfigured === true, "Konfigurerat", "Saknas"],
+        ["Bannerlagring/R2", health.adAssetsConfigured === true, "Konfigurerad", "Saknas"]
+      ];
+      target.innerHTML = checks.map(([label, ready, yes, no]) => `<div><span class="check" style="${ready ? "" : "background:var(--danger)"}" aria-hidden="true">${ready ? "✓" : "!"}</span><p><b>${escapeHtml(label)}</b><small>${ready ? yes : no}</small></p></div>`).join("");
+    } catch {
+      target.innerHTML = '<div><span class="check" style="background:var(--danger)" aria-hidden="true">!</span><p><b>Portalserver</b><small>Fel – kunde inte nås</small></p></div>';
+    }
   }
 
   function contractNumber() {
@@ -101,7 +129,7 @@
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
     if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
-    if (contract.status === "Aktivt") return `${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
+    if (contract.status === "Aktivt") return `<button class="secondary invoice-copy-action" data-id="${escapeHtml(contract.id)}">Kopiera fakturaunderlag</button>${contract.hasSignedPdf ? `<button class="secondary pdf-action" data-id="${escapeHtml(contract.id)}">Hämta signerad PDF</button><button class="secondary contract-email-action" data-id="${escapeHtml(contract.id)}">Skicka avtalskopia igen</button>` : ""}${!contract.activatedAt ? `<button class="primary activation-action" data-id="${escapeHtml(contract.id)}">Skicka ny aktiveringslänk</button>` : ""}<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Avslutat">Avsluta</button>`;
     return "";
   }
 
@@ -157,8 +185,17 @@ function openContract(id) {
     dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
     dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
     dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
+    dialog.querySelectorAll(".invoice-copy-action").forEach(button => button.onclick = async () => { try { await copyInvoiceBasis(button.dataset.id); } catch { alert("Fakturaunderlaget kunde inte kopieras. Kontrollera webbläsarens urklippsbehörighet."); } });
   dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));
     dialog.showModal();
+  }
+
+  async function copyInvoiceBasis(id) {
+    const contract = contractCache.find(item => item.id === id);
+    if (!contract) return;
+    const { formatInvoiceBasis } = await import("./invoice-copy.mjs");
+    await navigator.clipboard.writeText(formatInvoiceBasis(contract));
+    alert("Fakturaunderlaget är kopierat och kan klistras in i Spiris.");
   }
 
   function renderCompanies() {
@@ -275,6 +312,7 @@ function openContract(id) {
     try { await loadConfiguration(); }
     catch (error) { showLogin(error.message); return; }
     installContractTermsFields();
+    installSystemStatus();
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {
