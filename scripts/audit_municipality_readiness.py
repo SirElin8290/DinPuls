@@ -102,13 +102,14 @@ def main() -> None:
     health_supplement = load("health-private-supplement.json")
     service = load("service.json")
     service_supplement = load("service-private-supplement.json")
+    service_launch_supplement = load("service-launch-supplement.json")
 
     articles = news.get("articles") if isinstance(news.get("articles"), list) else []
     health_items = []
     for payload in (health, health_private, health_supplement):
         health_items.extend(payload.get("providers") if isinstance(payload.get("providers"), list) else [])
     service_items = []
-    for payload in (service, service_supplement):
+    for payload in (service, service_supplement, service_launch_supplement):
         service_items.extend(payload.get("businesses") if isinstance(payload.get("businesses"), list) else [])
 
     failures = []
