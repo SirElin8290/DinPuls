@@ -87,17 +87,21 @@ jobs:
 
       - name: Spara ny trafikdata konfliktsäkert
         shell: bash
-        env:
-          TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Generatorn har redan körts och resultatet är verifierat ovan. Bevara exakt
+          # den filen när vi synkar mot senaste main i stället för att göra en andra
+          # full Trafiklab-körning. Det halverar API-belastningen och minskar 429-risk.
+          cp data/transport.json /tmp/transport.json
+
           for attempt in 1 2 3 4; do
             echo "Publiceringsförsök $attempt av 4"
             git fetch origin main
             git reset --hard origin/main
-            python scripts/update_transport.py
+            cp /tmp/transport.json data/transport.json
             git add data/transport.json
             if git diff --cached --quiet; then
               echo "Transportfilen är redan aktuell."
