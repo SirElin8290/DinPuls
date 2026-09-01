@@ -24,6 +24,15 @@ jobs:
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synka mot senaste main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Aktivera Python
         uses: actions/setup-python@v5
@@ -67,7 +76,7 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Uppdatera väderläget"
           for attempt in 1 2 3; do
-            git pull --rebase && git push && exit 0
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
             git rebase --abort 2>/dev/null || true
             sleep $((attempt * 3))
           done
