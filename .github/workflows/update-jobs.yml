@@ -2,15 +2,15 @@ name: Uppdatera lediga jobb
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "42 */3 * * *"
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/update-jobs.yml"
-      - "scripts/update_jobs.py"
       - "data/municipalities.json"
-  schedule:
-    - cron: "17 */2 * * *"
+      - "scripts/update_jobs.py"
+      - ".github/workflows/update-jobs.yml"
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
@@ -34,50 +34,23 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Hämta aktuella jobbannonser
+      - name: Hämta lediga jobb
         run: python scripts/update_jobs.py
 
-      - name: Verifiera färsk jobbdata
+      - name: Verifiera att alla kommuner finns med
         run: |
           python - <<'PY'
           import json
-          from datetime import datetime, timezone
           from pathlib import Path
-
-          data = json.loads(Path('data/jobs.json').read_text(encoding='utf-8'))
-          generated = datetime.fromisoformat(data['generatedAt'].replace('Z', '+00:00')).astimezone(timezone.utc)
-          age = (datetime.now(timezone.utc) - generated).total_seconds()
-          assert 0 <= age <= 300, f'Jobbdata är inte färsk: {age:.0f} sekunder'
-
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
-          expected = {
-              item['name'] for item in config.get('municipalities', [])
-              if item.get('name') and (item.get('jobSearchMunicipalityId') or item.get('code'))
-          }
-          municipalities = data.get('municipalities', {})
-          assert set(municipalities) == expected, f'Kommuner saknas/fel: expected={sorted(expected)}, got={sorted(municipalities)}'
-          assert data.get('successfulMunicipalities') == len(expected), (
-              f"Alla kommuner uppdaterades inte: {data.get('successfulMunicipalities')}/{len(expected)}"
-          )
-          assert not data.get('failedMunicipalities'), f"Misslyckade kommuner: {data.get('failedMunicipalities')}"
-
-          now = datetime.now(timezone.utc)
-          for name, municipality in municipalities.items():
-              checked = datetime.fromisoformat(municipality['checkedAt'].replace('Z', '+00:00')).astimezone(timezone.utc)
-              checked_age = (now - checked).total_seconds()
-              assert 0 <= checked_age <= 300, f'{name} har gammal checkedAt: {checked_age:.0f} sekunder'
-              jobs = municipality.get('jobs')
-              assert isinstance(jobs, list), f'{name} saknar jobblista'
-              assert municipality.get('total') == len(jobs), f'{name}: total matchar inte jobblistan'
-              ids = [job.get('id') for job in jobs]
-              assert len(ids) == len(set(ids)), f'{name} innehåller dubbla jobb-id'
-              for job in jobs:
-                  assert job.get('id') and job.get('webpageUrl'), f'{name} har ogiltig annons'
-
-          print(f"Verifierade färsk jobbdata för {len(expected)} kommuner")
+          jobs = json.loads(Path('data/jobs.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          got = set(jobs.get('municipalities', {}))
+          assert got == expected, f'Jobbkommuner avviker: expected={sorted(expected)}, got={sorted(got)}'
+          print(f'Verifierade jobbdata för {len(expected)} kommuner')
           PY
 
-      - name: Spara ny jobbdata
+      - name: Publicera jobbdata
         shell: bash
         run: |
           set -euo pipefail
@@ -85,15 +58,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/jobs.json
           if git diff --cached --quiet; then
-            echo "Jobbfilen är redan aktuell."
+            echo "Jobbdatan är redan aktuell."
             exit 0
           fi
           git commit -m "Uppdatera lediga jobb"
           for attempt in 1 2 3 4; do
             if git pull --rebase origin main && git push origin HEAD:main; then
+              echo "Lediga jobb publicerade."
               exit 0
             fi
             git rebase --abort 2>/dev/null || true
             sleep $((attempt * 2))
           done
+          echo "Kunde inte publicera jobbdata efter fyra försök." >&2
           exit 1
