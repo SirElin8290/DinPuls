@@ -23,6 +23,14 @@ jobs:
     steps:
       - name: Hämta repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synka mot senaste main
+        if: github.event_name != 'pull_request'
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Installera Node
         uses: actions/setup-node@v4

@@ -1,6 +1,6 @@
-# DinPuls v0.23.4
+# DinPuls
 
-DinPuls är en lokal webbportal för Åmål, Säffle, Bengtsfors, Mellerud, Årjäng, Arvika och Grums. Den publicerade webbplatsen finns på [dinpuls.se](https://dinpuls.se/).
+DinPuls är en lokal webbportal för samtliga 16 kommuner i Värmlands län samt Dalslands fem kommuner — totalt 21 kommuner. Tio kommuner är produktionsklassade; de övriga elva visas som pilot tills deras lokala källor passerar samma readiness-grind. Den publicerade webbplatsen finns på [dinpuls.se](https://dinpuls.se/).
 
 ## Utveckling och drift
 

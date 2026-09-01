@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import unittest
+import json
+import tempfile
 from datetime import datetime, timedelta
+from pathlib import Path
 from unittest.mock import patch
 
 import update_transport as transport
@@ -20,6 +23,18 @@ def api_departure(hours=0):
 
 
 class UpdateTransportTests(unittest.TestCase):
+    def test_registry_loader_keeps_municipality_without_stop(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "municipalities.json"
+            path.write_text(json.dumps({"municipalities": [
+                {"name": "Med hållplats", "transportStops": [{"id": "1", "name": "Centrum"}]},
+                {"name": "Utan hållplats"},
+            ]}), encoding="utf-8")
+            with patch.object(transport, "MUNICIPALITY_FILE", path):
+                areas = transport.load_stop_areas()
+        self.assertEqual(areas["Utan hållplats"], [])
+        self.assertEqual(areas["Med hållplats"][0]["id"], "1")
+
     def test_thin_current_departures_trigger_deep_search(self):
         with patch.object(transport, "fetch", return_value={"departures": []}) as fetch:
             departures, _, retained, _, _ = transport.find_next_departures(

@@ -42,7 +42,27 @@ class MunicipalityIntegrationTests(unittest.TestCase):
                 self.assertTrue(item.get("newsListing", {}).get("url"))
                 self.assertTrue(item.get("associationDirectoryUrl"))
                 self.assertTrue(item.get("associationImport", {}).get("parser"))
-                self.assertTrue(item.get("transportStops"))
+                if item.get("launchMode") != "pilot":
+                    self.assertTrue(item.get("transportStops"), "produktionskommun saknar verifierad hållplats")
+
+    def test_exact_21_municipality_scope(self):
+        expected = {
+            "Åmål", "Bengtsfors", "Mellerud", "Dals-Ed", "Färgelanda",
+            "Arvika", "Eda", "Filipstad", "Forshaga", "Grums", "Hagfors",
+            "Hammarö", "Karlstad", "Kil", "Kristinehamn", "Munkfors",
+            "Storfors", "Sunne", "Säffle", "Torsby", "Årjäng",
+        }
+        self.assertEqual(len(self.config), 21)
+        self.assertEqual(self.names, expected)
+
+    def test_all_municipality_indexed_outputs_have_all_21_keys(self):
+        for filename in (
+            "jobs.json", "weather-live.json", "transport.json", "road-traffic.json",
+            "housing.json", "events.json", "lunch.json", "sports.json", "leisure.json",
+        ):
+            with self.subTest(filename=filename):
+                payload = json.loads((ROOT / "data" / filename).read_text(encoding="utf-8"))
+                self.assertEqual(set((payload.get("municipalities") or {}).keys()), self.names)
 
     def test_smaller_existing_localities_remain_covered(self):
         aliases = {item["name"]: set(item["localityAliases"]) for item in self.config}

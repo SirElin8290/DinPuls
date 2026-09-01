@@ -3,10 +3,17 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
+EXPECTED_MUNICIPALITIES = {
+    "Åmål", "Bengtsfors", "Mellerud", "Dals-Ed", "Färgelanda",
+    "Arvika", "Eda", "Filipstad", "Forshaga", "Grums", "Hagfors",
+    "Hammarö", "Karlstad", "Kil", "Kristinehamn", "Munkfors",
+    "Storfors", "Sunne", "Säffle", "Torsby", "Årjäng",
+}
 
 
 def load(name: str) -> dict:
@@ -31,14 +38,51 @@ def count_named(items, name: str) -> int:
     return sum(1 for item in items if isinstance(item, dict) and item.get("municipality") == name)
 
 
-def pilot_gaps(
+def active_departure_count(stops: list[dict]) -> int:
+    """Räkna bara användbara avgångar; gammal cache får inte göra kommunen grön."""
+    now = datetime.now(timezone.utc) - timedelta(minutes=2)
+    total = 0
+    for stop in stops:
+        for departure in stop.get("departures") if isinstance(stop, dict) else []:
+            if not isinstance(departure, dict) or departure.get("canceled"):
+                continue
+            raw = departure.get("realtime") or departure.get("scheduled")
+            try:
+                value = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+                if value.tzinfo and value.astimezone(timezone.utc) >= now:
+                    total += 1
+            except (TypeError, ValueError):
+                continue
+    return total
+
+
+def fresh_timestamp(value: object, max_age_minutes: int) -> bool:
+    try:
+        checked = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if not checked.tzinfo:
+            return False
+        age = datetime.now(timezone.utc) - checked.astimezone(timezone.utc)
+        return timedelta(0) <= age <= timedelta(minutes=max_age_minutes)
+    except (TypeError, ValueError):
+        return False
+
+
+def healthy_sources(entry: dict) -> bool:
+    health = entry.get("sourceHealth")
+    return isinstance(health, list) and bool(health) and all(
+        isinstance(row, dict) and row.get("status") in {"ok", "reference"}
+        for row in health
+    )
+
+
+def readiness_gaps(
     municipality: dict,
     *,
     current_weather: dict,
-    departures: int,
+    transit_source_ok: bool,
     job: dict,
     homes: dict,
-    housing_machine_source: bool,
+    housing_source_ok: bool,
     calendar: dict,
     meals: dict,
     sport: dict,
@@ -47,7 +91,7 @@ def pilot_gaps(
     health_count: int,
     service_count: int,
 ) -> list[str]:
-    """Returnera konkreta datagap för en pilotkommun utan att fabricera krav på volym.
+    """Returnera funktionella datagap utan att fabricera krav på volym.
 
     En liten kommun får naturligt ha färre poster än en stor kommun. Här testas därför
     framför allt om centrala moduler faktiskt har kommit igång, inte om alla kommuner
@@ -58,19 +102,19 @@ def pilot_gaps(
 
     if not current_weather.get("time"):
         gaps.append("väder saknar live-data")
-    if not departures:
-        gaps.append("kollektivtrafik saknar avgångar")
+    if not transit_source_ok:
+        gaps.append("kollektivtrafik saknar färsk, verifierad källstatus")
     if not count_list(job.get("jobs")):
         gaps.append("jobb saknar resultat")
-    if providers and not count_list(homes.get("listings")):
-        if housing_machine_source:
-            gaps.append("bostadskälla finns men gav 0 objekt")
-        else:
-            gaps.append("bostadskälla finns men saknar maskinläsbar import")
-    if municipality.get("eventSources") and not count_list(calendar.get("events")):
-        gaps.append("evenemangskällor finns men gav inget innehåll")
-    if municipality.get("lunchSources") and not count_list(meals.get("restaurants")):
-        gaps.append("lunchkälla finns men gav inget innehåll")
+    if providers and not (count_list(homes.get("listings")) or housing_source_ok):
+        gaps.append("bostadskällan saknar verifierat friskt resultat")
+    if municipality.get("eventSources") and not (
+        count_list(calendar.get("events")) or healthy_sources(calendar)
+    ):
+        gaps.append("evenemangskällor saknar innehåll och frisk källstatus")
+    lunch_references = meals.get("referenceSources")
+    if not (count_list(meals.get("restaurants")) or count_list(lunch_references)):
+        gaps.append("lunch saknar restaurang eller verifierad direktkälla")
     if municipality.get("associationImport") and not (
         count_list(sport.get("clubs")) or count_list(free_time.get("activities"))
     ):
@@ -112,6 +156,24 @@ def main() -> None:
     for payload in (service, service_supplement, service_launch_supplement):
         service_items.extend(payload.get("businesses") if isinstance(payload.get("businesses"), list) else [])
 
+    configured_names = [item.get("name") for item in config.get("municipalities", []) if item.get("name")]
+    if len(configured_names) != 21 or set(configured_names) != EXPECTED_MUNICIPALITIES:
+        raise SystemExit(
+            "Kommunregistret ska innehålla exakt de 21 lanseringskommunerna; "
+            f"fick {len(configured_names)} poster: {configured_names}"
+        )
+
+    indexed_payloads = {
+        "jobb": jobs, "väder": weather, "kollektivtrafik": transport,
+        "vägtrafik": road, "bostäder": housing, "evenemang": events,
+        "lunch": lunch, "sport": sports, "fritid": leisure,
+    }
+    for label, payload in indexed_payloads.items():
+        actual = set((payload.get("municipalities") or {}).keys())
+        missing = EXPECTED_MUNICIPALITIES - actual
+        if missing:
+            raise SystemExit(f"{label} saknar kommunindex för: {', '.join(sorted(missing))}")
+
     failures = []
     print("DinPuls kommun-audit")
     print("=" * 78)
@@ -131,7 +193,13 @@ def main() -> None:
         free_time = municipality_entry(leisure, name)
 
         stops = transit.get("stops") if isinstance(transit.get("stops"), list) else []
-        departures = sum(count_list(stop.get("departures")) for stop in stops if isinstance(stop, dict))
+        departures = active_departure_count(stops)
+        transit_source_ok = (
+            bool(stops)
+            and transit.get("sourceStatus") != "missing-stop-configuration"
+            and all(not stop.get("error") for stop in stops if isinstance(stop, dict))
+            and fresh_timestamp(transport.get("generatedAt"), 60)
+        )
         local_news = sum(1 for article in articles if name in (article.get("municipalities") or []))
         providers = municipality.get("housingProviders") or []
         housing_machine_source = any(
@@ -142,6 +210,14 @@ def main() -> None:
         # inte ligger i municipalities.json. Faktiska objekt är då beviset.
         if count_list(homes.get("listings")):
             housing_machine_source = True
+        housing_source_ok = healthy_sources(homes) and (
+            homes.get("availabilityMode") == "official-reference"
+            or (
+                homes.get("availabilityMode") == "automatic"
+                and isinstance(homes.get("total"), int)
+                and homes.get("total") == count_list(homes.get("listings"))
+            )
+        )
 
         nowcast = wx.get("nowcast") if isinstance(wx.get("nowcast"), dict) else {}
         current_weather = nowcast.get("current") if isinstance(nowcast.get("current"), dict) else {}
@@ -167,30 +243,25 @@ def main() -> None:
         }
         print(f"{name}: " + " · ".join(f"{key}={value}" for key, value in metrics.items()))
 
-        if not is_pilot:
-            if not health_count:
-                failures.append(f"{name}: produktionskommun saknar vård- och hälsodata")
-            if not service_count:
-                failures.append(f"{name}: produktionskommun saknar serviceföretag")
-            if providers and not count_list(homes.get("listings")):
-                failures.append(f"{name}: produktionskommun har bostadskälla men 0 bostadsobjekt")
-        else:
-            gaps = pilot_gaps(
-                municipality,
-                current_weather=current_weather,
-                departures=departures,
-                job=job,
-                homes=homes,
-                housing_machine_source=housing_machine_source,
-                calendar=calendar,
-                meals=meals,
-                sport=sport,
-                free_time=free_time,
-                local_news=local_news,
-                health_count=health_count,
-                service_count=service_count,
-            )
+        gaps = readiness_gaps(
+            municipality,
+            current_weather=current_weather,
+            transit_source_ok=transit_source_ok,
+            job=job,
+            homes=homes,
+            housing_source_ok=housing_source_ok,
+            calendar=calendar,
+            meals=meals,
+            sport=sport,
+            free_time=free_time,
+            local_news=local_news,
+            health_count=health_count,
+            service_count=service_count,
+        )
+        if is_pilot:
             print("  PILOT REST: " + ("; ".join(gaps) if gaps else "inga automatiska datagap upptäckta"))
+        elif gaps:
+            failures.extend(f"{name}: {gap}" for gap in gaps)
 
     if failures:
         raise SystemExit("Produktionsspärr:\n- " + "\n- ".join(failures))

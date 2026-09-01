@@ -25,6 +25,13 @@ jobs:
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synka mot senaste main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Aktivera Python
         uses: actions/setup-python@v5

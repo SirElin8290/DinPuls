@@ -31,9 +31,9 @@ class NewsUpdateTests(unittest.TestCase):
         article = {"title": "Utställning öppnar i Håverud", "summary": "", "url": "https://example.se/haverud"}
         self.assertEqual(update_news.article_municipalities(article), ["Mellerud"])
 
-    def test_bralanda_and_valberg_are_not_wrongly_mapped(self):
+    def test_valberg_is_correctly_mapped_to_karlstad(self):
         article = {"title": "Nyheter från Brålanda och Vålberg", "summary": "", "url": "https://example.se/region"}
-        self.assertEqual(update_news.article_municipalities(article), [])
+        self.assertEqual(update_news.article_municipalities(article), ["Karlstad"])
 
     def test_every_municipality_has_local_sources(self):
         covered = {municipality for source in update_news.SOURCE_DIRECTORY if source["scope"] == "local" for municipality in source["municipalities"]}

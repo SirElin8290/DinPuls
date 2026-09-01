@@ -29,6 +29,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Synka mot senaste main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Aktivera Python
         uses: actions/setup-python@v5
         with:

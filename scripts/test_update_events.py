@@ -7,11 +7,15 @@ import update_events
 
 
 class EventUpdateTests(unittest.TestCase):
-    def test_all_municipalities_have_multiple_sources(self):
+    def test_all_municipalities_have_multiple_valid_sources(self):
         catalog = json.loads(Path(update_events.SOURCE_CATALOG).read_text(encoding="utf-8"))
         self.assertEqual(set(catalog["municipalities"]), set(update_events.LOCALITIES))
         for municipality, data in catalog["municipalities"].items():
-            self.assertGreaterEqual(len(data.get("sources", [])), 5, municipality)
+            sources = data.get("sources", [])
+            self.assertGreaterEqual(len(sources), 2, municipality)
+            self.assertEqual(len({source.get("url") for source in sources}), len(sources), municipality)
+            self.assertTrue(all(str(source.get("url", "")).startswith("https://") for source in sources), municipality)
+            self.assertTrue(any(source.get("automatic") or "kommun" in source.get("type", "").casefold() for source in sources), municipality)
 
     def test_catalog_event_preserves_verified_source(self):
         event = update_events.catalog_event({

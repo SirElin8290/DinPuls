@@ -59,7 +59,7 @@ jobs:
           config = json.loads(Path("data/municipalities.json").read_text(encoding="utf-8"))
           expected = {
               item["name"] for item in config.get("municipalities", [])
-              if item.get("name") and item.get("transportStops")
+              if item.get("name")
           }
           generated = datetime.fromisoformat(str(data.get("generatedAt", "")).replace("Z", "+00:00"))
           age = datetime.now(timezone.utc) - generated.astimezone(timezone.utc)
@@ -79,6 +79,8 @@ jobs:
               actual = {str(stop.get("id")) for stop in (municipality or {}).get("stops", [])}
               if actual != configured:
                   raise SystemExit(f"{name}: hållplatser matchar inte central konfiguration: expected={sorted(configured)}, got={sorted(actual)}")
+              if not configured and municipality.get("sourceStatus") != "missing-stop-configuration":
+                  raise SystemExit(f"{name}: saknad hållplats måste redovisas transparent")
 
           print(f"Transportdata verifierad: {len(municipalities)} kommuner, {stops} hållplatser, {age.total_seconds():.0f} sekunder gammal")
           PY

@@ -137,7 +137,10 @@ def parse_filipstad(source: dict) -> list[dict]:
     for cells, href in table.rows:
         if len(cells) < 6:
             continue
-        address, area, rooms_raw, size_raw, rent_raw, available = cells[:6]
+        # Filipstadsbostäder currently prepends an unlabelled image/map cell.
+        # Reading the six semantic columns from the end also keeps compatibility
+        # with the older six-column table.
+        address, area, rooms_raw, size_raw, rent_raw, available = cells[-6:]
         if not address or address.casefold() == "adress" or not re.search(r"\d", rooms_raw):
             continue
         url = urljoin(source["url"], href) if href else source["url"]

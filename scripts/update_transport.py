@@ -254,7 +254,16 @@ def main():
 
     previous_stops = load_previous_stops()
     now = datetime.now(STOCKHOLM)
-    municipalities = {}
+    # Keep every registered municipality in the public index, including those
+    # that still lack a verified stop id. Empty, explicitly degraded entries are
+    # preferable to silently omitting a municipality or inventing a stop.
+    municipalities = {
+        municipality: {
+            "stops": [],
+            "sourceStatus": "missing-stop-configuration",
+        }
+        for municipality in missing
+    }
     successful_current_requests = 0
     failed_stops = []
 
@@ -294,7 +303,7 @@ def main():
             })
             print(f"{municipality}: {len(departures)} kommande avgångar")
 
-        municipalities[municipality] = {"stops": normalized_stops}
+        municipalities[municipality] = {"stops": normalized_stops, "sourceStatus": "ok"}
 
     if successful_current_requests == 0:
         print("Samtliga Trafiklab-anrop misslyckades; befintlig transport.json behålls")
