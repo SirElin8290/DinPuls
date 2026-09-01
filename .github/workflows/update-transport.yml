@@ -91,24 +91,21 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/transport.json
-
-          if git diff --cached --quiet; then
-            echo "Transportfilen är redan aktuell."
-            exit 0
-          fi
-
-          git commit -m "Uppdatera buss- och tågtider"
-
           for attempt in 1 2 3 4; do
             echo "Publiceringsförsök $attempt av 4"
-            if git pull --rebase origin main && git push origin HEAD:main; then
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/update_transport.py
+            git add data/transport.json
+            if git diff --cached --quiet; then
+              echo "Transportfilen är redan aktuell."
+              exit 0
+            fi
+            git commit -m "Uppdatera buss- och tågtider"
+            if git push origin HEAD:main; then
               echo "Nya avgångar publicerade."
               exit 0
             fi
-
-            git rebase --abort 2>/dev/null || true
-
             if [ "$attempt" -lt 4 ]; then
               sleep $((attempt * 2))
             fi
