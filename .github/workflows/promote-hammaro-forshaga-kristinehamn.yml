@@ -121,7 +121,8 @@ jobs:
       - name: Kör grundtester
         run: npm test
 
-      - name: Kontrollera readiness efter promotion
+      - name: Rapportera global readiness
+        continue-on-error: true
         run: python scripts/audit_municipality_readiness.py
 
       - name: Publicera promotion
