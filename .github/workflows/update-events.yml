@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Synka mot senaste main
         shell: bash
         run: |
@@ -42,6 +44,19 @@ jobs:
         run: python scripts/update_events.py
       - name: Testa evenemangslogiken
         run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py
+      - name: Verifiera alla kommuner i evenemangsdatan
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          events = json.loads(Path('data/events.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          actual = set((events.get('municipalities') or {}).keys())
+          if actual != expected:
+              raise SystemExit(f'Evenemangskommuner avviker: expected={sorted(expected)}, got={sorted(actual)}')
+          print(f'Evenemangsdata innehåller alla {len(expected)} kommuner')
+          PY
       - name: Spara evenemangsdata konfliktsäkert
         shell: bash
         run: |
