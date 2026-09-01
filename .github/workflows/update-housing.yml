@@ -10,6 +10,7 @@ on:
     paths:
       - "scripts/update_housing.py"
       - "scripts/update_housing_sunne.py"
+      - "scripts/update_housing_eda.py"
       - "scripts/test_update_housing.py"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
@@ -38,6 +39,7 @@ jobs:
         run: |
           python scripts/update_housing.py
           python scripts/update_housing_sunne.py
+          python scripts/update_housing_eda.py
 
       - name: Verifiera kommunregistret i bostadsdatan
         run: |
@@ -73,6 +75,25 @@ jobs:
               assert item.get('url'), 'Sunne-objekt saknar länk'
               assert item.get('provider') == 'Sunne Fastighets AB'
           print(f"Verifierat: Sunne har {sunne['total']} aktuella bostadsobjekt")
+          PY
+
+      - name: Verifiera Eda-data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          eda = data.get('municipalities', {}).get('Eda', {})
+          assert eda.get('total', 0) > 0, 'Eda saknar bostadsobjekt efter hämtning'
+          assert len(eda.get('listings', [])) == eda.get('total'), 'Edas total matchar inte listan'
+          assert eda.get('stale') is False, 'Eda-data är markerad stale'
+          for item in eda.get('listings', []):
+              assert item.get('id'), 'Eda-objekt saknar objektnummer'
+              assert item.get('address'), 'Eda-objekt saknar adress'
+              assert item.get('area'), 'Eda-objekt saknar ort'
+              assert item.get('url'), 'Eda-objekt saknar länk'
+              assert item.get('provider') == 'Eda Bostads AB'
+          print(f"Verifierat: Eda har {eda['total']} aktuella bostadsobjekt")
           PY
 
       - name: Testa bostadslogiken
