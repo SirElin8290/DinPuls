@@ -10,7 +10,9 @@ on:
       - "data/leisure-curated.json"
       - "data/leisure-enrichment.json"
       - "data/sports-curated.json"
+      - "data/association-launch-supplement.json"
       - "scripts/import_associations.py"
+      - "scripts/apply_launch_associations.py"
       - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
       - ".github/workflows/update-associations.yml"
@@ -34,6 +36,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Synka mot senaste main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Aktivera Python
         uses: actions/setup-python@v5
         with:
@@ -41,6 +50,9 @@ jobs:
 
       - name: Importera föreningsregister
         run: python scripts/import_associations.py
+
+      - name: Lägg till verifierad lanseringstäckning
+        run: python scripts/apply_launch_associations.py
 
       - name: Applicera verifierad fritidsberikning
         run: python scripts/apply_leisure_enrichment.py
@@ -59,6 +71,12 @@ jobs:
               data = json.loads(Path(filename).read_text(encoding='utf-8'))
               got = set(data.get('municipalities', {}))
               assert got == expected, f'{filename}: expected={sorted(expected)}, got={sorted(got)}'
+          launch = json.loads(Path('data/association-launch-supplement.json').read_text(encoding='utf-8'))
+          sports = json.loads(Path('data/sports.json').read_text(encoding='utf-8'))['municipalities']
+          leisure = json.loads(Path('data/leisure.json').read_text(encoding='utf-8'))['municipalities']
+          for name in launch.get('municipalities', {}):
+              assert sports.get(name, {}).get('clubs'), f'{name}: launch sport coverage missing'
+              assert leisure.get(name, {}).get('activities'), f'{name}: launch leisure coverage missing'
           print(f'Verifierade föreningsdata för {len(expected)} kommuner')
           PY
           node scripts/test_leisure_quality.js
