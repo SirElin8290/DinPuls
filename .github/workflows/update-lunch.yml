@@ -39,6 +39,19 @@ jobs:
           python scripts/test_update_lunch.py
           python scripts/update_lunch.py
 
+      - name: Verifiera att alla kommuner finns med
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
+          lunch = json.loads(Path('data/lunch.json').read_text(encoding='utf-8'))
+          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
+          got = set(lunch.get('municipalities', {}))
+          assert got == expected, f'Lunchkommuner avviker: expected={sorted(expected)}, got={sorted(got)}'
+          print(f'Verifierade lunchdata för {len(expected)} kommuner')
+          PY
+
       - name: Publicera lunchdata
         shell: bash
         run: |
