@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Merge verified launch associations into generated sports/leisure data.
 
-The supplement is additive: automated association imports remain authoritative and
+Supplements are additive: automated association imports remain authoritative and
 future imported entries replace the need for manual launch coverage without creating
 duplicates.
 """
@@ -13,7 +13,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-SUPPLEMENT = DATA / "association-launch-supplement.json"
+SUPPLEMENTS = (
+    DATA / "association-launch-supplement.json",
+    DATA / "association-priority-supplement.json",
+)
 
 
 def load(path: Path) -> dict:
@@ -40,14 +43,27 @@ def merge_named(existing: list[dict], supplemental: list[dict]) -> list[dict]:
 
 
 def main() -> None:
-    supplement = load(SUPPLEMENT)
     sports_path = DATA / "sports.json"
     leisure_path = DATA / "leisure.json"
     sports = load(sports_path)
     leisure = load(leisure_path)
 
-    supplement_municipalities = supplement.get("municipalities") or {}
-    for municipality, extra in supplement_municipalities.items():
+    merged_municipalities: dict[str, dict] = {}
+    for supplement_path in SUPPLEMENTS:
+        if not supplement_path.exists():
+            continue
+        supplement = load(supplement_path)
+        for municipality, extra in (supplement.get("municipalities") or {}).items():
+            merged = merged_municipalities.setdefault(
+                municipality,
+                {"directoryUrl": extra.get("directoryUrl", ""), "clubs": [], "activities": []},
+            )
+            if extra.get("directoryUrl") and not merged.get("directoryUrl"):
+                merged["directoryUrl"] = extra["directoryUrl"]
+            merged["clubs"] = merge_named(merged.get("clubs") or [], extra.get("clubs") or [])
+            merged["activities"] = merge_named(merged.get("activities") or [], extra.get("activities") or [])
+
+    for municipality, extra in merged_municipalities.items():
         sport_entry = (sports.setdefault("municipalities", {})).setdefault(
             municipality,
             {"directoryUrl": extra.get("directoryUrl", ""), "clubs": [], "liveSources": []},
@@ -69,14 +85,14 @@ def main() -> None:
     leisure_path.write_text(json.dumps(leisure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     missing = []
-    for municipality in supplement_municipalities:
+    for municipality in merged_municipalities:
         if not (sports["municipalities"][municipality].get("clubs") or []):
             missing.append(f"{municipality}: sport")
         if not (leisure["municipalities"][municipality].get("activities") or []):
             missing.append(f"{municipality}: fritid")
     if missing:
         raise SystemExit("Launch association merge failed: " + ", ".join(missing))
-    print(f"Launch association coverage verified for {len(supplement_municipalities)} municipalities")
+    print(f"Launch association coverage verified for {len(merged_municipalities)} municipalities")
 
 
 if __name__ == "__main__":
