@@ -48,26 +48,36 @@ def main() -> None:
         kept = []
 
         for activity in leisure_data.get("activities", []):
+            name = str(activity.get("name", "")).strip()
+            normalized_name = name.casefold()
+
+            # Om importen redan placerat samma förening i Idrott ska Fritid aldrig
+            # behålla en andra kopia, oavsett hur kommunregistret kategoriserat den.
+            if normalized_name and normalized_name in club_names:
+                moved += 1
+                continue
+
             detected = sport_for(activity)
             if not detected:
                 kept.append(activity)
                 continue
-            name = str(activity.get("name", "")).strip()
-            if name and name.casefold() not in club_names:
+
+            if name:
                 clubs.append({
                     "name": name,
                     "sports": detected,
                     "url": activity.get("url"),
                     "source": f"{municipality} föreningsregister",
                 })
-                club_names.add(name.casefold())
+                club_names.add(normalized_name)
             moved += 1
+
         leisure_data["activities"] = kept
         clubs.sort(key=lambda item: str(item.get("name", "")).casefold())
 
     LEISURE_PATH.write_text(json.dumps(leisure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     SPORTS_PATH.write_text(json.dumps(sports, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Flyttade {moved} uppenbara idrottsposter från Fritid till Idrott.")
+    print(f"Flyttade {moved} uppenbara eller dubblerade idrottsposter från Fritid till Idrott.")
 
 
 if __name__ == "__main__":
