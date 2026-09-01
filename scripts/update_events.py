@@ -10,6 +10,7 @@ import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode, urljoin, urlsplit
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
@@ -17,6 +18,7 @@ SOURCE_CATALOG = ROOT / "data" / "event-sources.json"
 USER_AGENT = "DinPuls.se/0.21 (lokal evenemangskalender; https://sirelin8290.github.io/DinPuls/)"
 ALGOLIA_APP_ID = "JLIO3DI59W"
 ALGOLIA_SEARCH_KEY = "c3e912c214238b637c6a86d637acfe79"
+SWEDEN_TZ = ZoneInfo("Europe/Stockholm")
 MUNICIPALITY_CONFIG = json.loads(
     (ROOT / "data" / "municipalities.json").read_text(encoding="utf-8")
 )["municipalities"]
@@ -40,6 +42,26 @@ def fetch_json(url: str):
     raw = fetch_html(url)
     value = json.loads(raw)
     return json.loads(value) if isinstance(value, str) else value
+
+
+def visit_varmland_time_label(start_stamp, end_stamp=None) -> str:
+    """Formaterar Visit Värmlands UTC-stämplar som svensk lokal tid.
+
+    Datumintervall utan riktig klockslagstid kodas ibland som lokal midnatt.
+    De ska visas som datum/"Se källan", inte som ett artificiellt 00:00/22:00.
+    """
+    if not start_stamp:
+        return "Se källan"
+    start_dt = datetime.fromtimestamp(int(start_stamp), timezone.utc).astimezone(SWEDEN_TZ)
+    end_dt = (
+        datetime.fromtimestamp(int(end_stamp), timezone.utc).astimezone(SWEDEN_TZ)
+        if end_stamp else None
+    )
+    start_time = start_dt.strftime("%H:%M")
+    end_time = end_dt.strftime("%H:%M") if end_dt else ""
+    if start_time == "00:00" and (not end_time or end_time in {"00:00", "23:59"}):
+        return "Se källan"
+    return f"{start_time}–{end_time}" if end_time and end_time != start_time else start_time
 
 
 def fetch_visit_varmland_events(municipality: str) -> list[dict]:
@@ -78,11 +100,7 @@ def fetch_visit_varmland_events(municipality: str) -> list[dict]:
                 continue
             start_stamp = occurrence.get("occasion_date")
             end_stamp = occurrence.get("occasion_end_date")
-            time_label = "Se källan"
-            if start_stamp:
-                start_time = datetime.fromtimestamp(int(start_stamp), timezone.utc).strftime("%H:%M")
-                end_time = datetime.fromtimestamp(int(end_stamp), timezone.utc).strftime("%H:%M") if end_stamp else ""
-                time_label = f"{start_time}–{end_time}" if end_time and end_time != start_time else start_time
+            time_label = visit_varmland_time_label(start_stamp, end_stamp)
             identifier = hashlib.sha1(
                 f"{municipality}|{title}|{start}|{venue}|{item_url}".encode()
             ).hexdigest()[:16]
