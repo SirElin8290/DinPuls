@@ -1,0 +1,136 @@
+{
+  "municipality": "Kristinehamn",
+  "checkedAt": "2026-09-02",
+  "scope": "Chat-side municipality completion research. Hero image intentionally excluded.",
+  "health": {
+    "official": [
+      "Vårdcentralen Kristinehamn, Solrosbacken 1, 010-838 63 03",
+      "Fysioterapimottagningen Kristinehamn, Solrosbacken 1, remissfri",
+      "Arbetsterapimottagningen Kristinehamn, Solrosbacken 1, remissfri",
+      "Jourcentralen Kristinehamn, Solrosbacken 1, helger/helgdagar 09-17 via 1177",
+      "Folktandvården Kristinehamn, Solrosbacken 1, 010-838 66 40",
+      "Familjecentralen Källan with BVC, barnmorska, förebyggande socialtjänst and öppen förskola",
+      "Ungdomsmottagningen Kristinehamn, Assemblégatan 3",
+      "Barn- och ungdomsmedicins mottagning Kristinehamn, Solrosbacken 1",
+      "Vaccinationsmottagning Kristinehamn, Solrosbacken 1"
+    ],
+    "privateTreatment": [
+      "Fot & Kroppskliniken – medicinsk fotvård, massage and lymfmassage",
+      "Popular Medicinsk Massageterapeut – massage/laser/lymfmassage",
+      "Helhetskänslan – klassisk, avslappnings-, koppnings- and lymfmassage",
+      "Lena fötter med mjuka händer – medicinsk fotvård",
+      "Brantens massage – massage and käkledsbehandling",
+      "No Pain Massage – massage",
+      "LaserTerapeuten Kristinehamn – massage and laser",
+      "Friskvården i Värmland – local physiotherapy clinic identified; use stronger direct source before static hardcoding"
+    ],
+    "pharmacy": ["Kronans Apotek Kristinehamn, Albinvägen 2"]
+  },
+  "service": {
+    "alreadyInLaunchSupplement": [
+      "LIKA El i Kristinehamn AB",
+      "Wermlands energi & rörservice AB",
+      "Höijs Ventilation AB"
+    ],
+    "verifiedAdditional": [
+      "Mekonomen Bilverkstad Kristinehamn / Kristinehamns Automekanik AB, Karlstadsvägen 44",
+      "Fändriks Fordonsteknik AB / MECA, Hantverkargatan 6",
+      "Auto bilservice i Kristinehamn AB / AD Bilverkstad, 1:a Industrigatan 2A",
+      "Låsmästarn i Värmland AB, Kungsgatan 36",
+      "Olssons Städ i Värmland KB, Tredje Industrigatan 9"
+    ]
+  },
+  "foodLunch": {
+    "alreadyInLaunchSupplement": [
+      "Brassie Bistro",
+      "Restaurang Mat i din Vardag",
+      "Öppna matsalen Uranus"
+    ],
+    "verifiedAdditional": [
+      "Panncentralen Italienskt möte at Kristinehamns konstmuseum – dagens lunch autumn/winter/spring",
+      "Restaurang Axel / Stadshotellet Kristinehamn – current weekday lunch",
+      "Oliveriet – restaurant with lunch and Italian/Sardinian profile"
+    ],
+    "dynamicDirectory": "Visit Kristinehamn maintains a current day-by-day restaurant/café opening guide; updated 2026-08-31. Prefer this as broad discovery source instead of duplicating every establishment statically."
+  },
+  "cinema": {
+    "name": "Bio & Bistro Kristinehamn",
+    "address": "Broängsgatan 3, Kristinehamn",
+    "features": ["3 salonger", "103 biostolar", "bistro", "Kristinehamns Filmstudio", "live på bio", "online booking"],
+    "repoAction": "Added to data/cinemas.json because Kristinehamn was incorrectly empty."
+  },
+  "housing": {
+    "primary": "Kristinehamnsbostäder – active housing queue and listings including Bostad, Bostad Direkt and poängfria apartments",
+    "market": "Multiple private landlords are active; current aggregators show Kristinehamnsbostäder plus Akka/Möller & Partners, Skandinaviska Folkbostäder, Stendalen, Hem i Kristinehamn and Albèr among current listings.",
+    "rule": "Vacancies are dynamic and must be regenerated rather than hardcoded."
+  },
+  "jobs": {
+    "municipalSource": "Kristinehamns kommun Lediga tjänster",
+    "statusAtCheck": "17 municipal advertisements shown on 2026-09-02",
+    "rule": "Job ads are dynamic; use generator/source rather than static vacancies."
+  },
+  "events": {
+    "source": "Visit Kristinehamn / Visit Värmland event calendar",
+    "status": "Active current feed verified on 2026-09-02 with exhibitions, music, sports, markets, library activities, food events and theatre.",
+    "examples": [
+      "Järnet födde staden, Kristinehamns Historiska Museum",
+      "Livets drycker, Kristinehamns Historiska Museum",
+      "Hannibal Jarrah Quartet, Mastmagasinet",
+      "IFK Ölme A-lag Herr at Ölme IP",
+      "IFK Kristinehamn A-lag dam at Sannavallen",
+      "Höstloppis i Arenan 26 Sep 2026",
+      "Konstens helg 26-27 Sep 2026"
+    ],
+    "rule": "Keep events dynamic; do not freeze individual 2026 events as permanent data."
+  },
+  "associations": {
+    "source": "Kristinehamns kommuns föreningsregister",
+    "breadth": "Municipality stated about 60 associations participated in Föreningsdagen 2026 across sport, culture, local heritage, social, pensioner and disability associations.",
+    "sportsVerifiedFromFacilitiesEvents": ["IFK Kristinehamn", "IFK Ölme", "Bäckhammars SK"],
+    "rule": "Use association importer/register for full coverage."
+  },
+  "leisureCulture": {
+    "library": "Kristinehamns bibliotek, Tullportsgatan 13, plus bokbuss; part of Bibliotek Värmland",
+    "youth": "Municipal and independent youth centres; Bygget is a current municipal youth centre for year 7 and older",
+    "fritidsbanken": "Fritidsbanken lends sport/outdoor equipment free for 14 days; municipal pages identify activity in Stadsparken/Brandkårsvägen 11",
+    "museums": ["Kristinehamns konstmuseum", "Kristinehamns Historiska Museum", "Kristinehamns bildarkiv"],
+    "outdoor": ["motions- and ski trails", "outdoor gyms", "cycle parks/routes", "frisbee golf", "skate/parkour", "Vänern archipelago", "hiking"]
+  },
+  "sportsFacilities": {
+    "Björkvallen": ["football", "bandy oval", "ice hockey rink", "ice hall", "curling hall", "tennis", "outdoor gym", "bikepark", "18-hole disc golf", "exercise trails"],
+    "SannahedenSannavallen": ["five full-size grass football pitches", "athletics arena", "grandstand", "Kristinehamns Arena facilities"],
+    "BjörneviBjörneborg": ["football", "natural ice rink", "outdoor gym", "exercise trail"],
+    "BäckeviBäckhammar": ["football pitches", "operated by Bäckhammars SK"],
+    "ÖlmeIP": ["three grass full-size pitches", "one lit gravel full-size pitch", "operated by IFK Ölme"],
+    "indoor": "Municipality has multiple indoor halls and Kristinehamns Arena; use municipal facility catalogue for complete generated coverage."
+  },
+  "bathing": {
+    "municipal": [
+      "Skymningen – Vänern, accessible, sand beach, changing building, seasonal toilet, sun deck and bathing jetty",
+      "Jutviken – Vänern, shallow sandy beach",
+      "Bengtsgård – Vänern, sandy beach, bathing jetty and playground"
+    ],
+    "popularOther": [
+      "Revsand – Vänern, sandy beach, playground and WC",
+      "Hult – Vänern, sandy beach, playground, jetty, beach volleyball, grill and café"
+    ],
+    "indoor": "Sannabadet is the municipal indoor swimming facility."
+  },
+  "transport": {
+    "localNetwork": "Kristinehamn has a Värmlandstrafik urban network centred on Resecentrum. Published network map includes lines 1, 2, 3, 4, 5, 11, 12 and 13 and destinations including Marieberg, Djurgården, Strand, Kvarnbyn, Övre Kvarn, Strandudden, Gustavsvik, Skäringsbol, Marielund and Sandfallet.",
+    "healthAccess": "Bus line 63 serves Vårdcentralen Kristinehamn according to 1177.",
+    "rule": "Stops/departures are dynamic and should be regenerated through transport workflow rather than manually frozen."
+  },
+  "communityServices": {
+    "municipality": "Kristinehamns kommun, Kungsgatan 29B, 0550-880 00",
+    "recycling": "Strandmossen recycling centre and municipality waste/recycling services",
+    "social": "Municipal support, care, family support, economic assistance and social services are exposed through kristinehamn.se; keep official municipal source links."
+  },
+  "technicalNotes": [
+    "Kristinehamn had an empty cinema array in data/cinemas.json; corrected in chat.",
+    "Kristinehamn already had three launch lunch sources and three launch service providers; do not duplicate them.",
+    "Verified health/treatment entries were added to data/health-chat-supplement.json, but the previously discovered project-wide health-chat wiring issue still means runtime visibility must be checked by the generator/integration stage.",
+    "Jobs, housing vacancies, events and transit are time-sensitive and must be regenerated and audited after static research changes.",
+    "Hero image intentionally untouched per project instruction."
+  ]
+}
