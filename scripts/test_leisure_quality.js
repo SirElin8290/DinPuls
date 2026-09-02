@@ -40,6 +40,10 @@ for (const [municipality, payload] of Object.entries(leisure.municipalities)) {
     assert(Array.isArray(activity.tags) && activity.tags.length > 0, `${municipality}/${activity.name}: taggar saknas`);
     assert.doesNotThrow(() => new URL(activity.url), `${municipality}/${activity.name}: ogiltig URL`);
     assert.equal(new URL(activity.url).protocol, "https:", `${municipality}/${activity.name}: URL ska använda HTTPS`);
+    assert(
+      !new URL(activity.url).pathname.includes("/idrott/idrottsaktiviteter/"),
+      `${municipality}/${activity.name}: kommunal idrottsaktivitet ligger i Fritid`,
+    );
     for (const field of ["calendarUrl", "activityUrl"]) {
       if (!activity[field]) continue;
       assert.doesNotThrow(() => new URL(activity[field]), `${municipality}/${activity.name}: ogiltig ${field}`);
