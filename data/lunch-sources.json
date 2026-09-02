@@ -1,5 +1,5 @@
 {
-  "version": "0.21.2",
+  "version": "0.21.3",
   "municipalities": {
     "Åmål": [
       {"id":"mickans-grill","name":"Mickans Grill","url":"https://www.mickansgrill.se/","address":"Åmål","hours":"Vardagar 11.00–14.00","parser":"weekday-headings"},
@@ -35,9 +35,9 @@
       {"id":"krogeriet","name":"Krogeriet","url":"https://krogeriet.se/","address":"Storgatan 53, Årjäng","hours":"Vardagar 11.30–15.00","parser":"weekday-headings"},
       {"id":"hotell-arjang","name":"Hotell Årjäng","url":"https://hotellarjang.com/ata/lunch/","address":"Claras Torg 1, Årjäng","hours":"Se aktuell lunchstatus","parser":"source-only"},
       {"id":"waterside","name":"Waterside Restaurant","url":"https://waterside.se/","address":"Bögatan 1, Töcksfors","hours":"Dagens lunch, se aktuell tid","parser":"source-only"},
-      {"id":"asian-town-tocksfors","name":"Asian Town Töcksfors","url":"https://asiantown.se/tocksfors/","address":"Töcksfors Shoppingcenter","hours":"Buffé dagligen från 11.00","parser":"source-only"}
-      ,{"id":"curry-punjabi-arjang","name":"Curry Punjabi","url":"https://www.facebook.com/currypunjabi1/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"}
-      ,{"id":"hornet-arjang","name":"Hörnet","url":"https://www.facebook.com/p/H%C3%B6rnet-61559522264272/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"}
+      {"id":"asian-town-tocksfors","name":"Asian Town Töcksfors","url":"https://asiantown.se/tocksfors/","address":"Töcksfors Shoppingcenter","hours":"Buffé dagligen från 11.00","parser":"source-only"},
+      {"id":"curry-punjabi-arjang","name":"Curry Punjabi","url":"https://www.facebook.com/currypunjabi1/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"},
+      {"id":"hornet-arjang","name":"Hörnet","url":"https://www.facebook.com/p/H%C3%B6rnet-61559522264272/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"}
     ],
     "Arvika": [
       {"id":"gate-gastgiveri","name":"Gate Gästgiveri","url":"https://www.gategastgiveri.se/13.html","address":"Gate","hours":"Se veckans meny","parser":"weekday-headings"},
@@ -52,45 +52,51 @@
     "Grums": [
       {"id":"anderssons","name":"Anderssons Restaurang & Catering","url":"https://www.facebook.com/anderssonsrestaurangochcatering/","address":"Sveagatan 142","hours":"Se veckans lunchbuffé","parser":"source-only"},
       {"id":"rasta-grums","name":"Rasta Grums","url":"https://www.rasta.se/grums/dagens-ratt/","address":"Nyängsgatan 1","hours":"Dagens rätt 11.00–19.00","parser":"weekday-headings"},
-      {"id":"pizzeria-97an-grums","name":"Pizzeria 97:an","url":"https://www.facebook.com/p/Pizzeria97an-100090669815751/","address":"Grums","hours":"Se dagens lunch","parser":"source-only"},
-      {"id":"restaurang-kina-grums","name":"Restaurang Kina","url":"https://www.facebook.com/Kinaigrums/","address":"Grums","hours":"Se dagens lunch","parser":"source-only"}
-    ]
-  ,
-"Kil":[{"id":"kils-golfrestaurang","name":"Kils Golfrestaurang","url":"https://www.kilsgolfrestaurang.se/","address":"Skärningsberg 125","hours":"Lunch 11.00–15.00","parser":"weekday-headings"},{"id":"kils-hotell","name":"Kils Hotell & Restaurang","url":"https://www.kilshotell.com/","address":"Storgatan 16","hours":"Vardagslunch 11.00–14.30","parser":"source-only"}],
-"Sunne":[{"id":"nils-holgerssons-vardshus","name":"Nils Holgerssons Värdshus","url":"https://www.nilsholgerssonswardshus.se/lunch/","address":"Nils Holgerssons väg 1","hours":"Lunch dagligen 11.00–16.00","parser":"weekday-headings"},{"id":"saffran-vitlok-sunne","name":"Saffran & Vitlök","url":"https://saffranvitlok.se/","address":"Storgatan 36","hours":"Lunch måndag–lördag 11.00–15.00","parser":"weekday-headings"},{"id":"sagolika-loven","name":"Sagolika Löven","url":"https://sagolikaloven.se/","address":"Brårudsallén 7","hours":"Lunch måndag–fredag 11.30–14.30","parser":"source-only"}],
-"Eda":[{"id":"kallmans-konditori","name":"Källmans Konditori","url":"https://xn--kllmans-5wa.se/lunch/","address":"Storgatan 14, Charlottenberg","hours":"Lunch vardagar","parser":"weekday-headings"}],
-"Karlstad":[],
-"Hammarö":[],
-"Forshaga":[],
-"Kristinehamn":[],
-"Storfors":[],
-"Filipstad":[],
-"Hagfors":[],
-"Munkfors":[],
-"Torsby":[],
-"Dals-Ed":[],
-"Färgelanda":[]},
+      {"id":"pizzeria-97an-grums","name":"Pizzeria 97:an","url":"https://www.facebook.com/p/Pizzeria97an-100090669815751/","address":"Sveagatan 98, Grums","hours":"Se dagens lunch","parser":"source-only"},
+      {"id":"restaurang-kina-grums","name":"Restaurang Kina","url":"https://www.facebook.com/Kinaigrums/","address":"Sveagatan 48, Grums","hours":"Se dagens lunch","parser":"source-only"},
+      {"id":"indian-street-kitchen-grums","name":"Indian Street Kitchen","url":"https://www.visitvarmland.com/grums/mat-dryck/lunch/indian-street-kitchen","address":"Sveagatan 94, Grums","hours":"Dagens lunch – se aktuell meny","parser":"source-only"},
+      {"id":"restaurang-asien-grums","name":"Restaurang Asien","url":"https://www.visitvarmland.com/grums/mat-dryck/lunch/restaurang-asien","address":"Sveagatan 118, Grums","hours":"Lunch och kvällsmeny – se aktuell meny och öppettider","parser":"source-only"},
+      {"id":"grums-pizzeria","name":"Grums Pizzeria","url":"https://www.visitvarmland.com/grums/mat-dryck/restaurang/grums-pizzeria","address":"Hammarstenallén 2, Grums","hours":"Dagens rätt – se aktuell meny och öppettider","parser":"source-only"},
+      {"id":"susannes-lilla-xtra-grums","name":"Susannes Lilla X-tra","url":"https://www.visitvarmland.com/grums/mat-dryck/lunch/susannes-lilla-x-tra","address":"Industrigatan 4, Grums","hours":"Lunch, sallader och catering – se aktuella öppettider","parser":"source-only"},
+      {"id":"viltkoket-grums","name":"Viltköket","url":"https://www.visitvarmland.com/grums/mat-dryck/lunch/viltkoket","address":"Åsbäcksvägen 3, Grums","hours":"Lunch och konferensmåltider – se aktuell meny och öppettider","parser":"source-only"},
+      {"id":"kafe-sagtorp-grums","name":"Kafé Sågtorp","url":"https://www.visitvarmland.com/grums/","address":"Sågtorp 1, Segmon","hours":"Hemlagad lunch, matiga pajer och hembakat – se aktuella öppettider","parser":"source-only"}
+    ],
+    "Kil":[{"id":"kils-golfrestaurang","name":"Kils Golfrestaurang","url":"https://www.kilsgolfrestaurang.se/","address":"Skärningsberg 125","hours":"Lunch 11.00–15.00","parser":"weekday-headings"},{"id":"kils-hotell","name":"Kils Hotell & Restaurang","url":"https://www.kilshotell.com/","address":"Storgatan 16","hours":"Vardagslunch 11.00–14.30","parser":"source-only"}],
+    "Sunne":[{"id":"nils-holgerssons-vardshus","name":"Nils Holgerssons Värdshus","url":"https://www.nilsholgerssonswardshus.se/lunch/","address":"Nils Holgerssons väg 1","hours":"Lunch dagligen 11.00–16.00","parser":"weekday-headings"},{"id":"saffran-vitlok-sunne","name":"Saffran & Vitlök","url":"https://saffranvitlok.se/","address":"Storgatan 36","hours":"Lunch måndag–lördag 11.00–15.00","parser":"weekday-headings"},{"id":"sagolika-loven","name":"Sagolika Löven","url":"https://sagolikaloven.se/","address":"Brårudsallén 7","hours":"Lunch måndag–fredag 11.30–14.30","parser":"source-only"}],
+    "Eda":[{"id":"kallmans-konditori","name":"Källmans Konditori","url":"https://xn--kllmans-5wa.se/lunch/","address":"Storgatan 14, Charlottenberg","hours":"Lunch vardagar","parser":"weekday-headings"}],
+    "Karlstad":[],
+    "Hammarö":[],
+    "Forshaga":[],
+    "Kristinehamn":[],
+    "Storfors":[],
+    "Filipstad":[],
+    "Hagfors":[],
+    "Munkfors":[],
+    "Torsby":[],
+    "Dals-Ed":[],
+    "Färgelanda":[]
+  },
   "referenceSources": {
     "Åmål": [{"name":"Visit Åmål – lunch","url":"https://www.vastsverige.com/amal/ata/lunch/"}],
     "Bengtsfors": [{"name":"Bengtsfors Handel – restauranger","url":"https://www.bengtsforshandel.se/"}],
     "Mellerud": [{"name":"Visit Mellerud – mat och dryck","url":"https://www.vastsverige.com/mellerud/mat-och-dryck/mat-och-dryck/"}],
     "Årjäng": [{"name":"Visit Årjäng – mat och dryck","url":"https://www.visitvarmland.com/arjang/mat-dryck"}],
     "Arvika": [{"name":"Arvika Lunch","url":"https://arvikalunch.se/"}],
-    "Grums": [{"name":"Visit Grums – mat och dryck","url":"https://www.visitvarmland.com/grums/mat-dryck"}]
-  ,
-"Säffle":[],
-"Kil":[{"name":"Gilla Kil – äta","url":"https://www.gillakil.com/aeta"}],
-"Sunne":[{"name":"Sagolika Sunne – lunch i Sunne","url":"https://sagolikasunne.se/gora/mat-fika/lunch-i-sunne/"}],
-"Eda":[{"name":"Visit Värmland Eda – mat och dryck","url":"https://www.visitvarmland.com/eda/mat-dryck"}],
-"Karlstad":[],
-"Hammarö":[],
-"Forshaga":[],
-"Kristinehamn":[],
-"Storfors":[],
-"Filipstad":[],
-"Hagfors":[],
-"Munkfors":[],
-"Torsby":[],
-"Dals-Ed":[],
-"Färgelanda":[]}
+    "Grums": [{"name":"Visit Grums – mat och dryck","url":"https://www.visitvarmland.com/grums/mat-dryck"}],
+    "Säffle":[],
+    "Kil":[{"name":"Gilla Kil – äta","url":"https://www.gillakil.com/aeta"}],
+    "Sunne":[{"name":"Sagolika Sunne – lunch i Sunne","url":"https://sagolikasunne.se/gora/mat-fika/lunch-i-sunne/"}],
+    "Eda":[{"name":"Visit Värmland Eda – mat och dryck","url":"https://www.visitvarmland.com/eda/mat-dryck"}],
+    "Karlstad":[],
+    "Hammarö":[],
+    "Forshaga":[],
+    "Kristinehamn":[],
+    "Storfors":[],
+    "Filipstad":[],
+    "Hagfors":[],
+    "Munkfors":[],
+    "Torsby":[],
+    "Dals-Ed":[],
+    "Färgelanda":[]
+  }
 }
