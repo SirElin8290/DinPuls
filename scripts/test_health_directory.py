@@ -31,10 +31,12 @@ class HealthDirectoryTests(unittest.TestCase):
     def setUpClass(cls):
         cls.main_data = json.loads((ROOT / "data" / "health-private.json").read_text(encoding="utf-8"))
         cls.supplement_data = json.loads((ROOT / "data" / "health-private-supplement.json").read_text(encoding="utf-8"))
+        cls.local_data = json.loads((ROOT / "data" / "health-local-supplement.json").read_text(encoding="utf-8"))
         cls.official_data = json.loads((ROOT / "data" / "health.json").read_text(encoding="utf-8"))
         cls.main_providers = cls.main_data.get("providers", [])
         cls.supplement_providers = cls.supplement_data.get("providers", [])
-        cls.providers = cls.main_providers + cls.supplement_providers
+        cls.local_providers = cls.local_data.get("providers", [])
+        cls.providers = cls.main_providers + cls.supplement_providers + cls.local_providers
 
     def test_all_municipalities_have_health_entries(self):
         covered = {item.get("municipality") for item in self.providers + self.official_data.get("providers", [])}
@@ -49,7 +51,7 @@ class HealthDirectoryTests(unittest.TestCase):
                 self.assertTrue(any(str(item.get(key) or "").strip() for key in ("url", "phone", "address")))
 
     def test_no_duplicate_names_inside_each_source(self):
-        for providers in (self.main_providers, self.supplement_providers):
+        for providers in (self.main_providers, self.supplement_providers, self.local_providers):
             keys = [(item.get("municipality"), str(item.get("name") or "").casefold()) for item in providers]
             self.assertEqual(len(keys), len(set(keys)))
 
@@ -58,6 +60,7 @@ class HealthDirectoryTests(unittest.TestCase):
         page = (ROOT / "vard.html").read_text(encoding="utf-8")
         self.assertIn('data/health-private.json', script)
         self.assertIn('data/health-private-supplement.json', script)
+        self.assertIn('data/health-local-supplement.json', script)
         self.assertIn('health-directory-groups', page)
         self.assertIn('health-page.css?version=', page)
         self.assertIn('Fotvård & medicinsk fotvård', script)
