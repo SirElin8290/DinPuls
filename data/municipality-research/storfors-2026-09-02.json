@@ -1,0 +1,42 @@
+{
+  "municipality": "Storfors",
+  "checkedAt": "2026-09-02",
+  "scope": "Chat-side exhaustive municipality pass before generator/runtime work; hero excluded.",
+  "health": [
+    {"name":"Vårdcentralen Storfors","address":"Hammargatan 3, 688 30 Storfors","phone":"010-836 57 02","source":"https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Storfors/","notes":"Regiondriven vårdcentral; vardagar 08-17 at verification. Includes district nurse, diabetes, asthma/COPD, dietitian, medical foot care, memory and counselling services."},
+    {"name":"Folktandvården Storfors","address":"Hälsans Hus, Hammargatan 3, Storfors","phone":"010-838 66 40","source":"https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Storfors/","notes":"General dentistry for children and adults; temporary closure notices must remain dynamic."},
+    {"name":"Barnmorskemottagningen vårdcentralen Storfors","address":"Hammargatan 3, Storfors","source":"https://www.1177.se/hitta-vard/kontaktkort/Barnmorskemottagningen-vardcentralen-Storfors/","notes":"Pregnancy, contraception, STI information/testing and cervical screening."},
+    {"name":"Barnavårdscentralen vårdcentralen Storfors","address":"Hammargatan 3, Storfors","phone":"010-836 57 08","source":"https://www.1177.se/Halland/hitta-vard/kontaktkort/Barnavardscentralen-vardcentralen-Storfors/","notes":"1177 currently states BVC Storfors is closed until further notice and refers patients to BVC Kristinehamn; do not present as normally open without fresh check."},
+    {"name":"Första linjen unga östra","coverage":"Kristinehamn, Storfors and Filipstad","source":"https://www.1177.se/Varmland/liv--halsa/ung/","notes":"Regional mental-health first-line service for young people in Storfors area."}
+  ],
+  "service": [
+    {"name":"Claussons Rörservice AB","category":"VVS","address":"Östra Skyttegatan 36, Storfors","notes":"Already present in service-launch-supplement."},
+    {"name":"Stegelvikens Bygg AB","category":"Bygg","address":"Industrigatan 4, Storfors","notes":"Already present in service-launch-supplement."},
+    {"name":"P-EL AB","category":"El","address":"Berggatan 19, Storfors","notes":"Already present in service-launch-supplement."},
+    {"name":"Piscators Bil AB","category":"Bilverkstad","address":"Industrigatan 3, Storfors","phone":"0550-622 83","source":"https://www.storfors.se/download/18.6e76175e1750766b1fc283/1602149890792/Specialnummer%20I%20freske%20lufta%20nr%202_2019.pdf","notes":"Municipal service guide source is older; refresh before production hardcoding."},
+    {"name":"Mekonomen bilverkstad","category":"Bilverkstad","address":"Industrigatan 8, Storfors","phone":"0550-622 22","source":"https://www.storfors.se/download/18.6e76175e1750766b1fc283/1602149890792/Specialnummer%20I%20freske%20lufta%20nr%202_2019.pdf","notes":"Municipal service guide source is older; refresh before production hardcoding."}
+  ],
+  "food": [
+    {"name":"Taverna Restaurang & Pizzeria","address":"Stationsgatan 74, Storfors","phone":"0550-622 43","source":"https://www.visitvarmland.com/storfors/mat-dryck/restaurang/takeaway-97/taverna-restaurang-pizzeria","notes":"Restaurant, pizzeria and lunch; current Visit Värmland listing."},
+    {"name":"Restaurang Pizzeria Folkets Hus","source":"https://www.visitvarmland.com/storfors/no/mat-dryck","notes":"Lunch, pizza, kebab, salad and grill according to current destination listing."},
+    {"name":"Kulturcafé","place":"Kulturhuset, Storfors","source":"https://www.visitvarmland.com/storfors/no/mat-dryck","notes":"Cafe listing."},
+    {"name":"Slusscaféet vid Bjurbäckens slussar","place":"Bjurbäckens slussar","source":"https://www.visitvarmland.com/storfors/no/mat-dryck","seasonal":true}
+  ],
+  "cinema": {"name":"Storfors biograf","place":"Kulturhuset, Storfors","seats":210,"features":["4K-projektor","nytt ljudsystem"],"source":"https://www.storfors.se/upplevaochgora/kulturhuset/storforsbiograf.4.55cd3a5d147583335eb18aa.html","notes":"Repository cinemas.json currently has Storfors empty; should be integrated safely without losing other municipalities' metadata."},
+  "leisure": {
+    "overviewSource":"https://www.storfors.se/upplevaochgora.4.789155f3143f6bce326330.html",
+    "facilities":["Rönningens IP","sporthall with group hostel","judohall","athletics training facility","gymnastics hall","small swimming pool","riding hall","Storfors motorstadion","skatepark","hockey rink","outdoor basketball/floorball court","elljusspår/motionsspår"],
+    "source":"https://www.storfors.se/kommunochpolitik/omstorforskommun.4.77c9f5d914487e726e18b1.html",
+    "notes":"Municipality states around 40 associations and Culture House activities including art, music, dance and cinema. Youth centres exist in Kulturhuset and in cooperation with IOGT/NTO in Kyrksten."
+  },
+  "bathing": {"verifiedPlaces":["Badsta badplats","Alkvetterns badplats","Hättälven","Jordkullens badplats","Lungsunds badplats"],"source":"https://www.storfors.se/upplevaochgora/fritidsaktiviteterochfriluftsliv/vattenledensexmillangtsjosystem/badstallen.4.55cd3a5d147583335eb17fb.html","checkedPageUpdated":"2026-03-23"},
+  "libraryCulture": {"notes":"Storfors library is an important cultural hub with reading groups, handicraft cafe, digital-safety activities and children/youth programming. Culture House is central for art, music, dance and cinema.","source":"https://www.storfors.se/download/18.1243187519afcc65877546b0/1765451888027/biblioteksplan%202026%20till%202029%20storfors%20kommun.pdf"},
+  "associations": {"notes":"Current municipal front page links a spring 2026 association folder. Association life is broad and should be imported dynamically/currently rather than frozen from the older 2025 folder.","source":"https://www.storfors.se/"},
+  "events": {"primarySource":"https://www.storfors.se/upplevaochgora/evenemang.4.34c20d5713f759f032516cb.html","destinationSource":"https://www.visitvarmland.com/storfors/","notes":"Municipal page explicitly directs to Visit Värmland for all Storfors events. Use dynamic event generator; do not hardcode expired events."},
+  "publicServices": {"municipalityAddress":"Djupadalsgatan 20, Storfors","municipalityPhone":"0550-651 00","touristInfo":"Limited tourist information in municipal building and InfoPoint at library","source":"https://www.storfors.se/upplevaochgora/turistinformation.4.3ece08af14905717f8215fd5.html"},
+  "transport": {"notes":"Storfors is served by Värmlandstrafik; fresh stops/departures must come from transport generator/GTFS. Verified structured search found stops including Kroppavägen, Näsvägen and Östra vägen, but these should not be treated as exhaustive."},
+  "housing": {"notes":"Housing must remain dynamic. 2026 municipal planning also includes an adopted plan for 20-30 small-house plots at Herrnäset 1:101; this is planning context, not a live housing listing.","source":"https://www.storfors.se/download/18.1ec27e1219d8bbd23721ef03/1776340916510/Protokoll%20KF%202026-04-09.pdf"},
+  "jobs": {"notes":"Municipal/current job listings must be generator-driven and refreshed; no stale vacancy counts hardcoded."},
+  "repoAudit": {"cinemas":"Storfors is empty in data/cinemas.json despite verified active municipal cinema.","lunch":"Storfors is empty in data/lunch-launch-supplement.json despite verified current lunch/restaurant sources.","service":"Base coverage exists for VVS/build/electrician in data/service-launch-supplement.json.","health":"Use verified health records; health-chat-supplement is known not to be consumed by production health page/audit unless wiring is changed."},
+  "hero":"Excluded by user instruction."
+}
