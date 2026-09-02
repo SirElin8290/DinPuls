@@ -85,7 +85,7 @@ def category(title: str) -> tuple[str, str]:
         return "music", "Musik"
     if any(word in lowered for word in ("lopp", "match", "tävling", "idrott")):
         return "sport", "Sport"
-    if any(word in lowered for word in ("bil", "motor", "mc")):
+    if "motor" in lowered or re.search(r"\b(?:bil|mc)\b", lowered):
         return "motor", "Motor"
     return "community", "Lokalt och föreningar"
 
@@ -122,7 +122,6 @@ def parse_events(markup: str) -> list[dict]:
             continue
         if not pending_dates:
             continue
-        # Nästa riktiga text efter ett eller flera datum är kalenderpostens titel.
         title = text
         event_category, label = category(title)
         for start, end, time_label in pending_dates:
