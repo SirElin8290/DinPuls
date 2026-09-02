@@ -1,0 +1,42 @@
+{
+  "municipality":"Hammarö",
+  "checked":"2026-09-02",
+  "status":"ChatGPT research complete; remaining items are integration/runtime work",
+  "completedInRepo":[
+    "Full verified municipality research in data/hammaro-chat-research.json",
+    "Verified health/treatment entries added to data/health-chat-supplement.json",
+    "Skoghalls Folkets Hus Bio added to data/cinemas.json while preserving pre-existing cinema metadata"
+  ],
+  "remainingIntegration":[
+    {
+      "area":"health",
+      "reason":"health-chat-supplement.json is not loaded by the ordinary health frontend/audit chain",
+      "action":"Merge Hammarö entries into a loaded health supplement or wire health-chat-supplement.json into the generator/frontend and readiness audit. Regenerate data/health*.json and verify visible cards."
+    },
+    {
+      "area":"lunch",
+      "reason":"Hammarö is empty in lunch-sources.json and lunch-launch-supplement.json although verified restaurants exist",
+      "action":"Add verified Hammarö sources from data/hammaro-chat-research.json to the established lunch source/supplement catalog without replacing other municipalities. Run scripts/update_lunch.py and verify Hammarö restaurants/reference sources in data/lunch.json."
+    },
+    {
+      "area":"service",
+      "reason":"service-launch-supplement.json contains Hammarö VVS/el baseline but not all verified local categories",
+      "action":"Merge the verified bilservice, ventilation, bygg, säkerhet and other service entries from data/hammaro-chat-research.json into the loaded service supplement, regenerate service data and verify Hammarö cards."
+    },
+    {
+      "area":"leisure-associations",
+      "reason":"Official association directory and facilities are verified but generated output must be checked after import",
+      "action":"Run association/leisure updater and verify Hammarö has non-empty sport/fritid output, including the official association directory and key facilities."
+    },
+    {
+      "area":"live-data",
+      "reason":"Jobs, housing, events and transport are live/generated data",
+      "action":"Run corresponding updaters and readiness audit. Verify AB Hammaröbostäder source health, current jobs, current Visit Hammarö events, and fresh Värmlandstrafik departures."
+    },
+    {
+      "area":"validation",
+      "action":"Run scripts/audit_municipality_readiness.py and launch validation. Do not mark Hammarö production-ready until all non-pilot gaps are cleared."
+    }
+  ],
+  "heroImages":"Explicitly excluded; Sören photographs missing hero images himself."
+}
