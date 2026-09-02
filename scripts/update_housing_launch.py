@@ -137,9 +137,6 @@ def parse_filipstad(source: dict) -> list[dict]:
     for cells, href in table.rows:
         if len(cells) < 6:
             continue
-        # Filipstadsbostäder currently prepends an unlabelled image/map cell.
-        # Reading the six semantic columns from the end also keeps compatibility
-        # with the older six-column table.
         address, area, rooms_raw, size_raw, rent_raw, available = cells[-6:]
         if not address or address.casefold() == "adress" or not re.search(r"\d", rooms_raw):
             continue
@@ -156,8 +153,6 @@ def parse_filipstad(source: dict) -> list[dict]:
             "provider": source["provider"],
         })
     if not listings:
-        # The official page is server rendered; zero rows is valid only if the page
-        # still explicitly identifies itself as the current apartment listing.
         lines = text_lines(markup)
         if not any("Lediga lägenheter" in line for line in lines):
             raise RuntimeError("kunde inte känna igen Filipstadsbostäders lediga-lista")
@@ -168,6 +163,7 @@ def parse_hagfors(source: dict) -> list[dict]:
     markup = fetch_text(source["url"])
     lines = text_lines(markup)
     listings: list[dict] = []
+    seen: set[str] = set()
     for index, line in enumerate(lines):
         if line.casefold() != "fakta:":
             continue
@@ -182,8 +178,12 @@ def parse_hagfors(source: dict) -> list[dict]:
         room_match = re.search(r"(\d+)\s*ROK", rooms_line, re.I)
         size_match = re.search(r"(\d+(?:[,.]\d+)?)\s*m2", rooms_line, re.I)
         available = next((item for item in block if re.search(r"kommer in|tillgäng", item, re.I)), "Se källan")
+        identifier = stable_id(address, rent_line)
+        if identifier in seen:
+            continue
+        seen.add(identifier)
         listings.append({
-            "id": stable_id(address, rent_line),
+            "id": identifier,
             "address": address,
             "area": "Hagfors kommun",
             "rooms": int(room_match.group(1)) if room_match else None,
@@ -213,8 +213,6 @@ def valbohem_detail(url: str, source: dict) -> dict | None:
     area_line = next((line for line in lines if line.startswith("Ort:")), "")
     available_line = next((line for line in lines if line.startswith("Tillgänglig fr.o.m:")), "")
     address = next((line for line in lines if line.startswith("# ")), "")
-    # TextParser removes heading markup; choose first line before a rent/size line that
-    # is not a generic navigation label, otherwise derive from page title-like content.
     if not address:
         rent_index = lines.index(rent_size) if rent_size in lines else min(len(lines), 8)
         candidates = [line for line in lines[:rent_index] if len(line) > 3 and "ledig lägenhet" not in line.casefold()]
@@ -296,13 +294,11 @@ def main() -> int:
                 entry["total"] = len(listings)
                 entry["updatedAt"] = now
             else:
-                # Do not present a fake zero. The inventory remains intentionally
-                # external and the UI can label it as an official live source.
                 entry["listings"] = []
                 entry["total"] = None
                 entry["updatedAt"] = now
             print(f"{name}: {mode} – {health['inventoryCount'] if health['inventoryCount'] is not None else 'officiell källa'}")
-        except Exception as error:  # source failure must be visible and launch-blocking
+        except Exception as error:
             health["status"] = "error"
             health["message"] = str(error)[:220]
             entry["sourceHealth"] = [health]
