@@ -12,7 +12,7 @@ import html
 import json
 import re
 import urllib.request
-from datetime import date
+from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
 SOURCE_URL = "https://www.dalsed.se/evenemang/"
 SOURCE_NAME = "Dals-Eds kommun – evenemang"
+VISIT_URL = "https://www.vastsverige.com/dalsland/dals-ed/"
 USER_AGENT = "DinPuls.se/0.21 (+https://dinpuls.se/)"
 
 MONTHS = {
@@ -155,6 +156,7 @@ def main() -> int:
     if not events:
         raise SystemExit("Dals-Eds kalender gav inga framtida evenemang; befintlig data lämnas orörd")
 
+    checked_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     municipalities = payload.setdefault("municipalities", {})
     municipality = municipalities.setdefault("Dals-Ed", {})
     municipality["events"] = events
@@ -165,7 +167,13 @@ def main() -> int:
             "url": SOURCE_URL,
             "icon": "landmark",
             "automatic": True,
-        }
+        },
+        {
+            "name": "Visit Dalsland – Dals-Ed",
+            "type": "Regional besöksguide",
+            "url": VISIT_URL,
+            "icon": "map",
+        },
     ]
     municipality["sourceHealth"] = [
         {
@@ -174,7 +182,16 @@ def main() -> int:
             "status": "ok",
             "mode": "automatic",
             "events": len(events),
-        }
+            "checkedAt": checked_at,
+        },
+        {
+            "name": "Visit Dalsland – Dals-Ed",
+            "url": VISIT_URL,
+            "status": "reference",
+            "mode": "reference",
+            "events": 0,
+            "checkedAt": checked_at,
+        },
     ]
     OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Dals-Ed: {len(events)} framtida evenemang från kommunens officiella kalender")
