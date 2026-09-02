@@ -1,0 +1,28 @@
+{
+  "municipality":"Karlstad",
+  "sourceChecked":"2026-09-02",
+  "status":"ChatGPT research and safe direct edits exhausted; runtime/generator verification remains",
+  "completedInChat":[
+    "Verifierat vårdcentraler, jourcentral, fysioterapi, arbetsterapi, barnmorska, barnspecialistvård, privat tandvård, apotek, naprapati, massage och medicinsk fotvård.",
+    "Verifierat VVS, el, bygg och flera bilverkstäder samt identifierat befintlig servicegrundtäckning.",
+    "Verifierat befintliga lunchdirektkällor och bred kommunal/lokal restaurangkatalog.",
+    "Rättat data/cinemas.json så aktiv Filmstaden Karlstad visas; Arenan dokumenterad som stängd 2026–2027 med planerad återöppning 2028.",
+    "Verifierat nio bibliotek, ungdomsmötesplatser, Sundstabadet, 19 kommunala badplatser, motionsområden och centrala idrottsarenor.",
+    "Verifierat kommunens föreningsregister.",
+    "Verifierat KBAB som kommunal bostadskälla och kommunens jobbsida.",
+    "Verifierat aktuella evenemangskällor och exempel för september 2026.",
+    "Sparat komplett verifierat underlag i data/karlstad-chat-research.json.",
+    "Ingen hero-bild har granskats eller ändrats."
+  ],
+  "remainingRuntimeOrGeneratorWork":[
+    "Kör vårdgenerator/audit och jämför faktisk Karlstad-output mot researchfilen; lägg bara in saknade poster i den frontend-laddade health-kedjan.",
+    "Komplettera service-launch/private-data med verifierade bilverkstäder och DT Bygg om de saknas i genererad service-output; uppgradera Rörinstallationer och Elektrikern till verifierade egna webbplatser.",
+    "Kör lunchgenerator och verifiera att Go Medda, Joan's, Nöjesfabriken och Karlstad restaurangguide faktiskt syns i data/lunch.json.",
+    "Kör föreningsimporten mot Karlstads kommuns föreningsregister och verifiera sport/leisure-output; undvik manuellt påhittade föreningar.",
+    "Kör bostadsuppdateraren mot KBAB och verifiera frisk källstatus/listningar.",
+    "Kör jobbuppdateraren och kontrollera att Karlstad ger aktuella resultat.",
+    "Kör evenemangsuppdateraren och kontrollera Visit Värmland/Visit Karlstad samt lokala arenakällor mot aktuella septemberhändelser.",
+    "Kör transportuppdateraren och verifiera färska avgångar/stopp för Karlstad C och övriga konfigurerade stopp.",
+    "Kör scripts/audit_municipality_readiness.py och åtgärda alla Karlstad-gap innan kommunen markeras tekniskt produktionsklar."
+  ]
+}
