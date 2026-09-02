@@ -1,0 +1,40 @@
+name: Uppdatera bioprogram
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/update_cinemas.py"
+      - "scripts/test_update_cinemas.py"
+      - ".github/workflows/update-cinemas.yml"
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-cinema-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py
+      - run: python scripts/update_cinemas.py
+      - name: Publicera ändring
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cinemas.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera bioprogram"
+          git pull --rebase origin main
+          git push origin HEAD:main

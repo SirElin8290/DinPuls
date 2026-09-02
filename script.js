@@ -2719,7 +2719,8 @@ function renderCinemaHome() {
   if (!cinemaHomeData) return;
   const municipality = DinPulsMunicipality.getName();
   const cinemas = cinemaHomeData.municipalities?.[municipality] || [];
-  const localFilms = cinemas.flatMap(cinema => (cinema.films || []).map(film => ({
+  const now = Date.now();
+  const localFilms = cinemas.flatMap(cinema => (cinema.films || []).filter(film => !Array.isArray(film.showtimes) || film.showtimes.some(value => Date.parse(value) >= now)).map(film => ({
     ...film,
     cinema: cinema.name,
     url: cinema.programUrl,
