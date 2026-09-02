@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dinpuls-github-scheduler",
+  "main": "cloudflare/github-scheduler-worker.mjs",
+  "compatibility_date": "2026-09-02",
+  "workers_dev": false,
+  "vars": {
+    "GITHUB_OWNER": "SirElin8290",
+    "GITHUB_REPO": "DinPuls",
+    "GITHUB_REF": "main"
+  },
+  "triggers": {
+    "crons": [
+      "8,18,28,38,48,58 * * * *",
+      "10,25,40,55 * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  }
+}

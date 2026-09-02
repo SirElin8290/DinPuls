@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node scripts/test_portal_shell.js && node scripts/test_leisure_quality.js && node scripts/test_leisure_ui.js && node scripts/test_sport_portal.js && node scripts/test_ad_inventory.js && node scripts/test_login_feedback.js && node scripts/test_commercial_readiness.mjs && python3 scripts/test_push_notifications.py && node scripts/test_push_worker.js && node scripts/test_banner_worker.mjs",
+    "test": "node scripts/test_portal_shell.js && node scripts/test_leisure_quality.js && node scripts/test_leisure_ui.js && node scripts/test_sport_portal.js && node scripts/test_ad_inventory.js && node scripts/test_login_feedback.js && node scripts/test_commercial_readiness.mjs && python3 scripts/test_push_notifications.py && node scripts/test_push_worker.js && node scripts/test_banner_worker.mjs && node scripts/test_github_scheduler_worker.mjs",
     "test:banner": "node scripts/test_banner_worker.mjs",
     "test:push": "python3 scripts/test_push_notifications.py && node scripts/test_push_worker.js",
     "test:production-smoke": "node scripts/test_portal_production_smoke.mjs",
+    "test:scheduler": "node scripts/test_github_scheduler_worker.mjs",
     "test:full": "npm test && PYTHONPATH=scripts python3 -m unittest scripts/test_municipality_integrations.py scripts/test_update_weather_live.py scripts/test_update_transport.py scripts/test_update_road_traffic.py scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_update_events.py scripts/test_update_lunch.py scripts/test_update_news.py && python3 scripts/audit_municipality_readiness.py"
   },
   "dependencies": {
