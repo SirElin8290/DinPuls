@@ -85,7 +85,7 @@ def category(title: str) -> tuple[str, str]:
         return "music", "Musik"
     if any(word in lowered for word in ("lopp", "match", "tävling", "idrott")):
         return "sport", "Sport"
-    if "motor" in lowered or re.search(r"\b(?:bil|mc)\b", lowered):
+    if "motor" in lowered or re.search(r"\b(?:bilträff|bilshow|bilsport|bilklubb|bilutställning|mc)\b", lowered):
         return "motor", "Motor"
     return "community", "Lokalt och föreningar"
 
