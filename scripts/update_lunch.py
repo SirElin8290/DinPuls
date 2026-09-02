@@ -35,7 +35,8 @@ STOP_MARKERS = (
     "kontakt", "pris ", "barn ", "utkörningsservice", "ta kontakt",
     "catering", "ring oss", "galleri", "adress", "bordsbokning",
     "öppet för", "veckans meny", "inkl.", "sommarerbjudanden",
-    "ladda ner", "med goda drycker", "övrigt",
+    "ladda ner", "med goda drycker", "övrigt", "lördagslunch",
+    "veckans burgare", "veckans pasta",
     "ta en titt på vår meny", "kunden har alltid rätt",
     "det här tycker våra kunder",
 )
@@ -83,6 +84,21 @@ def fetch(url: str) -> str:
         raise RuntimeError(str(error.reason)) from None
     except TimeoutError:
         raise RuntimeError("timeout") from None
+
+
+def fetch_source(source: dict, fetcher=fetch) -> str:
+    """Fetch parser input while retaining the public page as the user-facing link."""
+    page = fetcher(source.get("dataUrl") or source["url"])
+    if source.get("dataFormat") != "wordpress-page":
+        return page
+    try:
+        payload = json.loads(page)
+        rendered = payload[0]["content"]["rendered"]
+        if not isinstance(rendered, str) or not rendered.strip():
+            raise ValueError
+        return rendered
+    except (IndexError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        raise RuntimeError("ogiltigt WordPress-svar") from None
 
 
 def extract_week(lines: list[str]) -> int | None:
@@ -214,7 +230,7 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
             }
             if source.get("parser") in {"weekday-headings", "all-days-heading"}:
                 try:
-                    page = fetcher(source["url"])
+                    page = fetch_source(source, fetcher)
                     if source.get("parser") == "all-days-heading":
                         week, days = parse_all_days_menu(page)
                         if any(days.values()):
@@ -229,7 +245,7 @@ def build_output(config: dict, now: datetime, fetcher=fetch) -> dict:
                     item["mode"] = "automatic"
                 except RuntimeError as error:
                     item["status"] = "unavailable"
-                    item["mode"] = "automatic"
+                    item["mode"] = "reference" if source.get("fallbackMode") == "reference" else "automatic"
                     item["error"] = str(error)
             if source.get("seasonal"):
                 item["seasonal"] = True

@@ -41,8 +41,8 @@
     ],
     "Arvika": [
       {"id":"gate-gastgiveri","name":"Gate Gästgiveri","url":"https://www.gategastgiveri.se/13.html","address":"Gate","hours":"Se veckans meny","parser":"weekday-headings"},
-      {"id":"jennys","name":"Jennys Hotell & Restaurang","url":"https://www.jennys.se/lunchmeny/","address":"Palmviksgatan 11","hours":"Vardagar 11.00–14.30","parser":"weekday-headings"},
-      {"id":"stefan-pa-statt","name":"Stefan på Statt","url":"https://www.stefanpastatt.se/mat-dryck/dagens-lunch/","address":"Torggatan 9","hours":"Vardagar 11.30–14.00","parser":"weekday-headings"},
+      {"id":"jennys","name":"Jennys Hotell & Restaurang","url":"https://www.jennys.se/lunchmeny/","dataUrl":"https://www.jennys.se/wp-json/wp/v2/pages?slug=lunchmeny&_fields=content,modified,link","dataFormat":"wordpress-page","address":"Palmviksgatan 11","hours":"Vardagar 11.00–14.30","parser":"weekday-headings","fallbackMode":"reference"},
+      {"id":"stefan-pa-statt","name":"Stefan på Statt","url":"https://www.stefanpastatt.se/mat-dryck/dagens-lunch/","dataUrl":"https://www.stefanpastatt.se/wp-json/wp/v2/pages?slug=dagens-lunch&_fields=content,modified,link","dataFormat":"wordpress-page","address":"Torggatan 9","hours":"Vardagar 11.30–14.00","parser":"weekday-headings","fallbackMode":"reference"},
       {"id":"skeppet","name":"Restaurang Skeppet","url":"https://aanc.se/i-huset/restaurang-skeppet.html","address":"Arvika Näringslivscentrum","hours":"Vardagar 10.30–14.00","parser":"source-only"},
       {"id":"elins-bakgard","name":"Elins Bakgård","url":"https://elinsbakgard.se/meny.html","address":"Arvika","hours":"Tisdag–fredag 11.30–14.30, lördag 12.00–15.00","parser":"source-only"},
       {"id":"cafe-gnistan-arvika","name":"Café Gnistan","url":"https://www.facebook.com/cafegnistan/","address":"Arvika sjukhus, Rackstavägen","hours":"Se dagens lunch","parser":"source-only"},
