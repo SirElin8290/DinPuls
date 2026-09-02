@@ -7,6 +7,7 @@ import os
 import sys
 import time
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -25,8 +26,11 @@ DEEP_SEARCH_INTERVAL_HOURS = 2
 EMPTY_RETRY_MINUTES = 45
 FETCH_ATTEMPTS = 3
 FETCH_TIMEOUT_SECONDS = 25
-MIN_REQUEST_INTERVAL_SECONDS = 0.35
-MAX_RATE_LIMIT_DELAY_SECONDS = 15
+# Trafiklabs minutkvot kan annars nås redan under de 21 ordinarie
+# hållplatsanropen. Sprid dem över drygt en minut; framtidssökningar använder
+# samma globala pacing och kan därför inte skapa en ny anropsskur.
+MIN_REQUEST_INTERVAL_SECONDS = 3.2
+MAX_RETRY_DELAY_SECONDS = 90
 MIN_DEPARTURES_FOR_DEEP_SEARCH = 4
 TARGET_DEPARTURES = 10
 _last_request_started = 0.0
@@ -92,6 +96,23 @@ def pace_request():
     _last_request_started = time.monotonic()
 
 
+def retry_after_seconds(value, now=None):
+    """Tolka både antal sekunder och HTTP-datum från Retry-After."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if text.isdigit():
+        return max(0, int(text))
+    try:
+        retry_at = parsedate_to_datetime(text)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if retry_at.tzinfo is None:
+        retry_at = retry_at.replace(tzinfo=timezone.utc)
+    current = now or datetime.now(timezone.utc)
+    return max(0, int((retry_at - current).total_seconds()) + 1)
+
+
 def fetch(api_key, area_id, query_time=None):
     time_path = f"/{quote(query_time)}" if query_time else ""
     url = f"{API_URL}/{quote(area_id)}{time_path}?key={quote(api_key)}"
@@ -120,8 +141,9 @@ def fetch(api_key, area_id, query_time=None):
             last_error = str(error)
 
         if attempt < FETCH_ATTEMPTS:
-            requested_delay = int(retry_after) if str(retry_after).isdigit() else attempt * 2
-            delay = min(max(requested_delay, attempt * 2), MAX_RATE_LIMIT_DELAY_SECONDS)
+            server_delay = retry_after_seconds(retry_after)
+            requested_delay = server_delay if server_delay is not None else attempt * 2
+            delay = min(max(requested_delay, attempt * 2), MAX_RETRY_DELAY_SECONDS)
             print(f"{area_id}: hämtningsförsök {attempt} misslyckades ({last_error}). Försöker igen om {delay} s.")
             time.sleep(delay)
 

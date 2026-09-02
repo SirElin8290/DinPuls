@@ -126,6 +126,22 @@ class UpdateTransportTests(unittest.TestCase):
         sleep.assert_called_once()
         self.assertAlmostEqual(sleep.call_args.args[0], transport.MIN_REQUEST_INTERVAL_SECONDS - 0.1)
 
+    def test_request_pacing_spreads_twenty_one_stops_over_a_minute(self):
+        self.assertGreaterEqual(transport.MIN_REQUEST_INTERVAL_SECONDS * 20, 60)
+
+    def test_retry_after_supports_seconds(self):
+        self.assertEqual(transport.retry_after_seconds("37"), 37)
+
+    def test_retry_after_supports_http_date(self):
+        now = datetime(2026, 8, 1, 20, 0, tzinfo=transport.timezone.utc)
+        self.assertEqual(
+            transport.retry_after_seconds("Sat, 01 Aug 2026 20:00:45 GMT", now),
+            46,
+        )
+
+    def test_invalid_retry_after_falls_back_to_local_backoff(self):
+        self.assertIsNone(transport.retry_after_seconds("inte ett datum"))
+
 
 if __name__ == "__main__":
     unittest.main()
