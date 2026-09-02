@@ -3,6 +3,7 @@ let healthMunicipality = healthState.getInitial();
 let healthData;
 let healthPrivateData;
 let healthPrivateSupplement;
+let healthLocalSupplement;
 
 const escapeHealth = window.DinPulsSecurity.escapeHtml;
 const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -84,18 +85,22 @@ function renderProviderCard(provider) {
     </${tag}>`;
 }
 
+function allHealthProviders() {
+  return [
+    ...(healthData?.providers || []),
+    ...(healthPrivateSupplement?.providers || []),
+    ...(healthLocalSupplement?.providers || []),
+    ...(healthPrivateData?.providers || [])
+  ];
+}
+
 function renderHealthPage() {
   const municipalityData = healthData?.municipalities?.[healthMunicipality];
   if (!municipalityData) return;
   const query = document.querySelector("#health-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
   const selectedCategory = document.querySelector("#health-group")?.value || "";
-  const allProviders = [
-    ...(healthData.providers || []),
-    ...(healthPrivateSupplement?.providers || []),
-    ...(healthPrivateData?.providers || [])
-  ];
   const seen = new Set();
-  const providers = allProviders
+  const providers = allHealthProviders()
     .map(provider => ({ ...provider, category: inferHealthCategory(provider) }))
     .filter(provider => {
       if (provider.municipality !== healthMunicipality) return false;
@@ -149,25 +154,25 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const [officialResponse, privateResponse, supplementResponse] = await Promise.all([
+  const [officialResponse, privateResponse, supplementResponse, localSupplementResponse] = await Promise.all([
     fetch("data/health.json", { cache: "no-cache" }),
     fetch("data/health-private.json", { cache: "no-cache" }),
-    fetch("data/health-private-supplement.json", { cache: "no-cache" })
+    fetch("data/health-private-supplement.json", { cache: "no-cache" }),
+    fetch("data/health-local-supplement.json", { cache: "no-cache" })
   ]);
   if (!officialResponse.ok) throw new Error(`Vårddata kunde inte laddas (${officialResponse.status})`);
   healthData = await officialResponse.json();
   healthPrivateData = privateResponse.ok ? await privateResponse.json() : { providers: [] };
   healthPrivateSupplement = supplementResponse.ok ? await supplementResponse.json() : { providers: [] };
+  healthLocalSupplement = localSupplementResponse.ok ? await localSupplementResponse.json() : { providers: [] };
   if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
   if (!supplementResponse.ok) console.warn(`Kompletterande vårddata kunde inte laddas (${supplementResponse.status})`);
+  if (!localSupplementResponse.ok) console.warn(`Lokala vårdkompletteringar kunde inte laddas (${localSupplementResponse.status})`);
   const select = document.querySelector("#health-municipality");
   const categorySelect = document.querySelector("#health-group");
   healthState.populateSelect(select, healthMunicipality);
-  const allCategories = [...new Set([
-    ...(healthData.providers || []),
-    ...(healthPrivateSupplement.providers || []),
-    ...(healthPrivateData.providers || [])
-  ].map(inferHealthCategory))].sort((first, second) => first.localeCompare(second, "sv-SE"));
+  const allCategories = [...new Set(allHealthProviders().map(inferHealthCategory))]
+    .sort((first, second) => first.localeCompare(second, "sv-SE"));
   categorySelect.innerHTML = `<option value="">Alla kategorier</option>${allCategories.map(category => `<option value="${escapeHealth(category)}">${escapeHealth(category)}</option>`).join("")}`;
   select.addEventListener("change", () => {
     healthMunicipality = healthState.set(select.value);
