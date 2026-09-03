@@ -150,17 +150,75 @@ body::after{
   transform:rotate(-18deg);
 }
 
-[data-theme="dark"] body,
-html[data-theme="dark"] body{background:#071426}
-[data-theme="dark"] .card,
-[data-theme="dark"] .transport-section,
-[data-theme="dark"] .health-home,
-[data-theme="dark"] .service-home,
-[data-theme="dark"] .grocery-home,
-[data-theme="dark"] .missing-people-home,
-[data-theme="dark"] .portal-content,
-[data-theme="dark"] .portal-ad-column,
-[data-theme="dark"] .portal-card{border-color:#3c4c60}
+/* Dark mode ska vara samma läge på startsida och undersidor, även där äldre portal-CSS har hårdkodade vita ytor. */
+html[data-theme="dark"] body{background:#071426;color:#e8eef7}
+html[data-theme="dark"] .portal-main,
+html[data-theme="dark"] main{color:#e8eef7}
+html[data-theme="dark"] .portal-content,
+html[data-theme="dark"] .portal-ad-column,
+html[data-theme="dark"] .portal-card,
+html[data-theme="dark"] .news-page-toolbar,
+html[data-theme="dark"] .news-page-sources,
+html[data-theme="dark"] .news-page-source-groups article,
+html[data-theme="dark"] .leisure-search-panel,
+html[data-theme="dark"] .leisure-module,
+html[data-theme="dark"] .leisure-activity,
+html[data-theme="dark"] .leisure-empty,
+html[data-theme="dark"] .leisure-register,
+html[data-theme="dark"] .traffic-official-sources,
+html[data-theme="dark"] .grocery-shopping-list section,
+html[data-theme="dark"] .grocery-meals article,
+html[data-theme="dark"] .grocery-store,
+html[data-theme="dark"] .grocery-basket-summary,
+html[data-theme="dark"] .fuel-principle,
+html[data-theme="dark"] .grocery-principle,
+html[data-theme="dark"] .traffic-principle{
+  background:#0d1d31;
+  color:#e8eef7;
+  border-color:#33465f;
+}
+html[data-theme="dark"] .portal-footer{background:#0b192a;color:#aebbd0;border-color:#33465f}
+html[data-theme="dark"] .portal-footer a,
+html[data-theme="dark"] .portal-source-button,
+html[data-theme="dark"] .leisure-crosslink a{color:#8dbdff}
+html[data-theme="dark"] .portal-toolbar input,
+html[data-theme="dark"] .portal-toolbar select,
+html[data-theme="dark"] .leisure-search-box,
+html[data-theme="dark"] .leisure-municipality select{
+  background:#102238;
+  color:#e8eef7;
+  border-color:#3c526c;
+}
+html[data-theme="dark"] .leisure-search-box input{color:#e8eef7}
+html[data-theme="dark"] .leisure-search-heading h2,
+html[data-theme="dark"] .leisure-module h2,
+html[data-theme="dark"] .leisure-activity strong,
+html[data-theme="dark"] .leisure-register strong,
+html[data-theme="dark"] .leisure-empty h2{color:#eef4fb}
+html[data-theme="dark"] .leisure-search-heading p,
+html[data-theme="dark"] .leisure-search-status,
+html[data-theme="dark"] .leisure-module header p,
+html[data-theme="dark"] .leisure-activity small,
+html[data-theme="dark"] .leisure-activity>p,
+html[data-theme="dark"] .leisure-register p,
+html[data-theme="dark"] .leisure-empty p,
+html[data-theme="dark"] .portal-card p,
+html[data-theme="dark"] .portal-result-heading span{color:#aebbd0}
+html[data-theme="dark"] .leisure-activity-detail,
+html[data-theme="dark"] .leisure-suggestions button,
+html[data-theme="dark"] .fuel-price.missing,
+html[data-theme="dark"] .grocery-store-price a{
+  background:#132942;
+  color:#c6d3e4;
+  border-color:#3b526d;
+}
+html[data-theme="dark"] .leisure-crosslink{background:#10243b;color:#e8eef7;border-color:#33516f}
+html[data-theme="dark"] .service-directory-badge{background:#2d2519;color:#f3c780;border-color:#6c5735}
+html[data-theme="dark"] .dp-privacy-notice{background:#0d1d31!important;color:#e8eef7!important;border-color:#3c526c!important}
+html[data-theme="dark"] .dp-privacy-notice strong{color:#f1f5fb!important}
+html[data-theme="dark"] .dp-privacy-notice p{color:#b8c5d6!important}
+html[data-theme="dark"] .dp-privacy-notice button[data-privacy-essential-only]{background:#102238!important;color:#8dbdff!important;border-color:#3c526c!important}
+html[data-theme="dark"] .privacy-utility{background:#0b192a!important;color:#aebbd0!important;border-color:#33465f!important}
 
 @media(max-width:760px){
   body::before{top:178px;left:-18px;width:62px;height:74px;opacity:.30;transform:rotate(-18deg)}
