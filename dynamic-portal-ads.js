@@ -36,7 +36,7 @@
 
     const sports = modules.map(module => module.querySelector("h2")?.textContent?.trim() || "").filter(Boolean);
     const isSingleSport = modules.length === 1 && sports.length === 1;
-    const expectedSlots = isSingleSport ? 3 : 8;
+    const expectedSlots = isSingleSport ? 3 : 4;
     const signature = `${sports.join("|")}::${isSingleSport ? "single" : "hub"}`;
     if (signature === sportSignature && document.querySelectorAll('[data-dynamic-page="sport"]').length === expectedSlots) return;
     sportSignature = signature;
@@ -62,23 +62,18 @@
       return;
     }
 
-    const slots = Array.from({ length: 8 }, (_, index) => {
+    const slots = Array.from({ length: 4 }, (_, index) => {
       const slot = makeSlot("sport", index + 1, "Idrott & motion");
       slot.dataset.dynamicPage = "sport";
       return slot;
     });
 
     summary.after(slots[0]);
-    const internal = slots.slice(1, 7);
-    const used = new Set();
-    internal.forEach((slot, index) => {
-      let moduleIndex = Math.round(((index + 1) / (internal.length + 1)) * (modules.length - 1));
-      while (used.has(moduleIndex) && moduleIndex < modules.length - 1) moduleIndex++;
-      while (used.has(moduleIndex) && moduleIndex > 0) moduleIndex--;
-      used.add(moduleIndex);
-      modules[moduleIndex].after(slot);
-    });
-    view.after(slots[7]);
+    const firstIndex = Math.max(0, Math.round((modules.length - 1) * 0.33));
+    const secondIndex = Math.max(firstIndex + 1, Math.round((modules.length - 1) * 0.67));
+    modules[Math.min(firstIndex, modules.length - 1)].after(slots[1]);
+    modules[Math.min(secondIndex, modules.length - 1)].after(slots[2]);
+    view.after(slots[3]);
     refresh();
   }
 
