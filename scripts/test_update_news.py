@@ -1,9 +1,35 @@
 import unittest
+import json
+import tempfile
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 import update_news
 
 
 class NewsUpdateTests(unittest.TestCase):
+    def test_empty_feed_keeps_recent_articles_but_expires_old_ones(self):
+        now = datetime.now(timezone.utc)
+        recent = {"id": "feed-recent", "scope": "local", "source": "Forshaga feed",
+                  "title": "Lokala nyheter", "url": "https://example.se/recent",
+                  "municipalities": ["Forshaga"], "publishedAt": (now - timedelta(days=1)).isoformat()}
+        old = dict(recent, id="feed-old", url="https://example.se/old", publishedAt=(now - timedelta(days=30)).isoformat())
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "news.json"
+            path.write_text(json.dumps({"articles": [recent, old]}), encoding="utf-8")
+            with patch.object(update_news, "NEWS", path), \
+                 patch.object(update_news, "FEEDS", [{"source": "Forshaga feed"}]), \
+                 patch.object(update_news, "LOCAL_SEARCH_FEEDS", []), \
+                 patch.object(update_news, "LOCAL_LISTINGS", []), \
+                 patch.object(update_news, "fetch_feed", return_value=[]), \
+                 patch.object(update_news, "fetch_police_events", return_value=[]):
+                self.assertEqual(update_news.main(), 0)
+            output = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(output["articles"], [recent])
+        self.assertTrue(output["sourceStatus"]["errors"])
+        self.assertNotIn("Forshaga feed", output["sourceStatus"]["successful"])
+
     def test_police_event_matches_exact_municipality(self):
         event = {"location": {"name": "Arvika"}, "name": "Trafikolycka", "summary": "Centrala Arvika"}
         self.assertEqual(update_news.event_municipalities(event), ["Arvika"])

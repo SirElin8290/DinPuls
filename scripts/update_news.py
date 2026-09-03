@@ -363,6 +363,8 @@ def main():
     for feed in FEEDS + LOCAL_SEARCH_FEEDS:
         try:
             rows = fetch_feed(feed)
+            if not rows:
+                raise ValueError("tomt nyhetsflöde; tidigare färska artiklar behålls")
             fetched.extend(rows)
             successful_sources.add(feed["source"])
             print(feed["source"], len(rows))
