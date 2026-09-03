@@ -1,0 +1,130 @@
+/* Kompakt flygplatsremsa för dagens lunch.
+   Håll innehållet på en rad så remsan inte växer på höjden. */
+.lunch-airport-strip{
+  min-height:48px;
+  grid-template-columns:170px minmax(0,1fr);
+  margin-top:8px;
+}
+
+.lunch-airport-label{
+  gap:8px;
+  padding:7px 14px;
+}
+
+.lunch-airport-label svg{
+  width:19px;
+  height:19px;
+  flex:0 0 auto;
+}
+
+.lunch-airport-label span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  white-space:nowrap;
+}
+
+.lunch-airport-label strong{
+  font-size:10px;
+  letter-spacing:.07em;
+}
+
+.lunch-airport-label small{
+  margin:0;
+  font-size:8px;
+  letter-spacing:.08em;
+}
+
+.lunch-airport-track{
+  min-height:48px;
+}
+
+.lunch-airport-item{
+  min-width:500px;
+  max-width:620px;
+  min-height:48px;
+  grid-template-columns:max-content minmax(180px,1fr) max-content;
+  gap:11px;
+  padding:7px 18px;
+}
+
+.lunch-airport-item strong{
+  font-size:10px;
+  white-space:nowrap;
+}
+
+.lunch-airport-item span{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:11px;
+  line-height:1.2;
+}
+
+.lunch-airport-item b{
+  font-size:8px;
+  white-space:nowrap;
+}
+
+@media(max-width:760px){
+  .lunch-airport-strip{
+    min-height:46px;
+    grid-template-columns:104px minmax(0,1fr);
+    margin:8px 12px 0;
+  }
+
+  .lunch-airport-label{
+    gap:5px;
+    padding:6px 8px;
+  }
+
+  .lunch-airport-label svg{
+    width:16px;
+    height:16px;
+  }
+
+  .lunch-airport-label span{
+    display:grid;
+    gap:0;
+  }
+
+  .lunch-airport-label strong{font-size:8px}
+  .lunch-airport-label small{font-size:7px}
+
+  .lunch-airport-track{min-height:46px}
+
+  .lunch-airport-item{
+    min-width:calc(100vw - 128px);
+    max-width:calc(100vw - 128px);
+    min-height:46px;
+    grid-template-columns:minmax(0,1fr);
+    align-content:center;
+    gap:1px;
+    padding:6px 10px;
+  }
+
+  .lunch-airport-item strong{
+    font-size:8px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .lunch-airport-item span{
+    font-size:9px;
+    line-height:1.15;
+  }
+
+  .lunch-airport-item b{display:none}
+}
+
+@media(max-width:360px){
+  .lunch-airport-strip{grid-template-columns:92px minmax(0,1fr)}
+  .lunch-airport-label svg{display:none}
+  .lunch-airport-item{
+    min-width:calc(100vw - 116px);
+    max-width:calc(100vw - 116px);
+  }
+}
