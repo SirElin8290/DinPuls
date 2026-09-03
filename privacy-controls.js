@@ -1,6 +1,18 @@
 (function () {
   "use strict";
 
+  /* Gemensamt säsongstema: privacy-controls.js finns på DinPuls publika sidor,
+     så temat följer med även till undersidorna utan duplicerad HTML. */
+  (function loadSeasonalTheme() {
+    if (document.querySelector('link[data-dinpuls-seasonal-theme]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `${location.pathname.includes("/innebandyregler/") ? "../" : ""}seasonal-theme.css?version=0.1.0`;
+    link.dataset.dinpulsSeasonalTheme = "autumn";
+    (document.head || document.documentElement).appendChild(link);
+    document.documentElement.dataset.season = "autumn";
+  })();
+
   const LOCAL_PREFIX = "dinpuls-";
   const CONSENT_KEY = "dinpuls-privacy-consent-v3";
   const ANALYTICS_ID = "G-TVLG1QMX8C";
