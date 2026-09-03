@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-03T00:56:30+00:00",
+  "generatedAt": "2026-09-03T01:11:31+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -320,11 +320,23 @@
           "name": "Bengtsfors",
           "alerts": [],
           "lookupTime": "2026-09-02T16:44+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T18:44+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-09-03T04:09:00+02:00",
+              "realtime": "2026-09-03T04:09:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "bus",
               "line": "730",
@@ -389,7 +401,7 @@
           "name": "Mellerud",
           "alerts": [],
           "lookupTime": "2026-09-02T21:26+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T23:26+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -402,10 +414,9 @@
               "scheduled": "2026-09-03T04:07:00+02:00",
               "realtime": "2026-09-03T04:07:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -1542,18 +1553,6 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "850",
-              "direction": "Arlanda flygplats",
-              "operator": "Vy bus4you",
-              "scheduled": "2026-09-03T03:05:00+02:00",
-              "realtime": "2026-09-03T03:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": ""
-            },
-            {
-              "mode": "bus",
               "line": "601",
               "direction": "Forshaga Tjärnheden Deje",
               "operator": "Värmlandstrafik",
@@ -1563,6 +1562,30 @@
               "isRealtime": true,
               "canceled": false,
               "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Arlanda flygplats",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-09-03T04:00:00+02:00",
+              "realtime": "2026-09-03T04:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "801",
+              "direction": "Vålberg Grums",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T04:00:00+02:00",
+              "realtime": "2026-09-03T04:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -2219,13 +2242,27 @@
         {
           "id": "740000222",
           "name": "Kristinehamn station",
-          "alerts": [],
+          "alerts": [
+            "Linje 500 och 501,  Rönndungen Karlstad indragen"
+          ],
           "lookupTime": "2026-09-02T23:04+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-03T01:04+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "500",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T04:05:00+02:00",
+              "realtime": "2026-09-03T04:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "D"
+            },
             {
               "mode": "bus",
               "line": "500",
