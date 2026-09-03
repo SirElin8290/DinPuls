@@ -5,7 +5,7 @@
   const esc = window.DinPulsSecurity.escapeHtml;
   const safeUrl = window.DinPulsSecurity.safeExternalUrl;
   const META = {
-    Fotboll:["circle-dot","green"],Futsal:["circle-dot","green"],Innebandy:["target","purple"],Ishockey:["disc-3","blue"],Bandy:["goal","cyan"],Handboll:["circle-dot","orange"],Basket:["circle-dot","orange"],Bowling:["circle","violet"],Golf:["flag-triangle-right","green"],Ridsport:["trophy","rose"],Motorsport:["flag","red"],Orientering:["compass","green"],Löpning:["person-standing","orange"],Skidor:["mountain-snow","cyan"],Mountainbike:["bike","green"],Cykel:["bike","green"],Tennis:["circle-dot","yellow"],Badminton:["activity","yellow"],Bordtennis:["circle-dot","red"],Boule:["circle","blue"],Kampsport:["shield","red"],Boxning:["badge","red"],Bågskytte:["target","green"],Simning:["waves","blue"],Gymnastik:["sparkles","purple"],Skytte:["target","slate"],Kanot:["waves","blue"],Travsport:["trophy","orange"],Parasport:["accessibility","blue"],Sportfiske:["fish","cyan"]
+    Fotboll:["circle-dot","football"],Futsal:["circle-dot","futsal"],Innebandy:["target","floorball"],Ishockey:["disc-3","ice"],Bandy:["goal","bandy"],Handboll:["circle-dot","handball"],Basket:["circle-dot","basket"],Bowling:["circle","bowling"],Golf:["flag-triangle-right","golf"],Ridsport:["trophy","equestrian"],Motorsport:["flag","motorsport"],Orientering:["compass","orienteering"],Löpning:["person-standing","running"],Skidor:["mountain-snow","ski"],Mountainbike:["bike","mtb"],Cykel:["bike","cycling"],Tennis:["circle-dot","tennis"],Badminton:["activity","badminton"],Bordtennis:["circle-dot","tabletennis"],Boule:["circle","boule"],Kampsport:["shield","martial"],Boxning:["badge","boxing"],Bågskytte:["target","archery"],Simning:["waves","swimming"],Gymnastik:["sparkles","gymnastics"],Skytte:["target","shooting"],Kanot:["waves","canoe"],Travsport:["trophy","trotting"],Parasport:["accessibility","para"],Sportfiske:["fish","fishing"]
   };
   let municipality = state.getInitial();
   let requested = params.get("kategori") || params.get("sport") || "all";
@@ -13,7 +13,7 @@
   const current = () => data?.municipalities?.[municipality] || {clubs:[],liveSources:[],matches:[],standings:[]};
   const sports = () => [...new Set((current().clubs||[]).flatMap(club=>club.sports||[]))].sort((a,b)=>a.localeCompare(b,"sv"));
   const normalize = value => String(value||"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  const meta = sport => META[sport] || ["users","blue"];
+  const meta = sport => META[sport] || ["users","default"];
   const validMatch = match => match?.sport && match.homeTeam && match.awayTeam && !Number.isNaN(new Date(match.startTime).getTime());
   const finished = match => ["finished","final","ended"].includes(String(match.status||"").toLowerCase()) || (Number.isFinite(Number(match.homeScore)) && Number.isFinite(Number(match.awayScore)));
   const dateTime = (value,timeTbd=false) => new Date(value).toLocaleString("sv-SE",timeTbd?{timeZone:"Europe/Stockholm",weekday:"short",day:"numeric",month:"short"}:{timeZone:"Europe/Stockholm",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+(timeTbd?" · tid ej fastställd":"");
