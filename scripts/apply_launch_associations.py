@@ -19,6 +19,7 @@ SUPPLEMENTS = (
     DATA / "association-wave2-supplement.json",
     DATA / "association-wave3-supplement.json",
     DATA / "association-wave4-supplement.json",
+    DATA / "association-forshaga-supplement.json",
 )
 
 
