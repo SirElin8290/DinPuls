@@ -20,6 +20,21 @@ SAMPLE = """
 </article>
 """
 
+HAGFORS_NEIGHBOR_SAMPLE = """
+<article class="person mix region--varmland">
+  <h5 class="card-title">Test Sunne</h5><div class="person__location">SUNNE</div>
+  <time class="person__date" datetime="2026-09-03">2026-09-03</time>
+  <p class="person__ingress">Test för grannkommun.</p>
+  <a class="person__link" href="/efterlysningar/test-sunne/">Läs mer</a>
+</article>
+<article class="person mix region--varmland">
+  <h5 class="card-title">Test Karlstad</h5><div class="person__location">KARLSTAD</div>
+  <time class="person__date" datetime="2026-09-03">2026-09-03</time>
+  <p class="person__ingress">Test för grannkommun.</p>
+  <a class="person__link" href="/efterlysningar/test-karlstad/">Läs mer</a>
+</article>
+"""
+
 
 class MissingPeopleTests(unittest.TestCase):
     def test_parser_ignores_images_and_keeps_direct_link(self):
@@ -44,6 +59,12 @@ class MissingPeopleTests(unittest.TestCase):
     def test_case_is_not_spread_beyond_neighbor_graph(self):
         data = missing.distribute(missing.parse_people(SAMPLE))
         self.assertFalse(any(item["originMunicipality"] == "Grums" for item in data["Bengtsfors"]["items"]))
+
+    def test_hagfors_includes_supported_sunne_and_karlstad_neighbors(self):
+        data = missing.distribute(missing.parse_people(HAGFORS_NEIGHBOR_SAMPLE))
+        origins = {item["originMunicipality"] for item in data["Hagfors"]["items"] if item["scope"] == "neighbor"}
+        self.assertIn("Sunne", origins)
+        self.assertIn("Karlstad", origins)
 
 
 if __name__ == "__main__":
