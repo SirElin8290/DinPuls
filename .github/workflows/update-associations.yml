@@ -15,6 +15,7 @@ on:
       - "data/association-wave2-supplement.json"
       - "data/association-wave3-supplement.json"
       - "data/association-wave4-supplement.json"
+      - "data/association-hammaro-supplement.json"
       - "data/association-forshaga-supplement.json"
       - "data/association-enrichment-prerequisites.json"
       - "scripts/import_associations.py"
@@ -88,11 +89,15 @@ jobs:
           for name in launch.get('municipalities', {}):
               assert sports.get(name, {}).get('clubs'), f'{name}: launch sport coverage missing'
               assert leisure.get(name, {}).get('activities'), f'{name}: launch leisure coverage missing'
+          hammaro_sports = sports.get('Hammarö', {}).get('clubs') or []
+          hammaro_leisure = leisure.get('Hammarö', {}).get('activities') or []
+          assert len(hammaro_sports) >= 10, f'Hammarö: för få idrottsföreningar: {len(hammaro_sports)}'
+          assert len(hammaro_leisure) >= 15, f'Hammarö: för få fritidsposter: {len(hammaro_leisure)}'
           forshaga_sports = sports.get('Forshaga', {}).get('clubs') or []
           forshaga_leisure = leisure.get('Forshaga', {}).get('activities') or []
           assert len(forshaga_sports) >= 18, f'Forshaga: för få idrottsföreningar: {len(forshaga_sports)}'
           assert len(forshaga_leisure) >= 10, f'Forshaga: för få fritidsföreningar: {len(forshaga_leisure)}'
-          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Forshaga {len(forshaga_sports)} idrott/{len(forshaga_leisure)} fritid')
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Hammarö {len(hammaro_sports)} idrott/{len(hammaro_leisure)} fritid; Forshaga {len(forshaga_sports)} idrott/{len(forshaga_leisure)} fritid')
           PY
           PYTHONPATH=scripts python -m unittest scripts/test_forshaga_fri.py
           node scripts/test_leisure_quality.js
