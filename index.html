@@ -8,6 +8,7 @@
   <meta name="dinpuls-version" content="0.24.8">
   <title>DinPuls.se – din lokala startsida</title>
   <link rel="stylesheet" href="styles.css?version=0.24.6">
+  <link rel="stylesheet" href="homepage-local-now.css?version=0.1.0">
   <link rel="icon" href="favicon.ico?version=0.23.6" sizes="any">
   <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.23.6">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.23.6">
@@ -47,7 +48,10 @@
 
   <main>
     <div data-component="hero"></div>
-    <div data-component="missing-people"></div>
+    <section class="local-now-layout" aria-label="Lokalt just nu">
+      <div data-component="missing-people"></div>
+      <div data-component="primary-cards"></div>
+    </section>
     <section class="news-sources-section community-feed-section" id="community-feed-section" hidden>
       <div class="section-heading">
         <div><span class="section-kicker">Från lokalsamhället</span><h2>Det pratas om i <span data-municipality-name>Åmål</span></h2></div>
@@ -56,7 +60,6 @@
       <div class="news-source-grid" id="community-feed-list"></div>
     </section>
     <div data-component="secondary-cards"></div>
-    <div data-component="primary-cards"></div>
     <div data-component="transport"></div>
     <div data-component="premium-ad-1"></div>
     <div data-component="jobs-housing"></div>
