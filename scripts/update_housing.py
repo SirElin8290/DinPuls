@@ -285,6 +285,51 @@ def parse_momentum(provider: dict) -> list[dict]:
     return listings
 
 
+def parse_hogia(provider: dict) -> list[dict]:
+    """Read the same public, tenant-scoped search used by Edshus' portal."""
+    origin = provider["url"].split("/properties")[0]
+    listings = {}
+    seen_ids = set()
+    for page in range(1, 21):
+        request = Request(provider["dataUrl"],
+            data=json.dumps({"filter": {}, "pageSize": 100, "pageNumber": page}).encode(),
+            headers={"User-Agent": USER_AGENT, "Content-Type": "application/json",
+                     "Accept": "application/json", "Origin": origin, "Referer": origin + "/"})
+        try:
+            with urlopen(request, timeout=35) as response:
+                data = json.load(response).get("data")
+        except (URLError, TimeoutError) as error:
+            raise RuntimeError(f"Hogia-källan kunde inte hämtas: {error}") from None
+        if not isinstance(data, dict) or not isinstance(data.get("items"), list) or not isinstance(data.get("totalResults"), int):
+            raise RuntimeError("Hogia: oväntat svarsformat, inte ett verifierat nollresultat")
+        items = data["items"]
+        before = len(seen_ids)
+        for item in items:
+            identifier = str(item.get("id") or "")
+            if not identifier or not item.get("header") or "category" not in item:
+                raise RuntimeError("Hogia: ofullständigt bostadsobjekt")
+            seen_ids.add(identifier)
+            if item["category"] != 0:  # Public portal enum: Dwelling=0; exclude parking/premises.
+                continue
+            value = item.get("vacantFrom")
+            available = None
+            if value:
+                available = datetime(value["year"], value["month"], value["day"]).date().isoformat()
+            listings[identifier] = {
+                "id": identifier, "address": item["header"],
+                "area": ", ".join(item.get("searchTags") or []),
+                "rooms": item.get("numberOfRooms"), "size": item.get("squareMeters"),
+                "rent": (item.get("monthlyRent") or {}).get("amount"),
+                "available": available, "url": provider["url"].rstrip("/") + "/p/" + identifier,
+                "provider": provider["name"],
+            }
+        if len(seen_ids) >= data["totalResults"]:
+            return list(listings.values())
+        if len(seen_ids) == before:
+            raise RuntimeError("Hogia: ofullständig sidbläddring")
+    raise RuntimeError("Hogia: sidgränsen nåddes innan alla objekt hämtats")
+
+
 def main() -> int:
     configuration = get_json(MUNICIPALITY_FILE, {})
     existing = get_json(OUTPUT, {"municipalities": {}})

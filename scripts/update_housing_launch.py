@@ -274,6 +274,9 @@ def main() -> int:
                 listings = parse_hagfors(source)
             elif mode == "automatic-valbohem":
                 listings = parse_valbohem(source)
+            elif mode == "automatic-hogia":
+                from update_housing import parse_hogia
+                listings = parse_hogia({**source, "name": source["provider"]})
             elif mode == "official-reference":
                 fetch_text(source["url"])
                 listings = None

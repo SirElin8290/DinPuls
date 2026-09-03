@@ -12,6 +12,7 @@ on:
       - "scripts/update_events.py"
       - "scripts/update_dals_ed_events.py"
       - "scripts/test_update_events.py"
+      - "scripts/test_dals_ed_imports.py"
       - "data/event-sources.json"
       - "data/municipalities.json"
       - ".github/workflows/update-events.yml"
@@ -46,7 +47,7 @@ jobs:
       - name: Hämta Dals-Eds officiella kalender
         run: python scripts/update_dals_ed_events.py
       - name: Testa evenemangslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py scripts/test_dals_ed_imports.py
       - name: Verifiera alla kommuner i evenemangsdatan
         run: |
           python - <<'PY'
@@ -59,8 +60,8 @@ jobs:
           if actual != expected:
               raise SystemExit(f'Evenemangskommuner avviker: expected={sorted(expected)}, got={sorted(actual)}')
           dals_ed = (events.get('municipalities') or {}).get('Dals-Ed') or {}
-          if not dals_ed.get('events'):
-              raise SystemExit('Dals-Ed saknar evenemang efter officiell kalenderimport')
+          if not any(source.get('status') == 'ok' and source.get('mode') == 'automatic' for source in dals_ed.get('sourceHealth', [])):
+              raise SystemExit('Dals-Ed saknar verifierad kalenderstatus')
           print(f'Evenemangsdata innehåller alla {len(expected)} kommuner; Dals-Ed har {len(dals_ed["events"])} poster')
           PY
       - name: Spara evenemangsdata konfliktsäkert

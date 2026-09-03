@@ -13,6 +13,7 @@ on:
       - "scripts/update_housing_eda.py"
       - "scripts/update_housing_launch.py"
       - "scripts/test_update_housing.py"
+      - "scripts/test_dals_ed_imports.py"
       - "scripts/test_update_housing_launch.py"
       - "data/housing-launch-sources.json"
       - "data/municipalities.json"
@@ -123,7 +124,7 @@ jobs:
           PY
 
       - name: Testa bostadslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_dals_ed_imports.py
 
       - name: Spara ny bostadsdata
         shell: bash

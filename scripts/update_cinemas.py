@@ -5,6 +5,8 @@ from __future__ import annotations
 import html
 import json
 import re
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
@@ -14,6 +16,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "cinemas.json"
 SOURCE = "https://www.odeonbio.se/"
+SVEA_SOURCE = "https://www.dalsed.se/om-webbplatsen/prenumerera/bio-rss/"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
 MONTHS = {"januari": 1, "februari": 2, "mars": 3, "april": 4, "maj": 5, "juni": 6,
           "juli": 7, "augusti": 8, "september": 9, "oktober": 10, "november": 11, "december": 12}
@@ -84,6 +87,43 @@ def build(data, page, now):
     return data
 
 
+def parse_svea_program(xml, now):
+    """This official programme feed uses pubDate for the performance, in UTC."""
+    root = ET.fromstring(xml)
+    if root.tag != "rss" or root.find("channel") is None:
+        raise ValueError("Inte ett giltigt bioprogram")
+    grouped = {}
+    for item in root.findall("./channel/item"):
+        title = (item.findtext("title") or "").strip()
+        url = (item.findtext("link") or "").strip()
+        if not title or not url.startswith("https://www.dalsed.se/uppleva-och-gora/evenemang/"):
+            raise ValueError("Ofullständig biopost")
+        value = parsedate_to_datetime(item.findtext("pubDate") or "").astimezone(STOCKHOLM)
+        if value >= now:
+            film = grouped.setdefault(url, {"title": title, "url": url, "showtimes": []})
+            stamp = value.isoformat(timespec="minutes")
+            if stamp not in film["showtimes"]:
+                film["showtimes"].append(stamp)
+    for film in grouped.values():
+        film["showtimes"].sort()
+        film["label"] = " · ".join(datetime.fromisoformat(stamp).strftime("%d/%m %H:%M") for stamp in film["showtimes"])
+    return sorted(grouped.values(), key=lambda film: film["showtimes"][0])
+
+
+def update_svea(data, now):
+    svea = next(item for item in data["municipalities"]["Dals-Ed"] if item["name"] == "Svea Bio")
+    svea["programSource"] = SVEA_SOURCE
+    svea["programCheckedAt"] = now.isoformat(timespec="seconds")
+    try:
+        svea["films"] = parse_svea_program(fetch(SVEA_SOURCE), now)
+        svea["programStatus"] = "ok"
+        svea.pop("programError", None)
+    except Exception as error:
+        svea["films"] = []
+        svea["programStatus"] = "unavailable"
+        svea["programError"] = type(error).__name__
+
+
 def main():
     now = datetime.now(STOCKHOLM)
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
@@ -95,6 +135,7 @@ def main():
         odeon["films"] = []
         odeon["programStatus"] = "unavailable"
         odeon["programError"] = type(error).__name__
+    update_svea(data, now)
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 

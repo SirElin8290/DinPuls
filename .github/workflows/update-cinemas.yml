@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/update_cinemas.py"
       - "scripts/test_update_cinemas.py"
+      - "scripts/test_dals_ed_imports.py"
       - ".github/workflows/update-cinemas.yml"
   schedule:
     - cron: "17 */6 * * *"
@@ -27,7 +28,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py
+      - run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py scripts/test_dals_ed_imports.py
       - run: python scripts/update_cinemas.py
       - name: Publicera ändring
         run: |
