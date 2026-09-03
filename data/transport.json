@@ -1,10 +1,17 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-03T07:56:44+00:00",
+  "generatedAt": "2026-09-03T08:12:19+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
-  "partial": false,
-  "failedMunicipalities": [],
+  "partial": true,
+  "failedMunicipalities": [
+    "Åmål",
+    "Säffle",
+    "Bengtsfors",
+    "Mellerud",
+    "Årjäng",
+    "Arvika"
+  ],
   "municipalities": {
     "Åmål": {
       "stops": [
@@ -13,23 +20,11 @@
           "name": "Åmål station",
           "alerts": [],
           "lookupTime": "2026-09-03T09:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-03T11:25+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
-            {
-              "mode": "bus",
-              "line": "800",
-              "direction": "Säffle Grums Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "K"
-            },
             {
               "mode": "bus",
               "line": "775",
@@ -38,9 +33,10 @@
               "scheduled": "2026-09-03T10:25:00+02:00",
               "realtime": "2026-09-03T10:25:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "L"
+              "platform": "L",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -50,9 +46,10 @@
               "scheduled": "2026-09-03T10:39:00+02:00",
               "realtime": "2026-09-03T10:39:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "O"
+              "platform": "O",
+              "stale": true
             },
             {
               "mode": "train",
@@ -62,9 +59,10 @@
               "scheduled": "2026-09-03T10:45:00+02:00",
               "realtime": "2026-09-03T10:45:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "T"
+              "platform": "T",
+              "stale": true
             },
             {
               "mode": "train",
@@ -74,9 +72,10 @@
               "scheduled": "2026-09-03T10:45:00+02:00",
               "realtime": "2026-09-03T10:45:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -142,35 +141,11 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-09-02T21:26+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-02T23:26+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
-            {
-              "mode": "bus",
-              "line": "87",
-              "direction": "Duse Udde Camping",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "G"
-            },
-            {
-              "mode": "bus",
-              "line": "86",
-              "direction": "Treabackarna Rolfserud",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "G"
-            },
             {
               "mode": "bus",
               "line": "84",
@@ -179,9 +154,10 @@
               "scheduled": "2026-09-03T10:20:00+02:00",
               "realtime": "2026-09-03T10:20:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "G"
+              "platform": "G",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -191,9 +167,10 @@
               "scheduled": "2026-09-03T10:23:00+02:00",
               "realtime": "2026-09-03T10:23:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -203,9 +180,10 @@
               "scheduled": "2026-09-03T10:30:00+02:00",
               "realtime": "2026-09-03T10:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "G"
+              "platform": "G",
+              "stale": true
             }
           ]
         }
@@ -219,10 +197,10 @@
           "name": "Bengtsfors",
           "alerts": [],
           "lookupTime": "2026-09-03T07:54+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-03T09:54+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
             {
               "mode": "bus",
@@ -232,9 +210,10 @@
               "scheduled": "2026-09-03T10:14:00+02:00",
               "realtime": "2026-09-03T10:14:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -244,9 +223,10 @@
               "scheduled": "2026-09-03T10:30:00+02:00",
               "realtime": "2026-09-03T10:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -286,10 +266,10 @@
           "name": "Mellerud",
           "alerts": [],
           "lookupTime": "2026-09-03T08:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-03T10:25+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
             {
               "mode": "bus",
@@ -299,9 +279,10 @@
               "scheduled": "2026-09-03T10:18:00+02:00",
               "realtime": "2026-09-03T10:18:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "train",
@@ -311,9 +292,10 @@
               "scheduled": "2026-09-03T10:22:00+02:00",
               "realtime": "2026-09-03T10:22:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -323,9 +305,10 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -335,9 +318,10 @@
               "scheduled": "2026-09-03T10:53:00+02:00",
               "realtime": "2026-09-03T10:53:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -377,23 +361,11 @@
           "name": "Årjäng busstation",
           "alerts": [],
           "lookupTime": "2026-09-03T08:10+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-03T10:10+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
-            {
-              "mode": "bus",
-              "line": "700",
-              "direction": "Töcksfors",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:12+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
             {
               "mode": "bus",
               "line": "700",
@@ -460,156 +432,11 @@
             "Linje 103 försenad Säffle resecentrum kl 9:00 - Arvika busstation-Solbergsgränd"
           ],
           "lookupTime": "2026-09-02T23:04+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-03T01:04+02:00",
           "engineVersion": "0.21.3",
-          "error": null,
+          "error": "Trafiklab svarade med HTTP 500 efter 3 försök",
           "departures": [
-            {
-              "mode": "bus",
-              "line": "113",
-              "direction": "Arvika",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:58:00+02:00",
-              "realtime": "2026-09-03T09:53:43+02:00",
-              "delayMinutes": -4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Ingesund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:58:00+02:00",
-              "realtime": "2026-09-03T09:58:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "58",
-              "direction": "Västra Sund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:59:00+02:00",
-              "realtime": "2026-09-03T09:59:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "K"
-            },
-            {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:56:00+02:00",
-              "realtime": "2026-09-03T09:59:27+02:00",
-              "delayMinutes": 3,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "51",
-              "direction": "Ingesund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "57",
-              "direction": "Rosendal",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "J"
-            },
-            {
-              "mode": "bus",
-              "line": "56",
-              "direction": "Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "J"
-            },
-            {
-              "mode": "bus",
-              "line": "100",
-              "direction": "Åmotfors Charlottenberg",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "C"
-            },
-            {
-              "mode": "bus",
-              "line": "50",
-              "direction": "Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "56",
-              "direction": "Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:01:00+02:00",
-              "realtime": "2026-09-03T10:01:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "57",
-              "direction": "Rosendal",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:01:00+02:00",
-              "realtime": "2026-09-03T10:01:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "50",
-              "direction": "Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:02:00+02:00",
-              "realtime": "2026-09-03T10:02:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "50",
@@ -618,9 +445,10 @@
               "scheduled": "2026-09-03T10:21:00+02:00",
               "realtime": "2026-09-03T10:21:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -630,9 +458,10 @@
               "scheduled": "2026-09-03T10:26:00+02:00",
               "realtime": "2026-09-03T10:23:37+02:00",
               "delayMinutes": -2,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -642,9 +471,10 @@
               "scheduled": "2026-09-03T10:24:00+02:00",
               "realtime": "2026-09-03T10:24:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -654,9 +484,10 @@
               "scheduled": "2026-09-03T10:26:00+02:00",
               "realtime": "2026-09-03T10:26:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -666,9 +497,10 @@
               "scheduled": "2026-09-03T10:29:00+02:00",
               "realtime": "2026-09-03T10:29:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -678,9 +510,10 @@
               "scheduled": "2026-09-03T10:30:00+02:00",
               "realtime": "2026-09-03T10:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -690,9 +523,10 @@
               "scheduled": "2026-09-03T10:30:00+02:00",
               "realtime": "2026-09-03T10:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -702,9 +536,10 @@
               "scheduled": "2026-09-03T10:30:00+02:00",
               "realtime": "2026-09-03T10:30:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -714,9 +549,10 @@
               "scheduled": "2026-09-03T10:31:00+02:00",
               "realtime": "2026-09-03T10:31:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -726,9 +562,10 @@
               "scheduled": "2026-09-03T10:31:00+02:00",
               "realtime": "2026-09-03T10:31:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "K"
+              "platform": "K",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -738,9 +575,10 @@
               "scheduled": "2026-09-03T10:33:00+02:00",
               "realtime": "2026-09-03T10:33:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -750,9 +588,10 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -762,9 +601,10 @@
               "scheduled": "2026-09-03T10:37:00+02:00",
               "realtime": "2026-09-03T10:37:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "train",
@@ -774,9 +614,10 @@
               "scheduled": "2026-09-03T10:50:00+02:00",
               "realtime": "2026-09-03T10:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             }
           ]
         }
@@ -788,63 +629,13 @@
         {
           "id": "740000217",
           "name": "Grums station",
-          "alerts": [
-            "Linje 800 försenad Säffle resecentrum kl 9:23 - Karlstad busstation"
-          ],
+          "alerts": [],
           "lookupTime": "2026-09-03T00:40+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-03T02:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "800",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:53:00+02:00",
-              "realtime": "2026-09-03T09:56:38+02:00",
-              "delayMinutes": 4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "800",
-              "direction": "Säffle",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:26+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "E"
-            },
-            {
-              "mode": "bus",
-              "line": "700",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:44+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "801",
-              "direction": "Vålberg Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:07:00+02:00",
-              "realtime": "2026-09-03T10:07:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "train",
               "line": "71",
@@ -853,7 +644,7 @@
               "scheduled": "2026-09-03T10:41:00+02:00",
               "realtime": "2026-09-03T10:41:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "T"
             },
@@ -865,7 +656,7 @@
               "scheduled": "2026-09-03T10:41:00+02:00",
               "realtime": "2026-09-03T10:41:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": ""
             },
@@ -877,7 +668,7 @@
               "scheduled": "2026-09-03T10:50:00+02:00",
               "realtime": "2026-09-03T10:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "E"
             },
@@ -889,7 +680,31 @@
               "scheduled": "2026-09-03T10:53:00+02:00",
               "realtime": "2026-09-03T10:53:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Säffle Åmål",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:00:00+02:00",
+              "realtime": "2026-09-03T11:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "801",
+              "direction": "Vålberg Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:07:00+02:00",
+              "realtime": "2026-09-03T11:07:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             }
@@ -903,37 +718,15 @@
         {
           "id": "740000206",
           "name": "Kil station",
-          "alerts": [],
+          "alerts": [
+            "Linje 201 försenad Fagerås resecentrum kl 10:00 - Karlstad busstation"
+          ],
           "lookupTime": "2026-09-02T23:04+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-03T01:04+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Charlottenberg",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-09-03T09:57:00+02:00",
-              "realtime": "2026-09-03T09:57:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B-1"
-            },
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Karlstads central",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-09-03T10:01:00+02:00",
-              "realtime": "2026-09-03T10:01:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B-1"
-            },
             {
               "mode": "bus",
               "line": "201",
@@ -942,7 +735,7 @@
               "scheduled": "2026-09-03T10:20:00+02:00",
               "realtime": "2026-09-03T10:20:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -954,7 +747,7 @@
               "scheduled": "2026-09-03T10:28:00+02:00",
               "realtime": "2026-09-03T10:28:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "T"
             },
@@ -966,7 +759,7 @@
               "scheduled": "2026-09-03T10:28:00+02:00",
               "realtime": "2026-09-03T10:28:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": ""
             },
@@ -978,7 +771,7 @@
               "scheduled": "2026-09-03T10:40:00+02:00",
               "realtime": "2026-09-03T10:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "F"
             },
@@ -990,7 +783,7 @@
               "scheduled": "2026-09-03T10:40:00+02:00",
               "realtime": "2026-09-03T10:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             }
@@ -1004,39 +797,13 @@
         {
           "id": "740000184",
           "name": "Sunne station",
-          "alerts": [
-            "Linje 202, 207, 209 och 303: Hållplats Vinkelvägen, Torsby stängs från och med 20 augusti till och med 4 september"
-          ],
+          "alerts": [],
           "lookupTime": "2026-09-03T08:10+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-03T10:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "255",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:55:00+02:00",
-              "realtime": "2026-09-03T09:55:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "202",
-              "direction": "Lysvik Torsby",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:02:00+02:00",
-              "realtime": "2026-09-03T10:02:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
             {
               "mode": "bus",
               "line": "200",
@@ -1047,8 +814,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -1111,46 +877,10 @@
               "line": "100",
               "direction": "Åmotfors Arvika",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:55:00+02:00",
-              "realtime": "2026-09-03T09:55:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "102",
-              "direction": "Charlottenberg",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:55:00+02:00",
-              "realtime": "2026-09-03T09:55:21+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Karlstads central",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "bus"
-            },
-            {
-              "mode": "bus",
-              "line": "100",
-              "direction": "Åmotfors Arvika",
-              "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:55:00+02:00",
               "realtime": "2026-09-03T10:55:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -1243,9 +973,9 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 september",
-            "Linje 1: Hållplats Kavaljersvägen stängs från 24 augusti",
             "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
+            "Linje 1: Hållplats Kavaljersvägen stängs från 24 augusti",
+            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 september",
             "Linje 500 och 501,  Rönndungen Karlstad indragen",
             "Linje 600: Hållplats Tjärnheden bytespunkt stängs från 10 augusti till och med 2 oktober."
           ],
@@ -1258,220 +988,15 @@
             {
               "mode": "bus",
               "line": "1",
-              "direction": "Skutberget via Våxnäs",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:53:00+02:00",
-              "realtime": "2026-09-03T09:53:36+02:00",
-              "delayMinutes": 1,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "M",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Gräsdalen via Gruvlyckan",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:53:00+02:00",
-              "realtime": "2026-09-03T09:54:21+02:00",
-              "delayMinutes": 1,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "M",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "900",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:55:00+02:00",
-              "realtime": "2026-09-03T09:55:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "K"
-            },
-            {
-              "mode": "bus",
-              "line": "601",
-              "direction": "Forshaga Tjärnheden Deje",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:55:00+02:00",
-              "realtime": "2026-09-03T09:55:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "D"
-            },
-            {
-              "mode": "bus",
-              "line": "S",
-              "direction": "Jakobsberg via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:57:21+02:00",
-              "realtime": "2026-09-03T09:56:37+02:00",
-              "delayMinutes": -1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Stockholm Centralstation",
-              "operator": "Tågab",
-              "scheduled": "2026-09-03T09:57:00+02:00",
-              "realtime": "2026-09-03T09:57:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": ""
-            },
-            {
-              "mode": "bus",
-              "line": "11",
-              "direction": "Sommarro via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:58:00+02:00",
-              "realtime": "2026-09-03T09:57:34+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "801",
-              "direction": "Vålberg Grums",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "E"
-            },
-            {
-              "mode": "bus",
-              "line": "902",
-              "direction": "Skoghall via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:00:00+02:00",
-              "realtime": "2026-09-03T10:00:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "H"
-            },
-            {
-              "mode": "bus",
-              "line": "1",
-              "direction": "Campus via Universitetet",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:59:00+02:00",
-              "realtime": "2026-09-03T10:00:02+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "S",
-              "direction": "Välsviken handelsområde via Centrum",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:03:24+02:00",
-              "realtime": "2026-09-03T10:03:49+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Edsgatan via Norra Kroppkärr",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:04:00+02:00",
-              "realtime": "2026-09-03T10:04:10+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "1",
-              "direction": "Henstad via Våxnäs",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:03:00+02:00",
-              "realtime": "2026-09-03T10:04:57+02:00",
-              "delayMinutes": 2,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "904",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Kristinehamn",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-09-03T10:07:00+02:00",
-              "realtime": "2026-09-03T10:07:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "1"
-            },
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Kristinehamn",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:07:00+02:00",
-              "realtime": "2026-09-03T10:07:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "T"
-            },
-            {
-              "mode": "bus",
-              "line": "S",
-              "direction": "Jakobsberg via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:07:21+02:00",
-              "realtime": "2026-09-03T10:07:38+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "1",
               "direction": "Campus via Universitetet",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:09:00+02:00",
               "realtime": "2026-09-03T10:09:02+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "O"
+              "platform": "O",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1481,9 +1006,10 @@
               "scheduled": "2026-09-03T10:10:00+02:00",
               "realtime": "2026-09-03T10:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1493,9 +1019,10 @@
               "scheduled": "2026-09-03T10:10:00+02:00",
               "realtime": "2026-09-03T10:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "F"
+              "platform": "F",
+              "stale": true
             },
             {
               "mode": "train",
@@ -1505,7 +1032,7 @@
               "scheduled": "2026-09-03T10:11:00+02:00",
               "realtime": "2026-09-03T10:11:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "T"
             },
@@ -1517,7 +1044,7 @@
               "scheduled": "2026-09-03T10:11:00+02:00",
               "realtime": "2026-09-03T10:11:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": ""
             },
@@ -1529,9 +1056,21 @@
               "scheduled": "2026-09-03T10:12:00+02:00",
               "realtime": "2026-09-03T10:12:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "4",
+              "direction": "Skutberget via Gruvlyckan",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:13:00+02:00",
+              "realtime": "2026-09-03T10:13:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
             },
             {
               "mode": "bus",
@@ -1539,9 +1078,9 @@
               "direction": "Gruvlyckan via Våxnäs",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:13:00+02:00",
-              "realtime": "2026-09-03T10:12:11+02:00",
-              "delayMinutes": -1,
-              "isRealtime": true,
+              "realtime": "2026-09-03T10:13:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
               "canceled": false,
               "platform": "M"
             },
@@ -1551,21 +1090,9 @@
               "direction": "Bergvik Ikea via Våxnäs",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:13:00+02:00",
-              "realtime": "2026-09-03T10:12:34+02:00",
+              "realtime": "2026-09-03T10:13:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Skutberget via Gruvlyckan",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:13:00+02:00",
-              "realtime": "2026-09-03T10:13:10+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "M"
             },
@@ -1577,19 +1104,7 @@
               "scheduled": "2026-09-03T10:13:24+02:00",
               "realtime": "2026-09-03T10:13:24+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "3",
-              "direction": "Västra Stockfallet via Rud",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:14:00+02:00",
-              "realtime": "2026-09-03T10:13:58+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1601,7 +1116,19 @@
               "scheduled": "2026-09-03T10:14:00+02:00",
               "realtime": "2026-09-03T10:14:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "3",
+              "direction": "Västra Stockfallet via Rud",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:14:00+02:00",
+              "realtime": "2026-09-03T10:14:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1613,7 +1140,7 @@
               "scheduled": "2026-09-03T10:15:00+02:00",
               "realtime": "2026-09-03T10:15:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "E"
             },
@@ -1625,7 +1152,7 @@
               "scheduled": "2026-09-03T10:17:00+02:00",
               "realtime": "2026-09-03T10:17:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "M"
             },
@@ -1637,7 +1164,7 @@
               "scheduled": "2026-09-03T10:17:00+02:00",
               "realtime": "2026-09-03T10:17:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "D"
             },
@@ -1647,9 +1174,9 @@
               "direction": "Jakobsberg via Sjukhuset",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:17:21+02:00",
-              "realtime": "2026-09-03T10:18:04+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
+              "realtime": "2026-09-03T10:17:21+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
               "canceled": false,
               "platform": "M"
             },
@@ -1661,7 +1188,7 @@
               "scheduled": "2026-09-03T10:19:00+02:00",
               "realtime": "2026-09-03T10:19:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1673,7 +1200,7 @@
               "scheduled": "2026-09-03T10:19:00+02:00",
               "realtime": "2026-09-03T10:19:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1685,7 +1212,7 @@
               "scheduled": "2026-09-03T10:23:00+02:00",
               "realtime": "2026-09-03T10:23:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "M"
             },
@@ -1697,7 +1224,7 @@
               "scheduled": "2026-09-03T10:23:24+02:00",
               "realtime": "2026-09-03T10:23:24+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1709,7 +1236,7 @@
               "scheduled": "2026-09-03T10:24:00+02:00",
               "realtime": "2026-09-03T10:24:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "O"
             },
@@ -1721,7 +1248,7 @@
               "scheduled": "2026-09-03T10:25:00+02:00",
               "realtime": "2026-09-03T10:25:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "C"
             },
@@ -1733,9 +1260,213 @@
               "scheduled": "2026-09-03T10:25:00+02:00",
               "realtime": "2026-09-03T10:25:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "F"
+            },
+            {
+              "mode": "bus",
+              "line": "S",
+              "direction": "Jakobsberg via Sjukhuset",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:27:21+02:00",
+              "realtime": "2026-09-03T10:27:21+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Campus via Universitetet",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:29:00+02:00",
+              "realtime": "2026-09-03T10:29:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "902",
+              "direction": "Skoghall via Sjukhuset",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:30:00+02:00",
+              "realtime": "2026-09-03T10:30:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "300",
+              "direction": "Molkom Hagfors",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:32:00+02:00",
+              "realtime": "2026-09-03T10:32:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "4",
+              "direction": "Gräsdalen via Gruvlyckan",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:33:00+02:00",
+              "realtime": "2026-09-03T10:33:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "3",
+              "direction": "Gruvlyckan via Våxnäs",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:33:00+02:00",
+              "realtime": "2026-09-03T10:33:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Henstad via Våxnäs",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:33:00+02:00",
+              "realtime": "2026-09-03T10:33:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "S",
+              "direction": "Välsviken handelsområde via Centrum",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:33:24+02:00",
+              "realtime": "2026-09-03T10:33:24+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "3",
+              "direction": "Norra Kroppkärr via Rud",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:34:00+02:00",
+              "realtime": "2026-09-03T10:34:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "904",
+              "direction": "Skoghall",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:35:00+02:00",
+              "realtime": "2026-09-03T10:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "K"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Forshaga Järnvägsstation Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:35:00+02:00",
+              "realtime": "2026-09-03T10:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "F"
+            },
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Säffle Åmål",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:35:00+02:00",
+              "realtime": "2026-09-03T10:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Arlanda flygplats",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-09-03T10:35:00+02:00",
+              "realtime": "2026-09-03T10:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "S",
+              "direction": "Jakobsberg via Sjukhuset",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:37:21+02:00",
+              "realtime": "2026-09-03T10:37:21+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Campus via Universitetet",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:39:00+02:00",
+              "realtime": "2026-09-03T10:39:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "901",
+              "direction": "Lövnäs",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:40:00+02:00",
+              "realtime": "2026-09-03T10:40:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "C"
+            },
+            {
+              "mode": "bus",
+              "line": "501",
+              "direction": "Skattkärr Väse",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T10:40:00+02:00",
+              "realtime": "2026-09-03T10:40:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "D"
             }
           ]
         }
@@ -1748,7 +1479,7 @@
           "id": "740000820",
           "name": "Skoghall centrum",
           "alerts": [
-            "Linje 904 försenad Karlstad busstation kl 9:35 - Karlstad busstation"
+            "Linje 902 försenad Karlstad busstation kl 10:00 - Karlstad busstation"
           ],
           "lookupTime": "2026-09-03T00:40+02:00",
           "retained": false,
@@ -1758,37 +1489,13 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "904",
-              "direction": "Busstationen via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:50:00+02:00",
-              "realtime": "2026-09-03T09:56:16+02:00",
-              "delayMinutes": 6,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
-              "line": "902",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T09:56:00+02:00",
-              "realtime": "2026-09-03T10:00:28+02:00",
-              "delayMinutes": 4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
               "line": "911",
               "direction": "Rud",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:15:00+02:00",
               "realtime": "2026-09-03T10:15:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1800,7 +1507,7 @@
               "scheduled": "2026-09-03T10:15:00+02:00",
               "realtime": "2026-09-03T10:15:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1812,7 +1519,7 @@
               "scheduled": "2026-09-03T10:15:00+02:00",
               "realtime": "2026-09-03T10:15:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1824,7 +1531,7 @@
               "scheduled": "2026-09-03T10:20:00+02:00",
               "realtime": "2026-09-03T10:20:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1836,7 +1543,7 @@
               "scheduled": "2026-09-03T10:26:00+02:00",
               "realtime": "2026-09-03T10:26:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -1848,7 +1555,7 @@
               "scheduled": "2026-09-03T10:45:00+02:00",
               "realtime": "2026-09-03T10:45:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1860,7 +1567,7 @@
               "scheduled": "2026-09-03T10:50:00+02:00",
               "realtime": "2026-09-03T10:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -1872,7 +1579,7 @@
               "scheduled": "2026-09-03T10:56:00+02:00",
               "realtime": "2026-09-03T10:56:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             }
@@ -1897,10 +1604,10 @@
               "mode": "bus",
               "line": "344",
               "direction": "Vetlanda",
-              "operator": "Kalmar Länstrafik",
-              "scheduled": "2026-09-03T10:23:23+02:00",
-              "realtime": "2026-09-03T10:23:23+02:00",
-              "delayMinutes": 0,
+              "operator": "Jönköpings Länstrafik",
+              "scheduled": "2026-09-03T10:23:26+02:00",
+              "realtime": "2026-09-03T10:22:10+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -1909,14 +1616,13 @@
               "mode": "bus",
               "line": "344",
               "direction": "Vetlanda",
-              "operator": "Jönköpings Länstrafik",
-              "scheduled": "2026-09-03T10:23:26+02:00",
-              "realtime": "2026-09-03T10:23:26+02:00",
+              "operator": "Kalmar Länstrafik",
+              "scheduled": "2026-09-03T10:23:23+02:00",
+              "realtime": "2026-09-03T10:23:23+02:00",
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -1926,9 +1632,10 @@
               "scheduled": "2026-09-03T10:28:02+02:00",
               "realtime": "2026-09-03T10:28:02+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1938,9 +1645,10 @@
               "scheduled": "2026-09-03T12:49:10+02:00",
               "realtime": "2026-09-03T12:49:10+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1950,9 +1658,10 @@
               "scheduled": "2026-09-03T12:49:11+02:00",
               "realtime": "2026-09-03T12:49:11+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1962,9 +1671,10 @@
               "scheduled": "2026-09-03T14:47:35+02:00",
               "realtime": "2026-09-03T14:47:35+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1974,9 +1684,10 @@
               "scheduled": "2026-09-03T14:52:11+02:00",
               "realtime": "2026-09-03T14:52:11+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1986,9 +1697,10 @@
               "scheduled": "2026-09-03T16:23:23+02:00",
               "realtime": "2026-09-03T16:23:23+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1998,9 +1710,10 @@
               "scheduled": "2026-09-03T16:23:26+02:00",
               "realtime": "2026-09-03T16:23:26+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -2010,9 +1723,10 @@
               "scheduled": "2026-09-03T16:32:45+02:00",
               "realtime": "2026-09-03T16:32:45+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -2022,9 +1736,10 @@
               "scheduled": "2026-09-03T16:37:10+02:00",
               "realtime": "2026-09-03T16:37:10+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             }
           ]
         }
@@ -2048,99 +1763,16 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "500",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:01:44+02:00",
-              "delayMinutes": -3,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "D"
-            },
-            {
-              "mode": "bus",
-              "line": "500",
-              "direction": "Karlskoga",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:04:10+02:00",
-              "delayMinutes": -1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "E"
-            },
-            {
-              "mode": "bus",
-              "line": "13",
-              "direction": "Strandudden via Centrum",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "F"
-            },
-            {
-              "mode": "bus",
-              "line": "961",
-              "direction": "Örebro Servicelinjen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Övre Kvarn via Centrum",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "H"
-            },
-            {
-              "mode": "bus",
-              "line": "1",
-              "direction": "Djurgården via Vårdcentralen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:01+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "H"
-            },
-            {
-              "mode": "bus",
-              "line": "2",
-              "direction": "Strand",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:43+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "H"
-            },
-            {
-              "mode": "bus",
               "line": "12",
               "direction": "Sandfallet",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:10:00+02:00",
               "realtime": "2026-09-03T10:10:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "F"
+              "platform": "F",
+              "stale": true
             },
             {
               "mode": "train",
@@ -2150,7 +1782,7 @@
               "scheduled": "2026-09-03T10:14:00+02:00",
               "realtime": "2026-09-03T10:14:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "4"
             },
@@ -2162,7 +1794,7 @@
               "scheduled": "2026-09-03T10:14:00+02:00",
               "realtime": "2026-09-03T10:14:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "T"
             },
@@ -2174,7 +1806,7 @@
               "scheduled": "2026-09-03T10:29:00+02:00",
               "realtime": "2026-09-03T10:29:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": ""
             },
@@ -2186,7 +1818,7 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -2198,7 +1830,7 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "F"
             },
@@ -2210,7 +1842,7 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "G"
             },
@@ -2222,7 +1854,7 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "H"
             },
@@ -2234,9 +1866,117 @@
               "scheduled": "2026-09-03T10:35:00+02:00",
               "realtime": "2026-09-03T10:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "500",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "D"
+            },
+            {
+              "mode": "bus",
+              "line": "2",
+              "direction": "Strand",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "4",
+              "direction": "Övre Kvarn via Centrum",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "13",
+              "direction": "Strandudden via Centrum",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "F"
+            },
+            {
+              "mode": "bus",
+              "line": "500",
+              "direction": "Karlskoga",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Djurgården via Vårdcentralen",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:05:00+02:00",
+              "realtime": "2026-09-03T11:05:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "H"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Arlanda flygplats",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-09-03T11:10:00+02:00",
+              "realtime": "2026-09-03T11:10:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "12",
+              "direction": "Sandfallet",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:10:00+02:00",
+              "realtime": "2026-09-03T11:10:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "F"
+            },
+            {
+              "mode": "bus",
+              "line": "503",
+              "direction": "Björneborg",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:10:00+02:00",
+              "realtime": "2026-09-03T11:10:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
             }
           ]
         }
@@ -2418,12 +2158,24 @@
             {
               "mode": "bus",
               "line": "400",
+              "direction": "Nykroppa Storfors Kristinehamn",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T11:03:00+02:00",
+              "realtime": "2026-09-03T11:03:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "400",
               "direction": "Molkom Karlstad",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:07:00+02:00",
-              "realtime": "2026-09-03T10:07:00+02:00",
+              "scheduled": "2026-09-03T11:07:00+02:00",
+              "realtime": "2026-09-03T11:07:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "D"
             },
@@ -2543,7 +2295,7 @@
               "scheduled": "2026-09-03T10:27:00+02:00",
               "realtime": "2026-09-03T10:27:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -2553,8 +2305,8 @@
               "direction": "Polishuset Björkliden",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:56:00+02:00",
-              "realtime": "2026-09-03T10:54:30+02:00",
-              "delayMinutes": -2,
+              "realtime": "2026-09-03T10:55:20+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -2701,8 +2453,8 @@
               "direction": "Karlstad",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:31:00+02:00",
-              "realtime": "2026-09-03T10:30:01+02:00",
-              "delayMinutes": -1,
+              "realtime": "2026-09-03T10:32:52+02:00",
+              "delayMinutes": 2,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -2780,25 +2532,13 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "209",
-              "direction": "Ekshärad Värnäs",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T10:05:00+02:00",
-              "realtime": "2026-09-03T10:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "B"
-            },
-            {
-              "mode": "bus",
               "line": "202",
               "direction": "Lysvik Sunne",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T10:20:00+02:00",
               "realtime": "2026-09-03T10:20:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "D"
             },
@@ -2810,7 +2550,7 @@
               "scheduled": "2026-09-03T10:40:00+02:00",
               "realtime": "2026-09-03T10:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "E"
             },
@@ -2822,7 +2562,7 @@
               "scheduled": "2026-09-03T10:50:00+02:00",
               "realtime": "2026-09-03T10:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -2890,7 +2630,7 @@
               "scheduled": "2026-09-03T10:25:00+02:00",
               "realtime": "2026-09-03T10:25:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "1"
             },
@@ -2902,7 +2642,7 @@
               "scheduled": "2026-09-03T10:29:00+02:00",
               "realtime": "2026-09-03T10:29:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
@@ -2970,9 +2710,10 @@
               "scheduled": "2026-09-03T10:09:00+02:00",
               "realtime": "2026-09-03T10:09:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -2982,7 +2723,7 @@
               "scheduled": "2026-09-03T10:19:00+02:00",
               "realtime": "2026-09-03T10:19:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "B"
             },
@@ -2994,7 +2735,7 @@
               "scheduled": "2026-09-03T10:49:00+02:00",
               "realtime": "2026-09-03T10:49:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
               "platform": "A"
             },
