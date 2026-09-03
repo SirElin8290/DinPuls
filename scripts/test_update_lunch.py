@@ -102,6 +102,16 @@ class LunchUpdateTests(unittest.TestCase):
         dishes = output["municipalities"]["Åmål"]["restaurants"][0]["days"]["monday"]
         self.assertEqual(dishes, ["Pannbiff med potatis"])
 
+    def test_hammaro_supplement_adds_verified_sources(self):
+        config = {
+            "municipalities": {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES},
+            "referenceSources": {},
+        }
+        merged = update_lunch.merge_config(config)
+        sources = merged["municipalities"]["Hammarö"]
+        self.assertGreaterEqual(len(sources), 5)
+        self.assertTrue(any(source.get("id") == "abbes-golfkrog-hammaro" for source in sources))
+        self.assertTrue(merged["referenceSources"].get("Hammarö"))
 
     def test_duplicate_ids_are_rejected(self):
         municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
