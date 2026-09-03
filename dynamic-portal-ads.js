@@ -16,6 +16,15 @@
     window.DinPulsAds?.refreshStrategicAds?.();
   }
 
+  function sportAdKey(sport) {
+    return String(sport || "sport")
+      .toLocaleLowerCase("sv-SE")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
   let sportSignature = "";
   function placeSportAds() {
     const main = document.querySelector("main.sport-hub");
@@ -23,10 +32,35 @@
     const summary = document.querySelector("#sport-hub-summary");
     if (!main || !view || !summary) return;
     const modules = [...view.querySelectorAll(":scope > .activity-module")];
-    const signature = modules.map(module => module.querySelector("h2")?.textContent || "").join("|");
-    if (!modules.length || (signature === sportSignature && document.querySelectorAll('[data-dynamic-page="sport"]').length === 8)) return;
+    if (!modules.length) return;
+
+    const sports = modules.map(module => module.querySelector("h2")?.textContent?.trim() || "").filter(Boolean);
+    const isSingleSport = modules.length === 1 && sports.length === 1;
+    const expectedSlots = isSingleSport ? 3 : 8;
+    const signature = `${sports.join("|")}::${isSingleSport ? "single" : "hub"}`;
+    if (signature === sportSignature && document.querySelectorAll('[data-dynamic-page="sport"]').length === expectedSlots) return;
     sportSignature = signature;
+
     document.querySelectorAll('[data-dynamic-page="sport"]').forEach(slot => slot.remove());
+
+    if (isSingleSport) {
+      const sport = sports[0];
+      const municipality = document.querySelector("#sport-hub-place")?.textContent?.trim();
+      const pageLabel = municipality ? `${sport} i ${municipality}` : sport;
+      const category = `sport-${sportAdKey(sport)}`;
+      const slots = Array.from({ length: 3 }, (_, index) => {
+        const slot = makeSlot(category, index + 1, pageLabel);
+        slot.dataset.dynamicPage = "sport";
+        slot.dataset.sportAd = sport;
+        return slot;
+      });
+
+      summary.after(slots[0]);
+      modules[0].after(slots[1]);
+      view.after(slots[2]);
+      refresh();
+      return;
+    }
 
     const slots = Array.from({ length: 8 }, (_, index) => {
       const slot = makeSlot("sport", index + 1, "Idrott & motion");
