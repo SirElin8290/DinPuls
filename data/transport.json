@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-03T01:19:39+00:00",
+  "generatedAt": "2026-09-03T01:41:33+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -615,11 +615,23 @@
           "name": "Arvika",
           "alerts": [],
           "lookupTime": "2026-09-02T23:04+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-03T01:04+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "104",
+              "direction": "Koppom Vännacka",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T04:30:00+02:00",
+              "realtime": "2026-09-03T04:30:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "D"
+            },
             {
               "mode": "train",
               "line": "73",
@@ -1543,7 +1555,9 @@
         {
           "id": "740098025",
           "name": "Karlstad",
-          "alerts": [],
+          "alerts": [
+            "Linje 500 och 501,  Rönndungen Karlstad indragen"
+          ],
           "lookupTime": "2026-09-03T00:40+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-03T02:40+02:00",
@@ -1600,16 +1614,27 @@
             },
             {
               "mode": "bus",
+              "line": "601",
+              "direction": "Forshaga Järnvägsstation Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T04:35:00+02:00",
+              "realtime": "2026-09-03T04:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "C"
+            },
+            {
+              "mode": "bus",
               "line": "501",
               "direction": "Skattkärr Väse",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-03T04:40:00+02:00",
               "realtime": "2026-09-03T04:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2810,10 +2835,9 @@
               "scheduled": "2026-09-03T04:35:00+02:00",
               "realtime": "2026-09-03T04:35:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "D",
-              "stale": true
+              "platform": "D"
             },
             {
               "mode": "bus",
@@ -2823,10 +2847,9 @@
               "scheduled": "2026-09-03T04:40:00+02:00",
               "realtime": "2026-09-03T04:40:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2892,7 +2915,7 @@
           "name": "Ed station",
           "alerts": [],
           "lookupTime": "2026-09-02T20:05+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T22:05+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2905,10 +2928,9 @@
               "scheduled": "2026-09-03T04:24:00+02:00",
               "realtime": "2026-09-03T04:24:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
