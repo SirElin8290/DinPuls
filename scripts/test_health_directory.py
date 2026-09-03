@@ -1,5 +1,6 @@
 import json
 import unittest
+from urllib.parse import urlsplit
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +55,30 @@ class HealthDirectoryTests(unittest.TestCase):
         for providers in (self.main_providers, self.supplement_providers, self.local_providers):
             keys = [(item.get("municipality"), str(item.get("name") or "").casefold()) for item in providers]
             self.assertEqual(len(keys), len(set(keys)))
+
+    def test_eda_verified_coverage_without_duplicates(self):
+        entries = [item for item in self.providers + self.official_data.get("providers", [])
+                   if item.get("municipality") == "Eda"]
+        names = [item["name"].strip().casefold() for item in entries]
+        self.assertEqual(len(names), len(set(names)))
+        by_name = {item["name"]: item for item in entries}
+        for name in ("Vårdcentralen Eda", "Fysioterapimottagningen Charlottenberg",
+                     "Barnmorskemottagningen vårdcentralen Eda", "Folktandvården Åmotfors",
+                     "Charlottenbergs Tandklinik"):
+            with self.subTest(provider=name):
+                self.assertIn(name, by_name)
+                self.assertEqual(urlsplit(by_name[name]["url"]).hostname, "www.1177.se")
+        wellness = [by_name[name] for name in
+                    ("Fixa Foten", "Holmens massagepraktik", "Marihas Akupressur")]
+        self.assertTrue({"Fotvård & medicinsk fotvård", "Massage & kroppsterapi"}
+                        <= {item["category"] for item in wellness})
+        for item in wellness:
+            parsed = urlsplit(item["url"])
+            self.assertEqual(parsed.scheme, "https")
+            self.assertEqual(parsed.hostname, "www.bokadirekt.se")
+            self.assertTrue(parsed.path.startswith("/places/"))
+            self.assertTrue(item.get("sourceType"))
+            self.assertIn("Charlottenberg", item["address"])
 
     def test_frontend_loads_complete_directory(self):
         script = (ROOT / "health-page.js").read_text(encoding="utf-8")

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 MUNICIPALITIES = ["Åmål", "Säffle", "Bengtsfors", "Mellerud", "Årjäng", "Arvika", "Grums", "Kil", "Sunne"]
@@ -59,4 +60,27 @@ assert len({item.get("category") for item in local_businesses}) >= 3, "Dals-Ed b
 script = (ROOT / "service-page.js").read_text(encoding="utf-8")
 assert 'data/service-local-supplement.json' in script, "Frontend laddar inte lokala servicekompletteringar"
 
-print(f"Servicekatalogen godkänd: {len(businesses)} basposter och {len(local_businesses)} lokala Dals-Ed-poster.")
+base = json.loads((ROOT / "data/service.json").read_text(encoding="utf-8"))
+launch = json.loads((ROOT / "data/service-launch-supplement.json").read_text(encoding="utf-8"))
+eda = [item for item in base.get("businesses", []) + launch.get("businesses", [])
+       + businesses + local_businesses if item.get("municipality") == "Eda"]
+names = [item["name"].strip().casefold() for item in eda]
+assert len(names) == len(set(names)), "Eda: dubbletter mellan produktionskällor"
+assert not any("värmlandsvillan" in name for name in names), "Konkursbolag får inte läggas till"
+assert {"El & installation", "VVS, värme & kyla", "Bygg & snickeri", "Bil, däck & fordonsservice"} <= {item.get("category") for item in eda}
+expected = {"Stens EL", "Aaror AB", "Mekonomen Bilverkstad Charlottenberg",
+            "Gränsverkstad Charlottenberg / Autoexperten", "Engelbrekts Motor AB",
+            "Lässeruds Bygg AB", "FC Bygg AB", "VibeHus Bygg AB", "Vittensten Bygg AB"}
+added = [item for item in eda if item["name"] in expected]
+assert {item["name"] for item in added} == expected, "Eda: verifierade företag saknas"
+for town in ("Charlottenberg", "Åmotfors", "Koppom"):
+    assert any(town in item.get("address", "") for item in added), f"Eda: {town} saknas"
+for item in added:
+    assert item["category"] in categories
+    assert item.get("sourceType"), f"{item['name']}: källa saknas"
+    parsed = urlsplit(item.get("url") or item.get("sourceUrl") or "")
+    assert parsed.scheme == "https" and parsed.hostname, f"{item['name']}: ogiltig käll-URL"
+    assert not parsed.username and not parsed.password
+assert 'data/service-launch-supplement.json' in script, "Frontend laddar inte Eda-kompletteringen"
+
+print(f"Servicekatalogen godkänd: {len(businesses)} basposter, {len(local_businesses)} lokala Dals-Ed-poster och {len(eda)} Eda-poster.")
