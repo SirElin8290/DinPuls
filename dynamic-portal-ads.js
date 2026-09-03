@@ -51,13 +51,18 @@
   let leisureSignature = "";
   function placeLeisureAds() {
     const view = document.querySelector("#leisure-view");
-    const search = document.querySelector(".leisure-search-panel");
-    if (!view || !search) return;
+    const crosslink = document.querySelector(".leisure-crosslink");
+    if (!view || !crosslink) return;
+
     const modules = [...view.querySelectorAll(":scope > .leisure-module")];
     const signature = modules.map(module => module.querySelector("h2")?.textContent || "").join("|");
     if (!modules.length || (signature === leisureSignature && document.querySelectorAll('[data-dynamic-page="fritid"]').length === 4)) return;
     leisureSignature = signature;
+
     document.querySelectorAll('[data-dynamic-page="fritid"]').forEach(slot => slot.remove());
+    document.querySelectorAll('[data-dynamic-ad-row="fritid"]').forEach(row => row.remove());
+
+    view.classList.toggle("leisure-view-single", modules.length === 1);
 
     const slots = Array.from({ length: 4 }, (_, index) => {
       const slot = makeSlot("fritid", index + 1, "Fritid & föreningsliv");
@@ -65,12 +70,20 @@
       return slot;
     });
 
-    search.after(slots[0]);
-    const firstIndex = Math.max(0, Math.round((modules.length - 1) * 0.33));
-    const secondIndex = Math.max(firstIndex + 1, Math.round((modules.length - 1) * 0.67));
-    modules[Math.min(firstIndex, modules.length - 1)].after(slots[1]);
-    modules[Math.min(secondIndex, modules.length - 1)].after(slots[2]);
-    view.after(slots[3]);
+    const topRow = document.createElement("section");
+    topRow.className = "leisure-ad-row leisure-ad-row-top";
+    topRow.dataset.dynamicAdRow = "fritid";
+    topRow.setAttribute("aria-label", "Annonsplatser");
+    topRow.append(slots[0], slots[1]);
+
+    const bottomRow = document.createElement("section");
+    bottomRow.className = "leisure-ad-row leisure-ad-row-bottom";
+    bottomRow.dataset.dynamicAdRow = "fritid";
+    bottomRow.setAttribute("aria-label", "Annonsplatser");
+    bottomRow.append(slots[2], slots[3]);
+
+    crosslink.after(topRow);
+    view.after(bottomRow);
     refresh();
   }
 
