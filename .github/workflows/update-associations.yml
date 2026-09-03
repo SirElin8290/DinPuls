@@ -18,6 +18,8 @@ on:
       - "data/association-forshaga-supplement.json"
       - "data/association-enrichment-prerequisites.json"
       - "scripts/import_associations.py"
+      - "scripts/apply_forshaga_fri.py"
+      - "scripts/test_forshaga_fri.py"
       - "scripts/apply_launch_associations.py"
       - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
@@ -57,6 +59,9 @@ jobs:
       - name: Importera föreningsregister
         run: python scripts/import_associations.py
 
+      - name: Importera Forshagas FRI-register
+        run: python scripts/apply_forshaga_fri.py
+
       - name: Lägg till verifierad lanseringstäckning
         run: python scripts/apply_launch_associations.py
 
@@ -83,8 +88,13 @@ jobs:
           for name in launch.get('municipalities', {}):
               assert sports.get(name, {}).get('clubs'), f'{name}: launch sport coverage missing'
               assert leisure.get(name, {}).get('activities'), f'{name}: launch leisure coverage missing'
-          print(f'Verifierade föreningsdata för {len(expected)} kommuner')
+          forshaga_sports = sports.get('Forshaga', {}).get('clubs') or []
+          forshaga_leisure = leisure.get('Forshaga', {}).get('activities') or []
+          assert len(forshaga_sports) >= 18, f'Forshaga: för få idrottsföreningar: {len(forshaga_sports)}'
+          assert len(forshaga_leisure) >= 10, f'Forshaga: för få fritidsföreningar: {len(forshaga_leisure)}'
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Forshaga {len(forshaga_sports)} idrott/{len(forshaga_leisure)} fritid')
           PY
+          PYTHONPATH=scripts python -m unittest scripts/test_forshaga_fri.py
           node scripts/test_leisure_quality.js
           node scripts/test_leisure_ui.js
 
