@@ -1,0 +1,49 @@
+/* DinPuls – tydlig färgidentitet per sportmodul. */
+.activity-module{--sport-accent:#2563eb;--sport-soft:#eef5ff;border-top:6px solid var(--sport-accent)}
+.activity-module>header{background:linear-gradient(110deg,var(--sport-soft),#fff 72%)}
+.activity-module .activity-icon{color:var(--sport-accent);background:var(--sport-soft)}
+.activity-module .section-kicker,.activity-module .activity-links a,.activity-module .activity-club-actions a{color:var(--sport-accent)}
+.activity-module .activity-links a.primary{background:var(--sport-soft)}
+.activity-module .activity-club-main>svg:first-child{color:var(--sport-accent)}
+
+/* Lagidrotter */
+.activity-module[data-accent="football"]{--sport-accent:#17883f;--sport-soft:#e9f7ed}
+.activity-module[data-accent="futsal"]{--sport-accent:#247a45;--sport-soft:#edf7f0}
+.activity-module[data-accent="floorball"]{--sport-accent:#e56b16;--sport-soft:#fff0e4}
+.activity-module[data-accent="ice"]{--sport-accent:#2c8fc7;--sport-soft:#e7f6fd}
+.activity-module[data-accent="bandy"]{--sport-accent:#169eb4;--sport-soft:#e7f8fb}
+.activity-module[data-accent="handball"]{--sport-accent:#d98708;--sport-soft:#fff5df}
+.activity-module[data-accent="basket"]{--sport-accent:#c85f18;--sport-soft:#fff0e6}
+
+/* Racket, precision och hall */
+.activity-module[data-accent="tennis"]{--sport-accent:#a7a90a;--sport-soft:#f8f9dd}
+.activity-module[data-accent="badminton"]{--sport-accent:#c1a20b;--sport-soft:#fff8d9}
+.activity-module[data-accent="tabletennis"]{--sport-accent:#c94b4b;--sport-soft:#fceaea}
+.activity-module[data-accent="bowling"]{--sport-accent:#7357b8;--sport-soft:#f0ebfb}
+.activity-module[data-accent="boule"]{--sport-accent:#5579a8;--sport-soft:#edf3f9}
+.activity-module[data-accent="archery"]{--sport-accent:#507b37;--sport-soft:#eef6e9}
+.activity-module[data-accent="shooting"]{--sport-accent:#586474;--sport-soft:#eef1f4}
+
+/* Natur, kondition och vatten */
+.activity-module[data-accent="golf"]{--sport-accent:#4d9b36;--sport-soft:#edf8e9}
+.activity-module[data-accent="orienteering"]{--sport-accent:#2c8b57;--sport-soft:#e9f7ef}
+.activity-module[data-accent="running"]{--sport-accent:#d97818;--sport-soft:#fff1e5}
+.activity-module[data-accent="ski"]{--sport-accent:#5c9fc4;--sport-soft:#eaf5fb}
+.activity-module[data-accent="mtb"]{--sport-accent:#39784a;--sport-soft:#eaf4ed}
+.activity-module[data-accent="cycling"]{--sport-accent:#3a8b77;--sport-soft:#e8f5f1}
+.activity-module[data-accent="swimming"]{--sport-accent:#237bc2;--sport-soft:#e8f3fc}
+.activity-module[data-accent="canoe"]{--sport-accent:#168fa6;--sport-soft:#e7f7fa}
+.activity-module[data-accent="fishing"]{--sport-accent:#25849a;--sport-soft:#e8f6f8}
+
+/* Övrigt */
+.activity-module[data-accent="equestrian"]{--sport-accent:#b34f7a;--sport-soft:#faeaf1}
+.activity-module[data-accent="motorsport"]{--sport-accent:#c23939;--sport-soft:#fceaea}
+.activity-module[data-accent="martial"]{--sport-accent:#9e3232;--sport-soft:#f9e9e9}
+.activity-module[data-accent="boxing"]{--sport-accent:#b74335;--sport-soft:#fbeae7}
+.activity-module[data-accent="gymnastics"]{--sport-accent:#8b4dc2;--sport-soft:#f2eafb}
+.activity-module[data-accent="trotting"]{--sport-accent:#a96b21;--sport-soft:#f8efe4}
+.activity-module[data-accent="para"]{--sport-accent:#356fb3;--sport-soft:#eaf1fa}
+.activity-module[data-accent="default"]{--sport-accent:#2563eb;--sport-soft:#eef5ff}
+
+html[data-theme="dark"] .activity-module>header{background:linear-gradient(110deg,color-mix(in srgb,var(--sport-accent) 20%,#0d1b2b),#0d1b2b 72%)}
+html[data-theme="dark"] .activity-module .activity-icon,html[data-theme="dark"] .activity-module .activity-links a.primary{background:color-mix(in srgb,var(--sport-accent) 18%,#101f31)}
