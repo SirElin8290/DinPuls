@@ -5,7 +5,7 @@ Start-HEAD: `282d8fcf5b19cdb87f38d4bfc5c1bae11e7c4afd`.
 Senast kontrollerad data-HEAD: `dff6324d70796129d95e3a4db6b17e608c612f01`.
 
 ## Slutsats
-Forshagas lokala funktioner har verifierats och de identifierade lokala felen är rättade. **Forshaga är ännu inte formellt godkänd och stängd enligt arbetsorderns krav på gröna kontroller**: den gemensamma kontrollen `python scripts/validate_launch.py` stoppar på `Hammarö: lunchställen saknas`. Detta är ett befintligt fel utanför Forshaga. Kontrollens krav har inte sänkts och Hammarös data har inte fyllts med påhittat innehåll.
+Forshagas lokala funktioner har verifierats och de identifierade lokala felen är rättade. **Forshaga är ännu inte formellt godkänd och stängd enligt arbetsorderns krav på gröna kontroller**: den gemensamma kontrollen `python scripts/validate_launch.py` stoppar på `Hammarö: lunchställen saknas`. Separat körning av de återstående kontrollfunktionerna visar även att `verify_service` underkänner sju kommuner eftersom den endast läser basfilen, samt att `verify_review_fixes` kräver en annan ordning mellan `primary-cards` och `secondary-cards` än aktuell main. Dessa gemensamma avvikelser måste bedömas och lösas innan hela launch-kontrollen kan bli grön. Kontrollens krav har inte sänkts och Hammarös data har inte fyllts med påhittat innehåll.
 
 ## Redan fungerande vid start
 Automatisk Forshagabostäder-import, FRI-import, bioprogram från lokala Visit Värmland-evenemang, jobb, vård, service, lunchens källänkar, evenemang och lokal frontend fanns redan. Arbetet har fortsatt från aktuell main. Senare gemensamma ändringar i layout, dark mode, hösttema, sport och annonser har behållits.
@@ -40,18 +40,19 @@ Mobilens mörka läge aktiverades via gränssnittet och följde med till undersi
 - Vård: **11 verksamheter**. Service: **10 unika företag i livevyn**; readiness räknar en mindre delmängd.
 - Nyheter: **25 lokala artiklar** vid kvällskontrollen.
 - Vägtrafik: **10 meddelanden**. Bussar från rätt Forshaga centrum.
-- Missing People: utgången kontroll dolde personuppgifter korrekt och visade officiell reservlänk. Workflow kördes om med lyckat resultat. Schemaläggningens framtida punktlighet är inte bevisad av en manuell omkörning.
+- Missing People: utgången kontroll dolde personuppgifter korrekt och visade officiell reservlänk. Workflow kördes om med lyckat resultat. Livekontrollen efter omkörningen visade kontrolltid 21:05 och inga publicerade efterlysningar i området. Schemaläggningens framtida punktlighet är inte bevisad av en manuell omkörning.
 
 ## Tester och workflows
 - **64 relevanta Python-tester godkända**, inklusive Forshaga-bostäder, FRI, bio, transport, kommunintegration, evenemang, lunch och nyheter.
 - Åtta lokala JavaScript-kontroller godkända: portalstruktur, fritidsdata/UI, sportportal, annonsinventering, inloggningsåterkoppling, kommersiell readiness och sportavgränsning.
 - `audit_municipality_readiness.py`: **godkänd för aktuell data**.
-- `validate_launch.py`: **underkänd**, Hammarö saknar lunchställen.
+- `validate_launch.py`: **underkänd**, Hammarö saknar lunchställen. Separat verifiering: `verify_service` stoppar på kommuner utan företag i basfilen (Karlstad, Hammarö, Kristinehamn, Storfors, Munkfors, Torsby, Färgelanda), trots att livekatalogen även använder supplement. `verify_review_fixes` stoppar på primary/secondary-modulernas ordning. Övriga separat körda kontrollfunktioner passerar. Ingen kontroll har kringgåtts.
 - [Bostäder](https://github.com/SirElin8290/DinPuls/actions/runs/33758916960): **godkänd efter omkörning**, inklusive explicit Forshaga-verifiering. Första försöket stoppades av Karlstads externa källa.
 - [Föreningar](https://github.com/SirElin8290/DinPuls/actions/runs/33758917031): **godkänd**.
 - [Bio](https://github.com/SirElin8290/DinPuls/actions/runs/33778721575): **godkänd**.
 - [Missing People](https://github.com/SirElin8290/DinPuls/actions/runs/33782741530): **godkänd efter omkörning**.
 - [Pages](https://github.com/SirElin8290/DinPuls/actions/runs/33793555107): **godkänd** för kvällens kontrollerade publicering; lokala rättningar verifierade på sajten.
-- Senaste tidigare CI-fel avsåg tomma Färgelanda-nyheter; aktuell readiness passerar. Rapportcommitens nya CI/Pages-resultat redovisas i slutmeddelandet.
+- [Kontrollera DinPuls](https://github.com/SirElin8290/DinPuls/actions/runs/33794609219): **godkänd**, inklusive npm test, readiness och sportavgränsning för rapportcommit `3dc39de547b11097b6f61bc1654104dcc722e733`.
+- [Pages för samma commit](https://github.com/SirElin8290/DinPuls/actions/runs/33794607178): **godkänd**.
 
 Forshagas befintliga kommunstatus har inte ändrats under denna slutverifiering.
