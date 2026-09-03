@@ -21,6 +21,7 @@ Totalt: 21 kommuner.
 - Grums
 - Eda
 - Dals-Ed
+- Forshaga
 
 ## Pilotkommuner
 
@@ -28,7 +29,6 @@ Totalt: 21 kommuner.
 - Sunne
 - Karlstad
 - Hammarö
-- Forshaga
 - Kristinehamn
 - Storfors
 - Filipstad
@@ -36,6 +36,10 @@ Totalt: 21 kommuner.
 - Munkfors
 - Torsby
 - Färgelanda
+
+## Forshaga produktionsklassad 2026-09-03
+
+Forshaga har lämnat pilot efter full lokal granskning, utbyggd lokal service och tre nya automatiserade flöden för kommunen. Forshagabostäders publika tabell importeras maskinellt med verifierade adress-, områdes-, rums-, yte-, hyres-, vånings- och tillgänglighetsfält; den godkända körningen publicerade 10 lediga bostäder. Forshaga kommuns publika FRI-register läses automatiskt med verifierad supplementfallback och gav vid produktionskontrollen 40 importerade föreningar före komplettering och normalisering; slutdatan innehöll 22 idrottsföreningar och 34 fritids-/föreningsposter. Forshaga Folkets Hus bioprogram synkas automatiskt från kommunens verifierade Visit Värmland-evenemangsflöde och publicerade sex framtida filmer/visningar vid kontrollen. Readiness-auditen rapporterade dessutom 12 lokala jobb, live-väder, 10 kollektivtrafikavgångar, 10 vägtrafikhändelser, 80 evenemang, åtta lunchreferenser, 23 lokala nyheter, 11 vårdposter och nio service-/hantverksposter. Förenings-, bostads- och bioflödenas egna tester är gröna, den samlade lanseringsvalideringen är grön och GitHub Pages byggdes och publicerades utan fel.
 
 ## Dals-Ed produktionsklassad 2026-09-03
 
@@ -69,7 +73,7 @@ De elva är:
 10. Dals-Ed
 11. Färgelanda
 
-Dals-Ed är sedan 2026-09-03 produktionsklassad och ingår därför inte längre i pilotgruppen.
+Dals-Ed och Forshaga är sedan 2026-09-03 produktionsklassade och ingår därför inte längre i pilotgruppen.
 
 ## Automatisk grunddata
 
