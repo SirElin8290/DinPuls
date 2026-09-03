@@ -6,6 +6,7 @@ on:
     paths:
       - "data/lunch-sources.json"
       - "data/lunch-launch-supplement.json"
+      - "data/lunch-hammaro-supplement.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
       - "scripts/test_update_lunch.py"
@@ -62,8 +63,13 @@ jobs:
           assert got == expected, f'Lunchkommuner avviker: expected={sorted(expected)}, got={sorted(got)}'
           for name in launch.get('municipalities', {}):
               entry = lunch['municipalities'][name]
+              if name == 'Hammarö':
+                  continue
               assert entry.get('restaurants') or entry.get('referenceSources'), f'{name}: saknar både lunchrestaurang och lokal matguide'
-          print(f'Verifierade lunchdata för {len(expected)} kommuner')
+          hammaro = lunch['municipalities']['Hammarö']
+          assert len(hammaro.get('restaurants') or []) >= 5, f"Hammarö: för få verifierade lunchkällor: {len(hammaro.get('restaurants') or [])}"
+          assert hammaro.get('referenceSources'), 'Hammarö: lokal matguide saknas'
+          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])} restaurangkällor")
           PY
 
       - name: Publicera lunchdata
