@@ -45,6 +45,13 @@ class MunicipalityIntegrationTests(unittest.TestCase):
                 if item.get("launchMode") != "pilot":
                     self.assertTrue(item.get("transportStops"), "produktionskommun saknar verifierad hållplats")
 
+    def test_forshaga_uses_centrum_not_namesake_stop(self):
+        municipality = next(item for item in self.config if item["name"] == "Forshaga")
+        self.assertEqual(municipality["transportSearchName"], "Forshaga centrum")
+        self.assertEqual(municipality["transportStops"], [
+            {"id": "740000375", "name": "Forshaga centrum"},
+        ])
+
     def test_exact_21_municipality_scope(self):
         expected = {
             "Åmål", "Bengtsfors", "Mellerud", "Dals-Ed", "Färgelanda",

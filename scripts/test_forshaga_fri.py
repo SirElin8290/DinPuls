@@ -1,9 +1,24 @@
 import unittest
+import json
+from pathlib import Path
 
 import apply_forshaga_fri
 
 
 class ForshagaFriTests(unittest.TestCase):
+    def test_launch_supplement_does_not_reintroduce_short_name_duplicates(self):
+        data = Path(__file__).resolve().parents[1] / "data"
+        launch = json.loads((data / "association-launch-supplement.json").read_text(encoding="utf-8"))
+        existing = [
+            {"name": "Deje Idrottsklubb", "sports": ["Fotboll"], "url": "https://www.dejeik.se/"},
+            {"name": "Forshaga Idrottsförening", "sports": ["Fotboll", "Ishockey"], "url": "https://www.forshagaif.se"},
+        ]
+        merged = apply_forshaga_fri.merge_named(existing, launch["municipalities"]["Forshaga"]["clubs"])
+        self.assertEqual(len(merged), 4)
+        self.assertNotIn("Deje IK", {club["name"] for club in merged})
+        self.assertNotIn("Forshaga IF", {club["name"] for club in merged})
+        self.assertIn("Ishockey", next(club for club in merged if club["name"] == "Forshaga Idrottsförening")["sports"])
+
     def test_parse_registry_rows_and_classify_sport(self):
         markup = """
         <table><tbody>
