@@ -6,8 +6,11 @@ on:
     branches: [main]
     paths:
       - "scripts/update_cinemas.py"
+      - "scripts/sync_cinema_forshaga_from_events.py"
       - "scripts/test_update_cinemas.py"
+      - "scripts/test_sync_cinema_forshaga.py"
       - "scripts/test_dals_ed_imports.py"
+      - "data/events.json"
       - ".github/workflows/update-cinemas.yml"
   schedule:
     - cron: "17 */6 * * *"
@@ -28,8 +31,30 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py scripts/test_dals_ed_imports.py
-      - run: python scripts/update_cinemas.py
+      - name: Testa bioprogram
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py scripts/test_sync_cinema_forshaga.py scripts/test_dals_ed_imports.py
+      - name: Uppdatera bioprogram
+        run: |
+          python scripts/update_cinemas.py
+          python scripts/sync_cinema_forshaga_from_events.py
+      - name: Verifiera Forshaga bio
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/cinemas.json').read_text(encoding='utf-8'))
+          venues = data.get('municipalities', {}).get('Forshaga') or []
+          assert venues, 'Forshaga saknar biografpost'
+          cinema = venues[0]
+          films = cinema.get('films') or []
+          assert films, 'Forshaga saknar framtida verifierade biofilmer'
+          assert cinema.get('programStatus') == 'ok', 'Forshaga bioprogram är inte ok'
+          assert cinema.get('programSource') == 'https://www.visitvarmland.com/forshaga/evenemang'
+          for film in films:
+              assert film.get('title') and film.get('showtimes'), f'Ogiltig Forshaga-film: {film}'
+              assert all('T' in value and ('+01:00' in value or '+02:00' in value) for value in film['showtimes']), f'Ogiltig visningstid: {film}'
+          print(f"Forshaga bio: {len(films)} filmer / {sum(len(f.get('showtimes', [])) for f in films)} framtida visningar")
+          PY
       - name: Publicera ändring
         run: |
           git config user.name "github-actions[bot]"
