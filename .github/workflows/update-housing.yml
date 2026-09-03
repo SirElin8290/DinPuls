@@ -27,6 +27,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  edshus-fallback:
+    needs: update
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: PYTHONPATH=scripts python -m unittest scripts/test_dals_ed_imports.py
+      - name: Publicera endast verifierade Edshus-objekt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python scripts/update_housing_launch.py --municipality Dals-Ed
+          git add data/housing.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera Edshus oberoende av övriga bostadskällor"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+          done
+          exit 1
+
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 14

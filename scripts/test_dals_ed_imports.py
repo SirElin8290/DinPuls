@@ -2,11 +2,14 @@ import copy
 import io
 import json
 import unittest
+import tempfile
+from pathlib import Path
 from datetime import datetime
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 import update_housing as housing
+import update_housing_launch as launch
 import update_cinemas as cinema
 import update_dals_ed_events as events
 
@@ -79,6 +82,20 @@ class DalsEdTests(unittest.TestCase):
 
     def test_venue(self):
         self.assertEqual(events.venue_from_page('<a href="https://www.google.se/maps/search/?api=1&amp;query=1,2">Svea Bio, Ed</a>'), 'Svea Bio, Ed')
+
+    def test_scoped_housing_preserves_other_municipalities_and_accepts_empty(self):
+        with tempfile.TemporaryDirectory() as directory:
+            sources, output = Path(directory) / 'sources.json', Path(directory) / 'housing.json'
+            sources.write_text(json.dumps({'municipalities': {'Dals-Ed': {'provider': 'Edshus AB', 'mode': 'automatic-hogia', 'url': 'https://bostad.edshus.se/properties'}, 'Other': {'mode': 'invalid'}}}))
+            other = {'listings': [{'id': 'untouched'}], 'stale': True}
+            output.write_text(json.dumps({'municipalities': {'Other': other, 'Dals-Ed': {'listings': [{'id': 'old'}]}}}))
+            with patch.object(launch, 'SOURCES', sources), patch.object(launch, 'OUTPUT', output), patch.object(housing, 'parse_hogia', return_value=[]):
+                self.assertEqual(launch.main('Dals-Ed'), 0)
+            data = json.loads(output.read_text())['municipalities']
+            self.assertEqual(data['Other'], other)
+            self.assertEqual(data['Dals-Ed']['listings'], [])
+            self.assertEqual(data['Dals-Ed']['availabilityMode'], 'automatic')
+            self.assertEqual(data['Dals-Ed']['sourceHealth'][0]['status'], 'ok')
 
 
 if __name__ == '__main__':

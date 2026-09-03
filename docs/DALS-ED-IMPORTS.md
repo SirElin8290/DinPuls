@@ -53,5 +53,12 @@ The six existing references are retained; no menus are guessed:
 
 `PYTHONPATH=scripts python -m unittest scripts/test_dals_ed_imports.py scripts/test_update_cinemas.py scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_update_events.py`
 
-23 tests passed locally. All three existing relevant workflows run the new tests.
+24 tests passed locally. All three existing relevant workflows run the new tests.
 No SSL bypass, credentials, UI rebuild or other municipality content changes.
+
+Deployment exposed two existing publication failures: concurrent pushes rejected
+the cinema update (now bounded rebase/retry), and a Karlstad network error stopped
+the aggregate housing job despite successful Edshus retrieval. A failure-only job
+in the same housing workflow now runs `update_housing_launch.py --municipality Dals-Ed`.
+It preserves every other municipality and requires a successful new Edshus fetch
+before committing. The aggregate job remains failed, so Karlstad's error is not hidden.

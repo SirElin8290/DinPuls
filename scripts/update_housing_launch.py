@@ -251,8 +251,10 @@ def parse_valbohem(source: dict) -> list[dict]:
     return listings
 
 
-def main() -> int:
+def main(only_municipality=None) -> int:
     source_config = json.loads(SOURCES.read_text(encoding="utf-8"))
+    if only_municipality:
+        source_config["municipalities"] = {only_municipality: source_config["municipalities"][only_municipality]}
     housing = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {"municipalities": {}}
     municipalities = housing.setdefault("municipalities", {})
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -319,4 +321,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--municipality", help="Uppdatera endast en kommun; bevara övriga exakt")
+    sys.exit(main(parser.parse_args().municipality))
