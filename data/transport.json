@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-03T01:41:33+00:00",
+  "generatedAt": "2026-09-03T01:56:29+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -134,11 +134,23 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-09-02T21:26+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T23:26+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-03T04:53:00+02:00",
+              "realtime": "2026-09-03T04:53:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "train",
               "line": "13273",
@@ -345,10 +357,9 @@
               "scheduled": "2026-09-03T04:53:00+02:00",
               "realtime": "2026-09-03T04:53:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -826,7 +837,7 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-09-03T00:40+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-03T02:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -839,10 +850,9 @@
               "scheduled": "2026-09-03T04:50:00+02:00",
               "realtime": "2026-09-03T04:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "bus",
@@ -1380,7 +1390,7 @@
           "name": "Sunne station",
           "alerts": [],
           "lookupTime": "2026-09-02T20:05+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T22:05+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1393,10 +1403,9 @@
               "scheduled": "2026-09-03T04:53:00+02:00",
               "realtime": "2026-09-03T04:53:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
             },
             {
               "mode": "train",
@@ -1406,10 +1415,9 @@
               "scheduled": "2026-09-03T04:53:00+02:00",
               "realtime": "2026-09-03T04:53:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "bus",
@@ -1644,10 +1652,9 @@
               "scheduled": "2026-09-03T04:55:00+02:00",
               "realtime": "2026-09-03T04:55:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -2562,7 +2569,7 @@
           "name": "Filipstad busstation",
           "alerts": [],
           "lookupTime": "2026-09-02T20:05+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T22:05+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2575,10 +2582,9 @@
               "scheduled": "2026-09-03T04:50:00+02:00",
               "realtime": "2026-09-03T04:50:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -2629,9 +2635,11 @@
         {
           "id": "740000376",
           "name": "Hagfors busstation",
-          "alerts": [],
+          "alerts": [
+            "Linje 600: Hållplats Tjärnheden bytespunkt stängs från 10 augusti till och med 2 oktober."
+          ],
           "lookupTime": "2026-09-02T20:05+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-02T22:05+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2644,10 +2652,9 @@
               "scheduled": "2026-09-03T04:51:00+02:00",
               "realtime": "2026-09-03T04:51:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2815,18 +2822,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "202",
-              "direction": "Lysvik Sunne",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-03T03:50:00+02:00",
-              "realtime": "2026-09-03T03:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "D"
-            },
             {
               "mode": "bus",
               "line": "202",
