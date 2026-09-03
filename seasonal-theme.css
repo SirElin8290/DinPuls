@@ -1,0 +1,150 @@
+/* DinPuls – gemensamt säsongstema, höst 2026.
+   Laddas sist så att startsida och undersidor får samma visuella språk
+   utan att ändra sidornas struktur eller funktion. */
+:root{
+  --autumn-deep:#5b2d0b;
+  --autumn-brown:#7b3f12;
+  --autumn-rust:#b95713;
+  --autumn-orange:#d87918;
+  --autumn-gold:#e4a32a;
+  --autumn-cream:#fff8ec;
+  --autumn-border:#ead8bd;
+  --autumn-text:#3b281b;
+  --header-gradient:linear-gradient(120deg,#4d260c 0%,#7b3f12 52%,#b95713 100%);
+}
+
+body{
+  background:
+    radial-gradient(circle at 8% 8%,rgba(228,163,42,.10),transparent 24rem),
+    radial-gradient(circle at 94% 18%,rgba(185,87,19,.08),transparent 28rem),
+    var(--bg);
+}
+
+.site-header,
+.portal-header{
+  background:
+    radial-gradient(circle at 16% -20%,rgba(255,196,88,.20),transparent 34%),
+    linear-gradient(120deg,#4d260c 0%,#7b3f12 52%,#b95713 100%);
+}
+
+/* Behåll DinPuls blå som funktionsfärg men låt hösten bära ytorna. */
+.main-nav,
+.quick-strip,
+.portal-main,
+main{position:relative}
+
+/* Diskreta löv – CSS-former, inga nya bilder och ingen påverkan på klickytor. */
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  z-index:0;
+  width:30px;
+  height:46px;
+  pointer-events:none;
+  opacity:.28;
+  background:linear-gradient(145deg,var(--autumn-gold),var(--autumn-rust));
+  border-radius:90% 12% 90% 12%;
+  box-shadow:
+    34px 28px 0 -5px rgba(185,87,19,.70),
+    -22px 58px 0 -8px rgba(228,163,42,.72);
+}
+body::before{top:150px;left:12px;transform:rotate(-24deg)}
+body::after{right:18px;bottom:42px;transform:rotate(34deg) scale(.9)}
+
+/* Startsidan: förstärk befintlig höstkänsla utan att bygga om layouten. */
+.site-header + *{position:relative;z-index:1}
+.card,
+.transport-section,
+.health-home,
+.service-home,
+.grocery-home,
+.missing-people-home,
+.news-source-card{
+  border-color:var(--autumn-border);
+}
+.section-kicker,.eyebrow.dark{color:var(--autumn-rust)}
+.service-directory-badge{color:#7b3f12;background:#fff4df;border-color:#e8c78e}
+
+/* Portal-/undersidor: samma hösttema som startsidan. */
+.portal-main{z-index:1}
+.portal-hero{
+  position:relative;
+  overflow:hidden;
+  color:#fff;
+  background:
+    radial-gradient(circle at 88% 10%,rgba(255,207,116,.20),transparent 30%),
+    linear-gradient(120deg,#6a330d,#a65312 58%,#c87317);
+  border:1px solid rgba(121,62,17,.22);
+}
+.portal-hero.jobs,
+.portal-hero.fuel,
+.portal-hero.grocery,
+.portal-hero.traffic-page{
+  background:
+    radial-gradient(circle at 88% 10%,rgba(255,207,116,.20),transparent 30%),
+    linear-gradient(120deg,#6a330d,#a65312 58%,#c87317);
+}
+.portal-hero::after{
+  content:"";
+  position:absolute;
+  right:28px;
+  top:22px;
+  width:26px;
+  height:39px;
+  opacity:.72;
+  pointer-events:none;
+  background:linear-gradient(145deg,#efad2e,#b64e12);
+  border-radius:90% 12% 90% 12%;
+  transform:rotate(32deg);
+  box-shadow:
+    34px 24px 0 -6px rgba(221,119,24,.72),
+    -28px 45px 0 -8px rgba(238,166,43,.66);
+}
+.portal-hero .section-kicker{color:#ffe0a5}
+.portal-content,
+.portal-ad-column,
+.portal-card,
+.news-page-toolbar,
+.news-page-sources,
+.news-page-source-groups article{
+  border-color:var(--autumn-border);
+}
+.portal-source-button{background:var(--autumn-rust)}
+.portal-footer{border-color:var(--autumn-border)}
+
+/* Små höstmarkörer på större rubrikytor, utan att störa innehållet. */
+.portal-result-heading h2::before,
+.section-heading h2::before{
+  content:"";
+  display:inline-block;
+  width:9px;
+  height:13px;
+  margin-right:8px;
+  vertical-align:-1px;
+  background:linear-gradient(145deg,var(--autumn-gold),var(--autumn-rust));
+  border-radius:90% 12% 90% 12%;
+  transform:rotate(-24deg);
+}
+
+/* Mörkt läge behåller läsbarheten; hösten märks främst i header/hero. */
+[data-theme="dark"] body,
+html[data-theme="dark"] body{background:#071426}
+[data-theme="dark"] .card,
+[data-theme="dark"] .transport-section,
+[data-theme="dark"] .health-home,
+[data-theme="dark"] .service-home,
+[data-theme="dark"] .grocery-home,
+[data-theme="dark"] .missing-people-home,
+[data-theme="dark"] .portal-content,
+[data-theme="dark"] .portal-ad-column,
+[data-theme="dark"] .portal-card{border-color:#5b4635}
+
+@media(max-width:760px){
+  body::before{top:180px;left:-9px;opacity:.18;transform:rotate(-24deg) scale(.75)}
+  body::after{right:-8px;bottom:24px;opacity:.16;transform:rotate(34deg) scale(.68)}
+  .portal-hero::after{right:4px;top:12px;opacity:.42;transform:rotate(32deg) scale(.72)}
+  .portal-result-heading h2::before,.section-heading h2::before{width:7px;height:11px;margin-right:6px}
+}
+
+@media(prefers-reduced-motion:reduce){body{transition:none}}
