@@ -1,56 +1,72 @@
 {
   "municipality": "Hagfors",
   "updatedAt": "2026-09-03",
-  "purpose": "Endast kvarvarande Hagfors-arbete som kräver kod/pipeline. Rena data- och källkompletteringar har hanterats utan Codex där det varit säkert.",
+  "purpose": "Endast kvarvarande Hagfors-arbete som inte har kunnat slutföras säkert med direkta GitHub-ändringar. Codex ska inte användas för redan lösta data-, frontend- eller enklare skriptändringar.",
   "exclude": [
     "Hero-bild hanteras manuellt av projektägaren",
     "Matkassen ingår inte i Hagfors readiness enligt projektägarens beslut",
     "Rena data- och innehållskompletteringar ska inte lösas med Codex"
   ],
   "completedWithoutCodex": [
-    "Dagens viktigaste har fått dedikerad Hagfors-källa för aktuella VA- och sophämtningsstörningar samt lokal trafik/gator.",
-    "Verifierat Hagfors-underlag för vård, kommunal service, föreningar, evenemang, bio och lunch finns i data/hagfors-local-enrichment.json."
+    "Dagens viktigaste har dedikerade Hagfors-källor för aktuella VA- och sophämtningsstörningar samt lokal trafik/gator.",
+    "Vård och hälsa har kompletterats direkt i data/health-local-supplement.json med primärvård, fysioterapi, BVC, barnmorska, ungdomsmottagning, Första linjen, tandvård, apotek och privata hälsoposter. Den aktiva vårdsidan läser denna fil.",
+    "Service och hantverk har kompletterats direkt i data/service-local-supplement.json med fler bilverkstäder samt bygg- och snickeriföretag. Den aktiva servicesidan läser denna fil.",
+    "Myndigheter och samhällsservice har fått Hagfors-specifika direktlänkar via data/authorities-hagfors-supplement.json och myndigheter-page.js.",
+    "Fritid har breddats med fritidsgårdar, idrottsanläggningar, badplatser och friluftsaktiviteter. apply_leisure_enrichment.py kan nu även lägga till verifierade nya poster, inte bara patcha befintliga.",
+    "Missing People-fördelningen för Hagfors har kompletterats med de DinPuls-stödda grannkommunerna Sunne och Karlstad och fått ett explicit test.",
+    "Bio Hagfors har fått verifierade aktuella visningar och programkälla i cinemas.json."
   ],
   "tasks": [
     {
       "priority": 1,
-      "area": "Vård och hälsa",
+      "area": "Föreningsregister – automatisk grundimport",
       "status": "yellow",
-      "problem": "Verifierad Hagfors-data finns, men den aktiva vårdpipelinen behöver säkerställas så att hela underlaget når frontend utan dubbletter.",
-      "required": "Konsolidera befintlig Hagfors-vårddata och data/hagfors-local-enrichment.json till den aktiva vårddatapipelinen eller koppla in supplement på kontrollerat sätt.",
-      "acceptance": ["Verifierade Hagfors-vårdposter visas på aktiv sida", "Inga dubbletter", "Lanseringstest täcker Hagfors vårdinnehåll"]
+      "problem": "Hagfors associationImport är fortfarande parser=manual. Befintligt föreningsinnehåll och fritidsberikning fungerar, men kommunens officiella föreningsregister synkas inte automatiskt som helhet.",
+      "required": "Bygg och testa en robust parser för Hagfors kommuns aktuella föreningsregister och lägg in den i den befintliga importkedjan utan att förlora manuellt verifierade länkar och berikningar.",
+      "acceptance": [
+        "Officiella Hagfors-föreningar kan reproducerbart importeras",
+        "Manuella verifierade direktlänkar och fritidsberikningar överlever ny import",
+        "Idrott och övrigt föreningsliv normaliseras korrekt",
+        "Källfel lämnar tidigare verifierad data orörd"
+      ]
     },
     {
       "priority": 2,
-      "area": "Föreningsliv och fritid",
+      "area": "Bio – automatisk programinsamling",
       "status": "yellow",
-      "problem": "Hagfors associationImport använder parser=manual trots officiellt föreningsregister.",
-      "required": "Bygg reproducerbar Hagfors-import från kommunens föreningsregister och normalisera föreningar.",
-      "acceptance": ["Automatisk eller reproducerbar uppdatering", "Rätt modul och kommun", "Käll-URL och fallback bevaras"]
+      "problem": "Bio Hagfors har aktuell verifierad programdata, men den är manuellt inlagd och programStatus är partial. En automatisk parser mot Bio i Värmland är ännu inte verifierad i CI/runtime.",
+      "required": "Implementera och testa en robust programinsamling från https://www.varmland.bio/bio-hagfors/ som bara publicerar framtida verifierade visningar och behåller senaste säkra program vid källfel.",
+      "acceptance": [
+        "Aktuella framtida Hagfors-visningar uppdateras automatiskt",
+        "Programkälla och kontrolltid redovisas",
+        "Gamla visningar rensas utan att biografkortet försvinner",
+        "Källfel ger säker fallback"
+      ]
     },
     {
       "priority": 3,
-      "area": "Bio",
+      "area": "Dagens lunch – dagsmenyer",
       "status": "yellow",
-      "problem": "Bio Hagfors har verifierad aktuell programkälla på varmland.bio men DinPuls saknar automatisk programinsamling.",
-      "required": "Implementera programinsamling från https://www.varmland.bio/bio-hagfors/ med filmer, datum, tider, källa och kontrolltid.",
-      "acceptance": ["Aktuella visningar visas", "Programkälla och kontrolltid redovisas", "Direktlänk kvarstår vid källfel"]
+      "problem": "Sju verifierade Hagfors-lunchställen finns, men källorna är huvudsakligen source-only och ger inte säkert maskinverifierade dagsrätter.",
+      "required": "Implementera parser endast för källor där aktuell veckodag och meny kan verifieras stabilt. Behåll source-only för övriga.",
+      "acceptance": [
+        "Inga gamla rätter visas som dagens",
+        "Aktuell dag och vecka verifieras innan en rätt publiceras",
+        "Säsongsställen hanteras korrekt",
+        "Fallback till restaurangkällan fungerar"
+      ]
     },
     {
       "priority": 4,
-      "area": "Dagens lunch",
+      "area": "Direkta kommunnyheter",
       "status": "yellow",
-      "problem": "Verifierade Hagfors-lunchkällor finns men automatiskt verifierade dagsrätter saknas.",
-      "required": "Implementera parser endast för stabilt maskinläsbara källor. Pizzeria Hagfors och Restaurang Kronan har verifierats som aktiva lunchställen; behåll source-only där aktuell dag inte kan verifieras säkert.",
-      "acceptance": ["Inga gamla rätter visas som dagens", "Aktuell dag/vecka verifieras", "Fallback till restaurangkällan fungerar"]
-    },
-    {
-      "priority": 5,
-      "area": "Lokala nyheter",
-      "status": "yellow",
-      "problem": "Direktkällan Hagfors kommun har tidigare misslyckats medan Google Nyheter Hagfors fungerat.",
-      "required": "Verifiera kommunala nyhetsparsern och härda endast om felet är reproducerbart.",
-      "acceptance": ["Kommunala nyheter hämtas när källan är nåbar", "Fallback bevaras", "Källstatus visar korrekt felorsak"]
+      "problem": "Google Nyheter Hagfors fungerar och ger lokalt innehåll, men senaste körningen redovisar nätverksfel mot Hagfors kommuns direkta nyhetskälla tillsammans med flera andra kommunala webbplatser.",
+      "required": "Avgör i runtime om felet är transient GitHub-nätverk eller ett reproducerbart Hagfors-parserfel. Ändra parsern endast om felet kan reproduceras.",
+      "acceptance": [
+        "Google News-fallback fortsätter fungera",
+        "Hagfors kommun hämtas när webbplatsen är nåbar",
+        "Ingen fungerande fallback försämras för att maskera ett transient nätverksfel"
+      ]
     }
   ]
 }
