@@ -34,8 +34,29 @@ def count_list(value) -> int:
     return len(value) if isinstance(value, list) else 0
 
 
-def count_named(items, name: str) -> int:
-    return sum(1 for item in items if isinstance(item, dict) and item.get("municipality") == name)
+def normalized_name(value: object) -> str:
+    return " ".join(str(value or "").casefold().split())
+
+
+def merge_effective_named(payloads: tuple[dict, ...], key: str) -> list[dict]:
+    """Spegel frontendens additiva datakedja och räkna varje verksamhet en gång."""
+    result: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for payload in payloads:
+        items = payload.get(key) if isinstance(payload.get(key), list) else []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            identity = (str(item.get("municipality") or ""), normalized_name(item.get("name")))
+            if not identity[0] or not identity[1] or identity in seen:
+                continue
+            seen.add(identity)
+            result.append(item)
+    return result
+
+
+def count_named(items: list[dict], name: str) -> int:
+    return sum(1 for item in items if item.get("municipality") == name)
 
 
 def active_departure_count(stops: list[dict]) -> int:
@@ -91,12 +112,7 @@ def readiness_gaps(
     health_count: int,
     service_count: int,
 ) -> list[str]:
-    """Returnera funktionella datagap utan att fabricera krav på volym.
-
-    En liten kommun får naturligt ha färre poster än en stor kommun. Här testas därför
-    framför allt om centrala moduler faktiskt har kommit igång, inte om alla kommuner
-    når samma absoluta antal poster.
-    """
+    """Returnera funktionella datagap utan att fabricera krav på volym."""
     gaps: list[str] = []
     providers = municipality.get("housingProviders") or []
 
@@ -144,17 +160,19 @@ def main() -> None:
     health = load("health.json")
     health_private = load("health-private.json")
     health_supplement = load("health-private-supplement.json")
+    health_local = load("health-local-supplement.json")
     service = load("service.json")
     service_supplement = load("service-private-supplement.json")
     service_launch_supplement = load("service-launch-supplement.json")
+    service_local_supplement = load("service-local-supplement.json")
 
     articles = news.get("articles") if isinstance(news.get("articles"), list) else []
-    health_items = []
-    for payload in (health, health_private, health_supplement):
-        health_items.extend(payload.get("providers") if isinstance(payload.get("providers"), list) else [])
-    service_items = []
-    for payload in (service, service_supplement, service_launch_supplement):
-        service_items.extend(payload.get("businesses") if isinstance(payload.get("businesses"), list) else [])
+    health_items = merge_effective_named(
+        (health, health_supplement, health_local, health_private), "providers"
+    )
+    service_items = merge_effective_named(
+        (service, service_supplement, service_launch_supplement, service_local_supplement), "businesses"
+    )
 
     configured_names = [item.get("name") for item in config.get("municipalities", []) if item.get("name")]
     if len(configured_names) != 21 or set(configured_names) != EXPECTED_MUNICIPALITIES:
@@ -206,8 +224,6 @@ def main() -> None:
             isinstance(provider, dict) and (provider.get("parser") or provider.get("dataUrl"))
             for provider in providers
         )
-        # Specialimporter kan vara maskinläsbara via separat updater även om parsern
-        # inte ligger i municipalities.json. Faktiska objekt är då beviset.
         if count_list(homes.get("listings")):
             housing_machine_source = True
         housing_source_ok = healthy_sources(homes) and (
