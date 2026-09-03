@@ -12,9 +12,11 @@ on:
       - "scripts/update_housing_sunne.py"
       - "scripts/update_housing_eda.py"
       - "scripts/update_housing_launch.py"
+      - "scripts/update_housing_forshaga.py"
       - "scripts/test_update_housing.py"
       - "scripts/test_dals_ed_imports.py"
       - "scripts/test_update_housing_launch.py"
+      - "scripts/test_update_housing_forshaga.py"
       - "data/housing-launch-sources.json"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
@@ -85,6 +87,7 @@ jobs:
           python scripts/update_housing_sunne.py
           python scripts/update_housing_eda.py
           python scripts/update_housing_launch.py
+          python scripts/update_housing_forshaga.py
 
       - name: Verifiera kommunregistret och bostadskällornas hälsa
         run: |
@@ -121,6 +124,25 @@ jobs:
           print(f'Bostadsdata innehåller alla {len(expected)} kommuner; {len(launch_names)} lanseringskällor är friska')
           PY
 
+      - name: Verifiera Forshaga-data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          forshaga = data.get('municipalities', {}).get('Forshaga', {})
+          assert forshaga.get('availabilityMode') == 'automatic', 'Forshaga är inte automatisk'
+          assert forshaga.get('total', 0) > 0, 'Forshaga saknar verifierade bostadsobjekt'
+          assert forshaga.get('total') == len(forshaga.get('listings', [])), 'Forshagas total matchar inte listan'
+          for item in forshaga.get('listings', []):
+              assert item.get('address') and any(ch.isdigit() for ch in item['address']), f"Forshaga har ogiltig adress: {item.get('address')}"
+              assert isinstance(item.get('rooms'), (int, float)) and 0 < item['rooms'] < 20, f"Forshaga har orimligt rumsantal: {item}"
+              assert isinstance(item.get('size'), (int, float)) and item['size'] > 10, f"Forshaga har orimlig yta: {item}"
+              assert isinstance(item.get('rent'), (int, float)) and item['rent'] > 1000, f"Forshaga har orimlig hyra: {item}"
+              assert item.get('url', '').startswith('https://minasidor.forshagabostader.se/'), f"Forshaga har fel objektlänk: {item}"
+          print(f"Verifierat: Forshaga har {forshaga['total']} korrekt parsade bostadsobjekt")
+          PY
+
       - name: Verifiera Sunne-data
         run: |
           python - <<'PY'
@@ -154,7 +176,7 @@ jobs:
           PY
 
       - name: Testa bostadslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_dals_ed_imports.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_update_housing_forshaga.py scripts/test_dals_ed_imports.py
 
       - name: Spara ny bostadsdata
         shell: bash
