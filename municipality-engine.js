@@ -76,6 +76,16 @@
     select.value = normalize(selected) || DEFAULT_NAME;
   }
 
+  document.addEventListener("click", event => {
+    const link = event.target.closest?.("a[href]");
+    if (!link) return;
+    const current = new URL(location.href);
+    const target = new URL(link.href, current);
+    if (target.origin !== current.origin || !/\.html$/.test(target.pathname) || target.searchParams.has("kommun")) return;
+    target.searchParams.set("kommun", getInitial());
+    link.href = target.href;
+  }, true);
+
   window.DinPulsMunicipalityState = Object.freeze({
     STORAGE_KEY,
     DEFAULT_NAME,

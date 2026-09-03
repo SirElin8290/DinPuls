@@ -5,6 +5,7 @@ const vm = require("node:vm");
 function loadEngine(search = "", stored = null) {
   const storage = new Map(stored ? [["dinpuls-municipality", stored]] : []);
   const events = [];
+  const listeners = {};
   const location = {
     href: `https://example.test/DinPuls/lunch.html${search}`,
     pathname: "/DinPuls/lunch.html",
@@ -15,7 +16,7 @@ function loadEngine(search = "", stored = null) {
     URL,
     URLSearchParams,
     CustomEvent: class CustomEvent { constructor(type, init) { this.type = type; this.detail = init.detail; } },
-    document: { dispatchEvent: event => events.push(event) },
+    document: { dispatchEvent: event => events.push(event), addEventListener: (type, callback) => { listeners[type] = callback; } },
     history: {
       replaceState: (_state, _title, next) => { location.replaced = next; },
       pushState: (_state, _title, next) => { location.pushed = next; }
@@ -28,7 +29,7 @@ function loadEngine(search = "", stored = null) {
   };
   context.window = context;
   vm.runInNewContext(fs.readFileSync("municipality-engine.js", "utf8"), context);
-  return { engine: context.DinPulsMunicipalityState, storage, events, location };
+  return { engine: context.DinPulsMunicipalityState, storage, events, location, listeners };
 }
 
 const expected = JSON.parse(fs.readFileSync("data/municipalities.json", "utf8")).municipalities.map(item => item.name);
@@ -58,3 +59,24 @@ const renderedNames = [...select.innerHTML.matchAll(/value="([^"]+)"/g)].map(mat
 assert.deepEqual(renderedNames, [...expected].sort((left, right) => left.localeCompare(right, "sv-SE")));
 
 console.log(`✓ Kommunmotorn klarar alla ${expected.length} kommuner, lagring, URL och fallback`);
+
+for (const municipality of ["Hammarö", "Forshaga"]) {
+  const test = loadEngine(`?kommun=${encodeURIComponent(municipality)}`, "Åmål");
+  for (const href of ["evenemang.html", "index.html", "vard.html?kategori=all#kontakt"]) {
+    const link = { href };
+    test.listeners.click({ target: { closest: () => link } });
+    const result = new URL(link.href);
+    assert.equal(result.searchParams.get("kommun"), municipality);
+    if (href.includes("#kontakt")) {
+      assert.equal(result.hash, "#kontakt");
+      assert.equal(result.searchParams.get("kategori"), "all");
+    }
+  }
+  for (const href of ["https://example.org/program.html", "tel:1177", "evenemang.html?kommun=Kil"]) {
+    const link = { href };
+    test.listeners.click({ target: { closest: () => link } });
+    assert.equal(link.href, href);
+  }
+  test.listeners.click({ target: { closest: () => null } });
+}
+console.log("✓ Interna länkar bevarar kommunval, filter och ankare utan att ändra externa eller explicita kommunlänkar");
