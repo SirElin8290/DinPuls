@@ -1,0 +1,45 @@
+/* Fritid & föreningsliv – stabil innehålls- och annonslayout.
+   Annonsplatser ligger i två tydliga rader i stället för mellan innehållskort. */
+.leisure-ad-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin:18px 0;
+}
+.leisure-ad-row-top{margin-top:0;margin-bottom:22px}
+.leisure-ad-row-bottom{margin-top:22px;margin-bottom:0}
+.leisure-ad-row .strategic-ad-slot{
+  min-width:0;
+  margin:0;
+}
+.leisure-ad-row .strategic-ad,
+.leisure-ad-row .secondary-ad{
+  width:100%;
+  min-height:118px;
+  height:100%;
+  margin:0;
+  box-sizing:border-box;
+}
+
+/* En kommun med bara en innehållsmodul ska inte lämna ett tomt halvt rutnät. */
+.leisure-view.leisure-view-single{
+  grid-template-columns:1fr;
+}
+.leisure-view.leisure-view-single > .leisure-module{
+  grid-column:1/-1;
+}
+
+/* Registreringslänkar och övriga helbreddsblock behåller sin naturliga plats. */
+.leisure-view > .leisure-register,
+.leisure-view > .leisure-empty,
+.leisure-view > .leisure-loading{
+  grid-column:1/-1;
+}
+
+@media(max-width:800px){
+  .leisure-ad-row{grid-template-columns:1fr;gap:12px;margin:14px 0}
+  .leisure-ad-row-top{margin-top:0;margin-bottom:16px}
+  .leisure-ad-row-bottom{margin-top:16px;margin-bottom:0}
+  .leisure-ad-row .strategic-ad,
+  .leisure-ad-row .secondary-ad{min-height:104px}
+}
