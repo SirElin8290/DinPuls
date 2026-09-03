@@ -32,5 +32,8 @@ jobs:
       - name: Kontrollera kommunernas datatäckning
         run: python scripts/audit_municipality_readiness.py
 
+      - name: Kontrollera Hammarös slutkontrakt
+        run: python scripts/test_hammaro_readiness.py
+
       - name: Kontrollera sportmodulens avgränsning
         run: node scripts/check-sport-boundaries.js
