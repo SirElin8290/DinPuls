@@ -13,6 +13,7 @@ const safeLunchUrl = window.DinPulsSecurity.safeExternalUrl;
 const stockholmDay=()=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Europe/Stockholm"}).format(new Date()).toLowerCase();
 
 function updateLunchPageChrome(){
+  document.querySelectorAll('a[href^="index.html"]').forEach(link=>link.href=`index.html?kommun=${encodeURIComponent(lunchMunicipality)}`);
   document.querySelectorAll("[data-lunch-municipality]").forEach(element=>element.textContent=lunchMunicipality);
   document.title=`Dagens lunch i ${lunchMunicipality} – DinPuls`;
 }

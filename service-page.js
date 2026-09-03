@@ -136,6 +136,7 @@ function renderServicePage() {
 
   const categories = [...new Set(businesses.map(business => business.category))].sort(serviceCategorySort);
   document.querySelectorAll("[data-service-municipality]").forEach(element => { element.textContent = serviceMunicipality; });
+  document.querySelectorAll('a[href^="index.html"]').forEach(link => { link.href = `index.html?kommun=${encodeURIComponent(serviceMunicipality)}`; });
   document.querySelector("#service-result-count").textContent = `${businesses.length} företag`;
   document.querySelector("#service-category-grid").innerHTML = categories.map(group => {
     const items = businesses.filter(business => business.category === group);
