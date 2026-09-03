@@ -27,6 +27,11 @@ FETCH_ATTEMPTS = 3
 FETCH_TIMEOUT_SECONDS = 30
 
 NEIGHBORS = {item["name"]: item.get("neighbors", []) for item in MUNICIPALITY_CONFIG}
+# Kommunregistret innehåller endast DinPuls-kommuner. Hagfors saknade två
+# faktiska grannkommuner som båda finns i DinPuls: Sunne och Karlstad.
+# Lägg dem här tills central kommunmetadata kan migreras utan att riskera en
+# helfilsersättning av municipalities.json.
+NEIGHBORS["Hagfors"] = list(dict.fromkeys([*NEIGHBORS.get("Hagfors", []), "Sunne", "Karlstad"]))
 PLACE_ALIASES = {item["name"]: item.get("missingPeopleAliases", []) for item in MUNICIPALITY_CONFIG}
 if any(not aliases for aliases in PLACE_ALIASES.values()):
     raise RuntimeError("Alla kommuner måste ha missingPeopleAliases i data/municipalities.json")
@@ -156,7 +161,6 @@ def fetch_page() -> str:
                 return response.read().decode("utf-8", errors="replace")
         except HTTPError as error:
             last_error = f"HTTP {error.code} från Missing People"
-            # 4xx-fel (utom 408/429) är normalt inte tillfälliga och ska inte hamras.
             if 400 <= error.code < 500 and error.code not in {408, 429}:
                 break
         except URLError as error:
