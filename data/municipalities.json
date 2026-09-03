@@ -1231,19 +1231,21 @@
     {
       "name": "Filipstad",
       "slug": "filipstad",
+      "launchMode": "pilot",
       "code": "1782",
       "county": "Värmlands län",
       "latitude": 59.7124,
       "longitude": 14.1683,
       "website": "https://www.filipstad.se/",
-      "associationDirectoryUrl": "https://www.filipstad.se/",
+      "associationDirectoryUrl": "https://www.filipstad.se/toppmeny/upplevaochgora/foreningsverksamhet.911.html",
       "associationImport": {
         "parser": "manual"
       },
       "newsListing": {
-        "url": "https://www.filipstad.se/",
+        "url": "https://www.filipstad.se/4.165e7fd617085b4a5fc104c1/12.165e7fd617085b4a5fc104c9.portlet?state=rss&sv.contenttype=text%2Fxml%3Bcharset%3DUTF-8",
         "source": "Filipstads kommun",
-        "pathContains": "/nyheter/"
+        "pathContains": "/nyheter/",
+        "parser": "rss"
       },
       "newsSearchTerms": [
         "filipstad",
@@ -1279,12 +1281,14 @@
           "type": "Visit Värmland",
           "url": "https://www.visitvarmland.com/filipstad/evenemang",
           "icon": "map",
-          "automatic": true
+          "automatic": true,
+          "parser": "turid",
+          "dataUrl": "https://turid.visitvarmland.com/api/v8/events?categories=evenemang&lang=sv&municipalities=filipstad"
         },
         {
           "name": "Filipstads kommun – uppleva och göra",
           "type": "Kommunal guide",
-          "url": "https://www.filipstad.se/",
+          "url": "https://www.filipstad.se/toppmeny/upplevaochgora/sportochfritid.2155.html",
           "icon": "landmark"
         }
       ],

@@ -26,6 +26,9 @@ jobs:
           find . -maxdepth 1 -name '*.js' -print0 | xargs -0 -n1 node --check
           find scripts admin foretag cloudflare -name '*.js' -print0 | xargs -0 -n1 node --check
 
+      - name: Kontrollera Filipstads importer och befintliga datakontrakt
+        run: PYTHONPATH=scripts python -m unittest scripts/test_filipstad_imports.py scripts/test_update_cinemas.py scripts/test_dals_ed_imports.py scripts/test_update_news.py scripts/test_update_events.py scripts/test_update_lunch.py scripts/test_update_housing_launch.py scripts/test_municipality_integrations.py scripts/test_service_supplement.py scripts/test_health_directory.py scripts/test_update_missing_people.py scripts/test_update_transport.py scripts/test_update_weather_live.py
+
       - name: Kör lanseringstester
         run: npm test
 

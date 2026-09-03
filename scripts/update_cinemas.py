@@ -10,6 +10,7 @@ from email.utils import parsedate_to_datetime
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -17,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "cinemas.json"
 SOURCE = "https://www.odeonbio.se/"
 SVEA_SOURCE = "https://www.dalsed.se/om-webbplatsen/prenumerera/bio-rss/"
+MONITOR_SOURCE = "https://filipstad.biosverige.se/"
 STOCKHOLM = ZoneInfo("Europe/Stockholm")
 MONTHS = {"januari": 1, "februari": 2, "mars": 3, "april": 4, "maj": 5, "juni": 6,
           "juli": 7, "augusti": 8, "september": 9, "oktober": 10, "november": 11, "december": 12}
@@ -124,6 +126,54 @@ def update_svea(data, now):
         svea["programError"] = type(error).__name__
 
 
+def parse_monitor_program(payload, now):
+    """BioSverige's public schedule uses Swedish local time without an offset."""
+    if not isinstance(payload, list) or len(payload) >= 500:
+        raise ValueError("Ogiltigt eller trunkerat Bio Monitor-program")
+    grouped = {}
+    for item in payload:
+        if not isinstance(item, dict):
+            raise ValueError("Ogiltig biopost")
+        if item.get("deleted") or item.get("deletedDate"):
+            continue
+        if item.get("siteName") != "Filipstad":
+            raise ValueError("Bioprogram för fel ort")
+        movie = item.get("movie") or {}
+        title, slug = movie.get("title"), movie.get("slug")
+        if not title or not slug or not item.get("startDate"):
+            raise ValueError("Ofullständig biopost")
+        value = datetime.fromisoformat(item["startDate"])
+        value = value.replace(tzinfo=STOCKHOLM) if value.tzinfo is None else value.astimezone(STOCKHOLM)
+        if value < now:
+            continue
+        url = MONITOR_SOURCE + "filmer/" + quote(slug, safe="()-_")
+        film = grouped.setdefault(slug, {"title": title, "url": url, "showtimes": []})
+        stamp = value.isoformat(timespec="minutes")
+        if stamp not in film["showtimes"]:
+            film["showtimes"].append(stamp)
+    for film in grouped.values():
+        film["showtimes"].sort()
+        film["label"] = " · ".join(datetime.fromisoformat(stamp).strftime("%d/%m %H:%M") for stamp in film["showtimes"])
+    return sorted(grouped.values(), key=lambda film: film["showtimes"][0])
+
+
+def update_monitor(data, now):
+    monitor = next(item for item in data["municipalities"]["Filipstad"] if item["name"] == "Bio Monitor")
+    monitor["programSource"] = MONITOR_SOURCE + "program"
+    monitor["programUrl"] = MONITOR_SOURCE + "program"
+    monitor["bookingUrl"] = MONITOR_SOURCE + "program"
+    monitor["programCheckedAt"] = now.isoformat(timespec="seconds")
+    try:
+        query = urlencode({"StartDate": now.date().isoformat(), "Limit": 500, "Months": 12, "Days": 365})
+        monitor["films"] = parse_monitor_program(json.loads(fetch(MONITOR_SOURCE + "api/eventschedules?" + query)), now)
+        monitor["programStatus"] = "ok"
+        monitor.pop("programError", None)
+    except Exception as error:
+        monitor["films"] = []
+        monitor["programStatus"] = "unavailable"
+        monitor["programError"] = type(error).__name__
+
+
 def main():
     now = datetime.now(STOCKHOLM)
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
@@ -136,6 +186,7 @@ def main():
         odeon["programStatus"] = "unavailable"
         odeon["programError"] = type(error).__name__
     update_svea(data, now)
+    update_monitor(data, now)
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 

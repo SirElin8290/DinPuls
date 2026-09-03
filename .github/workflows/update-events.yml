@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - "scripts/update_events.py"
+      - "scripts/test_filipstad_imports.py"
       - "scripts/update_dals_ed_events.py"
       - "scripts/test_update_events.py"
       - "scripts/test_dals_ed_imports.py"
@@ -47,7 +48,7 @@ jobs:
       - name: Hämta Dals-Eds officiella kalender
         run: python scripts/update_dals_ed_events.py
       - name: Testa evenemangslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py scripts/test_dals_ed_imports.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_filipstad_imports.py scripts/test_update_events.py scripts/test_dals_ed_imports.py
       - name: Verifiera alla kommuner i evenemangsdatan
         run: |
           python - <<'PY'

@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "scripts/update_news.py"
+      - "scripts/test_filipstad_imports.py"
       - "scripts/update_news_deep.py"
       - "scripts/sanitize_news_freshness.py"
       - "data/municipalities.json"
@@ -48,7 +49,7 @@ jobs:
       - name: Sanera falskt färska kommunnyheter
         run: python scripts/sanitize_news_freshness.py
       - name: Testa nyhetslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_news.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_filipstad_imports.py scripts/test_update_news.py
       - name: Spara nyhetsdata
         shell: bash
         run: |

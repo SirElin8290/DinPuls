@@ -47,7 +47,7 @@ for item in local_businesses:
     url = str(item.get("url", "")).strip()
     phone = str(item.get("phone", "")).strip()
     address = str(item.get("address", "")).strip()
-    assert item.get("municipality") == "Dals-Ed", f"Lokal supplementpost ligger i oväntad kommun: {name}"
+    assert item.get("municipality") in {row["name"] for row in json.loads((ROOT / "data/municipalities.json").read_text(encoding="utf-8"))["municipalities"]}, f"Lokal supplementpost ligger i oväntad kommun: {name}"
     assert name, "Lokalt serviceföretag saknar namn"
     assert category in categories, f"{name}: okänd kategori {category}"
     assert url or phone or address, f"{name}: saknar webbplats och kontaktuppgifter"
@@ -55,8 +55,8 @@ for item in local_businesses:
         assert url.startswith("https://"), f"{name}: webbplats måste använda https"
         assert "google." not in url.lower(), f"{name}: får inte länka till Google"
 
-assert len(local_businesses) >= 5, "Dals-Ed behöver minst fem lokala servicekompletteringar"
-assert len({item.get("category") for item in local_businesses}) >= 3, "Dals-Ed behöver minst tre servicekategorier"
+assert len([item for item in local_businesses if item.get("municipality") == "Dals-Ed"]) >= 5, "Dals-Ed behöver minst fem lokala servicekompletteringar"
+assert len({item.get("category") for item in local_businesses if item.get("municipality") == "Dals-Ed"}) >= 3, "Dals-Ed behöver minst tre servicekategorier"
 script = (ROOT / "service-page.js").read_text(encoding="utf-8")
 assert 'data/service-local-supplement.json' in script, "Frontend laddar inte lokala servicekompletteringar"
 
@@ -83,4 +83,9 @@ for item in added:
     assert not parsed.username and not parsed.password
 assert 'data/service-launch-supplement.json' in script, "Frontend laddar inte Eda-kompletteringen"
 
-print(f"Servicekatalogen godkänd: {len(businesses)} basposter, {len(local_businesses)} lokala Dals-Ed-poster och {len(eda)} Eda-poster.")
+print(f"Servicekatalogen godkänd: {len(businesses)} basposter, {len(local_businesses)} lokala supplementposter och {len(eda)} Eda-poster.")
+
+filipstad = [item for item in base.get("businesses", []) + launch.get("businesses", [])
+             + businesses + local_businesses if item.get("municipality") == "Filipstad"]
+assert len({item["name"].strip().casefold() for item in filipstad}) == len(filipstad), "Filipstad: dubbla företag"
+assert {"El & installation", "VVS, värme & kyla", "Bygg & snickeri", "Bil, däck & fordonsservice"} <= {item.get("category") for item in filipstad}

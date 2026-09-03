@@ -207,6 +207,8 @@ def listing_date(url, fallback_rank=0):
 
 
 def fetch_local_listing(listing):
+    if listing.get("parser") == "rss":
+        return fetch_feed({**listing, "scope": "local"})
     request = urllib.request.Request(listing["url"], headers={"User-Agent": USER_AGENT, "Accept": "text/html"})
     with urllib.request.urlopen(request, timeout=25) as response:
         parser = ListingLinkParser()
@@ -252,7 +254,17 @@ def fetch_feed(feed):
         if not title or not link:
             continue
         summary = node_text(node, ["description", "summary", "content"])
-        published = date_iso(node_text(node, ["pubDate", "published", "updated", "date"]))
+        raw_date = node_text(node, ["pubDate", "published", "updated", "date"])
+        if feed.get("parser") == "rss":
+            # Official listings must never become fresh just because we fetched them.
+            try:
+                published = parsedate_to_datetime(raw_date).astimezone(timezone.utc).isoformat()
+            except (TypeError, ValueError, OverflowError):
+                continue
+            if urllib.parse.urlsplit(link).hostname != urllib.parse.urlsplit(feed["url"]).hostname:
+                continue
+        else:
+            published = date_iso(raw_date)
         row = {key: value for key, value in feed.items() if key != "url"}
         row.update(
             id="feed-" + hashlib.sha1((feed["source"] + link).encode()).hexdigest()[:14],

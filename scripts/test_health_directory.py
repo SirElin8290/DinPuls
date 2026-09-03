@@ -11,6 +11,9 @@ MUNICIPALITIES = [
 ALLOWED_CATEGORIES = {
     "Vårdcentral & läkare",
     "Akut & jour",
+    "Sjukhus & akutmottagning",
+    "Barn & unga",
+    "Psykisk hälsa & beroende",
     "Tandvård",
     "Apotek",
     "Rehabilitering & fysioterapi",

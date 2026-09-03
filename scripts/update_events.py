@@ -114,6 +114,59 @@ def fetch_visit_varmland_events(municipality: str) -> list[dict]:
     return results
 
 
+def fetch_turid_events(source: dict, municipality: str) -> list[dict]:
+    """Read all pages of the municipality's documented Turid event feed."""
+    url = source["dataUrl"]
+    rows, seen = [], set()
+    page = 1
+    while True:
+        request = urllib.request.Request(url + "&page=" + str(page), headers={
+            "User-Agent": USER_AGENT, "Accept": "application/json,text/html",
+            "Referer": "https://www.visitvarmland.com/",
+        })
+        with urllib.request.urlopen(request, timeout=30) as response:
+            payload = json.load(response)
+        if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+            raise ValueError("Ogiltigt Turid-flöde")
+        total_pages = int(payload.get("total_pages", 1))
+        if total_pages < page or total_pages > 100:
+            raise ValueError("Ogiltig Turid-paginering")
+        for item in payload["data"]:
+            title, slug = item.get("title"), item.get("slug")
+            if not title or not slug or not slug.startswith("evenemang/"):
+                raise ValueError("Ofullständig Turid-evenemangspost")
+            item_url = urljoin(source["url"].rstrip("/") + "/", "../" + slug)
+            venue = ", ".join(place["title"] for place in item.get("places", []) if place.get("title")) or municipality
+            source_category = ", ".join(cat["title"] for cat in item.get("categories", []) if cat.get("title"))
+            event_category, label = category(title)
+            if "Musik" in source_category:
+                event_category = "music"
+            for occasion in item.get("occasions", []):
+                start, end = iso_date(occasion.get("date_start")), iso_date(occasion.get("date_end"))
+                end = end or start
+                if not start:
+                    raise ValueError("Evenemangsdatum saknas")
+                if end < date.today().isoformat():
+                    continue
+                first, last = occasion.get("time_start"), occasion.get("time_end")
+                time_label = str(first)[:5] if first else "Se källan"
+                if first and last and last != first:
+                    time_label += "–" + str(last)[:5]
+                key = (item_url, start, end, time_label)
+                if key in seen:
+                    continue
+                seen.add(key)
+                identifier = hashlib.sha1("|".join(key).encode()).hexdigest()[:16]
+                rows.append({"id": "event-" + identifier, "title": title,
+                             "startDate": start, "endDate": end, "time": time_label,
+                             "venue": venue, "category": event_category,
+                             "categoryLabel": source_category or label,
+                             "sourceName": source["name"], "sourceFormat": "turid", "url": item_url})
+        if page == total_pages:
+            return rows
+        page += 1
+
+
 def json_ld_blocks(markup: str) -> list[object]:
     blocks = []
     pattern = re.compile(
@@ -344,6 +397,8 @@ def merge_event_rows(existing: list[dict], collected: list[dict]) -> list[dict]:
     for item in collected + existing:
         title_key = re.sub(r"\W+", "", str(item.get("title", "")).casefold())
         key = f"{title_key}|{item.get('startDate')}"
+        if item.get("sourceFormat") == "turid":
+            key += "|" + str(item.get("time"))
         current = unique.get(key)
         if not current or item.get("verified"):
             unique[key] = item
@@ -383,17 +438,22 @@ def main() -> int:
                 })
                 continue
             try:
-                markup = fetch_html(source["url"])
-                rows = []
-                for block in json_ld_blocks(markup):
-                    for candidate in walk_json(block):
-                        if is_event(candidate):
-                            event = event_from_json_ld(candidate, municipality, source)
-                            if event:
-                                rows.append(event)
-                rows.extend(events_from_filter_api(markup, municipality, source))
-                if "visitvarmland.com" in source["url"]:
-                    rows.extend(fetch_visit_varmland_events(municipality))
+                if source.get("parser") == "turid":
+                    rows = fetch_turid_events(source, municipality)
+                    # A complete successful feed supersedes its previous occurrences.
+                    existing = [row for row in existing if row.get("sourceName") not in {source["name"], "Visit Värmland"}]
+                else:
+                    markup = fetch_html(source["url"])
+                    rows = []
+                    for block in json_ld_blocks(markup):
+                        for candidate in walk_json(block):
+                            if is_event(candidate):
+                                event = event_from_json_ld(candidate, municipality, source)
+                                if event:
+                                    rows.append(event)
+                    rows.extend(events_from_filter_api(markup, municipality, source))
+                    if "visitvarmland.com" in source["url"]:
+                        rows.extend(fetch_visit_varmland_events(municipality))
                 collected.extend(rows)
                 health.append({
                     "name": source["name"],
