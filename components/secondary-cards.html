@@ -35,3 +35,21 @@
   </article>
 
 </section>
+
+<style>
+  /* Nyhetskort ska signalera nyhet visuellt i stället för att visa källinitialer som "ÅK". */
+  #nyheter .news-source-mark{
+    position:relative;
+    color:transparent !important;
+    font-size:0 !important;
+    display:grid;
+    place-items:center;
+  }
+  #nyheter .news-source-mark::before{
+    content:"📰";
+    color:initial;
+    font-size:18px;
+    line-height:1;
+    filter:saturate(.85);
+  }
+</style>
