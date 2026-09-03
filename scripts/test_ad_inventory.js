@@ -8,7 +8,7 @@ const context = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(root, "admin/ad-inventory.js"), "utf8"), context);
 const inventory = Array.from(context.window.DINPULS_AD_INVENTORY || []);
 
-assert.strictEqual(inventory.length, 93, "Inventeringen ska innehålla 30 startsidesplatser och 63 undersidesplatser");
+assert.strictEqual(inventory.length, 89, "Inventeringen ska innehålla 30 startsidesplatser och 59 undersidesplatser");
 assert.strictEqual(new Set(inventory.map(slot => slot.id)).size, inventory.length, "Alla annons-ID:n måste vara unika");
 assert(inventory.every(slot => slot.id && slot.module && slot.page && slot.position && slot.label && slot.location), "Varje annonsplats måste vara fullständigt beskriven");
 
@@ -30,11 +30,12 @@ for (const [page, slots] of byPage) {
   assert.deepStrictEqual(positions, slots.map(slot => slot.position), `${page}: annonsinventeringen avviker från HTML`);
 }
 
-assert.strictEqual(byPage.get("sport.html")?.length, 8, "Sport ska ha åtta säljbara annonsplatser");
+assert.strictEqual(byPage.get("sport.html")?.length, 4, "Idrott & motion ska ha fyra säljbara hubplatser");
 assert.strictEqual(byPage.get("fritid.html")?.length, 4, "Fritid ska ha fyra säljbara annonsplatser");
 const dynamicSource = fs.readFileSync(path.join(root, "dynamic-portal-ads.js"), "utf8");
-assert(dynamicSource.includes("length: 8"), "Den dynamiska sportlayouten ska skapa åtta platser");
-assert(dynamicSource.includes("length: 4"), "Den dynamiska fritidslayouten ska skapa fyra platser");
+assert(dynamicSource.includes("const expectedSlots = isSingleSport ? 3 : 4"), "Sportlayouten ska skilja tre sportspecifika platser från fyra hubplatser");
+assert(dynamicSource.includes("length: 3"), "Varje enskild sportsida ska skapa tre sportspecifika platser");
+assert(dynamicSource.includes("length: 4"), "Idrottshubben och fritidslayouten ska skapa fyra platser");
 
 const staticPagesWithAds = fs.readdirSync(root)
   .filter(file => file.endsWith(".html"))
@@ -45,4 +46,4 @@ const adminSource = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 assert(adminSource.includes("data/municipalities.json"), "Admin ska läsa aktiva kommuner centralt");
 assert(!adminSource.includes("Dals-Ed") && !adminSource.includes("Karlstad"), "Admin får inte ha en parallell kommunlista");
 
-console.log(`✓ Annonsregistret matchar 93 platser på startsidan och ${byPage.size} undersidor`);
+console.log(`✓ Annonsregistret matchar 89 basplatser och ${byPage.size} undersidor; sportspecifika vyer har tre dynamiska platser`);
