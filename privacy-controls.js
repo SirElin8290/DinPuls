@@ -1,13 +1,29 @@
 (function () {
   "use strict";
 
+  /* Gemensamt färgläge: startsidans sparade val ska gälla på alla publika sidor. */
+  (function applySavedTheme() {
+    try {
+      const savedTheme = localStorage.getItem("dinpuls-theme");
+      if (savedTheme === "dark") document.documentElement.dataset.theme = "dark";
+      else if (savedTheme === "light") document.documentElement.dataset.theme = "light";
+    } catch {}
+  })();
+
+  window.addEventListener("storage", event => {
+    if (event.key !== "dinpuls-theme") return;
+    if (event.newValue === "dark") document.documentElement.dataset.theme = "dark";
+    else if (event.newValue === "light") document.documentElement.dataset.theme = "light";
+    else delete document.documentElement.dataset.theme;
+  });
+
   /* Gemensamt säsongstema: privacy-controls.js finns på DinPuls publika sidor,
      så temat följer med även till undersidorna utan duplicerad HTML. */
   (function loadSeasonalTheme() {
     if (document.querySelector('link[data-dinpuls-seasonal-theme]')) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `${location.pathname.includes("/innebandyregler/") ? "../" : ""}seasonal-theme.css?version=0.1.0`;
+    link.href = `${location.pathname.includes("/innebandyregler/") ? "../" : ""}seasonal-theme.css?version=0.2.0`;
     link.dataset.dinpulsSeasonalTheme = "autumn";
     (document.head || document.documentElement).appendChild(link);
     document.documentElement.dataset.season = "autumn";
