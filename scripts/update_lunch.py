@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "lunch-sources.json"
 LAUNCH_SUPPLEMENT = ROOT / "data" / "lunch-launch-supplement.json"
+HAMMARO_SUPPLEMENT = ROOT / "data" / "lunch-hammaro-supplement.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
@@ -178,20 +179,21 @@ def parse_all_days_menu(page: str) -> tuple[int | None, dict[str, list[str]]]:
 
 
 def merge_config(config: dict) -> dict:
-    """Add verified launch sources without rewriting the established source catalog."""
-    if not LAUNCH_SUPPLEMENT.exists():
-        return config
-    launch = json.loads(LAUNCH_SUPPLEMENT.read_text(encoding="utf-8"))
+    """Add verified supplements without rewriting the established source catalog."""
     municipalities = config.setdefault("municipalities", {})
     references = config.setdefault("referenceSources", {})
-    for name, sources in (launch.get("municipalities") or {}).items():
-        current = municipalities.setdefault(name, [])
-        seen = {str(item.get("id")) for item in current if isinstance(item, dict)}
-        current.extend(item for item in sources if isinstance(item, dict) and str(item.get("id")) not in seen)
-    for name, sources in (launch.get("referenceSources") or {}).items():
-        current = references.setdefault(name, [])
-        seen = {str(item.get("url")) for item in current if isinstance(item, dict)}
-        current.extend(item for item in sources if isinstance(item, dict) and str(item.get("url")) not in seen)
+    for supplement_path in (LAUNCH_SUPPLEMENT, HAMMARO_SUPPLEMENT):
+        if not supplement_path.exists():
+            continue
+        supplement = json.loads(supplement_path.read_text(encoding="utf-8"))
+        for name, sources in (supplement.get("municipalities") or {}).items():
+            current = municipalities.setdefault(name, [])
+            seen = {str(item.get("id")) for item in current if isinstance(item, dict)}
+            current.extend(item for item in sources if isinstance(item, dict) and str(item.get("id")) not in seen)
+        for name, sources in (supplement.get("referenceSources") or {}).items():
+            current = references.setdefault(name, [])
+            seen = {str(item.get("url")) for item in current if isinstance(item, dict)}
+            current.extend(item for item in sources if isinstance(item, dict) and str(item.get("url")) not in seen)
     return config
 
 
