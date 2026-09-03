@@ -1,6 +1,6 @@
 # DinPuls – status för 21 kommuner
 
-Senast uppdaterad: 2026-09-01
+Senast uppdaterad: 2026-09-03
 
 Detta dokument är den gemensamma sanningskällan för kommunutbyggnaden. En kommun räknas inte som produktionsklar bara för att den finns i väljaren. Produktionsläge kräver verklig lokal data, fungerande automation och godkänd readiness-audit.
 
@@ -20,6 +20,7 @@ Totalt: 21 kommuner.
 - Arvika
 - Grums
 - Eda
+- Dals-Ed
 
 ## Pilotkommuner
 
@@ -34,8 +35,11 @@ Totalt: 21 kommuner.
 - Hagfors
 - Munkfors
 - Torsby
-- Dals-Ed
 - Färgelanda
+
+## Dals-Ed produktionsklassad 2026-09-03
+
+Dals-Ed har lämnat pilot efter full lokal granskning, fungerande automation och godkänd liveverifiering. Kommunen har bland annat verifierad Edshus-import med 24 publicerade bostäder, 41 aktuella/framtida evenemang, automatisk Svea Bio-import med filtrering av passerade visningar samt sex verifierade lunchreferenser utan gissade menyer. Relevanta tester, sajtens kontroll och GitHub Pages-publiceringen är gröna. Edshus har dessutom en separat reservpublicering som gör att fel i andra kommuners bostadskällor inte blockerar Dals-Ed.
 
 ## De 11 nya kommunerna – implementerat 2026-09-01
 
@@ -49,7 +53,7 @@ Samtliga elva finns nu i `data/municipalities.json` med:
 - föreningsregister eller officiell föreningsingång
 - bostadsaktör eller officiell bostadsingång
 - grannkommuner
-- pilotspärr så att kommunen inte kan förväxlas med produktionsklar kommun
+- initial pilotspärr tills kommunen passerar readiness-grinden
 
 De elva är:
 
@@ -64,6 +68,8 @@ De elva är:
 9. Torsby
 10. Dals-Ed
 11. Färgelanda
+
+Dals-Ed är sedan 2026-09-03 produktionsklassad och ingår därför inte längre i pilotgruppen.
 
 ## Automatisk grunddata
 
@@ -103,9 +109,9 @@ Kravet är i stället:
 - verklig vårddata
 - användbar service-/hantverkskatalog
 
-`scripts/audit_municipality_readiness.py` rapporterar nu automatiskt datagap för samtliga pilotkommuner, inte bara för en enskild kommun.
+`scripts/audit_municipality_readiness.py` rapporterar automatiskt datagap för kvarvarande pilotkommuner.
 
-## Kvar innan de 11 nya kan lämna pilot
+## Kvar innan övriga pilotkommuner kan lämna pilot
 
 Varje kommun ska granskas utifrån auditens faktiska resultat. Typiska kvarvarande arbeten är:
 
