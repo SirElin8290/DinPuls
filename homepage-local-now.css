@@ -1,0 +1,135 @@
+/* DinPuls: kompakt "lokalt just nu"-yta på startsidan.
+   Missing People, väder och trafik delar samma desktop-rad.
+   Mobil behåller tydlig stapling. */
+
+.local-now-layout{
+  display:grid;
+  grid-template-columns:minmax(260px,.72fr) minmax(0,2.28fr);
+  gap:16px;
+  padding:16px 20px 0;
+  align-items:stretch;
+}
+
+.local-now-layout > *{min-width:0}
+.local-now-layout > [data-component="missing-people"]{display:flex;min-width:0}
+.local-now-layout > [data-component="primary-cards"]{min-width:0}
+
+.local-now-layout .missing-people-home{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:16px;
+  border-radius:12px;
+}
+
+.local-now-layout .missing-people-head h2{
+  font-size:18px;
+  line-height:1.2;
+  margin-bottom:4px;
+}
+
+.local-now-layout .missing-people-head p{
+  margin:4px 0 0;
+  font-size:11px;
+  line-height:1.45;
+}
+
+.local-now-layout .missing-people-principle{
+  margin-top:10px;
+  padding:9px 10px;
+  gap:8px;
+  font-size:10px;
+  line-height:1.45;
+}
+
+.local-now-layout .missing-people-principle svg{
+  width:16px;
+  height:16px;
+  flex:0 0 auto;
+}
+
+.local-now-layout .missing-people-status{
+  margin-top:9px;
+  font-size:10px;
+}
+
+.local-now-layout .missing-people-list{
+  margin-top:8px;
+}
+
+.local-now-layout .missing-people-empty{
+  min-height:108px;
+  padding:18px 16px;
+  border-radius:12px;
+}
+
+.local-now-layout .missing-people-empty::before{
+  right:-12px;
+  width:66px;
+  height:66px;
+}
+
+.local-now-layout .missing-people-empty > svg{
+  width:36px;
+  height:36px;
+  padding:8px;
+}
+
+.local-now-layout .missing-people-empty strong{font-size:13px}
+.local-now-layout .missing-people-empty small{font-size:10px;line-height:1.45}
+
+.local-now-layout .missing-people-footer{
+  margin-top:10px;
+  font-size:10px;
+}
+
+.local-now-layout .primary-service-grid{
+  height:100%;
+  padding:0;
+  grid-template-columns:minmax(0,1.18fr) minmax(250px,.82fr);
+  align-items:stretch;
+}
+
+.local-now-layout .primary-service-grid > .card{height:100%;min-width:0}
+
+@media(max-width:1180px){
+  .local-now-layout{
+    grid-template-columns:minmax(240px,.8fr) minmax(0,2.2fr);
+  }
+  .local-now-layout .primary-service-grid{
+    grid-template-columns:minmax(0,1fr) minmax(230px,.78fr);
+  }
+}
+
+@media(max-width:980px){
+  .local-now-layout{
+    grid-template-columns:1fr;
+  }
+  .local-now-layout .primary-service-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:760px){
+  .local-now-layout{
+    display:block;
+    padding:12px 12px 0;
+  }
+  .local-now-layout > [data-component="missing-people"]{
+    display:block;
+    margin-bottom:12px;
+  }
+  .local-now-layout .missing-people-home{
+    padding:14px;
+  }
+  .local-now-layout .missing-people-principle{
+    font-size:9px;
+  }
+  .local-now-layout .missing-people-empty{
+    min-height:120px;
+    padding:18px 16px;
+  }
+  .local-now-layout .primary-service-grid{
+    grid-template-columns:1fr;
+  }
+}
