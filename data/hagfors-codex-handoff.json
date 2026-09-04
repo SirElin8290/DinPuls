@@ -1,29 +1,18 @@
 {
   "municipality": "Hagfors",
   "updatedAt": "2026-09-04",
-  "mode": "low-budget-codex",
-  "budgetGoal": "Minimera Codex-förbrukning. Ingen ny helhetsanalys. Ingen bred refaktorering. Endast kvarvarande Hagfors-gap.",
-  "exclude": [
-    "Hero-bild",
-    "Matkassen",
-    "Föreningar och fritid – verifierade Hagfors-föreningar är tillagda utan Codex",
-    "Bio Hagfors – automatisk synkning är implementerad utan Codex",
-    "Dagens lunch – verifierade lunchställen i Hagfors kommun är inlagda och kopplade till ordinarie lunchpipeline utan Codex; exakta dagsmenyer får vara manuella/source-only där stabil automatisk källa saknas",
-    "Redan lösta data-, frontend-, vård-, service-, myndighets-, fritids- och Missing People-ändringar",
-    "Kosmetisk refaktorering, dokumentation och generell cleanup"
+  "status": "completed-without-codex",
+  "purpose": "Hagfors-arbetet som tidigare låg i Codex-arbetsordern är nu genomfört med direkta GitHub-ändringar.",
+  "excludedByOwner": [
+    "Hero-bild hanteras manuellt av projektägaren",
+    "Matkassen ingår inte i Hagfors readiness"
   ],
-  "instruction": "Gör endast reproduktionskontrollen av Hagfors kommunnyheter. Om felet är transient: ändra ingenting. Om ett tydligt Hagfors-specifikt parserfel hittas: gör minsta lokala fix och behåll Google News-fallback. Kör endast riktade tester.",
-  "tasks": [
-    {
-      "priority": 1,
-      "area": "Kommunnyheter",
-      "work": "Gör endast en reproduktionskontroll av Hagfors kommunkälla i befintlig nyhetspipeline. Om felet är transient: ändra ingenting. Om ett tydligt Hagfors-specifikt parserfel hittas: gör minsta lokala fix och behåll Google News-fallback."
-    }
+  "completedWithoutCodex": [
+    "Verifierade föreningar och fritidsinnehåll är kopplade till ordinarie pipeline.",
+    "Bio Hagfors har automatisk programsynkning och riktat test.",
+    "Verifierade lunchställen i Hagfors kommun är kopplade till ordinarie lunchpipeline; dagsmenyer kan vara manuella/source-only där stabil källa saknas.",
+    "Hagfors kommunnyheter har fått en lokal direkt-synk mot kommunens riktiga /arkiv/nyheter/-struktur med säker fallback och riktat test.",
+    "Google News-fallback och övriga nyhetskällor är oförändrade."
   ],
-  "acceptance": [
-    "Inga regressioner i andra kommuner",
-    "Google News-fallback bevaras",
-    "Endast riktade tester körs",
-    "Ingen bred scanning eller refaktorering"
-  ]
+  "tasks": []
 }
