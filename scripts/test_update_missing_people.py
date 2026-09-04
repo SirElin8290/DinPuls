@@ -35,6 +35,17 @@ HAGFORS_NEIGHBOR_SAMPLE = """
 </article>
 """
 
+KARLSTAD_NEIGHBOR_SAMPLE = """
+<article class="person mix region--varmland"><h5 class="card-title">Test Kil</h5><div class="person__location">KIL</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-kil/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Storfors</h5><div class="person__location">STORFORS</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-storfors/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Hammarö</h5><div class="person__location">HAMMARÖ</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-hammaro/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Forshaga</h5><div class="person__location">FORSHAGA</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-forshaga/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Grums</h5><div class="person__location">GRUMS</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-grums/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Kristinehamn</h5><div class="person__location">KRISTINEHAMN</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-kristinehamn/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Filipstad</h5><div class="person__location">FILIPSTAD</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-filipstad/">Läs mer</a></article>
+<article class="person mix region--varmland"><h5 class="card-title">Test Hagfors</h5><div class="person__location">HAGFORS</div><time class="person__date" datetime="2026-09-03">2026-09-03</time><p class="person__ingress">Test.</p><a class="person__link" href="/efterlysningar/test-hagfors/">Läs mer</a></article>
+"""
+
 
 class MissingPeopleTests(unittest.TestCase):
     def test_parser_ignores_images_and_keeps_direct_link(self):
@@ -65,6 +76,11 @@ class MissingPeopleTests(unittest.TestCase):
         origins = {item["originMunicipality"] for item in data["Hagfors"]["items"] if item["scope"] == "neighbor"}
         self.assertIn("Sunne", origins)
         self.assertIn("Karlstad", origins)
+
+    def test_karlstad_includes_all_eight_actual_neighbors_in_dinpuls(self):
+        data = missing.distribute(missing.parse_people(KARLSTAD_NEIGHBOR_SAMPLE))
+        origins = {item["originMunicipality"] for item in data["Karlstad"]["items"] if item["scope"] == "neighbor"}
+        self.assertEqual(origins, {"Kil", "Storfors", "Hammarö", "Forshaga", "Grums", "Kristinehamn", "Filipstad", "Hagfors"})
 
 
 if __name__ == "__main__":
