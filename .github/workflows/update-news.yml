@@ -10,6 +10,8 @@ on:
     paths:
       - "scripts/update_news.py"
       - "scripts/update_news_deep.py"
+      - "scripts/sync_hagfors_municipal_news.py"
+      - "scripts/test_sync_hagfors_municipal_news.py"
       - "scripts/sanitize_news_freshness.py"
       - "data/municipalities.json"
       - ".github/workflows/update-news.yml"
@@ -43,12 +45,14 @@ jobs:
         run: python scripts/update_news.py
       - name: Gör ett andra hämtningsförsök vid tillfälliga källfel
         run: python scripts/update_news.py
+      - name: Synka Hagfors kommuns officiella nyheter
+        run: python scripts/sync_hagfors_municipal_news.py
       - name: Djupsök färska lokala nyheter i alla kommuner
         run: python scripts/update_news_deep.py
       - name: Sanera falskt färska kommunnyheter
         run: python scripts/sanitize_news_freshness.py
       - name: Testa nyhetslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_news.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_news.py scripts/test_sync_hagfors_municipal_news.py
       - name: Spara nyhetsdata
         shell: bash
         run: |
