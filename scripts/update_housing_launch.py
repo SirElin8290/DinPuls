@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-"""Update housing coverage for municipalities in the 21-municipality launch.
-
-Three source types are intentionally supported:
-- automatic-filipstad: server-rendered table of currently available apartments.
-- automatic-hagfors: official server-rendered facts blocks.
-- automatic-valbohem: official list + detail pages.
-- official-reference: verify the official rental entry point without pretending that
-  a JS/private rental backend has been mirrored.
-
-A verified reference source is not reported as zero inventory. It is reported as
-"official-reference" so the public UI can send the visitor to the authoritative source.
-"""
+"""Update housing coverage for municipalities in the 21-municipality launch."""
 from __future__ import annotations
 
 import hashlib
@@ -141,21 +130,11 @@ def parse_filipstad(source: dict) -> list[dict]:
         if not address or address.casefold() == "adress" or not re.search(r"\d", rooms_raw):
             continue
         url = urljoin(source["url"], href) if href else source["url"]
-        listings.append({
-            "id": stable_id(address, area, available, rent_raw),
-            "address": address,
-            "area": area,
-            "rooms": num(rooms_raw),
-            "size": num(size_raw),
-            "rent": num(rent_raw),
-            "available": available,
-            "url": url,
-            "provider": source["provider"],
-        })
-    if not listings:
-        lines = text_lines(markup)
-        if not any("Lediga lägenheter" in line for line in lines):
-            raise RuntimeError("kunde inte känna igen Filipstadsbostäders lediga-lista")
+        listings.append({"id": stable_id(address, area, available, rent_raw), "address": address, "area": area,
+                         "rooms": num(rooms_raw), "size": num(size_raw), "rent": num(rent_raw),
+                         "available": available, "url": url, "provider": source["provider"]})
+    if not listings and not any("Lediga lägenheter" in line for line in text_lines(markup)):
+        raise RuntimeError("kunde inte känna igen Filipstadsbostäders lediga-lista")
     return listings
 
 
@@ -182,28 +161,38 @@ def parse_hagfors(source: dict) -> list[dict]:
         if identifier in seen:
             continue
         seen.add(identifier)
-        listings.append({
-            "id": identifier,
-            "address": address,
-            "area": "Hagfors kommun",
-            "rooms": int(room_match.group(1)) if room_match else None,
-            "size": num(size_match.group(1)) if size_match else None,
-            "rent": num(rent_line),
-            "available": available,
-            "url": source["url"],
-            "provider": source["provider"],
-        })
+        listings.append({"id": identifier, "address": address, "area": "Hagfors kommun",
+                         "rooms": int(room_match.group(1)) if room_match else None,
+                         "size": num(size_match.group(1)) if size_match else None, "rent": num(rent_line),
+                         "available": available, "url": source["url"], "provider": source["provider"]})
     if not listings and not any("Lediga lägenheter" in line for line in lines):
         raise RuntimeError("kunde inte känna igen Hagforshems lediga-lista")
     return listings
 
 
-def valbohem_detail(url: str, source: dict) -> dict | None:
-    lines = text_lines(fetch_text(url))
-    if not lines:
+def extract_valbohem_links(markup: str, base_url: str) -> list[str]:
+    """Hitta objektlänkar även på detaljsidornas 'Liknande objekt'."""
+    links: list[str] = []
+    patterns = [
+        r'href=["\']([^"\']*/ledigt/detalj/id/[^"\'#?]+)["\']',
+        r'["\'](\/ledigt\/detalj\/id\/[^"\'#?]+)["\']',
+    ]
+    for pattern in patterns:
+        for href in re.findall(pattern, markup, flags=re.I):
+            url = urljoin(base_url, html.unescape(href)).rstrip("/")
+            if url not in links:
+                links.append(url)
+    return links
+
+
+def valbohem_detail_from_markup(url: str, source: dict, markup: str) -> dict | None:
+    lines = text_lines(markup)
+    if not lines or any("Objektet kan ej visas" in line for line in lines):
         return None
     object_number_line = next((line for line in lines if line.startswith("Objektnr.:") or line.startswith("Objektnr:")), "")
-    identifier = object_number_line.split(":", 1)[-1].strip() if object_number_line else url.rstrip("/").rsplit("/", 1)[-1]
+    if not object_number_line:
+        return None
+    identifier = object_number_line.split(":", 1)[-1].strip()
     rent_size = next((line for line in lines if " kr" in line and ("m2" in line or "m²" in line)), "")
     rent = num(rent_size.split("kr", 1)[0]) if rent_size else None
     after_bullet = rent_size.split("•", 1)[1] if "•" in rent_size else ""
@@ -212,11 +201,18 @@ def valbohem_detail(url: str, source: dict) -> dict | None:
     room_match = re.search(r"(\d+)\s+rum", rooms_line, re.I)
     area_line = next((line for line in lines if line.startswith("Ort:")), "")
     available_line = next((line for line in lines if line.startswith("Tillgänglig fr.o.m:")), "")
-    address = next((line for line in lines if line.startswith("# ")), "")
-    if not address:
-        rent_index = lines.index(rent_size) if rent_size in lines else min(len(lines), 8)
-        candidates = [line for line in lines[:rent_index] if len(line) > 3 and "ledig lägenhet" not in line.casefold()]
-        address = candidates[-1] if candidates else "Ledig lägenhet"
+    published_line = next((line for line in lines if line.startswith("Publicerad till:")), "")
+    published_until = published_line.split(":", 1)[-1].strip() if published_line else ""
+    today = datetime.now(timezone.utc).date().isoformat()
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", published_until) and published_until < today:
+        return None
+
+    rent_index = lines.index(rent_size) if rent_size in lines else min(len(lines), 10)
+    candidates = [line for line in lines[:rent_index]
+                  if len(line) > 3
+                  and "ledig lägenhet" not in line.casefold()
+                  and not line.casefold().startswith(("objektsdetalj", "lediga lägenheter"))]
+    address = candidates[-1] if candidates else "Ledig lägenhet"
     if not identifier or rent is None:
         return None
     return {
@@ -232,23 +228,52 @@ def valbohem_detail(url: str, source: dict) -> dict | None:
     }
 
 
+def valbohem_detail(url: str, source: dict) -> dict | None:
+    return valbohem_detail_from_markup(url, source, fetch_text(url))
+
+
 def parse_valbohem(source: dict) -> list[dict]:
-    markup = fetch_text(source["url"])
-    hrefs = []
-    for href in re.findall(r'href=["\']([^"\']+/ledigt/detalj/id/[^"\']+)["\']', markup, flags=re.I):
-        url = urljoin(source["url"], html.unescape(href))
-        if url not in hrefs:
-            hrefs.append(url)
-    listings = []
-    for url in hrefs[:80]:
-        item = valbohem_detail(url, source)
-        if item:
-            listings.append(item)
-    if not listings:
+    """Crawla Valbohems publika objektgraf i stället för att lita på JS-listvyn.
+
+    Listvyn är dynamisk och kan vara tom i server-HTML. Vi börjar både där och på
+    verifierade offentliga seed-objekt och följer länkarna till 'Liknande objekt'.
+    Bara fortfarande publicerade objektsidor tas med.
+    """
+    start_markup = fetch_text(source["url"])
+    queue = extract_valbohem_links(start_markup, source["url"])
+    for seed in source.get("seedUrls") or []:
+        normalized = str(seed).rstrip("/")
+        if normalized and normalized not in queue:
+            queue.append(normalized)
+
+    visited: set[str] = set()
+    listings: dict[str, dict] = {}
+    successful_detail_pages = 0
+    while queue and len(visited) < 160:
+        url = queue.pop(0)
+        if url in visited:
+            continue
+        visited.add(url)
+        try:
+            markup = fetch_text(url)
+        except RuntimeError:
+            continue
         lines = text_lines(markup)
-        if not any("ledig" in line.casefold() and "lägen" in line.casefold() for line in lines):
-            raise RuntimeError("kunde inte känna igen Valbohems lediga-lista")
-    return listings
+        if any("Objektnr" in line for line in lines):
+            successful_detail_pages += 1
+        for linked in extract_valbohem_links(markup, url):
+            if linked not in visited and linked not in queue:
+                queue.append(linked)
+        item = valbohem_detail_from_markup(url, source, markup)
+        if item:
+            listings[item["id"]] = item
+
+    if not listings:
+        # Ett tomt dynamiskt listskal är INTE bevis för noll lediga bostäder.
+        if successful_detail_pages == 0:
+            raise RuntimeError("Valbohems dynamiska listvy gav inga verifierbara objektsidor")
+        raise RuntimeError("Valbohem-objektsidor hittades men inget objekt kunde verifieras som fortsatt publicerat")
+    return sorted(listings.values(), key=lambda item: (str(item.get("area") or ""), str(item.get("address") or "")))
 
 
 def main(only_municipality=None) -> int:
@@ -263,12 +288,7 @@ def main(only_municipality=None) -> int:
     for name, source in (source_config.get("municipalities") or {}).items():
         entry = municipalities.setdefault(name, {"total": 0, "listings": [], "providers": []})
         mode = source.get("mode")
-        health = {
-            "provider": source.get("provider"),
-            "url": source.get("url"),
-            "mode": mode,
-            "checkedAt": now,
-        }
+        health = {"provider": source.get("provider"), "url": source.get("url"), "mode": mode, "checkedAt": now}
         try:
             if mode == "automatic-filipstad":
                 listings = parse_filipstad(source)
@@ -287,8 +307,7 @@ def main(only_municipality=None) -> int:
 
             health["status"] = "ok"
             health["inventoryCount"] = len(listings) if isinstance(listings, list) else None
-            provider_view = {"name": source["provider"], "url": source["url"], "official": True, "mode": mode}
-            entry["providers"] = [provider_view]
+            entry["providers"] = [{"name": source["provider"], "url": source["url"], "official": True, "mode": mode}]
             entry["sourceHealth"] = [health]
             entry["errors"] = []
             entry["stale"] = False
