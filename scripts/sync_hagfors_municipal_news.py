@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Synka Hagfors kommuns officiella nyheter till DinPuls news.json.
 
-Hagfors använder /arkiv/nyheter/... för artiklar medan den generella
-kommun-konfigurationen tidigare matchade /nyheter/. Den här lilla synken är
-avsiktligt lokal: Google News och övriga nyhetskällor lämnas helt orörda.
+Hagfors publicerar artiklar under /arkiv/nyheter/.... Den generella nyhetspipelinen
+kan få ett felaktigt 404-svar från kommunens SiteVision-sida trots att sidan är
+publikt åtkomlig i vanlig webbläsare. Den här lokala synken använder därför
+webbläsarliknande headers och faller tillbaka till startsidan om arkivsidan
+blockeras. Google News och övriga nyhetskällor lämnas orörda.
 """
 from __future__ import annotations
 
@@ -20,9 +22,18 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[1]
 NEWS = ROOT / "data" / "news.json"
 SOURCE_URL = "https://www.hagfors.se/verktygsmeny/kontakta-oss/nyhetsarkiv.html"
+FALLBACK_URL = "https://www.hagfors.se/"
 SOURCE_NAME = "Hagfors kommun"
-USER_AGENT = "DinPuls.se/0.21 (+https://dinpuls.se/)"
 ARTICLE_PREFIX = "/arkiv/nyheter/20"
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.7",
+    "Cache-Control": "no-cache",
+}
 
 
 class LinkParser(HTMLParser):
@@ -65,13 +76,13 @@ def title_from_url(url: str) -> str:
     return slug[:1].upper() + slug[1:] if slug else "Hagfors kommunnyhet"
 
 
-def parse_listing(page: str) -> list[dict]:
+def parse_listing(page: str, base_url: str = SOURCE_URL) -> list[dict]:
     parser = LinkParser()
     parser.feed(page)
     rows: list[dict] = []
     seen: set[str] = set()
     for href, title in parser.links:
-        link = urljoin(SOURCE_URL, href)
+        link = urljoin(base_url, href)
         if ARTICLE_PREFIX not in urlparse(link).path or link in seen:
             continue
         title = re.sub(r"^Läs mer(?: om)?\s+", "", title, flags=re.I).strip()
@@ -98,16 +109,31 @@ def parse_listing(page: str) -> list[dict]:
     return sorted(rows, key=lambda item: item["publishedAt"], reverse=True)[:20]
 
 
-def fetch_page() -> str:
-    request = Request(SOURCE_URL, headers={"User-Agent": USER_AGENT, "Accept": "text/html"})
+def fetch_url(url: str) -> str:
+    request = Request(url, headers=BROWSER_HEADERS)
     with urlopen(request, timeout=30) as response:
         return response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace")
+
+
+def fetch_page() -> tuple[str, str]:
+    """Hämta arkivet; använd startsidan som säker sekundär kommunal källa."""
+    errors: list[str] = []
+    for url in (SOURCE_URL, FALLBACK_URL):
+        try:
+            page = fetch_url(url)
+            if ARTICLE_PREFIX not in page:
+                raise ValueError("inga Hagfors-nyhetslänkar i svaret")
+            return page, url
+        except Exception as error:
+            errors.append(f"{url}: {type(error).__name__}")
+    raise RuntimeError("; ".join(errors))
 
 
 def main() -> int:
     data = json.loads(NEWS.read_text(encoding="utf-8"))
     try:
-        rows = parse_listing(fetch_page())
+        page, base_url = fetch_page()
+        rows = parse_listing(page, base_url)
     except Exception as error:
         print(f"Hagfors kommunnyheter: källfel {type(error).__name__}; befintlig data lämnas orörd.")
         return 0
@@ -134,7 +160,7 @@ def main() -> int:
     status["successful"] = sorted(successful)
     status["errors"] = errors
     NEWS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Hagfors kommunnyheter: {len(rows)} verifierade länkar, {len(fresh_rows)} inom 21 dagar")
+    print(f"Hagfors kommunnyheter: {len(rows)} verifierade länkar, {len(fresh_rows)} inom 21 dagar via {base_url}")
     return 0
 
 
