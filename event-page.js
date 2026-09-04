@@ -1,6 +1,7 @@
 const municipalityState = window.DinPulsMunicipalityState;
 let eventMunicipality = municipalityState.getInitial();
 let fullEventsData = null;
+let fargelandaEventSupplement = null;
 
 const escapeEvent = window.DinPulsSecurity.escapeHtml;
 const safeEventUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -23,9 +24,15 @@ async function initializeEventPage() {
   ["#events-category", "#events-period"].forEach(selector => document.querySelector(selector).addEventListener("change", renderEventPage));
   document.querySelector("#events-search").addEventListener("input", renderEventPage);
   renderStrategicAds("evenemang", "evenemangssida", "#events-page-list");
-  const response = await fetch(`data/events.json`, { cache:"no-store" });
+  const [response, fargelandaSupplementResponse] = await Promise.all([
+    fetch(`data/events.json`, { cache:"no-store" }),
+    fetch(`data/events-fargelanda-supplement.json`, { cache:"no-store" })
+  ]);
   if (!response.ok) throw new Error(`Status ${response.status}`);
   fullEventsData = await response.json();
+  fargelandaEventSupplement = fargelandaSupplementResponse.ok
+    ? await fargelandaSupplementResponse.json()
+    : { events:[] };
   renderEventPage();
 }
 
@@ -60,10 +67,30 @@ function eventMatchesPeriod(item, period) {
   return true;
 }
 
+function mergedEventDataForMunicipality() {
+  const base = fullEventsData?.municipalities?.[eventMunicipality] || { events:[], sources:[] };
+  if (eventMunicipality !== "Färgelanda" || !fargelandaEventSupplement?.events?.length) return base;
+
+  const today = stockholmDateKey();
+  const supplementEvents = fargelandaEventSupplement.events.filter(item => String(item.endDate || item.startDate || "") >= today);
+  const merged = new Map();
+  [...(base.events || []), ...supplementEvents].forEach(item => {
+    const titleKey = String(item.title || "").toLocaleLowerCase("sv-SE").replace(/\W+/g, "");
+    const key = `${titleKey}|${String(item.startDate || "").slice(0, 10)}`;
+    const current = merged.get(key);
+    if (!current || item.verified) merged.set(key, item);
+  });
+  return {
+    ...base,
+    events:[...merged.values()],
+    sources:base.sources || []
+  };
+}
+
 function renderEventPage() {
   if (!fullEventsData) return;
   updateEventPageChrome();
-  const data = fullEventsData.municipalities?.[eventMunicipality] || { events:[], sources:[] };
+  const data = mergedEventDataForMunicipality();
   const query = document.querySelector("#events-search").value.trim().toLocaleLowerCase("sv-SE");
   const category = document.querySelector("#events-category").value;
   const period = document.querySelector("#events-period").value;
