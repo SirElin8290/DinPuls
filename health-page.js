@@ -4,6 +4,7 @@ let healthData;
 let healthPrivateData;
 let healthPrivateSupplement;
 let healthLocalSupplement;
+let healthKarlstadPrivateSupplement;
 
 const escapeHealth = window.DinPulsSecurity.escapeHtml;
 const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -90,6 +91,7 @@ function allHealthProviders() {
     ...(healthData?.providers || []),
     ...(healthPrivateSupplement?.providers || []),
     ...(healthLocalSupplement?.providers || []),
+    ...(healthKarlstadPrivateSupplement?.providers || []),
     ...(healthPrivateData?.providers || [])
   ];
 }
@@ -154,20 +156,23 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const [officialResponse, privateResponse, supplementResponse, localSupplementResponse] = await Promise.all([
+  const [officialResponse, privateResponse, supplementResponse, localSupplementResponse, karlstadPrivateResponse] = await Promise.all([
     fetch("data/health.json", { cache: "no-cache" }),
     fetch("data/health-private.json", { cache: "no-cache" }),
     fetch("data/health-private-supplement.json", { cache: "no-cache" }),
-    fetch("data/health-local-supplement.json", { cache: "no-cache" })
+    fetch("data/health-local-supplement.json", { cache: "no-cache" }),
+    fetch("data/health-karlstad-private-supplement.json", { cache: "no-cache" })
   ]);
   if (!officialResponse.ok) throw new Error(`Vårddata kunde inte laddas (${officialResponse.status})`);
   healthData = await officialResponse.json();
   healthPrivateData = privateResponse.ok ? await privateResponse.json() : { providers: [] };
   healthPrivateSupplement = supplementResponse.ok ? await supplementResponse.json() : { providers: [] };
   healthLocalSupplement = localSupplementResponse.ok ? await localSupplementResponse.json() : { providers: [] };
+  healthKarlstadPrivateSupplement = karlstadPrivateResponse.ok ? await karlstadPrivateResponse.json() : { providers: [] };
   if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
   if (!supplementResponse.ok) console.warn(`Kompletterande vårddata kunde inte laddas (${supplementResponse.status})`);
   if (!localSupplementResponse.ok) console.warn(`Lokala vårdkompletteringar kunde inte laddas (${localSupplementResponse.status})`);
+  if (!karlstadPrivateResponse.ok) console.warn(`Privata Karlstad-aktörer kunde inte laddas (${karlstadPrivateResponse.status})`);
   const select = document.querySelector("#health-municipality");
   const categorySelect = document.querySelector("#health-group");
   healthState.populateSelect(select, healthMunicipality);
