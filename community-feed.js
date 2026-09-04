@@ -13,6 +13,16 @@
   document.head.appendChild(script);
 })();
 
+/* Färgelandas verifierade evenemang måste även nå startsidans evenemangskort.
+   Huvudflödet i data/events.json är fortfarande källan för övriga kommuner. */
+(() => {
+  if (document.querySelector('script[data-fargelanda-events-home]')) return;
+  const script = document.createElement("script");
+  script.src = "fargelanda-events-home.js?v=1";
+  script.dataset.fargelandaEventsHome = "true";
+  document.head.appendChild(script);
+})();
+
 (function initCommunityFeed(root) {
   "use strict";
 
