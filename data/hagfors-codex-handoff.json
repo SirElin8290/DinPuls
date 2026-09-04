@@ -2,11 +2,12 @@
   "municipality": "Hagfors",
   "updatedAt": "2026-09-04",
   "mode": "low-budget-codex",
-  "budgetGoal": "Minimera Codex-förbrukning. Ingen ny helhetsanalys. Ingen bred refaktorering. Arbeta endast i de filer som krävs för nedanstående tre Hagfors-gap och återanvänd befintliga mönster i repot.",
+  "budgetGoal": "Minimera Codex-förbrukning. Ingen ny helhetsanalys. Ingen bred refaktorering. Arbeta endast i de filer som krävs för nedanstående två Hagfors-gap och återanvänd befintliga mönster i repot.",
   "exclude": [
     "Hero-bild",
     "Matkassen",
-    "Föreningar och fritid – verifierade Hagfors-föreningar är nu tillagda utan Codex via association-hagfors-supplement.json",
+    "Föreningar och fritid – verifierade Hagfors-föreningar är tillagda utan Codex via association-hagfors-supplement.json",
+    "Bio Hagfors – automatisk synkning mot Värmlands Biografnätverk är implementerad utan Codex via scripts/sync_cinema_hagfors_from_varmland.py och update-cinemas-workflowen",
     "Redan lösta data-, frontend-, vård-, service-, myndighets-, fritids- och Missing People-ändringar",
     "Kosmetisk refaktorering, dokumentation och generell cleanup"
   ],
@@ -14,16 +15,11 @@
   "tasks": [
     {
       "priority": 1,
-      "area": "Bio Hagfors",
-      "work": "Återanvänd mönstret i scripts/sync_cinema_forshaga_from_events.py för Hagfors i stället för att bygga ett nytt system. Hämta endast framtida verifierade visningar från befintlig Hagfors-programkälla, behåll senaste säkra data vid källfel och lägg ett riktat test."
-    },
-    {
-      "priority": 2,
       "area": "Dagens lunch",
       "work": "Rör endast Hagfors-källor som redan finns i lunchdata. Implementera dagsmeny bara där aktuell dag/vecka kan verifieras med befintligt parsermönster. Övriga ska fortsätta source-only. Ingen generell lunchrefaktorering."
     },
     {
-      "priority": 3,
+      "priority": 2,
       "area": "Kommunnyheter",
       "work": "Gör endast en reproduktionskontroll av Hagfors kommunkälla i befintlig nyhetspipeline. Om felet är transient: ändra ingenting. Om ett tydligt Hagfors-specifikt parserfel hittas: gör minsta lokala fix och behåll Google News-fallback."
     }
@@ -33,6 +29,6 @@
     "Befintliga fallbacks bevaras",
     "Endast riktade tester körs",
     "Ingen bred scanning eller refaktorering",
-    "Om allt inte ryms: slutför i prioritetsordning 1-3 och lämna exakt kvarvarande punkt orörd"
+    "Om allt inte ryms: slutför dagens lunch före kommunnyheter och lämna kvarvarande punkt orörd"
   ]
 }
