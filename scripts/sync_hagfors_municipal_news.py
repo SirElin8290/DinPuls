@@ -14,7 +14,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,6 +57,14 @@ def published_at(url: str) -> str:
     return datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)), 12, tzinfo=timezone.utc).isoformat()
 
 
+def title_from_url(url: str) -> str:
+    slug = unquote(urlparse(url).path.rsplit("/", 1)[-1])
+    slug = re.sub(r"^20\d{2}-\d{2}-\d{2}-", "", slug)
+    slug = re.sub(r"\.html$", "", slug)
+    slug = re.sub(r"[-_]+", " ", slug).strip()
+    return slug[:1].upper() + slug[1:] if slug else "Hagfors kommunnyhet"
+
+
 def parse_listing(page: str) -> list[dict]:
     parser = LinkParser()
     parser.feed(page)
@@ -68,9 +76,7 @@ def parse_listing(page: str) -> list[dict]:
             continue
         title = re.sub(r"^Läs mer(?: om)?\s+", "", title, flags=re.I).strip()
         if not title or title.casefold() == "läs mer":
-            # Hagfors lägger ofta rubriken utanför själva Läs mer-länken.
-            # Artikeln är fortfarande verifierbar, men utan rubrik ska den inte publiceras.
-            continue
+            title = title_from_url(link)
         seen.add(link)
         rows.append({
             "id": "hagfors-listing-" + hashlib.sha1(link.encode()).hexdigest()[:14],
@@ -107,7 +113,7 @@ def main() -> int:
         return 0
 
     if not rows:
-        print("Hagfors kommunnyheter: inga säkert rubricerade artiklar hittades; befintlig data lämnas orörd.")
+        print("Hagfors kommunnyheter: inga artikellänkar hittades; befintlig data lämnas orörd.")
         return 0
 
     now = datetime.now(timezone.utc)
@@ -128,7 +134,7 @@ def main() -> int:
     status["successful"] = sorted(successful)
     status["errors"] = errors
     NEWS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Hagfors kommunnyheter: {len(fresh_rows)} färska officiella artiklar synkade")
+    print(f"Hagfors kommunnyheter: {len(rows)} verifierade länkar, {len(fresh_rows)} inom 21 dagar")
     return 0
 
 
