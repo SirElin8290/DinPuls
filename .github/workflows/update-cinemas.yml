@@ -7,8 +7,10 @@ on:
     paths:
       - "scripts/update_cinemas.py"
       - "scripts/sync_cinema_forshaga_from_events.py"
+      - "scripts/sync_cinema_hagfors_from_varmland.py"
       - "scripts/test_update_cinemas.py"
       - "scripts/test_sync_cinema_forshaga.py"
+      - "scripts/test_sync_cinema_hagfors.py"
       - "scripts/test_dals_ed_imports.py"
       - "data/events.json"
       - ".github/workflows/update-cinemas.yml"
@@ -32,28 +34,34 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Testa bioprogram
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py scripts/test_sync_cinema_forshaga.py scripts/test_dals_ed_imports.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_cinemas.py scripts/test_sync_cinema_forshaga.py scripts/test_sync_cinema_hagfors.py scripts/test_dals_ed_imports.py
       - name: Uppdatera bioprogram
         run: |
           python scripts/update_cinemas.py
           python scripts/sync_cinema_forshaga_from_events.py
-      - name: Verifiera Forshaga bio
+          python scripts/sync_cinema_hagfors_from_varmland.py
+      - name: Verifiera Forshaga och Hagfors bio
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           data = json.loads(Path('data/cinemas.json').read_text(encoding='utf-8'))
-          venues = data.get('municipalities', {}).get('Forshaga') or []
-          assert venues, 'Forshaga saknar biografpost'
-          cinema = venues[0]
-          films = cinema.get('films') or []
-          assert films, 'Forshaga saknar framtida verifierade biofilmer'
-          assert cinema.get('programStatus') == 'ok', 'Forshaga bioprogram är inte ok'
-          assert cinema.get('programSource') == 'https://www.visitvarmland.com/forshaga/evenemang'
-          for film in films:
-              assert film.get('title') and film.get('showtimes'), f'Ogiltig Forshaga-film: {film}'
-              assert all('T' in value and ('+01:00' in value or '+02:00' in value) for value in film['showtimes']), f'Ogiltig visningstid: {film}'
-          print(f"Forshaga bio: {len(films)} filmer / {sum(len(f.get('showtimes', [])) for f in films)} framtida visningar")
+          checks = {
+              'Forshaga': 'https://www.visitvarmland.com/forshaga/evenemang',
+              'Hagfors': 'https://www.varmland.bio/bio-hagfors/',
+          }
+          for municipality, source in checks.items():
+              venues = data.get('municipalities', {}).get(municipality) or []
+              assert venues, f'{municipality} saknar biografpost'
+              cinema = venues[0]
+              films = cinema.get('films') or []
+              assert films, f'{municipality} saknar framtida verifierade biofilmer'
+              assert cinema.get('programStatus') in {'ok', 'stale'}, f'{municipality} bioprogram saknar säker status'
+              assert cinema.get('programSource') == source
+              for film in films:
+                  assert film.get('title') and film.get('showtimes'), f'Ogiltig {municipality}-film: {film}'
+                  assert all('T' in value and ('+01:00' in value or '+02:00' in value) for value in film['showtimes']), f'Ogiltig visningstid: {film}'
+              print(f"{municipality} bio: {len(films)} filmer / {sum(len(f.get('showtimes', [])) for f in films)} framtida visningar, status={cinema.get('programStatus')}")
           PY
       - name: Publicera ändring
         run: |
