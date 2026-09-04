@@ -29,6 +29,26 @@ async function initializePortal() {
   const response = await fetch(`data/${portalType === "jobs" ? "jobs" : "housing"}.json`, { cache: "no-cache" });
   if (!response.ok) throw new Error(`Data kunde inte laddas (${response.status})`);
   portalData = await response.json();
+
+  if (portalType === "housing") {
+    try {
+      const supplementResponse = await fetch("data/housing-fargelanda-supplement.json", { cache: "no-store" });
+      if (supplementResponse.ok) {
+        const supplement = await supplementResponse.json();
+        if (Array.isArray(supplement?.listings) && supplement.listings.length > 0) {
+          portalData.municipalities ||= {};
+          portalData.municipalities.Färgelanda = {
+            ...supplement,
+            checkedAt: supplement.sourceChecked ? `${supplement.sourceChecked}T12:00:00+02:00` : undefined,
+            updatedAt: supplement.sourceChecked ? `${supplement.sourceChecked}T12:00:00+02:00` : undefined
+          };
+        }
+      }
+    } catch (error) {
+      console.error("Färgelandas bostadstillägg kunde inte laddas på bostadssidan:", error);
+    }
+  }
+
   renderPortal();
 }
 
