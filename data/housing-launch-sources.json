@@ -1,6 +1,6 @@
 {
-  "version":"1.0.4",
-  "sourceChecked":"2026-09-03",
+  "version":"1.0.5",
+  "sourceChecked":"2026-09-04",
   "municipalities":{
     "Karlstad":{"provider":"KBAB","mode":"official-reference","url":"https://kbab.se/","note":"KBAB publicerar tillgängliga lägenheter via sin egen webbplats."},
     "Hammarö":{"provider":"Hammaröbostäder","mode":"official-reference","url":"https://minasidor.hammarobostader.se/ledigt/lagenhet","note":"Officiell publik sida för lediga lägenheter; objekten laddas i uthyrningssystemet."},
@@ -12,6 +12,17 @@
     "Munkfors":{"provider":"Munkforsbostäder AB","mode":"official-reference","url":"https://www.munkfors.se/kommun-och-politik/kommunala-bolag/munkforsbostader-ab/","note":"Kommunens officiella bostadsbolag och väg till lediga lägenheter."},
     "Torsby":{"provider":"Torsby Bostäder","mode":"official-reference","url":"https://www.torsbybostader.se/","note":"Officiell Sök boende-ingång för lediga lägenheter."},
     "Dals-Ed":{"provider":"Edshus AB","mode":"automatic-hogia","url":"https://bostad.edshus.se/properties","dataUrl":"https://applicant-app-api-fwema7gph3h0g7g0.swedencentral-01.azurewebsites.net/homeinfo/filter","note":"Publik Hogia-sökning från Edshus egen bostadsportal; endast bostäder, med sidbläddring och verifierat totalantal."},
-    "Färgelanda":{"provider":"Valbohem AB","mode":"automatic-valbohem","url":"https://www.valbohem.se/ledigt/lagenhet"}
+    "Färgelanda":{
+      "provider":"Valbohem AB",
+      "mode":"automatic-valbohem",
+      "url":"https://www.valbohem.se/ledigt/lagenhet",
+      "seedUrls":[
+        "https://www.valbohem.se/ledigt/detalj/id/442-10-104",
+        "https://www.valbohem.se/ledigt/detalj/id/411-40-811",
+        "https://www.valbohem.se/ledigt/detalj/id/426-10-562",
+        "https://www.valbohem.se/ledigt/detalj/id/756f6930-546f-48e4-9edd-832d75263284"
+      ],
+      "note":"Valbohems listvy laddas dynamiskt. Importen startar därför även från verifierade offentliga objektsidor och följer deras länkar till liknande lediga objekt."
+    }
   }
 }
