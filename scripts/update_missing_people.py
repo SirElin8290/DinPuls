@@ -27,11 +27,17 @@ FETCH_ATTEMPTS = 3
 FETCH_TIMEOUT_SECONDS = 30
 
 NEIGHBORS = {item["name"]: item.get("neighbors", []) for item in MUNICIPALITY_CONFIG}
-# Kommunregistret innehåller endast DinPuls-kommuner. Hagfors saknade två
-# faktiska grannkommuner som båda finns i DinPuls: Sunne och Karlstad.
-# Lägg dem här tills central kommunmetadata kan migreras utan att riskera en
-# helfilsersättning av municipalities.json.
+# Tillfälliga metadataöverstyrningar för faktiska grannkommuner som finns i
+# DinPuls men ännu saknas i central municipalities.json. De hålls här tills
+# kommunmetadata kan migreras säkert utan en riskabel helfilsersättning.
 NEIGHBORS["Hagfors"] = list(dict.fromkeys([*NEIGHBORS.get("Hagfors", []), "Sunne", "Karlstad"]))
+NEIGHBORS["Karlstad"] = list(dict.fromkeys([
+    *NEIGHBORS.get("Karlstad", []),
+    "Storfors",
+    "Kristinehamn",
+    "Filipstad",
+    "Hagfors",
+]))
 PLACE_ALIASES = {item["name"]: item.get("missingPeopleAliases", []) for item in MUNICIPALITY_CONFIG}
 if any(not aliases for aliases in PLACE_ALIASES.values()):
     raise RuntimeError("Alla kommuner måste ha missingPeopleAliases i data/municipalities.json")
