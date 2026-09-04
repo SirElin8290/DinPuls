@@ -13,6 +13,7 @@ on:
       - "scripts/update_housing_eda.py"
       - "scripts/update_housing_launch.py"
       - "scripts/update_housing_forshaga.py"
+      - "scripts/update_housing_fargelanda.py"
       - "scripts/test_update_housing.py"
       - "scripts/test_dals_ed_imports.py"
       - "scripts/test_update_housing_launch.py"
@@ -88,6 +89,7 @@ jobs:
           python scripts/update_housing_eda.py
           python scripts/update_housing_launch.py
           python scripts/update_housing_forshaga.py
+          python scripts/update_housing_fargelanda.py
 
       - name: Verifiera kommunregistret och bostadskällornas hälsa
         run: |
@@ -122,6 +124,24 @@ jobs:
               else:
                   assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
           print(f'Bostadsdata innehåller alla {len(expected)} kommuner; {len(launch_names)} lanseringskällor är friska')
+          PY
+
+      - name: Verifiera Färgelanda-data
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
+          fargelanda = data.get('municipalities', {}).get('Färgelanda', {})
+          assert fargelanda.get('availabilityMode') == 'automatic', 'Färgelanda är inte automatisk'
+          assert fargelanda.get('total', 0) > 0, 'Färgelanda saknar verifierade bostadsobjekt'
+          assert fargelanda.get('total') == len(fargelanda.get('listings', [])), 'Färgelandas total matchar inte listan'
+          for item in fargelanda.get('listings', []):
+              assert item.get('address') and any(ch.isdigit() for ch in item['address']), f"Färgelanda har ogiltig adress: {item}"
+              assert isinstance(item.get('rooms'), (int, float)) and item['rooms'] > 0, f"Färgelanda har ogiltigt rumsantal: {item}"
+              assert isinstance(item.get('rent'), (int, float)) and item['rent'] > 1000, f"Färgelanda har ogiltig hyra: {item}"
+              assert item.get('url'), f"Färgelanda-objekt saknar länk: {item}"
+          print(f"Verifierat: Färgelanda har {fargelanda['total']} aktuella bostadsobjekt")
           PY
 
       - name: Verifiera Forshaga-data
