@@ -7,6 +7,7 @@ on:
       - "data/lunch-sources.json"
       - "data/lunch-launch-supplement.json"
       - "data/lunch-hammaro-supplement.json"
+      - "data/lunch-hagfors-supplement.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
       - "scripts/test_update_lunch.py"
@@ -69,7 +70,9 @@ jobs:
           hammaro = lunch['municipalities']['Hammarö']
           assert len(hammaro.get('restaurants') or []) >= 5, f"Hammarö: för få verifierade lunchkällor: {len(hammaro.get('restaurants') or [])}"
           assert hammaro.get('referenceSources'), 'Hammarö: lokal matguide saknas'
-          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])} restaurangkällor")
+          hagfors = lunch['municipalities']['Hagfors']
+          assert len(hagfors.get('restaurants') or []) >= 8, f"Hagfors: för få verifierade lunchställen: {len(hagfors.get('restaurants') or [])}"
+          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])} restaurangkällor")
           PY
 
       - name: Publicera lunchdata
