@@ -1,6 +1,17 @@
 /* DinPuls first-visit municipality selector v1 */
 (() => {
   "use strict";
+
+  /* Håll URL-parametern i synk med det kommunval som faktiskt visas.
+     Startsidan kan annars ha kvar t.ex. ?kommun=Forshaga efter att användaren
+     bytt till Färgelanda. Vid refresh vinner URL-parametern över localStorage
+     och sidan hoppar då tillbaka till den gamla kommunen. */
+  document.addEventListener("dinpuls:municipalitychange", event => {
+    const name = event.detail?.municipality?.name || event.detail?.name;
+    if (!name) return;
+    window.DinPulsMunicipalityState?.updateUrl?.(name);
+  });
+
   const onboarding = document.getElementById("municipality-onboarding");
   const options = document.getElementById("municipality-onboarding-options");
   if (!onboarding || !options) return;
