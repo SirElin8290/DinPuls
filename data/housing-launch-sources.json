@@ -1,5 +1,5 @@
 {
-  "version":"1.0.5",
+  "version":"1.0.6",
   "sourceChecked":"2026-09-04",
   "municipalities":{
     "Karlstad":{"provider":"KBAB","mode":"official-reference","url":"https://kbab.se/","note":"KBAB publicerar tillgängliga lägenheter via sin egen webbplats."},
@@ -14,15 +14,9 @@
     "Dals-Ed":{"provider":"Edshus AB","mode":"automatic-hogia","url":"https://bostad.edshus.se/properties","dataUrl":"https://applicant-app-api-fwema7gph3h0g7g0.swedencentral-01.azurewebsites.net/homeinfo/filter","note":"Publik Hogia-sökning från Edshus egen bostadsportal; endast bostäder, med sidbläddring och verifierat totalantal."},
     "Färgelanda":{
       "provider":"Valbohem AB",
-      "mode":"automatic-valbohem",
+      "mode":"official-reference",
       "url":"https://www.valbohem.se/ledigt/lagenhet",
-      "seedUrls":[
-        "https://www.valbohem.se/ledigt/detalj/id/442-10-104",
-        "https://www.valbohem.se/ledigt/detalj/id/411-40-811",
-        "https://www.valbohem.se/ledigt/detalj/id/426-10-562",
-        "https://www.valbohem.se/ledigt/detalj/id/756f6930-546f-48e4-9edd-832d75263284"
-      ],
-      "note":"Valbohems listvy laddas dynamiskt. Importen startar därför även från verifierade offentliga objektsidor och följer deras länkar till liknande lediga objekt."
+      "note":"Valbohems listvy är JavaScript-renderad. Den officiella länken verifieras här och aktuella Färgelanda-annonser hämtas därefter av update_housing_fargelanda.py från en serverrenderad marknadsfallback."
     }
   }
 }
