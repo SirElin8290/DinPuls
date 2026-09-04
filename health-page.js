@@ -5,6 +5,7 @@ let healthPrivateData;
 let healthPrivateSupplement;
 let healthLocalSupplement;
 let healthKarlstadPrivateSupplement;
+let healthFargelandaSupplement;
 
 const escapeHealth = window.DinPulsSecurity.escapeHtml;
 const safeHealthUrl = window.DinPulsSecurity.safeExternalUrl;
@@ -21,6 +22,7 @@ const DEFAULT_CATEGORY_ORDER = [
   "Fotvård & medicinsk fotvård",
   "Optik & syn",
   "Psykisk hälsa & samtalsstöd",
+  "Barnhälsa & BVC",
   "Barnmorska & kvinnohälsa",
   "Vaccination",
   "Företagshälsa & specialist",
@@ -46,6 +48,7 @@ function inferHealthCategory(provider) {
   if (/fotvård|fotterap/.test(text)) return "Fotvård & medicinsk fotvård";
   if (/optik|synundersök|glasögon|kontaktlins/.test(text)) return "Optik & syn";
   if (/psykolog|psykoter|samtal|beteendevet/.test(text)) return "Psykisk hälsa & samtalsstöd";
+  if (/barnavård|bvc|barnhälsa/.test(text)) return "Barnhälsa & BVC";
   if (/barnmorsk|kvinnohälsa|gravid|preventiv/.test(text)) return "Barnmorska & kvinnohälsa";
   if (/vaccin/.test(text)) return "Vaccination";
   if (/företagshälsa|arbetsmedicin|ortoped|specialist/.test(text)) return "Företagshälsa & specialist";
@@ -92,6 +95,7 @@ function allHealthProviders() {
     ...(healthPrivateSupplement?.providers || []),
     ...(healthLocalSupplement?.providers || []),
     ...(healthKarlstadPrivateSupplement?.providers || []),
+    ...(healthFargelandaSupplement?.providers || []),
     ...(healthPrivateData?.providers || [])
   ];
 }
@@ -156,12 +160,13 @@ function renderHealthAds() {
 }
 
 async function initializeHealthPage() {
-  const [officialResponse, privateResponse, supplementResponse, localSupplementResponse, karlstadPrivateResponse] = await Promise.all([
+  const [officialResponse, privateResponse, supplementResponse, localSupplementResponse, karlstadPrivateResponse, fargelandaResponse] = await Promise.all([
     fetch("data/health.json", { cache: "no-cache" }),
     fetch("data/health-private.json", { cache: "no-cache" }),
     fetch("data/health-private-supplement.json", { cache: "no-cache" }),
     fetch("data/health-local-supplement.json", { cache: "no-cache" }),
-    fetch("data/health-karlstad-private-supplement.json", { cache: "no-cache" })
+    fetch("data/health-karlstad-private-supplement.json", { cache: "no-cache" }),
+    fetch("data/health-fargelanda-supplement.json", { cache: "no-cache" })
   ]);
   if (!officialResponse.ok) throw new Error(`Vårddata kunde inte laddas (${officialResponse.status})`);
   healthData = await officialResponse.json();
@@ -169,10 +174,12 @@ async function initializeHealthPage() {
   healthPrivateSupplement = supplementResponse.ok ? await supplementResponse.json() : { providers: [] };
   healthLocalSupplement = localSupplementResponse.ok ? await localSupplementResponse.json() : { providers: [] };
   healthKarlstadPrivateSupplement = karlstadPrivateResponse.ok ? await karlstadPrivateResponse.json() : { providers: [] };
+  healthFargelandaSupplement = fargelandaResponse.ok ? await fargelandaResponse.json() : { providers: [] };
   if (!privateResponse.ok) console.warn(`Privat vårddata kunde inte laddas (${privateResponse.status})`);
   if (!supplementResponse.ok) console.warn(`Kompletterande vårddata kunde inte laddas (${supplementResponse.status})`);
   if (!localSupplementResponse.ok) console.warn(`Lokala vårdkompletteringar kunde inte laddas (${localSupplementResponse.status})`);
   if (!karlstadPrivateResponse.ok) console.warn(`Privata Karlstad-aktörer kunde inte laddas (${karlstadPrivateResponse.status})`);
+  if (!fargelandaResponse.ok) console.warn(`Färgelandas vårdkomplettering kunde inte laddas (${fargelandaResponse.status})`);
   const select = document.querySelector("#health-municipality");
   const categorySelect = document.querySelector("#health-group");
   healthState.populateSelect(select, healthMunicipality);
