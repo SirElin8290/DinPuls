@@ -47,10 +47,28 @@
     if (window.lucide) window.lucide.createIcons();
   }
 
+  function mergeFargelandaSupplement(supplement){
+    if (!supplement?.activities?.length) return;
+    data.municipalities = data.municipalities || {};
+    const target = data.municipalities.Färgelanda || (data.municipalities.Färgelanda = {activities:[],directoryUrl:""});
+    const seen = new Set((target.activities || []).map(item => normalize(item.name)));
+    supplement.activities.forEach(item => {
+      const key = normalize(item.name);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      target.activities.push(item);
+    });
+    if (supplement.directoryUrl) target.directoryUrl = supplement.directoryUrl;
+  }
+
   async function init(){
-    const response = await fetch("data/leisure.json",{cache:"no-cache"});
+    const [response, fargelandaResponse] = await Promise.all([
+      fetch("data/leisure.json",{cache:"no-cache"}),
+      fetch("data/leisure-fargelanda-supplement.json",{cache:"no-cache"}).catch(()=>null)
+    ]);
     if(!response.ok) throw new Error(`Fritidsdata kunde inte laddas: ${response.status}`);
     data = await response.json();
+    if (fargelandaResponse?.ok) mergeFargelandaSupplement(await fargelandaResponse.json());
     const select = document.querySelector("#leisure-municipality");
     select.innerHTML = `<option value="${ALL_MUNICIPALITIES}">Alla kommuner</option>` + state.MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
     select.value = municipality;
