@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "lunch-sources.json"
 LAUNCH_SUPPLEMENT = ROOT / "data" / "lunch-launch-supplement.json"
 HAMMARO_SUPPLEMENT = ROOT / "data" / "lunch-hammaro-supplement.json"
+HAGFORS_SUPPLEMENT = ROOT / "data" / "lunch-hagfors-supplement.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
@@ -88,7 +89,6 @@ def fetch(url: str) -> str:
 
 
 def fetch_source(source: dict, fetcher=fetch) -> str:
-    """Fetch parser input while retaining the public page as the user-facing link."""
     page = fetcher(source.get("dataUrl") or source["url"])
     if source.get("dataFormat") != "wordpress-page":
         return page
@@ -182,14 +182,25 @@ def merge_config(config: dict) -> dict:
     """Add verified supplements without rewriting the established source catalog."""
     municipalities = config.setdefault("municipalities", {})
     references = config.setdefault("referenceSources", {})
-    for supplement_path in (LAUNCH_SUPPLEMENT, HAMMARO_SUPPLEMENT):
+    for supplement_path in (LAUNCH_SUPPLEMENT, HAMMARO_SUPPLEMENT, HAGFORS_SUPPLEMENT):
         if not supplement_path.exists():
             continue
         supplement = json.loads(supplement_path.read_text(encoding="utf-8"))
-        for name, sources in (supplement.get("municipalities") or {}).items():
+        supplement_municipalities = supplement.get("municipalities") or {}
+        if supplement_path == HAGFORS_SUPPLEMENT and supplement.get("restaurants"):
+            supplement_municipalities = {"Hagfors": supplement["restaurants"]}
+        for name, sources in supplement_municipalities.items():
             current = municipalities.setdefault(name, [])
-            seen = {str(item.get("id")) for item in current if isinstance(item, dict)}
-            current.extend(item for item in sources if isinstance(item, dict) and str(item.get("id")) not in seen)
+            by_id = {str(item.get("id")): index for index, item in enumerate(current) if isinstance(item, dict)}
+            for item in sources:
+                if not isinstance(item, dict):
+                    continue
+                source_id = str(item.get("id"))
+                if source_id in by_id:
+                    current[by_id[source_id]] = {**current[by_id[source_id]], **item}
+                else:
+                    by_id[source_id] = len(current)
+                    current.append(item)
         for name, sources in (supplement.get("referenceSources") or {}).items():
             current = references.setdefault(name, [])
             seen = {str(item.get("url")) for item in current if isinstance(item, dict)}
