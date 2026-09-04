@@ -23,6 +23,16 @@
   document.head.appendChild(script);
 })();
 
+/* Färgelandas bostadsdata har en verifierad marknadsfallback eftersom Valbohems
+   publika listvy är JavaScript-renderad och den centrala importen kan bli tom. */
+(() => {
+  if (document.querySelector('script[data-fargelanda-housing-home]')) return;
+  const script = document.createElement("script");
+  script.src = "fargelanda-housing-home.js?v=1";
+  script.dataset.fargelandaHousingHome = "true";
+  document.head.appendChild(script);
+})();
+
 (function initCommunityFeed(root) {
   "use strict";
 
