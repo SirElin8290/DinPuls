@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T22:24:03+02:00
+Genererad: 2026-09-08T00:49:56+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
@@ -15,7 +15,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Årjäng | 🟢 100 % | 29 | 10 | 29 | 40 / 40 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
 | Bengtsfors | 🟢 100 % | 21 | 34 | 7 | 44 / 44 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 34 |
 | Mellerud | 🟢 100 % | 26 | 18 | 10 | 33 / 33 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
-| Arvika | 🟢 100 % | 52 | 8 | 26 | 75 / 75 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
+| Arvika | 🟢 100 % | 52 | 8 | 25 | 75 / 75 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
 | Grums | 🟢 100 % | 14 | 9 | 7 | 26 / 26 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
 | Säffle | 🟢 100 % | 29 | 55 | 5 | 73 / 73 färska | 18 / 7 kat | 16 / 4 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 6 | 24 | 28 | 20 / 20 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
@@ -31,7 +31,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 27 / 27 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
 | Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 45 / 45 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
 | Sunne | 🟢 100 % | 21 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
-| Torsby | 🟡 EJ 100 % | 22 | 0 | 29 | 45 / 45 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
+| Torsby | 🟡 EJ 100 % | 22 | 0 | 27 | 45 / 45 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
 
 ## Blockerare per kommun
 
