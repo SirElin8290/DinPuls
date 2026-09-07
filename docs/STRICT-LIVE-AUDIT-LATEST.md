@@ -1,7 +1,7 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T18:59:48+02:00
-Datakälla: 37 livefiler, 2 repo-fallback.
+Genererad: 2026-09-07T19:03:19+02:00
+Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
