@@ -1,155 +1,149 @@
-# DinPuls – regelbok för kommunanalys
+# DinPuls – STRICT LIVE 100 % kommunregel
 
-Detta dokument är den bindande arbetsstandarden för analys, åtgärd och godkännande av kommuner på DinPuls.se.
-
-Regelboken ska läsas innan en ny kommunanalys eller omanalys görs. Tidigare godkända bedömningar får inte nollställas eller bedömas enligt nya kriterier utan att denna fil först ändras genom ett uttryckligt beslut.
+Detta dokument ersätter alla tidigare regler för kommunanalys och är den bindande standarden för att avgöra om en DinPuls-kommun är 100 % klar.
 
 ## 1. Grundprincip
 
-Målet är att varje DinPuls-kommun ska vara praktiskt användbar för en vanlig besökare. Analysen ska bedöma verklig funktion, relevant innehåll och korrekt kommunanknytning – inte jaga teoretisk perfektion.
+Varje kommun bedöms från noll vid varje full revision. Tidigare grönt, tidigare pilot-/produktionsstatus, äldre rapporter och tidigare godkännanden ger inget frikort.
 
-Samma standard ska användas för samtliga 21 kommuner.
+Frågan är endast:
+
+> Om en vanlig besökare öppnar DinPuls för kommunen nu – fungerar samtliga obligatoriska moduler, visar de rätt kommun och finns det tillräckligt mycket aktuellt och lokalt innehåll?
+
+En kommun är **🟢 100 % GRÖN** endast när alla obligatoriska moduler samtidigt är gröna.
+
+En enda gul eller röd modul innebär att kommunen som helhet inte är 100 % grön.
 
 ## 2. Statusfärger
 
-### 🟢 GRÖN – godkänd
-En modul är grön när den fungerar och har tillräckligt korrekt och relevant innehåll för kommunen.
+### 🟢 GRÖN
+Modulen fungerar, visar rätt kommun, använder aktiv kod/data, innehållet är aktuellt och den når nedanstående miniminivå.
 
-Grönt betyder inte att modulen måste innehålla allt som över huvud taget går att hitta. Den ska vara användbar och hålla DinPuls fastställda kvalitetsnivå.
+### 🟡 GUL
+Modulen fungerar tekniskt men är för tunn, för gammal, bygger bara på en referenslänk där verkligt innehåll ska visas, eller når inte miniminivån.
 
-### 🟡 GUL – fungerar men har konkret brist
-En modul är gul när grundfunktionen fungerar men det finns en identifierad, konkret innehålls- eller kvalitetsbrist som behöver åtgärdas.
+### 🔴 RÖD
+Modulen är trasig, tom på grund av fel, visar fel kommun/fel data, saknar nödvändig källa eller kan inte användas som avsett.
 
-En modul får inte göras gul enbart därför att den inte verifierades på nytt i den senaste analysen.
+## 3. Obligatoriska moduler och miniminivåer
 
-### 🔴 RÖD – fungerar inte
-En modul är röd när den inte fungerar, visar felaktig kommun/data, saknar en nödvändig funktion eller på annat sätt inte kan användas som avsett.
+| Modul | Krav för 🟢 |
+|---|---|
+| Grundkonfiguration / kommunval | Rätt kommun ska väljas, visas och bestå vid navigation/refresh. |
+| Dagens viktigaste | Lokal källa/fallback fungerar. Ett legitimt nolläge är okej om källorna faktiskt är friska. |
+| Väder | Aktuell väderdata för rätt kommun. |
+| Vägtrafik | Aktiv fungerande källa för kommunen. 0 händelser är okej om källan är frisk. |
+| Kollektivtrafik | Rätt hållplats/område och aktuell användbar information. |
+| Flyg | Korrekt och användbar flyginformation. Realtid krävs inte. |
+| Jobb | Minst **3 aktuella lokala jobb**. 0–2 = 🟡. |
+| Bostäder | Minst **1 faktiskt aktuellt ledigt objekt**. Endast länk eller 0 objekt = 🟡 i STRICT 100 %. |
+| Evenemang | Minst **5 aktuella/framtida evenemang**. 1–4 = 🟡. |
+| Lokala/kommunala nyheter | Minst **5 aktuella lokala nyheter**. Huvuddelen bör vara högst cirka 30 dagar gamla. |
+| Missing People | Korrekt lokal/grannkommunal logik och fungerande källa/fallback. 0 aktiva efterlysningar är okej. |
+| Vård & hälsa | Minst **5 relevanta verksamheter** och rimlig bredd: vårdcentral/läkare plus flera av tandvård, BVC/barnmorska, rehab/fysioterapi, apotek, privat vård/behandling. |
+| Service & hantverk | Minst **8 verifierade lokala företag** och minst **4 relevanta kategorier**, exempelvis el, VVS, bygg, bil/däck, lås, städ. |
+| Myndigheter & samhällsservice | Centrala funktioner ska täckas: kontaktcenter, socialtjänst, ekonomiskt bistånd, budget/skuld, äldreomsorg, LSS, bygglov/boende och relevanta statliga funktioner. |
+| Dagens lunch | Minst **4 verifierade lokala lunchställen** som faktiskt serverar lunch. Dagsmeny behöver inte vara maskinläst. |
+| Bio | Finns aktiv lokal bio ska korrekt biograf samt aktuell program-/visningsinformation eller fungerande direkt programkälla finnas. Om lokal bio saknas får modulen vara grön endast om detta hanteras korrekt och tydligt. |
+| Fritid & aktiviteter | Minst **10 verkliga lokala aktiviteter/anläggningar** med bredd, exempelvis bibliotek/kultur, bad, friluftsliv, motionsområde, ungdomsverksamhet och anläggningar. |
+| Idrott & föreningar | Minst **20 verkliga lokala föreningar** för normal kommun och tydlig bredd mellan verksamhetstyper. Färre än 20 = 🟡 om inte ett verifierat faktiskt lokalt föreningsutbud är mindre än så. |
+| Community / Det pratas om | Funktionen ska bete sig korrekt. Privata grupper får inte skrapas utan godkännande. Avsaknad av godkänd community-källa är inte i sig blockerande. |
 
-## 3. Grönt består
+## 4. Absoluta spärrar
 
-En redan verifierad grön modul förblir grön tills ett konkret nytt fel eller en konkret ny brist faktiskt har identifierats.
+### Live/aktiv kod före repo
+Data i GitHub räknas inte om den aktiva frontend- eller pipeline-koden inte använder den.
 
-En ny fullanalys innebär INTE att alla tidigare gröna moduler nollställs och måste bevisas från början igen.
+### Inga gamla meriter
+Vid STRICT-revision nollställs bedömningen. Ingen kommun behåller grönt bara för att den tidigare varit godkänd.
 
-Om en tidigare grön modul degraderas ska analysen ange exakt vilket nytt fel eller vilken ny brist som motiverar ändringen.
+### Inget tekniskt grönt med tunn sida
+Två föreningar, ett evenemang, en ensam vårdcentral eller en referenslänk räcker inte när modulen ska ge ett lokalt utbud.
 
-Osäkerhet eller utebliven omverifiering är inte i sig ett skäl att degradera grönt.
-
-## 4. Bedömningsstandarden får inte ändras mitt i arbetet
-
-Kraven för grönt, gult och rött ska vara desamma mellan kommunerna och över tid.
-
-En kommun får inte plötsligt bedömas hårdare därför att en senare analys råkar vara mer omfattande.
-
-Om kvalitetsstandarden behöver ändras ska det göras som ett medvetet projektbeslut och denna regelbok uppdateras först. Därefter ska konsekvensen för redan godkända kommuner bedömas uttryckligen.
-
-## 5. Vad som inte är blockerande
-
-### Hero
-Hero-bilden ingår inte i kommunens godkännandestatus. Den hanteras separat av projektägaren och ska ignoreras vid kommunanalys.
-
-### Matkassen
-Matkassen ingår inte i kommunens godkännandestatus och ska inte anges som brist eller blockerare.
-
-### Flyg
-Flyg behöver inte vara realtid för att modulen ska kunna vara grön. Korrekt och användbar flyginformation räcker enligt projektets beslutade standard.
-
-### Community / Det pratas om
-Avsaknad av en godkänd lokal community-källa blockerar inte grönt. Privata grupper får inte skrapas eller publiceras utan godkännande och innehåll får aldrig fabriceras för att fylla modulen.
-
-### Externa tillfälliga nätverksfel
-Ett tillfälligt nätverksfel mot en extern källa innebär inte automatiskt att en kommunmodul är röd om DinPuls implementation är korrekt och en fungerande fallback finns. Ett faktiskt återkommande integrationsfel ska däremot åtgärdas.
-
-## 6. Innehållskrav
-
-En modul ska bedömas utifrån kommunens storlek och verkliga lokala utbud. En liten kommun behöver inte ha samma antal poster som Karlstad.
-
-Det är kvalitet och rimlig täckning som bedöms – inte ett identiskt numeriskt mål för alla kommuner.
-
-Symboliska kompletteringar ska undvikas. Om en modul verkligen är för tunn ska den byggas ut ordentligt med relevanta, verifierbara aktörer, verksamheter, aktiviteter eller källor.
-
-Innehåll får aldrig hittas på för att få en modul grön.
-
-## 7. Verifieringsnivåer – håll dem isär
-
-Följande är olika saker och får aldrig beskrivas som om de vore samma:
-
-1. **Kod/data skapad** – ändringen finns lokalt eller är förberedd.
-2. **Commit genomförd** – ändringen finns på GitHub/main.
-3. **Aktiv kodväg verifierad** – det är verifierat att den faktiska frontend-/pipeline-koden använder ändringen.
-4. **Workflow/runtime verifierad** – automation/import har körts med den nya koden och resultatet har kontrollerats.
-5. **Live-verifierad** – den publicerade DinPuls-sidan visar och beter sig korrekt.
-
-En commit får aldrig ensam beskrivas som bevis för att funktionen fungerar live.
-
-Om endast repo-nivån är verifierad ska detta sägas uttryckligen.
-
-## 8. Full kommunanalys
-
-En full analys ska gå igenom alla relevanta DinPuls-moduler för kommunen, bland annat:
-
-- grundkonfiguration och kommunval
+### Legitimt nolläge skiljs från innehållsbrist
+Följande kan vara gröna med 0 aktuella poster om källan fungerar korrekt:
 - Dagens viktigaste
-- väder
 - vägtrafik
-- kollektivtrafik
-- flyg
+- Missing People
+
+Följande måste innehålla verkligt lokalt utbud för STRICT 100 %:
 - jobb
 - bostäder
 - evenemang
-- kommun-/lokalnyheter
-- Missing People
-- vård & hälsa
-- service & hantverk
-- myndigheter & samhällsservice
-- dagens lunch
-- bio
-- fritid & aktiviteter
-- idrott & föreningar
-- community / Det pratas om
+- nyheter
+- vård
+- service
+- lunch
+- fritid
+- idrott/föreningar
 
-Hero och Matkassen undantas enligt ovan.
+## 5. Undantag
 
-Analysen ska utgå från senast fastställda status och leta efter konkreta förändringar eller fel. Den ska inte börja med antagandet att tidigare arbete är ogiltigt.
+### Hero
+Hero-bilder ingår inte i kommunens 100 %-status.
 
-## 9. Åtgärdsprincip
+### Matkassen
+Matkassen ingår inte i kommunens 100 %-status.
 
-När ett konkret problem hittas ska allt som säkert kan lösas direkt via GitHub göras där utan onödig Codex-/Work-användning.
+### Flyg
+Flyg behöver inte vara realtid.
 
-Codex/annan tyngre exekvering används endast när uppgiften faktiskt kräver det.
+### Community
+Avsaknad av godkänd privat/community-källa blockerar inte grönt om funktionen i övrigt hanteras korrekt och inget innehåll fabriceras.
 
-Aktiva kodvägar ska prioriteras. Att skapa en supplement-, research- eller datafil som ingen aktiv kod läser räknas inte som att modulen är fixad.
+## 6. Verifieringsordning
 
-## 10. Rapportering
+Vid full analys ska varje kommun granskas mot aktuell aktiv data och, när möjligt, publicerad/live sida.
 
-Kommunarbete ska normalt genomföras utan löpande mellanrapporter. Slutrapporten ska skilja tydligt mellan:
+Verifieringsnivåerna ska hållas isär:
+1. data/kod finns i repo,
+2. aktiv kodväg använder datan,
+3. workflow/runtime har producerat aktuell output,
+4. live-sidan visar korrekt resultat.
 
-- vad som redan var godkänt,
-- vilka konkreta problem som hittades,
-- vad som faktiskt åtgärdades,
-- vad som är repo-/runtime-/live-verifierat,
-- vad som eventuellt återstår.
+En commit är aldrig ensam bevis för att en modul är grön.
 
-Överdrivna påståenden om att något är "fixat", "färdigt" eller "grönt" ska undvikas tills den verifieringsnivå som krävs faktiskt är uppnådd.
+## 7. Full kommunanalys
 
-## 11. Kommunstatus och historik
+Samtliga 21 kommuner ska bedömas enligt exakt samma STRICT-standard:
 
-När en kommun är färdigställd ska dess godkända status betraktas som projektets baseline. Senare analyser får komplettera eller degradera den endast när ett konkret nytt fel hittas.
+- Åmål
+- Årjäng
+- Bengtsfors
+- Mellerud
+- Arvika
+- Grums
+- Säffle
+- Dals-Ed
+- Eda
+- Filipstad
+- Forshaga
+- Färgelanda
+- Hagfors
+- Hammarö
+- Karlstad
+- Kil
+- Kristinehamn
+- Munkfors
+- Storfors
+- Sunne
+- Torsby
 
-### Fastställda baselines
+Hero och Matkassen undantas. Alla övriga obligatoriska moduler ska kontrolleras.
 
-- **Hagfors:** 🟢 färdig enligt DinPuls beslutade standard. Accepterade begränsningar ska inte återöppnas som blockerare utan ett nytt projektbeslut eller ett konkret nytt fel.
-- **Hammarö:** tidigare genomarbetad/godkänd baseline ska bevaras; en framtida analys får inte nollställa tidigare verifieringar utan konkret anledning.
-- **Färgelanda:** tidigare analys hade i huvudsak evenemang och bostäder som återstående konkreta problem. Senare arbete har dessutom byggt ut vård, fritid och idrott. En ny analys får inte göra övriga tidigare gröna moduler gula enbart för att de inte omverifierades i samma genomgång.
+## 8. Slutregel
 
-Kommunstatus ska uppdateras när ett nytt faktiskt resultat är verifierat. Historiken ska inte skrivas om för att passa en ny bedömningsstandard.
+> **100 % GRÖN = samtliga obligatoriska moduler är gröna, ingen innehållsmodul ligger under miniminivån och aktuell aktiv/live data är verifierad.**
 
-## 12. Konfliktregel
+Om någon modul är gul eller röd ska kommunen rapporteras som **inte 100 % grön**, med exakt blockerare.
 
-Om en framtida analys, instruktion eller arbetsmetod står i konflikt med denna regelbok ska konflikten uppmärksammas innan status ändras.
+## 9. Rapportering
 
-Projektägarens senaste uttryckliga beslut har företräde. När ett sådant beslut ändrar den permanenta arbetsstandarden ska denna fil uppdateras så att samma regel används nästa gång.
+Slutrapporten för de 21 kommunerna ska visa:
+- totalstatus per kommun,
+- vilka moduler som är gröna/gula/röda,
+- konkreta antal där miniminivåer används,
+- exakt blockerare för varje icke-grön kommun,
+- vilka kommuner som faktiskt når 100 %.
 
----
-
-**Praktisk huvudregel:** Läs denna fil först. Behåll redan verifierat grönt. Leta efter konkreta fel. Ändra inte standarden i efterhand. Skilj alltid commit från faktisk funktion.
+Inga tidigare statusar får användas som argument för grönt. Nuläget är facit.
