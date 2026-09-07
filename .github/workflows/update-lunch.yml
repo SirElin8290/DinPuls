@@ -8,8 +8,10 @@ on:
       - "data/lunch-launch-supplement.json"
       - "data/lunch-hammaro-supplement.json"
       - "data/lunch-hagfors-supplement.json"
+      - "data/lunch-fargelanda-supplement.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
+      - "scripts/apply_fargelanda_lunch.py"
       - "scripts/test_update_lunch.py"
       - ".github/workflows/update-lunch.yml"
   schedule:
@@ -50,6 +52,7 @@ jobs:
           set -euo pipefail
           python scripts/test_update_lunch.py
           python scripts/update_lunch.py
+          python scripts/apply_fargelanda_lunch.py
 
       - name: Verifiera att alla kommuner finns med och att lanseringskommunerna har matkälla
         run: |
@@ -72,7 +75,9 @@ jobs:
           assert hammaro.get('referenceSources'), 'Hammarö: lokal matguide saknas'
           hagfors = lunch['municipalities']['Hagfors']
           assert len(hagfors.get('restaurants') or []) >= 8, f"Hagfors: för få verifierade lunchställen: {len(hagfors.get('restaurants') or [])}"
-          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])} restaurangkällor")
+          fargelanda = lunch['municipalities']['Färgelanda']
+          assert len(fargelanda.get('restaurants') or []) >= 4, f"Färgelanda: för få verifierade lunchställen: {len(fargelanda.get('restaurants') or [])}"
+          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])}, Färgelanda {len(fargelanda.get('restaurants') or [])} restaurangkällor")
           PY
 
       - name: Publicera lunchdata
