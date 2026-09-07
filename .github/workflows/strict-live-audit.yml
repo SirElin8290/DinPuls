@@ -3,12 +3,16 @@ name: STRICT LIVE 100 audit
 # Auditen ska alltid läsa publicerad live-data. Den här manuella omkörningsvägen
 # används när en Pages-deploy precis har färdigställts efter en tidigare audit.
 # Färgelanda-verifiering 2026-09-07: event, föreningar, service, lunch och myndigheter.
+# Hammarö-verifiering 2026-09-07: bostäder, föreningar och myndigheter.
 on:
   push:
     branches: [main]
     paths:
       - 'DINPULS-AUDIT-RULES.md'
       - 'scripts/audit_strict_live_100.py'
+      - 'data/housing.json'
+      - 'data/housing-hammaro-supplement.json'
+      - 'scripts/apply_hammaro_housing.py'
       - 'data/service.json'
       - 'data/service-private-supplement.json'
       - 'data/service-launch-supplement.json'
@@ -21,6 +25,7 @@ on:
       - 'data/health-fargelanda-supplement.json'
       - 'data/health-eda-supplement.json'
       - 'health-page.js'
+      - 'data/association-hammaro-supplement.json'
       - 'data/association-hagfors-supplement.json'
       - 'data/association-sunne-supplement.json'
       - 'data/association-dals-ed-supplement.json'
