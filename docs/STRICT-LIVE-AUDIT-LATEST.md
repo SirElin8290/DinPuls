@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T19:48:53+02:00
+Genererad: 2026-09-07T19:50:52+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 13 av 21 kommuner når 100 %
+## Resultat: 14 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Dals-Ed, Eda, Filipstad, Forshaga, Hagfors, Kil, Sunne
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Hagfors, Kil, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -17,7 +17,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Mellerud | 🟢 100 % | 26 | 18 | 10 | 34 / 34 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
 | Arvika | 🟢 100 % | 50 | 8 | 26 | 78 / 78 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
 | Grums | 🟢 100 % | 14 | 9 | 7 | 27 / 27 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
-| Säffle | 🟡 EJ 100 % | 29 | 55 | 5 | 72 / 72 färska | 18 / 7 kat | 15 / 3 kat | 10 | 64 | 44 |
+| Säffle | 🟢 100 % | 29 | 55 | 5 | 72 / 72 färska | 18 / 7 kat | 16 / 4 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
 | Eda | 🟢 100 % | 27 | 41 | 9 | 45 / 45 färska | 13 / 7 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟢 100 % | 9 | 10 | 10 | 68 / 69 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 34 |
@@ -53,8 +53,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Grums — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Säffle — 🟡 EJ 100 %
-- **Service & hantverk:** 🟡 — 15 företag i 3 kategorier; minst 8 och 4 kategorier krävs (15 / 3 kat)
+### Säffle — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Dals-Ed — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
