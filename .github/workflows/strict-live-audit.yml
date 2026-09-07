@@ -32,7 +32,12 @@ permissions:
 
 jobs:
   audit:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      ${{
+        github.event_name != 'workflow_run' ||
+        (github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_commit.message != 'Uppdatera STRICT LIVE 100 kommunrapport')
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Hämta repo
