@@ -52,25 +52,34 @@ function renderAuthorityAds() {
   });
 }
 
+function mergeAuthoritySupplement(supplement) {
+  Object.entries(supplement.municipalities || {}).forEach(([name, municipality]) => {
+    const current = authorityData.municipalities[name] || {};
+    authorityData.municipalities[name] = {
+      ...current,
+      ...municipality,
+      serviceUrls: { ...(current.serviceUrls || {}), ...(municipality.serviceUrls || {}) }
+    };
+  });
+}
+
 async function initializeAuthoritiesPage() {
-  const [response, hagforsSupplementResponse] = await Promise.all([
+  const [response, hagforsSupplementResponse, arjangSupplementResponse] = await Promise.all([
     fetch("data/authorities.json", { cache: "no-cache" }),
-    fetch("data/authorities-hagfors-supplement.json", { cache: "no-cache" })
+    fetch("data/authorities-hagfors-supplement.json", { cache: "no-cache" }),
+    fetch("data/authorities-arjang-supplement.json", { cache: "no-cache" })
   ]);
   if (!response.ok) throw new Error(`Myndighetsdata kunde inte laddas (${response.status})`);
   authorityData = await response.json();
   if (hagforsSupplementResponse.ok) {
-    const supplement = await hagforsSupplementResponse.json();
-    Object.entries(supplement.municipalities || {}).forEach(([name, municipality]) => {
-      const current = authorityData.municipalities[name] || {};
-      authorityData.municipalities[name] = {
-        ...current,
-        ...municipality,
-        serviceUrls: { ...(current.serviceUrls || {}), ...(municipality.serviceUrls || {}) }
-      };
-    });
+    mergeAuthoritySupplement(await hagforsSupplementResponse.json());
   } else {
     console.warn(`Hagfors samhällsservice-komplettering kunde inte laddas (${hagforsSupplementResponse.status})`);
+  }
+  if (arjangSupplementResponse.ok) {
+    mergeAuthoritySupplement(await arjangSupplementResponse.json());
+  } else {
+    console.warn(`Årjängs samhällsservice-komplettering kunde inte laddas (${arjangSupplementResponse.status})`);
   }
   const municipalitySelect = document.querySelector("#authority-municipality");
   const groupSelect = document.querySelector("#authority-group");
