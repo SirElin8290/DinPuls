@@ -25,6 +25,7 @@ SUPPLEMENTS = (
     DATA / "association-sunne-supplement.json",
     DATA / "association-dals-ed-supplement.json",
     DATA / "association-filipstad-supplement.json",
+    DATA / "sports-fargelanda-supplement.json",
     DATA / "association-enrichment-prerequisites.json",
 )
 
@@ -38,7 +39,6 @@ def normalized_name(value: object) -> str:
 
 
 def merge_named(existing: list[dict], supplemental: list[dict]) -> list[dict]:
-    """Keep generated/curated item when names collide; add verified missing items."""
     result = [dict(item) for item in existing if isinstance(item, dict)]
     seen = {normalized_name(item.get("name")) for item in result}
     for item in supplemental:
