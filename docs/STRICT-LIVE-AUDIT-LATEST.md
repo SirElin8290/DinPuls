@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T15:49:13+02:00
+Genererad: 2026-09-07T15:52:26+02:00
 Datakälla: 37 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 6 av 21 kommuner når 100 %
+## Resultat: 7 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -21,7 +21,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Dals-Ed | 🟡 EJ 100 % | 5 | 24 | 25 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 10 |
 | Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 51 / 51 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟡 EJ 100 % | 9 | 10 | 10 | 67 / 67 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 8 |
-| Forshaga | 🟡 EJ 100 % | 12 | 10 | 44 | 47 / 47 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
+| Forshaga | 🟢 100 % | 12 | 10 | 44 | 47 / 47 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
 | Färgelanda | 🟡 EJ 100 % | 7 | 4 | 3 | 22 / 22 färska | 9 / 8 kat | 3 / 3 kat | 3 | 12 | 4 |
 | Hagfors | 🟡 EJ 100 % | 22 | 23 | 22 | 47 / 47 färska | 13 / 7 kat | 12 / 7 kat | 8 | 28 | 16 |
 | Hammarö | 🟡 EJ 100 % | 12 | 0 | 38 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 16 |
@@ -70,8 +70,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 - **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
 - **Idrott & föreningar:** 🟡 — endast 8 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (8)
 
-### Forshaga — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
+### Forshaga — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Färgelanda — 🟡 EJ 100 %
 - **Evenemang:** 🟡 — endast 3 aktuella/framtida evenemang; minst 5 krävs (3)
@@ -158,7 +158,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Dals-Ed | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Eda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Filipstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
-| Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Färgelanda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Hagfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Hammarö | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
