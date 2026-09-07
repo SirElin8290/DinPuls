@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T15:42:13+02:00
+Genererad: 2026-09-07T15:49:13+02:00
 Datakälla: 37 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 5 av 21 kommuner når 100 %
+## Resultat: 6 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Bengtsfors | 🟢 100 % | 21 | 34 | 7 | 41 / 41 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 34 |
 | Mellerud | 🟢 100 % | 26 | 18 | 9 | 31 / 31 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
 | Arvika | 🟢 100 % | 50 | 8 | 26 | 67 / 67 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
-| Grums | 🟡 EJ 100 % | 14 | 9 | 7 | 29 / 29 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
+| Grums | 🟢 100 % | 14 | 9 | 7 | 29 / 29 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
 | Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 69 / 69 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟡 EJ 100 % | 5 | 24 | 25 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 10 |
 | Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 51 / 51 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
@@ -50,8 +50,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Arvika — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Grums — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, bygglov (4 lokala länkar)
+### Grums — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Säffle — 🟡 EJ 100 %
 - **Evenemang:** 🟡 — endast 1 aktuella/framtida evenemang; minst 5 krävs (1)
@@ -153,7 +153,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Bengtsfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Mellerud | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Arvika | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
-| Grums | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| Grums | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Säffle | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Dals-Ed | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Eda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
