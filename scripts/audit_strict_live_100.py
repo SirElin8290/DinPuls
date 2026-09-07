@@ -1,394 +1,128 @@
 #!/usr/bin/env python3
-"""DinPuls STRICT LIVE 100 % audit.
-
-Bedömer alla 21 kommuner från noll enligt DINPULS-AUDIT-RULES.md.
-Primärt används publicerade JSON-data från dinpuls.se när de kan hämtas;
-repo-data används som fallback. Rapport skrivs till docs/STRICT-LIVE-AUDIT-LATEST.md.
-"""
 from __future__ import annotations
-
-import json
-import re
-import sys
-import urllib.request
-from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+import json, re, sys, urllib.request
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
-
-ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "data"
-REPORT = ROOT / "docs" / "STRICT-LIVE-AUDIT-LATEST.md"
-TZ = ZoneInfo("Europe/Stockholm")
-NOW = datetime.now(TZ)
-LIVE_BASE = "https://dinpuls.se/"
-
-MUNICIPALITIES = [
-    "Åmål", "Årjäng", "Bengtsfors", "Mellerud", "Arvika", "Grums", "Säffle",
-    "Dals-Ed", "Eda", "Filipstad", "Forshaga", "Färgelanda", "Hagfors", "Hammarö",
-    "Karlstad", "Kil", "Kristinehamn", "Munkfors", "Storfors", "Sunne", "Torsby",
-]
-
-FILES = [
-    "municipalities.json", "important.json", "important-sources.json", "weather-live.json",
-    "road-traffic.json", "transport.json", "flights.json", "jobs.json", "housing.json",
-    "housing-fargelanda-supplement.json", "events.json", "events-fargelanda-supplement.json",
-    "news.json", "missing-people.json", "health.json", "health-private.json",
-    "health-private-supplement.json", "health-local-supplement.json",
-    "health-karlstad-private-supplement.json", "health-fargelanda-supplement.json",
-    "service.json", "service-private-supplement.json", "service-launch-supplement.json",
-    "service-local-supplement.json", "authorities.json", "authorities-hagfors-supplement.json",
-    "lunch.json", "cinemas.json", "leisure.json", "leisure-enrichment.json",
-    "leisure-fargelanda-supplement.json", "sports.json", "sports-fargelanda-supplement.json",
-    "community-sources.json", "community-posts.json",
-]
-
-
-def repo_json(name: str) -> dict:
+ROOT=Path(__file__).resolve().parents[1]; DATA=ROOT/'data'; REPORT=ROOT/'docs/STRICT-LIVE-AUDIT-LATEST.md'
+TZ=ZoneInfo('Europe/Stockholm'); NOW=datetime.now(TZ); LIVE='https://dinpuls.se/data/'
+MUNIS=['Åmål','Årjäng','Bengtsfors','Mellerud','Arvika','Grums','Säffle','Dals-Ed','Eda','Filipstad','Forshaga','Färgelanda','Hagfors','Hammarö','Karlstad','Kil','Kristinehamn','Munkfors','Storfors','Sunne','Torsby']
+FILES=['municipalities.json','important.json','important-sources.json','weather-live.json','road-traffic.json','transport.json','flights.json','jobs.json','housing.json','housing-fargelanda-supplement.json','events.json','events-fargelanda-supplement.json','news.json','missing-people.json','health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','health-karlstad-private-supplement.json','health-fargelanda-supplement.json','service.json','service-private-supplement.json','service-launch-supplement.json','service-local-supplement.json','authorities.json','authorities-hagfors-supplement.json','lunch.json','cinemas.json','leisure.json','leisure-enrichment.json','leisure-fargelanda-supplement.json','sports.json','sports-fargelanda-supplement.json','community-sources.json','community-posts.json']
+def load_repo(fn):
     try:
-        value = json.loads((DATA / name).read_text(encoding="utf-8"))
-        return value if isinstance(value, dict) else {}
-    except Exception:
-        return {}
-
-
-def live_json(name: str) -> tuple[dict, str]:
-    url = LIVE_BASE + "data/" + name
+        v=json.loads((DATA/fn).read_text(encoding='utf-8')); return v if isinstance(v,dict) else {}
+    except Exception:return {}
+def load(fn):
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "DinPuls-Strict-Audit/1.0"})
-        with urllib.request.urlopen(req, timeout=12) as response:
-            raw = response.read()
-        value = json.loads(raw.decode("utf-8"))
-        if isinstance(value, dict):
-            return value, "live"
-    except Exception:
-        pass
-    return repo_json(name), "repo-fallback"
-
-
-def normalize(value: object) -> str:
-    return re.sub(r"\s+", " ", str(value or "").strip().casefold())
-
-
-def parse_dt(value: object) -> datetime | None:
-    if value in (None, ""):
-        return None
-    text = str(value).strip().replace("Z", "+00:00")
+        req=urllib.request.Request(LIVE+fn,headers={'User-Agent':'DinPuls-Strict-Audit/1.1'})
+        with urllib.request.urlopen(req,timeout=8) as r:v=json.loads(r.read().decode('utf-8'))
+        if isinstance(v,dict):return v,'live'
+    except Exception:pass
+    return load_repo(fn),'repo-fallback'
+def norm(v):return re.sub(r'\s+',' ',str(v or '').strip().casefold())
+def dt(v):
     try:
-        dt = datetime.fromisoformat(text)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=TZ)
-        return dt.astimezone(TZ)
-    except Exception:
-        return None
-
-
-def age_ok(value: object, hours: int) -> bool:
-    dt = parse_dt(value)
-    if not dt:
-        return False
-    age = NOW - dt
-    return timedelta(0) <= age <= timedelta(hours=hours)
-
-
-def muni_entry(payload: dict, name: str) -> dict:
-    row = (payload.get("municipalities") or {}).get(name, {})
-    return row if isinstance(row, dict) else {}
-
-
-def named_items(payload: dict, key: str, municipality: str) -> list[dict]:
-    items = payload.get(key)
-    if not isinstance(items, list):
-        return []
-    return [x for x in items if isinstance(x, dict) and x.get("municipality") == municipality]
-
-
-def dedupe(items: list[dict]) -> list[dict]:
-    out = []
-    seen = set()
-    for item in items:
-        key = normalize(item.get("name") or item.get("title") or item.get("id") or item.get("address"))
-        if not key:
-            key = json.dumps(item, ensure_ascii=False, sort_keys=True)[:200]
-        if key in seen:
-            continue
-        seen.add(key)
-        out.append(item)
+        x=datetime.fromisoformat(str(v).replace('Z','+00:00')); return (x if x.tzinfo else x.replace(tzinfo=TZ)).astimezone(TZ)
+    except Exception:return None
+def fresh(v,h):
+    x=dt(v); return bool(x and timedelta(0)<=NOW-x<=timedelta(hours=h))
+def me(p,n):
+    x=(p.get('municipalities') or {}).get(n,{}); return x if isinstance(x,dict) else {}
+def dedupe(xs):
+    out=[]; seen=set()
+    for x in xs:
+        if not isinstance(x,dict):continue
+        k=norm(x.get('name') or x.get('title') or x.get('id') or x.get('address')) or json.dumps(x,ensure_ascii=False,sort_keys=True)[:160]
+        if k in seen:continue
+        seen.add(k); out.append(x)
     return out
-
-
-def config_map(config: dict) -> dict[str, dict]:
-    result = {}
-    for row in config.get("municipalities") or []:
-        if isinstance(row, dict) and row.get("name"):
-            result[row["name"]] = row
-    return result
-
-
-def categories(items: list[dict]) -> set[str]:
-    out = set()
-    for item in items:
-        text = normalize(item.get("category") or item.get("type") or item.get("serviceType") or item.get("activityType"))
-        if text:
-            out.add(text)
-    return out
-
-
-def effective_health(data: dict[str, dict], name: str) -> list[dict]:
-    items = []
-    for fn in [
-        "health.json", "health-private.json", "health-private-supplement.json",
-        "health-local-supplement.json", "health-karlstad-private-supplement.json",
-        "health-fargelanda-supplement.json",
-    ]:
-        payload = data[fn]
-        items += named_items(payload, "providers", name)
-        if payload.get("municipality") == name and isinstance(payload.get("providers"), list):
-            items += [x for x in payload["providers"] if isinstance(x, dict)]
-    return dedupe(items)
-
-
-def effective_service(data: dict[str, dict], name: str) -> list[dict]:
-    items = []
-    for fn in ["service.json", "service-private-supplement.json", "service-launch-supplement.json", "service-local-supplement.json"]:
-        items += named_items(data[fn], "businesses", name)
-    return dedupe(items)
-
-
-def effective_leisure(data: dict[str, dict], name: str) -> list[dict]:
-    items = []
-    base = muni_entry(data["leisure.json"], name)
-    items += [x for x in (base.get("activities") or []) if isinstance(x, dict)]
-    items += [x for x in (data["leisure-enrichment.json"].get("entries") or []) if isinstance(x, dict) and x.get("municipality") == name]
-    f = data["leisure-fargelanda-supplement.json"]
-    if f.get("municipality") == name:
-        for key in ("activities", "entries"):
-            items += [x for x in (f.get(key) or []) if isinstance(x, dict)]
-    return dedupe(items)
-
-
-def effective_sports(data: dict[str, dict], name: str) -> list[dict]:
-    items = []
-    base = muni_entry(data["sports.json"], name)
-    items += [x for x in (base.get("clubs") or []) if isinstance(x, dict)]
-    f = data["sports-fargelanda-supplement.json"]
-    if f.get("municipality") == name:
-        items += [x for x in (f.get("clubs") or []) if isinstance(x, dict)]
-    return dedupe(items)
-
-
-def event_items(data: dict[str, dict], name: str) -> list[dict]:
-    items = [x for x in (muni_entry(data["events.json"], name).get("events") or []) if isinstance(x, dict)]
-    f = data["events-fargelanda-supplement.json"]
-    if f.get("municipality") == name:
-        items += [x for x in (f.get("events") or []) if isinstance(x, dict)]
-    # count only current/future where a date is parseable; keep undated current source items as published
-    valid = []
-    today = NOW.date()
-    for item in items:
-        raw = item.get("start") or item.get("startDate") or item.get("date") or item.get("datetime")
-        dt = parse_dt(raw)
-        if dt and dt.date() < today:
-            continue
-        valid.append(item)
-    return dedupe(valid)
-
-
-def housing_items(data: dict[str, dict], name: str) -> list[dict]:
-    items = [x for x in (muni_entry(data["housing.json"], name).get("listings") or []) if isinstance(x, dict)]
-    f = data["housing-fargelanda-supplement.json"]
-    if f.get("municipality") == name:
-        items += [x for x in (f.get("listings") or []) if isinstance(x, dict)]
-    return dedupe(items)
-
-
-def news_items(data: dict[str, dict], name: str) -> tuple[list[dict], int]:
-    rows = []
-    fresh = 0
-    cutoff = NOW - timedelta(days=30)
-    for a in data["news.json"].get("articles") or []:
-        if not isinstance(a, dict) or name not in (a.get("municipalities") or []):
-            continue
-        rows.append(a)
-        dt = parse_dt(a.get("publishedAt") or a.get("date") or a.get("published"))
-        if dt is None or dt >= cutoff:
-            fresh += 1
-    return dedupe(rows), fresh
-
-
-def authorities_score(data: dict[str, dict], name: str) -> tuple[bool, int, list[str]]:
-    auth = data["authorities.json"]
-    row = (auth.get("municipalities") or {}).get(name, {})
-    row = row if isinstance(row, dict) else {}
-    urls = row.get("serviceUrls") if isinstance(row.get("serviceUrls"), dict) else {}
-    # Hagfors supplement may provide additional direct municipal links.
-    sup = data["authorities-hagfors-supplement.json"]
-    if sup.get("municipality") == name:
-        extra = sup.get("serviceUrls") if isinstance(sup.get("serviceUrls"), dict) else {}
-        urls = {**urls, **extra}
-    essential = ["socialtjanst", "ekonomiskt-bistand", "budget-skuld", "aldreomsorg", "lss", "bygglov"]
-    missing = [x for x in essential if not urls.get(x)]
-    # Contactcenter can use the official municipality website as the common entry.
-    has_contact = bool(row.get("website"))
-    ok = has_contact and len(missing) == 0
-    return ok, len(urls), missing
-
-
-def classify(ok: bool, reason: str = "") -> tuple[str, str]:
-    return ("🟢", "") if ok else ("🟡", reason)
-
-
-def audit_one(name: str, data: dict[str, dict], config_by_name: dict[str, dict]) -> dict:
-    c = config_by_name.get(name, {})
-    modules: dict[str, tuple[str, str, str]] = {}
-
-    def put(label: str, status: str, metric: str = "", reason: str = "") -> None:
-        modules[label] = (status, metric, reason)
-
-    put("Grundkonfiguration", *classify(bool(c and c.get("slug") and c.get("code")), "kommunregister ofullständigt"), metric="konfigurerad" if c else "saknas")
-
-    imp = muni_entry(data["important.json"], name)
-    imp_sources = (data["important-sources.json"].get("municipalities") or {}).get(name)
-    put("Dagens viktigaste", *classify(bool(imp or imp_sources), "lokal källa/fallback saknas"), metric=str(len(imp.get("items") or [])) + " aktiva" if imp else "källa")
-
-    wx = muni_entry(data["weather-live.json"], name)
-    current = ((wx.get("nowcast") or {}).get("current") or {}) if isinstance(wx, dict) else {}
-    wx_ok = bool(current.get("time")) and age_ok(data["weather-live.json"].get("generatedAt"), 6)
-    put("Väder", *classify(wx_ok, "aktuell liveväderdata saknas"), metric="live" if wx_ok else "saknas/stale")
-
-    road = muni_entry(data["road-traffic.json"], name)
-    road_generated = data["road-traffic.json"].get("generatedAt")
-    road_ok = bool(road) and (age_ok(road_generated, 12) or bool(road.get("sourceStatus") or road.get("items") is not None))
-    put("Vägtrafik", *classify(road_ok, "fungerande aktuell trafikkälla kan inte verifieras"), metric=f"{len(road.get('items') or [])} händelser")
-
-    tr = muni_entry(data["transport.json"], name)
-    stops = [x for x in (tr.get("stops") or []) if isinstance(x, dict)]
-    dep = 0
-    for stop in stops:
-        dep += sum(1 for d in (stop.get("departures") or []) if isinstance(d, dict) and not d.get("canceled"))
-    tr_ok = bool(stops) and tr.get("sourceStatus") != "missing-stop-configuration" and all(not x.get("error") for x in stops)
-    put("Kollektivtrafik", *classify(tr_ok, "hållplats/aktuell transportkälla saknas eller felar"), metric=f"{len(stops)} hållplatser / {dep} avgångar")
-
-    fl = muni_entry(data["flights.json"], name)
-    fl_ok = bool(fl) or bool(data["flights.json"].get("airports"))
-    put("Flyg", *classify(fl_ok, "användbar flyginformation saknas"), metric="konfigurerad" if fl_ok else "saknas")
-
-    jobs = [x for x in (muni_entry(data["jobs.json"], name).get("jobs") or []) if isinstance(x, dict)]
-    put("Jobb", *(classify(len(jobs) >= 3, f"endast {len(jobs)} aktuella lokala jobb; minst 3 krävs")), metric=str(len(jobs)))
-
-    homes = housing_items(data, name)
-    put("Bostäder", *(classify(len(homes) >= 1, "inga faktiska aktuella lediga objekt; minst 1 krävs")), metric=str(len(homes)))
-
-    evs = event_items(data, name)
-    put("Evenemang", *(classify(len(evs) >= 5, f"endast {len(evs)} aktuella/framtida evenemang; minst 5 krävs")), metric=str(len(evs)))
-
-    news, fresh_news = news_items(data, name)
-    news_ok = len(news) >= 5 and fresh_news >= 3
-    put("Nyheter", *(classify(news_ok, f"{len(news)} lokala nyheter varav {fresh_news} inom cirka 30 dagar; minst 5 och tydlig aktualitet krävs")), metric=f"{len(news)} / {fresh_news} färska")
-
-    mp = muni_entry(data["missing-people.json"], name)
-    neighbors = c.get("neighbors") if isinstance(c.get("neighbors"), list) else []
-    mp_ok = bool(mp or neighbors or c.get("missingPeopleAliases"))
-    put("Missing People", *classify(mp_ok, "lokal/grannkommunal logik kan inte verifieras"), metric=f"{len(neighbors)} grannar")
-
-    health = effective_health(data, name)
-    hcats = categories(health)
-    health_ok = len(health) >= 5 and len(hcats) >= 3
-    put("Vård & hälsa", *(classify(health_ok, f"{len(health)} verksamheter i {len(hcats)} kategorier; minst 5 och rimlig bredd krävs")), metric=f"{len(health)} / {len(hcats)} kat")
-
-    service = effective_service(data, name)
-    scats = categories(service)
-    service_ok = len(service) >= 8 and len(scats) >= 4
-    put("Service & hantverk", *(classify(service_ok, f"{len(service)} företag i {len(scats)} kategorier; minst 8 företag och 4 kategorier krävs")), metric=f"{len(service)} / {len(scats)} kat")
-
-    auth_ok, auth_count, auth_missing = authorities_score(data, name)
-    auth_reason = "saknar direkta centrala kommunlänkar: " + ", ".join(auth_missing) if auth_missing else "centrala myndighetsingångar ofullständiga"
-    put("Myndigheter", *classify(auth_ok, auth_reason), metric=f"{auth_count} lokala länkar")
-
-    lunch = [x for x in (muni_entry(data["lunch.json"], name).get("restaurants") or []) if isinstance(x, dict)]
-    put("Dagens lunch", *(classify(len(lunch) >= 4, f"endast {len(lunch)} verifierade lunchställen; minst 4 krävs")), metric=str(len(lunch)))
-
-    cinemas = (data["cinemas.json"].get("municipalities") or {}).get(name, [])
-    cinemas = cinemas if isinstance(cinemas, list) else []
-    # If repo explicitly has no local cinema, strict audit cannot infer non-existence; mark yellow.
-    cinema_ok = bool(cinemas) and all(bool(x.get("programUrl") or x.get("bookingUrl")) for x in cinemas if isinstance(x, dict))
-    put("Bio", *classify(cinema_ok, "ingen verifierad lokal bio/programkälla eller korrekt 'ingen lokal bio'-hantering"), metric=str(len(cinemas)))
-
-    leisure = effective_leisure(data, name)
-    put("Fritid & aktiviteter", *(classify(len(leisure) >= 10, f"endast {len(leisure)} lokala aktiviteter/anläggningar; minst 10 krävs")), metric=str(len(leisure)))
-
-    sports = effective_sports(data, name)
-    put("Idrott & föreningar", *(classify(len(sports) >= 20, f"endast {len(sports)} lokala föreningar; minst 20 krävs om inte verifierat verkligt utbud är mindre")), metric=str(len(sports)))
-
-    community_ok = isinstance(data["community-sources.json"], dict) and isinstance(data["community-posts.json"], dict)
-    put("Community", *classify(community_ok, "communityfunktionen kan inte verifieras"), metric="källa/fallback")
-
-    yellow = [label for label, (status, _, _) in modules.items() if status != "🟢"]
-    return {"name": name, "modules": modules, "overall": "🟢 100 %" if not yellow else "🟡 EJ 100 %", "blockers": yellow}
-
-
-def main() -> int:
-    data: dict[str, dict] = {}
-    origins = {}
-    for fn in FILES:
-        payload, origin = live_json(fn)
-        data[fn] = payload
-        origins[fn] = origin
-
-    config_by_name = config_map(data["municipalities.json"])
-    results = [audit_one(name, data, config_by_name) for name in MUNICIPALITIES]
-
-    live_count = sum(1 for x in origins.values() if x == "live")
-    repo_count = len(origins) - live_count
-    green = [r["name"] for r in results if r["overall"].startswith("🟢")]
-
-    lines = [
-        "# DinPuls – STRICT LIVE 100 % audit",
-        "",
-        f"Genererad: {NOW.isoformat(timespec='seconds')}",
-        f"Datakälla: {live_count} filer hämtade från publicerad dinpuls.se, {repo_count} repo-fallback.",
-        "",
-        "Denna rapport nollställer tidigare status och använder `DINPULS-AUDIT-RULES.md`. Hero och Matkassen ingår inte.",
-        "",
-        f"## Resultat: {len(green)} av 21 kommuner når 100 %",
-        "",
-        ("**100 % gröna:** " + ", ".join(green)) if green else "**100 % gröna:** inga.",
-        "",
-        "| Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
-    ]
-    for r in results:
-        m = r["modules"]
-        metric = lambda k: m[k][1]
-        lines.append(
-            f"| {r['name']} | {r['overall']} | {metric('Jobb')} | {metric('Bostäder')} | {metric('Evenemang')} | {metric('Nyheter')} | {metric('Vård & hälsa')} | {metric('Service & hantverk')} | {metric('Dagens lunch')} | {metric('Fritid & aktiviteter')} | {metric('Idrott & föreningar')} |"
-        )
-
-    lines += ["", "## Blockerare per kommun", ""]
-    for r in results:
-        if not r["blockers"]:
-            lines.append(f"### {r['name']} — 🟢 100 %")
-            lines.append("Samtliga obligatoriska moduler passerar den strikta auditen.")
-            lines.append("")
-            continue
-        lines.append(f"### {r['name']} — 🟡 EJ 100 %")
-        for label in r["blockers"]:
-            status, metric, reason = r["modules"][label]
-            lines.append(f"- **{label}:** {status} — {reason} ({metric})")
-        lines.append("")
-
-    lines += ["## Modulmatris", ""]
-    module_names = list(results[0]["modules"].keys())
-    lines.append("| Kommun | " + " | ".join(module_names) + " |")
-    lines.append("|---|" + "---:|" * len(module_names))
-    for r in results:
-        lines.append("| " + r["name"] + " | " + " | ".join(r["modules"][k][0] for k in module_names) + " |")
-
-    REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print("\n".join(lines[:40]))
-    print(f"\nRapport: {REPORT}")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+def named(p,key,n):return [x for x in (p.get(key) or []) if isinstance(x,dict) and x.get('municipality')==n]
+def cats(xs):return {norm(x.get('category') or x.get('type') or x.get('serviceType') or x.get('activityType')) for x in xs if norm(x.get('category') or x.get('type') or x.get('serviceType') or x.get('activityType'))}
+def effective_named(D,n,files,key):
+    xs=[]
+    for fn in files:
+        p=D[fn]; xs+=named(p,key,n)
+        if p.get('municipality')==n and isinstance(p.get(key),list):xs += [x for x in p[key] if isinstance(x,dict)]
+    return dedupe(xs)
+def leisure(D,n):
+    xs=[x for x in (me(D['leisure.json'],n).get('activities') or []) if isinstance(x,dict)]
+    xs += [x for x in (D['leisure-enrichment.json'].get('entries') or []) if isinstance(x,dict) and x.get('municipality')==n]
+    p=D['leisure-fargelanda-supplement.json']
+    if p.get('municipality')==n:xs += [x for k in ('activities','entries') for x in (p.get(k) or []) if isinstance(x,dict)]
+    return dedupe(xs)
+def sports(D,n):
+    xs=[x for x in (me(D['sports.json'],n).get('clubs') or []) if isinstance(x,dict)]
+    p=D['sports-fargelanda-supplement.json']
+    if p.get('municipality')==n:xs += [x for x in (p.get('clubs') or []) if isinstance(x,dict)]
+    return dedupe(xs)
+def homes(D,n):
+    xs=[x for x in (me(D['housing.json'],n).get('listings') or []) if isinstance(x,dict)]
+    p=D['housing-fargelanda-supplement.json']
+    if p.get('municipality')==n:xs += [x for x in (p.get('listings') or []) if isinstance(x,dict)]
+    return dedupe(xs)
+def events(D,n):
+    xs=[x for x in (me(D['events.json'],n).get('events') or []) if isinstance(x,dict)]
+    p=D['events-fargelanda-supplement.json']
+    if p.get('municipality')==n:xs += [x for x in (p.get('events') or []) if isinstance(x,dict)]
+    ok=[]
+    for x in xs:
+        t=dt(x.get('start') or x.get('startDate') or x.get('date') or x.get('datetime'))
+        if not t or t.date()>=NOW.date():ok.append(x)
+    return dedupe(ok)
+def news(D,n):
+    xs=[]; recent=0; cut=NOW-timedelta(days=30)
+    for x in D['news.json'].get('articles') or []:
+        if not isinstance(x,dict) or n not in (x.get('municipalities') or []):continue
+        xs.append(x); t=dt(x.get('publishedAt') or x.get('date') or x.get('published'))
+        if t is None or t>=cut:recent+=1
+    return dedupe(xs),recent
+def auth(D,n):
+    row=(D['authorities.json'].get('municipalities') or {}).get(n,{}) or {}; urls=dict(row.get('serviceUrls') or {})
+    p=D['authorities-hagfors-supplement.json']
+    if p.get('municipality')==n:urls.update(p.get('serviceUrls') or {})
+    req=['socialtjanst','ekonomiskt-bistand','budget-skuld','aldreomsorg','lss','bygglov']; miss=[x for x in req if not urls.get(x)]
+    return bool(row.get('website')) and not miss,len(urls),miss
+def config(D):return {x.get('name'):x for x in D['municipalities.json'].get('municipalities') or [] if isinstance(x,dict) and x.get('name')}
+def C(ok,reason=''):return ('🟢','') if ok else ('🟡',reason)
+def audit(n,D,CFG):
+    c=CFG.get(n,{}) or {}; M={}
+    def put(label,status,reason='',metric=''):M[label]=(status,metric,reason)
+    put('Grundkonfiguration',*C(bool(c.get('slug') and c.get('code')),'kommunregister ofullständigt'),metric='konfigurerad' if c else 'saknas')
+    imp=me(D['important.json'],n); src=(D['important-sources.json'].get('municipalities') or {}).get(n); put('Dagens viktigaste',*C(bool(imp or src),'lokal källa/fallback saknas'),metric=f"{len(imp.get('items') or [])} aktiva" if imp else 'källa')
+    wx=me(D['weather-live.json'],n); cur=((wx.get('nowcast') or {}).get('current') or {}) if isinstance(wx,dict) else {}; wok=bool(cur.get('time')) and fresh(D['weather-live.json'].get('generatedAt'),6); put('Väder',*C(wok,'aktuell liveväderdata saknas'),metric='live' if wok else 'saknas/stale')
+    rd=me(D['road-traffic.json'],n); rok=bool(rd) and (fresh(D['road-traffic.json'].get('generatedAt'),12) or rd.get('items') is not None); put('Vägtrafik',*C(rok,'fungerande aktuell trafikkälla kan inte verifieras'),metric=f"{len(rd.get('items') or [])} händelser")
+    tr=me(D['transport.json'],n); stops=[x for x in (tr.get('stops') or []) if isinstance(x,dict)]; dep=sum(len([d for d in (s.get('departures') or []) if isinstance(d,dict) and not d.get('canceled')]) for s in stops); tok=bool(stops) and tr.get('sourceStatus')!='missing-stop-configuration' and all(not s.get('error') for s in stops); put('Kollektivtrafik',*C(tok,'hållplats/aktuell transportkälla saknas eller felar'),metric=f'{len(stops)} hållplatser / {dep} avgångar')
+    fl=me(D['flights.json'],n); fok=bool(fl) or bool(D['flights.json'].get('airports')); put('Flyg',*C(fok,'användbar flyginformation saknas'),metric='konfigurerad' if fok else 'saknas')
+    js=[x for x in (me(D['jobs.json'],n).get('jobs') or []) if isinstance(x,dict)]; put('Jobb',*C(len(js)>=3,f'endast {len(js)} aktuella lokala jobb; minst 3 krävs'),metric=str(len(js)))
+    hs=homes(D,n); put('Bostäder',*C(len(hs)>=1,'inga faktiska aktuella lediga objekt; minst 1 krävs'),metric=str(len(hs)))
+    es=events(D,n); put('Evenemang',*C(len(es)>=5,f'endast {len(es)} aktuella/framtida evenemang; minst 5 krävs'),metric=str(len(es)))
+    ns,nf=news(D,n); put('Nyheter',*C(len(ns)>=5 and nf>=3,f'{len(ns)} lokala nyheter varav {nf} aktuella; minst 5 och tydlig aktualitet krävs'),metric=f'{len(ns)} / {nf} färska')
+    mp=me(D['missing-people.json'],n); neigh=c.get('neighbors') if isinstance(c.get('neighbors'),list) else []; mok=bool(mp or neigh or c.get('missingPeopleAliases')); put('Missing People',*C(mok,'lokal/grannkommunal logik kan inte verifieras'),metric=f'{len(neigh)} grannar')
+    health=effective_named(D,n,['health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','health-karlstad-private-supplement.json','health-fargelanda-supplement.json'],'providers'); hc=cats(health); put('Vård & hälsa',*C(len(health)>=5 and len(hc)>=3,f'{len(health)} verksamheter i {len(hc)} kategorier; minst 5 och rimlig bredd krävs'),metric=f'{len(health)} / {len(hc)} kat')
+    svc=effective_named(D,n,['service.json','service-private-supplement.json','service-launch-supplement.json','service-local-supplement.json'],'businesses'); sc=cats(svc); put('Service & hantverk',*C(len(svc)>=8 and len(sc)>=4,f'{len(svc)} företag i {len(sc)} kategorier; minst 8 och 4 kategorier krävs'),metric=f'{len(svc)} / {len(sc)} kat')
+    aok,ac,miss=auth(D,n); put('Myndigheter',*C(aok,'saknar centrala direktlänkar: '+', '.join(miss) if miss else 'centrala ingångar ofullständiga'),metric=f'{ac} lokala länkar')
+    ls=[x for x in (me(D['lunch.json'],n).get('restaurants') or []) if isinstance(x,dict)]; put('Dagens lunch',*C(len(ls)>=4,f'endast {len(ls)} verifierade lunchställen; minst 4 krävs'),metric=str(len(ls)))
+    bios=(D['cinemas.json'].get('municipalities') or {}).get(n,[]); bios=bios if isinstance(bios,list) else []; bok=bool(bios) and all(bool(x.get('programUrl') or x.get('bookingUrl')) for x in bios if isinstance(x,dict)); put('Bio',*C(bok,"ingen verifierad lokal bio/programkälla eller korrekt 'ingen lokal bio'-hantering"),metric=str(len(bios)))
+    leis=leisure(D,n); put('Fritid & aktiviteter',*C(len(leis)>=10,f'endast {len(leis)} lokala aktiviteter/anläggningar; minst 10 krävs'),metric=str(len(leis)))
+    sp=sports(D,n); put('Idrott & föreningar',*C(len(sp)>=20,f'endast {len(sp)} lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre'),metric=str(len(sp)))
+    cok=isinstance(D['community-sources.json'],dict) and isinstance(D['community-posts.json'],dict); put('Community',*C(cok,'communityfunktionen kan inte verifieras'),metric='källa/fallback')
+    blockers=[k for k,v in M.items() if v[0]!='🟢']; return {'name':n,'modules':M,'blockers':blockers,'overall':'🟢 100 %' if not blockers else '🟡 EJ 100 %'}
+def main():
+    D={}; origin={}
+    for fn in FILES:D[fn],origin[fn]=load(fn)
+    CFG=config(D); R=[audit(n,D,CFG) for n in MUNIS]; green=[r['name'] for r in R if not r['blockers']]
+    lines=['# DinPuls – STRICT LIVE 100 % audit','',f"Genererad: {NOW.isoformat(timespec='seconds')}",f"Datakälla: {sum(v=='live' for v in origin.values())} livefiler, {sum(v!='live' for v in origin.values())} repo-fallback.",'','Tidigare status är nollställd. Hero och Matkassen ingår inte.','',f'## Resultat: {len(green)} av 21 kommuner når 100 %','',('**100 % gröna:** '+', '.join(green)) if green else '**100 % gröna:** inga.','', '| Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |','|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
+    for r in R:
+        m=r['modules']; g=lambda k:m[k][1]; lines.append(f"| {r['name']} | {r['overall']} | {g('Jobb')} | {g('Bostäder')} | {g('Evenemang')} | {g('Nyheter')} | {g('Vård & hälsa')} | {g('Service & hantverk')} | {g('Dagens lunch')} | {g('Fritid & aktiviteter')} | {g('Idrott & föreningar')} |")
+    lines += ['','## Blockerare per kommun','']
+    for r in R:
+        lines.append(f"### {r['name']} — {r['overall']}")
+        if not r['blockers']:lines.append('Samtliga obligatoriska moduler passerar den strikta auditen.')
+        else:
+            for k in r['blockers']:
+                s,metric,reason=r['modules'][k]; lines.append(f'- **{k}:** {s} — {reason} ({metric})')
+        lines.append('')
+    mods=list(R[0]['modules']); lines += ['## Modulmatris','','| Kommun | '+' | '.join(mods)+' |','|---|'+'---:|'*len(mods)]
+    for r in R:lines.append('| '+r['name']+' | '+' | '.join(r['modules'][k][0] for k in mods)+' |')
+    REPORT.write_text('\n'.join(lines)+'\n',encoding='utf-8'); print('\n'.join(lines[:45])); return 0
+if __name__=='__main__':sys.exit(main())
