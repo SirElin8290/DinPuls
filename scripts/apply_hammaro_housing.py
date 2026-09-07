@@ -26,7 +26,10 @@ row["checkedAt"] = f"{supplement.get('sourceChecked')}T12:00:00+02:00"
 row["updatedAt"] = row["checkedAt"]
 row["stale"] = False
 row["errors"] = []
-row.setdefault("availabilityMode", "automatic")
+# När en verifierad objektslista applicerats är Hammarö inte längre bara en
+# official-reference-post. Detta måste vara automatic så den gemensamma
+# bostadsvalideringen tillåter numerisk total och faktiska objekt.
+row["availabilityMode"] = "automatic"
 row.setdefault("sourceHealth", []).append({
     "source": "Hammarö verifierad komplettering",
     "status": "ok",
