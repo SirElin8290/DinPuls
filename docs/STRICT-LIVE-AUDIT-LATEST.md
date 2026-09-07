@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T17:30:05+02:00
+Genererad: 2026-09-07T18:17:39+02:00
 Datakälla: 38 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
@@ -11,27 +11,27 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 100 % | 26 | 51 | 15 | 43 / 43 färska | 19 / 8 kat | 17 / 5 kat | 4 | 43 | 40 |
-| Årjäng | 🟢 100 % | 29 | 10 | 29 | 44 / 44 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
-| Bengtsfors | 🟢 100 % | 21 | 34 | 7 | 41 / 41 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 34 |
-| Mellerud | 🟢 100 % | 26 | 18 | 9 | 31 / 31 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
-| Arvika | 🟢 100 % | 50 | 8 | 26 | 67 / 67 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
-| Grums | 🟢 100 % | 14 | 9 | 7 | 29 / 29 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
-| Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 69 / 69 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
+| Åmål | 🟢 100 % | 26 | 51 | 15 | 48 / 48 färska | 19 / 8 kat | 17 / 5 kat | 4 | 43 | 40 |
+| Årjäng | 🟢 100 % | 29 | 10 | 29 | 41 / 41 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
+| Bengtsfors | 🟢 100 % | 21 | 34 | 7 | 42 / 42 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 34 |
+| Mellerud | 🟢 100 % | 26 | 18 | 10 | 34 / 34 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
+| Arvika | 🟢 100 % | 50 | 8 | 26 | 78 / 78 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
+| Grums | 🟢 100 % | 14 | 9 | 7 | 27 / 27 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
+| Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 72 / 72 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
-| Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 51 / 51 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
-| Filipstad | 🟡 EJ 100 % | 9 | 10 | 10 | 67 / 67 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 8 |
-| Forshaga | 🟢 100 % | 12 | 10 | 44 | 47 / 47 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
-| Färgelanda | 🟡 EJ 100 % | 7 | 4 | 3 | 22 / 22 färska | 9 / 8 kat | 3 / 3 kat | 3 | 12 | 4 |
-| Hagfors | 🟢 100 % | 22 | 23 | 22 | 47 / 47 färska | 13 / 7 kat | 12 / 7 kat | 8 | 24 | 23 |
+| Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 45 / 45 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
+| Filipstad | 🟡 EJ 100 % | 9 | 10 | 10 | 68 / 69 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 8 |
+| Forshaga | 🟢 100 % | 12 | 10 | 44 | 48 / 48 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
+| Färgelanda | 🟡 EJ 100 % | 7 | 4 | 3 | 23 / 24 färska | 9 / 8 kat | 3 / 3 kat | 3 | 12 | 4 |
+| Hagfors | 🟢 100 % | 22 | 23 | 22 | 45 / 45 färska | 13 / 7 kat | 12 / 7 kat | 8 | 24 | 23 |
 | Hammarö | 🟡 EJ 100 % | 12 | 0 | 38 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 16 |
-| Karlstad | 🟡 EJ 100 % | 92 | 0 | 30 | 104 / 104 färska | 36 / 10 kat | 3 / 2 kat | 4 | 8 | 19 |
-| Kil | 🟢 100 % | 12 | 4 | 5 | 40 / 40 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
+| Karlstad | 🟡 EJ 100 % | 92 | 0 | 30 | 101 / 101 färska | 36 / 10 kat | 3 / 2 kat | 4 | 8 | 19 |
+| Kil | 🟢 100 % | 12 | 4 | 5 | 42 / 42 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
 | Kristinehamn | 🟡 EJ 100 % | 57 | 0 | 29 | 63 / 63 färska | 4 / 2 kat | 3 / 2 kat | 3 | 5 | 13 |
-| Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 34 / 34 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
-| Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 49 / 49 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
-| Sunne | 🟢 100 % | 21 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
-| Torsby | 🟡 EJ 100 % | 21 | 0 | 29 | 48 / 48 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
+| Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 31 / 31 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
+| Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 46 / 46 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
+| Sunne | 🟢 100 % | 21 | 8 | 7 | 60 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
+| Torsby | 🟡 EJ 100 % | 21 | 0 | 29 | 46 / 46 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
 
 ## Blockerare per kommun
 
