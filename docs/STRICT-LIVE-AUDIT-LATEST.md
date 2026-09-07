@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T16:59:02+02:00
+Genererad: 2026-09-07T17:03:30+02:00
 Datakälla: 38 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 9 av 21 kommuner når 100 %
+## Resultat: 10 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga, Hagfors, Kil
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga, Hagfors, Kil, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -30,7 +30,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Kristinehamn | 🟡 EJ 100 % | 57 | 0 | 29 | 63 / 63 färska | 4 / 2 kat | 3 / 2 kat | 3 | 5 | 13 |
 | Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 34 / 34 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
 | Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 49 / 49 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
-| Sunne | 🟡 EJ 100 % | 21 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 3 | 13 | 14 |
+| Sunne | 🟢 100 % | 21 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
 | Torsby | 🟡 EJ 100 % | 21 | 0 | 29 | 48 / 48 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
 
 ## Blockerare per kommun
@@ -127,10 +127,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 - **Fritid & aktiviteter:** 🟡 — endast 4 lokala aktiviteter/anläggningar; minst 10 krävs (4)
 - **Idrott & föreningar:** 🟡 — endast 10 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (10)
 
-### Sunne — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, aldreomsorg, lss, bygglov (1 lokala länkar)
-- **Dagens lunch:** 🟡 — endast 3 verifierade lunchställen; minst 4 krävs (3)
-- **Idrott & föreningar:** 🟡 — endast 14 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (14)
+### Sunne — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Torsby — 🟡 EJ 100 %
 - **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
@@ -165,5 +163,5 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Kristinehamn | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟡 | 🟢 | 🟡 | 🟡 | 🟢 |
 | Munkfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟡 | 🟢 | 🟡 | 🟡 | 🟢 |
 | Storfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟢 |
-| Sunne | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟢 |
+| Sunne | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Torsby | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟢 |
