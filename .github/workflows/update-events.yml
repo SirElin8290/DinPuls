@@ -13,11 +13,13 @@ on:
       - "scripts/update_dals_ed_events.py"
       - "scripts/apply_kil_events.py"
       - "scripts/apply_saffle_events.py"
+      - "scripts/apply_fargelanda_events.py"
       - "scripts/test_update_events.py"
       - "scripts/test_dals_ed_imports.py"
       - "data/event-sources.json"
       - "data/events-kil-supplement.json"
       - "data/events-saffle-supplement.json"
+      - "data/events-fargelanda-supplement.json"
       - "data/municipalities.json"
       - ".github/workflows/update-events.yml"
 
@@ -54,6 +56,8 @@ jobs:
         run: python scripts/apply_kil_events.py
       - name: Lägg in verifierade Säffle-evenemang
         run: python scripts/apply_saffle_events.py
+      - name: Lägg in verifierade Färgelanda-evenemang
+        run: python scripts/apply_fargelanda_events.py
       - name: Testa evenemangslogiken
         run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py scripts/test_dals_ed_imports.py
       - name: Verifiera alla kommuner i evenemangsdatan
@@ -76,7 +80,10 @@ jobs:
           saffle = (events.get('municipalities') or {}).get('Säffle') or {}
           if len(saffle.get('events') or []) < 5:
               raise SystemExit(f'Säffle har för få aktuella evenemang efter supplement: {len(saffle.get("events") or [])}')
-          print(f'Evenemangsdata innehåller alla {len(expected)} kommuner; Dals-Ed har {len(dals_ed["events"])} poster; Kil har {len(kil["events"])} poster; Säffle har {len(saffle["events"])} poster')
+          fargelanda = (events.get('municipalities') or {}).get('Färgelanda') or {}
+          if len(fargelanda.get('events') or []) < 5:
+              raise SystemExit(f'Färgelanda har för få aktuella evenemang efter supplement: {len(fargelanda.get("events") or [])}')
+          print(f'Evenemangsdata innehåller alla {len(expected)} kommuner; Dals-Ed har {len(dals_ed["events"])} poster; Kil har {len(kil["events"])} poster; Säffle har {len(saffle["events"])} poster; Färgelanda har {len(fargelanda["events"])} poster')
           PY
       - name: Spara evenemangsdata konfliktsäkert
         shell: bash
