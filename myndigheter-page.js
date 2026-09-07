@@ -64,10 +64,11 @@ function mergeAuthoritySupplement(supplement) {
 }
 
 async function initializeAuthoritiesPage() {
-  const [response, hagforsSupplementResponse, arjangSupplementResponse] = await Promise.all([
+  const [response, hagforsSupplementResponse, arjangSupplementResponse, arvikaSupplementResponse] = await Promise.all([
     fetch("data/authorities.json", { cache: "no-cache" }),
     fetch("data/authorities-hagfors-supplement.json", { cache: "no-cache" }),
-    fetch("data/authorities-arjang-supplement.json", { cache: "no-cache" })
+    fetch("data/authorities-arjang-supplement.json", { cache: "no-cache" }),
+    fetch("data/authorities-arvika-supplement.json", { cache: "no-cache" })
   ]);
   if (!response.ok) throw new Error(`Myndighetsdata kunde inte laddas (${response.status})`);
   authorityData = await response.json();
@@ -80,6 +81,11 @@ async function initializeAuthoritiesPage() {
     mergeAuthoritySupplement(await arjangSupplementResponse.json());
   } else {
     console.warn(`Årjängs samhällsservice-komplettering kunde inte laddas (${arjangSupplementResponse.status})`);
+  }
+  if (arvikaSupplementResponse.ok) {
+    mergeAuthoritySupplement(await arvikaSupplementResponse.json());
+  } else {
+    console.warn(`Arvikas samhällsservice-komplettering kunde inte laddas (${arvikaSupplementResponse.status})`);
   }
   const municipalitySelect = document.querySelector("#authority-municipality");
   const groupSelect = document.querySelector("#authority-group");
