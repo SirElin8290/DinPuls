@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T18:56:17+02:00
+Genererad: 2026-09-07T18:57:45+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 12 av 21 kommuner når 100 %
+## Resultat: 13 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Dals-Ed, Filipstad, Forshaga, Hagfors, Kil, Sunne
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Dals-Ed, Eda, Filipstad, Forshaga, Hagfors, Kil, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -19,7 +19,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Grums | 🟢 100 % | 14 | 9 | 7 | 27 / 27 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
 | Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 72 / 72 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
-| Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 45 / 45 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
+| Eda | 🟢 100 % | 27 | 41 | 9 | 45 / 45 färska | 13 / 7 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟢 100 % | 9 | 10 | 10 | 68 / 69 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 34 |
 | Forshaga | 🟢 100 % | 12 | 10 | 44 | 48 / 48 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
 | Färgelanda | 🟡 EJ 100 % | 7 | 4 | 3 | 23 / 24 färska | 9 / 8 kat | 3 / 3 kat | 3 | 12 | 4 |
@@ -61,8 +61,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Dals-Ed — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Eda — 🟡 EJ 100 %
-- **Vård & hälsa:** 🟡 — 13 verksamheter i 2 kategorier; minst 5 och rimlig bredd krävs (13 / 2 kat)
+### Eda — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Filipstad — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
@@ -149,7 +149,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Grums | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Säffle | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Dals-Ed | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
-| Eda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| Eda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Filipstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Färgelanda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟢 |
