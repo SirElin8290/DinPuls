@@ -1,18 +1,18 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T12:31:27+02:00
-Datakälla: 35 livefiler, 0 repo-fallback.
+Genererad: 2026-09-07T14:46:55+02:00
+Datakälla: 36 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 2 av 21 kommuner når 100 %
+## Resultat: 3 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Bengtsfors
+**100 % gröna:** Åmål, Årjäng, Bengtsfors
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Åmål | 🟢 100 % | 25 | 51 | 15 | 43 / 43 färska | 19 / 8 kat | 17 / 5 kat | 4 | 43 | 40 |
-| Årjäng | 🟡 EJ 100 % | 29 | 10 | 28 | 44 / 44 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
+| Årjäng | 🟢 100 % | 29 | 10 | 28 | 44 / 44 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
 | Bengtsfors | 🟢 100 % | 21 | 34 | 7 | 41 / 41 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 34 |
 | Mellerud | 🟡 EJ 100 % | 25 | 18 | 9 | 31 / 31 färska | 7 / 4 kat | 14 / 3 kat | 5 | 96 | 27 |
 | Arvika | 🟡 EJ 100 % | 47 | 8 | 26 | 67 / 67 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
@@ -38,8 +38,8 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 ### Åmål — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Årjäng — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
+### Årjäng — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Bengtsfors — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
@@ -81,7 +81,6 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 - **Idrott & föreningar:** 🟡 — endast 4 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (4)
 
 ### Hagfors — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
 - **Idrott & föreningar:** 🟡 — endast 16 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (16)
 
 ### Hammarö — 🟡 EJ 100 %
@@ -150,7 +149,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Kommun | Grundkonfiguration | Dagens viktigaste | Väder | Vägtrafik | Kollektivtrafik | Flyg | Jobb | Bostäder | Evenemang | Nyheter | Missing People | Vård & hälsa | Service & hantverk | Myndigheter | Dagens lunch | Bio | Fritid & aktiviteter | Idrott & föreningar | Community |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Åmål | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
-| Årjäng | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
+| Årjäng | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Bengtsfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Mellerud | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Arvika | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
@@ -161,7 +160,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Filipstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Färgelanda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟢 |
-| Hagfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
+| Hagfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Hammarö | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Karlstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 |
 | Kil | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 |
