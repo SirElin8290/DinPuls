@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T16:00:50+02:00
+Genererad: 2026-09-07T16:21:08+02:00
 Datakälla: 38 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 7 av 21 kommuner når 100 %
+## Resultat: 8 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga, Hagfors
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -23,7 +23,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Filipstad | 🟡 EJ 100 % | 9 | 10 | 10 | 67 / 67 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 8 |
 | Forshaga | 🟢 100 % | 12 | 10 | 44 | 47 / 47 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
 | Färgelanda | 🟡 EJ 100 % | 7 | 4 | 3 | 22 / 22 färska | 9 / 8 kat | 3 / 3 kat | 3 | 12 | 4 |
-| Hagfors | 🟡 EJ 100 % | 22 | 23 | 22 | 47 / 47 färska | 13 / 7 kat | 12 / 7 kat | 8 | 28 | 16 |
+| Hagfors | 🟢 100 % | 22 | 23 | 22 | 47 / 47 färska | 13 / 7 kat | 12 / 7 kat | 8 | 24 | 23 |
 | Hammarö | 🟡 EJ 100 % | 12 | 0 | 38 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 16 |
 | Karlstad | 🟡 EJ 100 % | 92 | 0 | 30 | 104 / 104 färska | 36 / 10 kat | 3 / 2 kat | 4 | 8 | 19 |
 | Kil | 🟡 EJ 100 % | 12 | 4 | 4 | 40 / 40 färska | 10 / 4 kat | 18 / 5 kat | 2 | 21 | 20 |
@@ -80,8 +80,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 - **Dagens lunch:** 🟡 — endast 3 verifierade lunchställen; minst 4 krävs (3)
 - **Idrott & föreningar:** 🟡 — endast 4 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (4)
 
-### Hagfors — 🟡 EJ 100 %
-- **Idrott & föreningar:** 🟡 — endast 16 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (16)
+### Hagfors — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Hammarö — 🟡 EJ 100 %
 - **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
@@ -160,7 +160,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Filipstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Färgelanda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟢 |
-| Hagfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
+| Hagfors | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Hammarö | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Karlstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 |
 | Kil | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 |
