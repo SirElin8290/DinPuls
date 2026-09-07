@@ -23,6 +23,7 @@ SUPPLEMENTS = (
     DATA / "association-forshaga-supplement.json",
     DATA / "association-hagfors-supplement.json",
     DATA / "association-sunne-supplement.json",
+    DATA / "association-dals-ed-supplement.json",
     DATA / "association-enrichment-prerequisites.json",
 )
 
