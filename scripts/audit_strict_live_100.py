@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Full omkontroll begärd 2026-09-07: samtliga 21 kommuner nollställs och granskas på nytt.
 from __future__ import annotations
 import json, re, sys, urllib.request
 from datetime import datetime, timedelta
@@ -98,7 +99,5 @@ def main():
    for k in r['blockers']:
     s,metric,reason=r['modules'][k];lines.append(f'- **{k}:** {s} — {reason} ({metric})')
   lines.append('')
- mods=list(R[0]['modules']);lines+=['## Modulmatris','','| Kommun | '+' | '.join(mods)+' |','|---|'+'---:|'*len(mods)]
- for r in R:lines.append('| '+r['name']+' | '+' | '.join(r['modules'][k][0] for k in mods)+' |')
- REPORT.write_text('\n'.join(lines)+'\n',encoding='utf-8');print('\n'.join(lines[:45]));return 0
-if __name__=='__main__':sys.exit(main())
+ REPORT.write_text('\n'.join(lines).rstrip()+'\n',encoding='utf-8');print(f'{len(green)}/21 kommuner 100 %');return 0
+if __name__=='__main__':raise SystemExit(main())
