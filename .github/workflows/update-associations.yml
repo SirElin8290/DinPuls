@@ -21,6 +21,7 @@ on:
       - "data/association-sunne-supplement.json"
       - "data/association-dals-ed-supplement.json"
       - "data/association-filipstad-supplement.json"
+      - "data/sports-fargelanda-supplement.json"
       - "data/association-enrichment-prerequisites.json"
       - "scripts/import_associations.py"
       - "scripts/apply_forshaga_fri.py"
@@ -111,7 +112,9 @@ jobs:
           assert len(dalsed_sports) >= 20, f'Dals-Ed: för få idrottsföreningar: {len(dalsed_sports)}'
           filipstad_sports = sports.get('Filipstad', {}).get('clubs') or []
           assert len(filipstad_sports) >= 20, f'Filipstad: för få idrottsföreningar: {len(filipstad_sports)}'
-          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Dals-Ed {len(dalsed_sports)} idrott; Filipstad {len(filipstad_sports)} idrott')
+          fargelanda_sports = sports.get('Färgelanda', {}).get('clubs') or []
+          assert len(fargelanda_sports) >= 20, f'Färgelanda: för få idrottsföreningar: {len(fargelanda_sports)}'
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Dals-Ed {len(dalsed_sports)} idrott; Filipstad {len(filipstad_sports)} idrott; Färgelanda {len(fargelanda_sports)} idrott')
           PY
           PYTHONPATH=scripts python -m unittest scripts/test_forshaga_fri.py
           node scripts/test_leisure_quality.js
