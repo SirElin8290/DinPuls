@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parents[1]; DATA=ROOT/'data'; REPORT=ROOT/'docs/STRICT-LIVE-AUDIT-LATEST.md'
 TZ=ZoneInfo('Europe/Stockholm'); NOW=datetime.now(TZ); LIVE='https://dinpuls.se/data/'
 MUNIS=['Åmål','Årjäng','Bengtsfors','Mellerud','Arvika','Grums','Säffle','Dals-Ed','Eda','Filipstad','Forshaga','Färgelanda','Hagfors','Hammarö','Karlstad','Kil','Kristinehamn','Munkfors','Storfors','Sunne','Torsby']
-FILES=['municipalities.json','important.json','important-sources.json','weather-live.json','road-traffic.json','transport.json','flights.json','jobs.json','housing.json','housing-fargelanda-supplement.json','events.json','events-fargelanda-supplement.json','news.json','missing-people.json','health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','health-karlstad-private-supplement.json','health-fargelanda-supplement.json','service.json','service-private-supplement.json','service-launch-supplement.json','service-local-supplement.json','authorities.json','authorities-hagfors-supplement.json','authorities-arjang-supplement.json','lunch.json','cinemas.json','leisure.json','leisure-enrichment.json','leisure-fargelanda-supplement.json','sports.json','sports-fargelanda-supplement.json','community-sources.json','community-posts.json']
+FILES=['municipalities.json','important.json','important-sources.json','weather-live.json','road-traffic.json','transport.json','flights.json','jobs.json','housing.json','housing-fargelanda-supplement.json','events.json','events-fargelanda-supplement.json','news.json','missing-people.json','health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','health-karlstad-private-supplement.json','health-fargelanda-supplement.json','service.json','service-private-supplement.json','service-launch-supplement.json','service-local-supplement.json','authorities.json','authorities-hagfors-supplement.json','authorities-arjang-supplement.json','authorities-arvika-supplement.json','lunch.json','cinemas.json','leisure.json','leisure-enrichment.json','leisure-fargelanda-supplement.json','sports.json','sports-fargelanda-supplement.json','community-sources.json','community-posts.json']
 def load_repo(fn):
     try:
         v=json.loads((DATA/fn).read_text(encoding='utf-8')); return v if isinstance(v,dict) else {}
@@ -78,7 +78,7 @@ def news(D,n):
     return dedupe(xs),recent
 def auth(D,n):
     row=(D['authorities.json'].get('municipalities') or {}).get(n,{}) or {}; urls=dict(row.get('serviceUrls') or {})
-    for fn in ('authorities-hagfors-supplement.json','authorities-arjang-supplement.json'):
+    for fn in ('authorities-hagfors-supplement.json','authorities-arjang-supplement.json','authorities-arvika-supplement.json'):
         p=D[fn]
         supplement_row=(p.get('municipalities') or {}).get(n,{}) if isinstance(p.get('municipalities'),dict) else {}
         if isinstance(supplement_row,dict):urls.update(supplement_row.get('serviceUrls') or {})
