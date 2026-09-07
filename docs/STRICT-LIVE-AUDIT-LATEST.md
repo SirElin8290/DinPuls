@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T17:22:40+02:00
+Genererad: 2026-09-07T17:30:05+02:00
 Datakälla: 38 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 10 av 21 kommuner når 100 %
+## Resultat: 11 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Forshaga, Hagfors, Kil, Sunne
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Dals-Ed, Forshaga, Hagfors, Kil, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -18,7 +18,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Arvika | 🟢 100 % | 50 | 8 | 26 | 67 / 67 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
 | Grums | 🟢 100 % | 14 | 9 | 7 | 29 / 29 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
 | Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 69 / 69 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
-| Dals-Ed | 🟡 EJ 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 10 |
+| Dals-Ed | 🟢 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
 | Eda | 🟡 EJ 100 % | 27 | 41 | 9 | 51 / 51 färska | 13 / 2 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟡 EJ 100 % | 9 | 10 | 10 | 67 / 67 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 8 |
 | Forshaga | 🟢 100 % | 12 | 10 | 44 | 47 / 47 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
@@ -58,9 +58,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 - **Service & hantverk:** 🟡 — 14 företag i 3 kategorier; minst 8 och 4 kategorier krävs (14 / 3 kat)
 - **Myndigheter:** 🟡 — saknar centrala direktlänkar: bygglov (7 lokala länkar)
 
-### Dals-Ed — 🟡 EJ 100 %
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
-- **Idrott & föreningar:** 🟡 — endast 10 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (10)
+### Dals-Ed — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Eda — 🟡 EJ 100 %
 - **Vård & hälsa:** 🟡 — 13 verksamheter i 2 kategorier; minst 5 och rimlig bredd krävs (13 / 2 kat)
@@ -151,7 +150,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 | Arvika | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Grums | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Säffle | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
-| Dals-Ed | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
+| Dals-Ed | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Eda | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
 | Filipstad | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 | 🟢 | 🟢 | 🟡 | 🟢 |
 | Forshaga | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 |
