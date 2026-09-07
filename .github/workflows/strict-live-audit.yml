@@ -2,7 +2,7 @@ name: STRICT LIVE 100 audit
 
 # Auditen ska alltid läsa publicerad live-data. Den här manuella omkörningsvägen
 # används när en Pages-deploy precis har färdigställts efter en tidigare audit.
-# Full omkontroll 2026-09-07: ny körning efter färdig Pages-deploy.
+# Säffle-verifiering 2026-09-07: tvinga färsk kontroll efter publicerad eventfix.
 on:
   push:
     branches: [main]
@@ -30,6 +30,8 @@ on:
       - 'data/events.json'
       - 'data/events-kil-supplement.json'
       - 'scripts/apply_kil_events.py'
+      - 'data/events-saffle-supplement.json'
+      - 'scripts/apply_saffle_events.py'
       - 'data/lunch.json'
       - 'data/lunch-hammaro-supplement.json'
       - 'data/authorities.json'
