@@ -2,7 +2,7 @@ name: STRICT LIVE 100 audit
 
 # Auditen ska alltid läsa publicerad live-data. Den här manuella omkörningsvägen
 # används när en Pages-deploy precis har färdigställts efter en tidigare audit.
-# Säffle-verifiering 2026-09-07: kontroll efter publicerad event- och servicefix.
+# Färgelanda-verifiering 2026-09-07: event, föreningar, service, lunch och myndigheter.
 on:
   push:
     branches: [main]
@@ -25,6 +25,7 @@ on:
       - 'data/association-sunne-supplement.json'
       - 'data/association-dals-ed-supplement.json'
       - 'data/association-filipstad-supplement.json'
+      - 'data/sports-fargelanda-supplement.json'
       - 'data/sports.json'
       - 'data/leisure.json'
       - 'data/events.json'
@@ -32,6 +33,8 @@ on:
       - 'scripts/apply_kil_events.py'
       - 'data/events-saffle-supplement.json'
       - 'scripts/apply_saffle_events.py'
+      - 'data/events-fargelanda-supplement.json'
+      - 'scripts/apply_fargelanda_events.py'
       - 'data/lunch.json'
       - 'data/lunch-hammaro-supplement.json'
       - 'data/authorities.json'
