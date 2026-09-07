@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-07T19:03:19+02:00
+Genererad: 2026-09-07T19:48:53+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
@@ -17,7 +17,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Mellerud | 🟢 100 % | 26 | 18 | 10 | 34 / 34 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
 | Arvika | 🟢 100 % | 50 | 8 | 26 | 78 / 78 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
 | Grums | 🟢 100 % | 14 | 9 | 7 | 27 / 27 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
-| Säffle | 🟡 EJ 100 % | 29 | 55 | 1 | 72 / 72 färska | 18 / 7 kat | 14 / 3 kat | 10 | 64 | 44 |
+| Säffle | 🟡 EJ 100 % | 29 | 55 | 5 | 72 / 72 färska | 18 / 7 kat | 15 / 3 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 5 | 24 | 28 | 19 / 19 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
 | Eda | 🟢 100 % | 27 | 41 | 9 | 45 / 45 färska | 13 / 7 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟢 100 % | 9 | 10 | 10 | 68 / 69 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 34 |
@@ -54,9 +54,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Säffle — 🟡 EJ 100 %
-- **Evenemang:** 🟡 — endast 1 aktuella/framtida evenemang; minst 5 krävs (1)
-- **Service & hantverk:** 🟡 — 14 företag i 3 kategorier; minst 8 och 4 kategorier krävs (14 / 3 kat)
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: bygglov (7 lokala länkar)
+- **Service & hantverk:** 🟡 — 15 företag i 3 kategorier; minst 8 och 4 kategorier krävs (15 / 3 kat)
 
 ### Dals-Ed — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
