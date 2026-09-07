@@ -1,0 +1,42 @@
+name: STRICT LIVE 100 audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'DINPULS-AUDIT-RULES.md'
+      - 'scripts/audit_strict_live_100.py'
+      - '.github/workflows/strict-live-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Installera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Kör STRICT LIVE 100 audit
+        run: python scripts/audit_strict_live_100.py
+
+      - name: Publicera senaste auditrapport
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/STRICT-LIVE-AUDIT-LATEST.md
+          if git diff --cached --quiet; then
+            echo 'Ingen rapportändring att committa.'
+          else
+            git commit -m 'Uppdatera STRICT LIVE 100 kommunrapport'
+            git push origin HEAD:main
+          fi
