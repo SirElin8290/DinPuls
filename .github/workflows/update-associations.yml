@@ -27,6 +27,7 @@ on:
       - "scripts/apply_forshaga_fri.py"
       - "scripts/test_forshaga_fri.py"
       - "scripts/apply_launch_associations.py"
+      - "scripts/apply_hammaro_associations.py"
       - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
       - ".github/workflows/update-associations.yml"
@@ -71,6 +72,9 @@ jobs:
       - name: Lägg till verifierad lanseringstäckning
         run: python scripts/apply_launch_associations.py
 
+      - name: Applicera Hammarös verifierade föreningskomplettering
+        run: python scripts/apply_hammaro_associations.py
+
       - name: Applicera verifierad fritidsberikning
         run: python scripts/apply_leisure_enrichment.py
 
@@ -96,7 +100,7 @@ jobs:
               assert leisure.get(name, {}).get('activities'), f'{name}: launch leisure coverage missing'
           hammaro_sports = sports.get('Hammarö', {}).get('clubs') or []
           hammaro_leisure = leisure.get('Hammarö', {}).get('activities') or []
-          assert len(hammaro_sports) >= 10, f'Hammarö: för få idrottsföreningar: {len(hammaro_sports)}'
+          assert len(hammaro_sports) >= 20, f'Hammarö: för få idrottsföreningar: {len(hammaro_sports)}'
           assert len(hammaro_leisure) >= 15, f'Hammarö: för få fritidsposter: {len(hammaro_leisure)}'
           forshaga_sports = sports.get('Forshaga', {}).get('clubs') or []
           forshaga_leisure = leisure.get('Forshaga', {}).get('activities') or []
@@ -114,7 +118,7 @@ jobs:
           assert len(filipstad_sports) >= 20, f'Filipstad: för få idrottsföreningar: {len(filipstad_sports)}'
           fargelanda_sports = sports.get('Färgelanda', {}).get('clubs') or []
           assert len(fargelanda_sports) >= 20, f'Färgelanda: för få idrottsföreningar: {len(fargelanda_sports)}'
-          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Dals-Ed {len(dalsed_sports)} idrott; Filipstad {len(filipstad_sports)} idrott; Färgelanda {len(fargelanda_sports)} idrott')
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Hammarö {len(hammaro_sports)} idrott; Dals-Ed {len(dalsed_sports)} idrott; Filipstad {len(filipstad_sports)} idrott; Färgelanda {len(fargelanda_sports)} idrott')
           PY
           PYTHONPATH=scripts python -m unittest scripts/test_forshaga_fri.py
           node scripts/test_leisure_quality.js
