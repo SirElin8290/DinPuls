@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-08T09:20:40+02:00
+Genererad: 2026-09-08T09:31:51+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 17 av 21 kommuner når 100 %
+## Resultat: 18 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Sunne
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -27,7 +27,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Hammarö | 🟢 100 % | 9 | 1 | 38 | 41 / 42 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 21 |
 | Karlstad | 🟢 100 % | 94 | 1 | 31 | 87 / 87 färska | 36 / 10 kat | 8 / 6 kat | 4 | 10 | 20 |
 | Kil | 🟢 100 % | 11 | 4 | 5 | 35 / 36 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
-| Kristinehamn | 🟡 EJ 100 % | 55 | 1 | 29 | 58 / 60 färska | 6 / 4 kat | 8 / 6 kat | 3 | 10 | 23 |
+| Kristinehamn | 🟢 100 % | 55 | 1 | 29 | 58 / 60 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
 | Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 25 / 25 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
 | Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 60 / 60 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
 | Sunne | 🟢 100 % | 20 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
@@ -83,8 +83,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Kil — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Kristinehamn — 🟡 EJ 100 %
-- **Dagens lunch:** 🟡 — endast 3 verifierade lunchställen; minst 4 krävs (3)
+### Kristinehamn — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Munkfors — 🟡 EJ 100 %
 - **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
