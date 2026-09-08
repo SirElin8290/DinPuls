@@ -10,6 +10,7 @@ on:
     paths:
       - 'DINPULS-AUDIT-RULES.md'
       - 'scripts/audit_strict_live_100.py'
+      - 'scripts/audit_strict_live_100_runner.py'
       - 'data/housing.json'
       - 'data/housing-hammaro-supplement.json'
       - 'scripts/apply_hammaro_housing.py'
@@ -75,7 +76,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Kör STRICT LIVE 100 audit
-        run: python scripts/audit_strict_live_100.py
+        run: python scripts/audit_strict_live_100_runner.py
       - name: Publicera senaste auditrapport
         run: |
           set -euo pipefail
