@@ -7,16 +7,24 @@ on:
       - 'data/kristinehamn-strict-source.json'
       - 'scripts/apply_kristinehamn_strict.py'
       - '.github/workflows/update-kristinehamn-strict.yml'
+  workflow_run:
+    workflows:
+      - 'Uppdatera lediga bostäder'
+      - 'Uppdatera dagens lunch'
+      - 'Uppdatera föreningar och idrott'
+    types: [completed]
   schedule:
     - cron: '27 * * * *'
 permissions:
   contents: write
 jobs:
   update:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - name: Synka mot senaste main
         run: |
