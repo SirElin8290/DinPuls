@@ -1,0 +1,37 @@
+name: Update Kristinehamn STRICT data
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/kristinehamn-strict-source.json'
+      - 'scripts/apply_kristinehamn_strict.py'
+      - '.github/workflows/update-kristinehamn-strict.yml'
+  schedule:
+    - cron: '27 * * * *'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply and hard-gate Kristinehamn
+        run: python scripts/apply_kristinehamn_strict.py
+      - name: Commit active data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/housing.json data/health-local-supplement.json data/service-local-supplement.json data/authorities.json data/lunch-launch-supplement.json data/leisure.json data/sports.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Uppdatera Kristinehamn STRICT-data'
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
