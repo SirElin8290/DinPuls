@@ -9,9 +9,11 @@ on:
       - "data/lunch-hammaro-supplement.json"
       - "data/lunch-hagfors-supplement.json"
       - "data/lunch-fargelanda-supplement.json"
+      - "data/lunch-storfors-supplement.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
       - "scripts/apply_fargelanda_lunch.py"
+      - "scripts/apply_storfors_lunch.py"
       - "scripts/test_update_lunch.py"
       - ".github/workflows/update-lunch.yml"
   schedule:
@@ -53,6 +55,7 @@ jobs:
           python scripts/test_update_lunch.py
           python scripts/update_lunch.py
           python scripts/apply_fargelanda_lunch.py
+          python scripts/apply_storfors_lunch.py
 
       - name: Verifiera att alla kommuner finns med och att lanseringskommunerna har matkälla
         run: |
@@ -77,7 +80,10 @@ jobs:
           assert len(hagfors.get('restaurants') or []) >= 8, f"Hagfors: för få verifierade lunchställen: {len(hagfors.get('restaurants') or [])}"
           fargelanda = lunch['municipalities']['Färgelanda']
           assert len(fargelanda.get('restaurants') or []) >= 4, f"Färgelanda: för få verifierade lunchställen: {len(fargelanda.get('restaurants') or [])}"
-          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])}, Färgelanda {len(fargelanda.get('restaurants') or [])} restaurangkällor")
+          storfors = lunch['municipalities']['Storfors']
+          assert len(storfors.get('restaurants') or []) >= 2, f"Storfors: verifierade lunchställen saknas: {len(storfors.get('restaurants') or [])}"
+          assert storfors.get('referenceSources'), 'Storfors: kommunal matguide saknas'
+          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])}, Färgelanda {len(fargelanda.get('restaurants') or [])}, Storfors {len(storfors.get('restaurants') or [])} restaurangkällor")
           PY
 
       - name: Publicera lunchdata
