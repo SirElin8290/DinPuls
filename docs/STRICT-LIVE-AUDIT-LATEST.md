@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-08T09:31:51+02:00
+Genererad: 2026-09-08T09:48:39+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 18 av 21 kommuner når 100 %
+## Resultat: 19 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Sunne
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -28,7 +28,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Karlstad | 🟢 100 % | 94 | 1 | 31 | 87 / 87 färska | 36 / 10 kat | 8 / 6 kat | 4 | 10 | 20 |
 | Kil | 🟢 100 % | 11 | 4 | 5 | 35 / 36 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
 | Kristinehamn | 🟢 100 % | 55 | 1 | 29 | 58 / 60 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
-| Munkfors | 🟡 EJ 100 % | 9 | 0 | 19 | 25 / 25 färska | 1 / 0 kat | 3 / 2 kat | 1 | 6 | 8 |
+| Munkfors | 🟢 100 % | 9 | 1 | 19 | 25 / 25 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
 | Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 60 / 60 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
 | Sunne | 🟢 100 % | 20 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
 | Torsby | 🟡 EJ 100 % | 22 | 0 | 31 | 44 / 44 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
@@ -86,14 +86,8 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Kristinehamn — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Munkfors — 🟡 EJ 100 %
-- **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
-- **Vård & hälsa:** 🟡 — 1 verksamheter i 0 kategorier; minst 5 och rimlig bredd krävs (1 / 0 kat)
-- **Service & hantverk:** 🟡 — 3 företag i 2 kategorier; minst 8 och 4 kategorier krävs (3 / 2 kat)
-- **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
-- **Dagens lunch:** 🟡 — endast 1 verifierade lunchställen; minst 4 krävs (1)
-- **Fritid & aktiviteter:** 🟡 — endast 6 lokala aktiviteter/anläggningar; minst 10 krävs (6)
-- **Idrott & föreningar:** 🟡 — endast 8 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (8)
+### Munkfors — 🟢 100 %
+Samtliga obligatoriska moduler passerar den strikta auditen.
 
 ### Storfors — 🟡 EJ 100 %
 - **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
