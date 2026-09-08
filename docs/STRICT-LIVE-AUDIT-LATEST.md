@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-08T11:21:35+02:00
+Genererad: 2026-09-08T11:25:57+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
@@ -29,7 +29,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Kil | 🟢 100 % | 11 | 4 | 5 | 35 / 36 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
 | Kristinehamn | 🟢 100 % | 55 | 1 | 30 | 58 / 60 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
 | Munkfors | 🟢 100 % | 9 | 1 | 19 | 25 / 25 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
-| Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 60 / 60 färska | 1 / 0 kat | 3 / 3 kat | 0 | 4 | 10 |
+| Storfors | 🟡 EJ 100 % | 4 | 0 | 0 | 60 / 60 färska | 5 / 5 kat | 3 / 3 kat | 0 | 4 | 10 |
 | Sunne | 🟢 100 % | 20 | 8 | 7 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
 | Torsby | 🟡 EJ 100 % | 22 | 0 | 31 | 44 / 44 färska | 2 / 0 kat | 3 / 3 kat | 1 | 2 | 5 |
 
@@ -92,7 +92,6 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Storfors — 🟡 EJ 100 %
 - **Bostäder:** 🟡 — inga faktiska aktuella lediga objekt; minst 1 krävs (0)
 - **Evenemang:** 🟡 — endast 0 aktuella/framtida evenemang; minst 5 krävs (0)
-- **Vård & hälsa:** 🟡 — 1 verksamheter i 0 kategorier; minst 5 och rimlig bredd krävs (1 / 0 kat)
 - **Service & hantverk:** 🟡 — 3 företag i 3 kategorier; minst 8 och 4 kategorier krävs (3 / 3 kat)
 - **Myndigheter:** 🟡 — saknar centrala direktlänkar: socialtjanst, ekonomiskt-bistand, budget-skuld, aldreomsorg, lss, bygglov (0 lokala länkar)
 - **Dagens lunch:** 🟡 — endast 0 verifierade lunchställen; minst 4 krävs (0)
