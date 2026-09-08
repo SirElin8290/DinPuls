@@ -43,7 +43,7 @@ Modulen är trasig, tom på grund av fel, visar fel kommun/fel data, saknar nöd
 | Vård & hälsa | Minst **5 relevanta verksamheter** och rimlig bredd: vårdcentral/läkare plus flera av tandvård, BVC/barnmorska, rehab/fysioterapi, apotek, privat vård/behandling. |
 | Service & hantverk | Minst **8 verifierade lokala företag** och minst **4 relevanta kategorier**, exempelvis el, VVS, bygg, bil/däck, lås, städ. |
 | Myndigheter & samhällsservice | Centrala funktioner ska täckas: kontaktcenter, socialtjänst, ekonomiskt bistånd, budget/skuld, äldreomsorg, LSS, bygglov/boende och relevanta statliga funktioner. |
-| Dagens lunch | Minst **4 verifierade lokala lunchställen** som faktiskt serverar lunch. Dagsmeny behöver inte vara maskinläst. |
+| Dagens lunch | Normalt minst **4 verifierade lokala lunchställen** som faktiskt serverar lunch. Dagsmeny behöver inte vara maskinläst. Om aktuella officiella eller primära lokala källor verifierar att kommunens faktiska ordinarie lunchutbud är mindre än fyra får modulen vara grön när **hela det verifierade utbudet** finns i aktiv/live data. Undantaget får inte användas för att kompensera för ofullständig research, säsongsstängda verksamheter eller trasig import. |
 | Bio | Finns aktiv lokal bio ska korrekt biograf samt aktuell program-/visningsinformation eller fungerande direkt programkälla finnas. Om lokal bio saknas får modulen vara grön endast om detta hanteras korrekt och tydligt. |
 | Fritid & aktiviteter | Minst **10 verkliga lokala aktiviteter/anläggningar** med bredd, exempelvis bibliotek/kultur, bad, friluftsliv, motionsområde, ungdomsverksamhet och anläggningar. |
 | Idrott & föreningar | Minst **20 verkliga lokala föreningar** för normal kommun och tydlig bredd mellan verksamhetstyper. Färre än 20 = 🟡 om inte ett verifierat faktiskt lokalt föreningsutbud är mindre än så. |
@@ -58,7 +58,7 @@ Data i GitHub räknas inte om den aktiva frontend- eller pipeline-koden inte anv
 Vid STRICT-revision nollställs bedömningen. Ingen kommun behåller grönt bara för att den tidigare varit godkänd.
 
 ### Inget tekniskt grönt med tunn sida
-Två föreningar, ett evenemang, en ensam vårdcentral eller en referenslänk räcker inte när modulen ska ge ett lokalt utbud.
+Två föreningar, ett evenemang, en ensam vårdcentral eller en referenslänk räcker inte när modulen ska ge ett lokalt utbud. För lunch får ett verifierat faktiskt lokalt totalutbud under fyra endast godkännas när hela utbudet är dokumenterat med aktuella officiella eller primära källor och samtliga verifierade lunchställen visas live.
 
 ### Legitimt nolläge skiljs från innehållsbrist
 Följande kan vara gröna med 0 aktuella poster om källan fungerar korrekt:
@@ -90,6 +90,9 @@ Flyg behöver inte vara realtid.
 
 ### Community
 Avsaknad av godkänd privat/community-källa blockerar inte grönt om funktionen i övrigt hanteras korrekt och inget innehåll fabriceras.
+
+### Dagens lunch – verifierat faktiskt utbud
+Fyra lunchställen är normalgränsen. En kommun med färre än fyra får bara godkännas om aktuell research mot officiell kommunal källa och/eller primära destinations-/verksamhetskällor visar att färre ordinarie lunchställen faktiskt finns, det verifierade totalantalet lagras i aktiv data och alla dessa verksamheter är med i modulen. Detta är ett verklighetsundantag, inte en generell sänkning av kravet.
 
 ## 6. Verifieringsordning
 
@@ -133,7 +136,7 @@ Hero och Matkassen undantas. Alla övriga obligatoriska moduler ska kontrolleras
 
 ## 8. Slutregel
 
-> **100 % GRÖN = samtliga obligatoriska moduler är gröna, ingen innehållsmodul ligger under miniminivån och aktuell aktiv/live data är verifierad.**
+> **100 % GRÖN = samtliga obligatoriska moduler är gröna, ingen innehållsmodul ligger under miniminivån utan ett uttryckligen tillåtet och verifierat verklighetsundantag, och aktuell aktiv/live data är verifierad.**
 
 Om någon modul är gul eller röd ska kommunen rapporteras som **inte 100 % grön**, med exakt blockerare.
 
