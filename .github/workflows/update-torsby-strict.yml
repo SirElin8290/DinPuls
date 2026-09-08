@@ -1,0 +1,54 @@
+name: Uppdatera Torsby STRICT
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "data/torsby-strict-source.json"
+      - "scripts/apply_torsby_strict.py"
+      - ".github/workflows/update-torsby-strict.yml"
+  schedule:
+    - cron: "23 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-torsby-strict
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hämta projektet
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Synka main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+      - name: Aktivera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Applicera Torsby STRICT-data
+        run: python scripts/apply_torsby_strict.py
+      - name: Publicera aktiva Torsby-data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/health.json data/service-local-supplement.json data/authorities.json data/cinemas.json data/leisure.json data/sports.json data/lunch.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera Torsby STRICT-data"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 2))
+          done
+          exit 1
