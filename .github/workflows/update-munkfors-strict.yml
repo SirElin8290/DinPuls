@@ -1,0 +1,50 @@
+name: Update Munkfors STRICT data
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/munkfors-strict-source.json'
+      - 'scripts/apply_munkfors_strict.py'
+      - '.github/workflows/update-munkfors-strict.yml'
+  workflow_run:
+    workflows:
+      - 'Uppdatera lediga bostäder'
+      - 'Uppdatera dagens lunch'
+      - 'Uppdatera föreningar och idrott'
+    types: [completed]
+  schedule:
+    - cron: '37 * * * *'
+permissions:
+  contents: write
+jobs:
+  update:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Synka mot senaste main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply and hard-gate Munkfors
+        run: python scripts/apply_munkfors_strict.py
+      - name: Commit active data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/housing.json data/health-local-supplement.json data/service-local-supplement.json data/authorities.json data/lunch.json data/leisure.json data/sports.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Uppdatera Munkfors STRICT-data'
+          for i in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 3))
+          done
+          exit 1
