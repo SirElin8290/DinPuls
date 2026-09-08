@@ -24,8 +24,14 @@ def main() -> int:
     row["restaurants"] = list(by_id.values())
     row["referenceSources"] = supplement.get("referenceSources") or row.get("referenceSources") or []
     row["sourceChecked"] = supplement.get("sourceChecked")
+    row["actualLocalLunchSupply"] = supplement.get("actualLocalLunchSupply")
+    row["actualSupplyVerified"] = bool(supplement.get("actualSupplyVerified"))
+    row["actualSupplyBasis"] = supplement.get("actualSupplyBasis")
     LUNCH.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Storfors: {len(row['restaurants'])} verifierade lunchställen")
+    print(
+        f"Storfors: {len(row['restaurants'])} verifierade lunchställen; "
+        f"verifierat faktiskt utbud={row.get('actualLocalLunchSupply')}"
+    )
     return 0
 
 
