@@ -61,7 +61,7 @@ lur=lu.setdefault('municipalities',{}).setdefault('Torsby',{})
 lur['restaurants']=merge_named(lur.get('restaurants') or [],SRC['lunch'])
 save('lunch.json',lu)
 
-# Kontrollera de blockerare som denna patch faktiskt ska lösa.
+# Kontrollera alla blockerare som denna patch löser. Workflow ska falla i stället för att publicera under STRICT-tröskel.
 health=[]
 for fn in ['health-eda-supplement.json','health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','health-karlstad-private-supplement.json','health-fargelanda-supplement.json']:
     p=load(fn)
@@ -79,5 +79,7 @@ assert len(service)>=8 and len(cats(service))>=4,(len(service),cats(service))
 assert all(ar['serviceUrls'].get(k) for k in ['socialtjanst','ekonomiskt-bistand','budget-skuld','aldreomsorg','lss','bygglov'])
 assert len(c['municipalities']['Torsby'])>=1 and all(x.get('programUrl') or x.get('bookingUrl') for x in c['municipalities']['Torsby'])
 assert len(lr['activities'])>=10,len(lr['activities'])
+assert len(sr['clubs'])>=20,len(sr['clubs'])
+assert len(lur['restaurants'])>=4,len(lur['restaurants'])
 
 print(f"Torsby STRICT patch: health={len(health)}/{len(cats(health))} kat, service={len(service)}/{len(cats(service))} kat, authorities=6, cinema={len(c['municipalities']['Torsby'])}, leisure={len(lr['activities'])}, sports={len(sr['clubs'])}, lunch={len(lur['restaurants'])}")
