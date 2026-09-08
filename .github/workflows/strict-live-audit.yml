@@ -1,10 +1,7 @@
 name: STRICT LIVE 100 audit
 
-# Auditen ska alltid läsa publicerad live-data. Den här manuella omkörningsvägen
-# används när en Pages-deploy precis har färdigställts efter en tidigare audit.
-# Färgelanda-verifiering 2026-09-07: event, föreningar, service, lunch och myndigheter.
-# Hammarö-verifiering 2026-09-07: bostäder, föreningar och myndigheter.
-# Karlstad-verifiering 2026-09-07: kör om efter publicerade STRICT-kompletteringar.
+# Auditen ska alltid läsa publicerad live-data. Manuell omkörningsväg efter kommunfixar.
+# Färgelanda/Hammarö/Karlstad/Kristinehamn verifieras först efter publicerad Pages-data.
 on:
   push:
     branches: [main]
@@ -42,6 +39,7 @@ on:
       - 'data/events-fargelanda-supplement.json'
       - 'scripts/apply_fargelanda_events.py'
       - 'data/lunch.json'
+      - 'data/lunch-launch-supplement.json'
       - 'data/lunch-hammaro-supplement.json'
       - 'data/authorities.json'
       - 'data/authorities-hagfors-supplement.json'
@@ -55,33 +53,24 @@ on:
   schedule:
     - cron: '11 * * * *'
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   audit:
     if: >-
-      ${{
-        github.event_name != 'workflow_run' ||
-        (github.event.workflow_run.conclusion == 'success' &&
-         github.event.workflow_run.head_commit.message != 'Uppdatera STRICT LIVE 100 kommunrapport')
-      }}
+      ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_commit.message != 'Uppdatera STRICT LIVE 100 kommunrapport') }}
     runs-on: ubuntu-latest
     steps:
       - name: Hämta repo
         uses: actions/checkout@v4
         with:
           ref: main
-
       - name: Installera Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Kör STRICT LIVE 100 audit
         run: python scripts/audit_strict_live_100.py
-
       - name: Publicera senaste auditrapport
         run: |
           git config user.name 'github-actions[bot]'
