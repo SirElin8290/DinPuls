@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import audit_strict_live_100 as base
 
+# Körs efter att aktuell lunch.json har publicerats live.
 _original_audit = base.audit
 
 
