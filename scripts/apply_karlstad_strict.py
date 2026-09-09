@@ -16,11 +16,8 @@ def merge_named(existing, additions):
         if k: out[k]=x
     return list(out.values())
 
-# Housing: current, externally verified object from KBAB market snapshot.
-h=load('housing.json'); row=h.setdefault('municipalities',{}).setdefault('Karlstad',{})
-row['listings']=merge_named(row.get('listings') or [],SRC['housing']); row['total']=len(row['listings'])
-row['checkedAt']=SRC['sourceChecked']+'T12:00:00+02:00'; row['updatedAt']=row['checkedAt']; row['stale']=False; row['errors']=[]; row['availabilityMode']='automatic'
-save('housing.json',h)
+# Housing is owned by update_housing.py; this legacy STRICT patch must not add snapshots.
+row=load('housing.json').setdefault('municipalities',{}).setdefault('Karlstad',{})
 
 # Service: file is already consumed directly by service-page.js.
 s=load('service-local-supplement.json'); s['sourceChecked']=SRC['sourceChecked']; s['businesses']=merge_named(s.get('businesses') or [],SRC['service']); save('service-local-supplement.json',s)

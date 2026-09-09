@@ -39,7 +39,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/housing.json data/health-local-supplement.json data/service-local-supplement.json data/authorities.json data/lunch.json data/leisure.json data/sports.json
+          git add data/health-local-supplement.json data/service-local-supplement.json data/authorities.json data/lunch.json data/leisure.json data/sports.json
           git diff --cached --quiet && exit 0
           git commit -m 'Uppdatera Kristinehamn STRICT-data'
           for i in 1 2 3 4; do

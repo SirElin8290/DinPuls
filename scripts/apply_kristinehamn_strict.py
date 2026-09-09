@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'data'
 SRC = json.loads((DATA / 'kristinehamn-strict-source.json').read_text(encoding='utf-8'))
-ALL = {'housing','health','service','authorities','lunch','leisure','sports'}
+ALL = {'health','service','authorities','lunch','leisure','sports'}
 
 
 def load(name):
@@ -38,17 +38,6 @@ def selected_modules():
 
 
 def apply(modules):
-    if 'housing' in modules:
-        data = load('housing.json')
-        entry = data.setdefault('municipalities', {}).setdefault('Kristinehamn', {})
-        entry['listings'] = merge(entry.get('listings') or [], SRC['housing'])
-        entry['total'] = len(entry['listings'])
-        entry['checkedAt'] = SRC['sourceChecked'] + 'T09:00:00+02:00'
-        entry['updatedAt'] = entry['checkedAt']
-        entry['stale'] = False
-        entry['errors'] = []
-        save('housing.json', data)
-
     if 'health' in modules:
         data = load('health-local-supplement.json')
         data['sourceChecked'] = SRC['sourceChecked']
