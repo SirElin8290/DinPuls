@@ -169,6 +169,32 @@ class HousingUpdateTests(unittest.TestCase):
                 self.assertEqual(update_housing.main(), 1)
             self.assertEqual(json.loads(output_path.read_text(encoding="utf-8")), previous)
 
+    def test_single_municipality_mode_preserves_every_other_entry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config_path = root / "municipalities.json"
+            output_path = root / "housing.json"
+            provider = {"name": "A-bostäder", "url": "https://a.example", "parser": "momentum", "official": True}
+            config_path.write_text(json.dumps({"municipalities": [
+                {"name": "A", "housingProviders": [provider]},
+                {"name": "B", "housingProviders": []},
+            ]}), encoding="utf-8")
+            untouched = {"total": 7, "listings": [{"id": "keep"}], "providers": []}
+            output_path.write_text(json.dumps({"municipalities": {
+                "A": {"total": 0, "listings": [], "providers": []}, "B": untouched,
+            }}), encoding="utf-8")
+            with (
+                patch.object(update_housing, "MUNICIPALITY_FILE", config_path),
+                patch.object(update_housing, "OUTPUT", output_path),
+                patch.object(update_housing, "parse_momentum", return_value=[{
+                    "id": "new", "address": "Nya vägen 1", "url": "https://a.example/new", "provider": "A-bostäder",
+                }]),
+            ):
+                self.assertEqual(update_housing.main("A"), 0)
+            result = json.loads(output_path.read_text(encoding="utf-8"))["municipalities"]
+            self.assertEqual(result["B"], untouched)
+            self.assertEqual(result["A"]["total"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

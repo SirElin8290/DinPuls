@@ -28,7 +28,7 @@ Kommunens [hyresvärdsförteckning](https://www.grums.se/byggabomiljo/flyttatill
 - Dubbletter: 0.
 - Verifierat automatiskt universum: 12.
 - Repo efter körning: 12.
-- Live före publicering: 9, endast GHAB, senast uppdaterad 2026-09-04.
+- Live efter publicering: 12, GHAB 4 + Maleon 8, källstatus ok för båda.
 - Sekundär kontroll upptäckte ytterligare aktuella kandidater från bland andra Akka, SM, J & J, Steijner & Nordh, Bernt Johansson och Unifly. De saknar åtkomlig primär objektsida och har därför inte importerats.
 - Coverage: kan inte bevisas som 100 % så länge dessa privata kandidater inte kan verifieras mot primär källa.
 - Status: **YELLOW**.
@@ -52,7 +52,7 @@ Kommunens [bostads- och hyresvärdssida](https://www.filipstad.se/toppmeny/bogat
 - Dubbletter: 0.
 - Verifierat automatiskt universum: 23.
 - Repo efter körning: 23.
-- Live före publicering: 10, endast Filipstadsbostäder, senast uppdaterad 2026-09-04.
+- Live efter publicering: 23, Filipstadsbostäder 10 + Strandell 10 + Podium 3, källstatus ok för samtliga.
 - Sekundär kontroll upptäckte tre aktuella annonser hos Bodil Warmland och andra privata kandidater. De har ingen identifierad publik primär objektsida och har inte importerats.
 - Coverage: kan inte bevisas som 100 % medan kontaktbaserade privata källor och sekundärt upptäckta annonser återstår att verifiera.
 - Status: **YELLOW**.
@@ -73,7 +73,7 @@ Kommunens [hyresvärdsförteckning](https://www.bengtsfors.se/bygga-bo-och-miljo
 - Dubbletter: 0.
 - Verifierat automatiskt universum: 37.
 - Repo efter körning: 37.
-- Live före publicering: 34, endast Bengtsforshus, senast uppdaterad 2026-09-04.
+- Live efter publicering: 37 från Bengtsforshus, källstatus ok.
 - Sekundär kontroll upptäckte fem privata kandidater: en hos Stendalen, tre hos Hänsjön Fastigheter och en hos BBF Bostäder. De tre namnen finns inte på kommunens aktuella länklista och någon publik primär objektsida kunde inte identifieras.
 - Coverage: kan inte bevisas som 100 %; sekundär kontroll indikerar minst fem möjliga saknade privata objekt.
 - Status: **YELLOW**.
@@ -92,6 +92,6 @@ Kommunens [hyresvärdsförteckning](https://www.bengtsfors.se/bygga-bo-och-miljo
 
 Den gemensamma server-renderade list-/detaljmodellen, fullständighetskontrollen mellan kort och detaljlänkar, source-health-fälten och den försiktiga korsprovider-dedupliceringen kan återanvändas för Säffle, Munkfors och Torsby. Nya kommuner ska anslutas via `housingProviders` och en provideradapter i den gemensamma uppdateraren.
 
-## Slutstatus före publicering
+## Slutstatus efter publicering
 
-Alla tre kommuner har mätbart förbättrad och färsk repo-data, men ingen får klassas GREEN enligt STRICT LIVE 100 % v3 innan privata kontakt-/sekundärkällor har primärverifierats och den nya datan har nått live. Aktuell status är **3 YELLOW, 0 GREEN, 0 RED**.
+Alla tre kommuner har mätbart förbättrad och färsk data i repo och live, men ingen får klassas GREEN enligt STRICT LIVE 100 % v3 innan privata kontakt-/sekundärkällor har primärverifierats. Aktuell status är **3 YELLOW, 0 GREEN, 0 RED**.

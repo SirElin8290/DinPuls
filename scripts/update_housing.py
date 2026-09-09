@@ -600,16 +600,18 @@ def deduplicate_listings(listings: list[dict]) -> list[dict]:
     return list(unique_listings.values())
 
 
-def main() -> int:
+def main(only_municipality: str | None = None) -> int:
     configuration = get_json(MUNICIPALITY_FILE, {})
     existing = get_json(OUTPUT, {"municipalities": {}})
     previous = existing.get("municipalities", {})
-    municipalities = {}
+    municipalities = dict(previous) if only_municipality else {}
     successful = 0
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     for municipality in configuration.get("municipalities", []):
         name = municipality.get("name", "")
+        if only_municipality and name != only_municipality:
+            continue
         strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö", "Grums", "Filipstad", "Bengtsfors"}
         providers = municipality.get("housingProviders", [])
         listings = []
@@ -714,4 +716,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    selected = None
+    if "--municipality" in sys.argv:
+        try:
+            selected = sys.argv[sys.argv.index("--municipality") + 1]
+        except IndexError:
+            print("--municipality kräver ett kommunnamn", file=sys.stderr)
+            sys.exit(2)
+    sys.exit(main(selected))
