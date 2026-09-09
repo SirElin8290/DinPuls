@@ -32,8 +32,8 @@ concurrency:
 
 jobs:
   block2-fallback:
-    needs: update
-    if: failure()
+    needs: [update, edshus-fallback]
+    if: always() && needs.update.result == 'failure'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
