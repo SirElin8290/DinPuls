@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
-from urllib.request import Request, urlopen
+from urllib.parse import urlencode, urljoin
+from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
+from http.cookiejar import CookieJar
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ROOT / "data" / "housing-launch-sources.json"
@@ -67,7 +68,10 @@ class TableParser(HTMLParser):
             self.in_cell = True
             self.parts = []
         elif self.in_row and tag == "a" and not self.href:
-            self.href = str(attributes.get("href") or "")
+            href = str(attributes.get("href") or "")
+            identifier = str(attributes.get("id") or "")
+            if identifier.endswith("ObjectDetailsUrl") or "/detalj/id/" in href:
+                self.href = href
 
     def handle_data(self, data):
         if self.in_cell:
@@ -82,6 +86,18 @@ class TableParser(HTMLParser):
             if self.cells:
                 self.rows.append((self.cells[:], self.href))
             self.in_row = False
+
+
+class HiddenFieldParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.fields: dict[str, str] = {}
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if (tag == "input" and str(attributes.get("type", "")).casefold() == "hidden"
+                and attributes.get("name")):
+            self.fields[str(attributes["name"])] = str(attributes.get("value") or "")
 
 
 def fetch_text(url: str) -> str:
@@ -119,22 +135,73 @@ def text_lines(markup: str) -> list[str]:
 
 
 def parse_filipstad(source: dict) -> list[dict]:
-    markup = fetch_text(source["url"])
-    table = TableParser()
-    table.feed(markup)
-    listings: list[dict] = []
-    for cells, href in table.rows:
-        if len(cells) < 6:
-            continue
-        address, area, rooms_raw, size_raw, rent_raw, available = cells[-6:]
-        if not address or address.casefold() == "adress" or not re.search(r"\d", rooms_raw):
-            continue
-        url = urljoin(source["url"], href) if href else source["url"]
-        listings.append({"id": stable_id(address, area, available, rent_raw), "address": address, "area": area,
-                         "rooms": num(rooms_raw), "size": num(size_raw), "rent": num(rent_raw),
-                         "available": available, "url": url, "provider": source["provider"]})
+    opener = build_opener(HTTPCookieProcessor(CookieJar()))
+
+    def request(data: bytes | None = None) -> str:
+        headers = {"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"}
+        if data is not None:
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
+        try:
+            with opener.open(Request(source["url"], data=data, headers=headers), timeout=35) as response:
+                return response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace")
+        except HTTPError as error:
+            raise RuntimeError(f"HTTP {error.code}") from None
+        except (URLError, TimeoutError) as error:
+            raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+
+    def parse_page(markup: str) -> list[dict]:
+        table = TableParser()
+        table.feed(markup)
+        page_items: list[dict] = []
+        for cells, href in table.rows:
+            if len(cells) < 6:
+                continue
+            address, area, rooms_raw, size_raw, rent_raw, available = cells[-6:]
+            if not address or address.casefold() == "adress" or not re.search(r"\d", rooms_raw):
+                continue
+            url = urljoin(source["url"], href) if href else source["url"]
+            object_match = re.search(r"/id/([^/?#]+)", url)
+            identifier = object_match.group(1) if object_match else stable_id(address, area, available, rent_raw)
+            page_items.append({"id": identifier, "address": address, "area": area,
+                               "rooms": num(rooms_raw), "size": num(size_raw), "rent": num(rent_raw),
+                               "available": available, "url": url, "provider": source["provider"]})
+        return page_items
+
+    markup = request()
+    page_count_match = re.search(r"ucNavBar_lblNoOfPages[^>]*>\s*(\d+)", markup)
+    page_count = int(page_count_match.group(1)) if page_count_match else 1
+    homepage = fetch_text(urljoin(source["url"], "/"))
+    total_match = re.search(r"Lägenheter:\s*</?[^>]*>*\s*(\d+)", homepage, re.I)
+    if not total_match:
+        total_match = re.search(r"Lägenheter:\s*(\d+)", " ".join(text_lines(homepage)), re.I)
+    reported_total = int(total_match.group(1)) if total_match else None
+    listings_by_id = {item["id"]: item for item in parse_page(markup)}
+
+    for page_index in range(1, page_count):
+        hidden = HiddenFieldParser()
+        hidden.feed(markup)
+        form = dict(hidden.fields)
+        form["__EVENTTARGET"] = (
+            "ctl00$ctl01$DefaultSiteContentPlaceHolder1$Col1$ucNavBar$"
+            f"rptButtons$ctl{page_index:02d}$btnPage"
+        )
+        form["__EVENTARGUMENT"] = ""
+        markup = request(urlencode(form).encode("utf-8"))
+        current_match = re.search(r"ucNavBar_lblCurrPage[^>]*>\s*(\d+)", markup)
+        if not current_match or int(current_match.group(1)) != page_index + 1:
+            raise RuntimeError(f"Filipstadsbostäders pagination stannade före sida {page_index + 1}")
+        for item in parse_page(markup):
+            listings_by_id[item["id"]] = item
+
+    listings = list(listings_by_id.values())
     if not listings and not any("Lediga lägenheter" in line for line in text_lines(markup)):
         raise RuntimeError("kunde inte känna igen Filipstadsbostäders lediga-lista")
+    if page_count > 1 and (reported_total is None or reported_total > 10) and len(listings) <= 10:
+        raise RuntimeError("Filipstadsbostäders flersidiga resultat fastnade vid 10 objekt")
+    if reported_total is not None and len(listings) != reported_total:
+        raise RuntimeError(
+            f"Filipstadsbostäder rapporterade {reported_total} objekt men {len(listings)} unika hämtades"
+        )
     return listings
 
 

@@ -274,6 +274,85 @@ def fetch_json_url(url: str, headers: dict[str, str] | None = None) -> dict:
         raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
 
 
+def post_json_url(url: str, payload: dict) -> dict:
+    request = Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json", "Content-Type": "application/json"},
+    )
+    try:
+        with urlopen(request, timeout=35) as response:
+            return json.load(response)
+    except HTTPError as error:
+        raise RuntimeError(f"HTTP {error.code}") from None
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+
+
+def parse_homeq_company(provider: dict) -> list[dict]:
+    """Read the same public HomeQ feed embedded on a landlord's own vacancies page."""
+    company_id = str(provider.get("companyId") or "")
+    municipality = str(provider.get("municipality") or "")
+    if not company_id or not municipality:
+        raise RuntimeError("HomeQ-konfigurationen saknar companyId eller municipality")
+    payload = post_json_url("https://search.homeq.se/api/v3/search", {"company": company_id})
+    results = payload.get("results") if isinstance(payload, dict) else None
+    if not isinstance(results, list):
+        raise RuntimeError("HomeQ-svaret saknar results")
+    listings = []
+    for item in results:
+        if str(item.get("municipality") or "").casefold() != municipality.casefold():
+            continue
+        identifier = str(item.get("id") or "")
+        if not identifier:
+            raise RuntimeError("HomeQ-objekt saknar id")
+        uri = str(item.get("uri") or "")
+        listings.append({
+            "id": identifier,
+            "address": item.get("title") or "Ledig bostad",
+            "area": item.get("city") or municipality,
+            "rooms": room_count(item.get("rooms")),
+            "size": item.get("area"),
+            "rent": item.get("rent"),
+            "available": item.get("date_access") or "Se källan",
+            "url": urljoin("https://www.homeq.se/", uri),
+            "provider": provider["name"],
+        })
+    return listings
+
+
+def parse_orvelin_residential(provider: dict) -> list[dict]:
+    """Verify Orvelin's public GraphQL inventory and keep residential objects in the municipality."""
+    query = """query { allRentable { edges { node { slug type space property { title city address zipCode category } } } } }"""
+    payload = post_json_url("https://api.orvelinfastigheter.se/graphql", {"query": query})
+    try:
+        edges = payload["data"]["allRentable"]["edges"]
+    except (KeyError, TypeError):
+        raise RuntimeError("Orvelins GraphQL-svar saknar allRentable") from None
+    municipality = str(provider.get("municipality") or "")
+    listings = []
+    for edge in edges:
+        node = edge.get("node") or {}
+        prop = node.get("property") or {}
+        city = str(prop.get("city") or "")
+        category = str(prop.get("category") or "")
+        if city.casefold() != municipality.casefold() or category.casefold() not in {"bostad", "bostäder", "residential"}:
+            continue
+        slug = str(node.get("slug") or "")
+        listings.append({
+            "id": slug,
+            "address": prop.get("address") or prop.get("title") or "Ledig bostad",
+            "area": city,
+            "rooms": None,
+            "size": node.get("space"),
+            "rent": None,
+            "available": "Se källan",
+            "url": urljoin(provider["url"], f"lediga-objekt/{slug}"),
+            "provider": provider["name"],
+        })
+    return listings
+
+
 def parse_momentum(provider: dict) -> list[dict]:
     settings_url = urljoin(provider["url"], "/assets/app-settings.json")
     settings = fetch_json_url(settings_url)
@@ -644,6 +723,10 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_hogia(provider)
                 elif parser_name == "willhem":
                     fetched = parse_willhem(provider)
+                elif parser_name == "homeq-company":
+                    fetched = parse_homeq_company(provider)
+                elif parser_name == "orvelin-residential":
+                    fetched = parse_orvelin_residential(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
                 previous_provider_listings = [

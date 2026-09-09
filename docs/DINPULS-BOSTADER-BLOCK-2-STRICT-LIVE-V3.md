@@ -95,3 +95,49 @@ Den gemensamma server-renderade list-/detaljmodellen, fullständighetskontrollen
 ## Slutstatus efter publicering
 
 Alla tre kommuner har mätbart förbättrad och färsk data i repo och live, men ingen får klassas GREEN enligt STRICT LIVE 100 % v3 innan privata kontakt-/sekundärkällor har primärverifierats. Aktuell status är **3 YELLOW, 0 GREEN, 0 RED**.
+
+## Closure-körning 2026-09-09
+
+Efterföljande full källinventering hittade ett verkligt importfel och en ny automatiserbar primärkälla:
+
+- Filipstadsbostäders lista består av fyra ASP.NET-postbacksidor. Den gamla adaptern läste bara sida ett. Adaptern följer nu alla sidor, verifierar sidnumret och kräver att de 34 unika objekten matchar primärkällans rapporterade total. Filipstadsbostäder gick därmed från 10 till 34 objekt och Filipstads liveunderlag från 23 till 47.
+- Akka Egendoms egen ledigtsida bäddar in HomeQ:s publika företagsflöde. Fem objekt i Grums importeras nu via samma officiella inbäddning. Grums gick från 12 till 17 objekt.
+- Orvelins publika GraphQL-inventering verifierades tekniskt. Den innehåller noll bostadsobjekt i Bengtsfors och redovisas därför som `VERIFIED_ZERO`, inte som ett misslyckat nollresultat.
+
+Maskinläsbar inventering finns i `data/housing-coverage-sources.json`. Den reproducerbara körningen `scripts/update_housing_coverage_evidence.py` kombinerar inventeringen med aktuell `data/housing.json` och skriver `data/housing-coverage-evidence.json` med provider, URL, kontrolltid, källstatus, råantal, accepterat antal, dubbletter, aktuellt antal, klassificering, fel och stale-status.
+
+### Grums closure
+
+- Relevanta providers: 14.
+- `ACTIVE_WITH_OBJECTS`: Grums Hyresbostäder 4, Maleon 8, Akka 5.
+- `VERIFIED_ZERO`: inga.
+- `NOT_RELEVANT`: HSB Värmland som allmän sökväg, inte identifierad lokal hyresvärd.
+- `BLOCKED`: Aktiebolaget Slottsbron, Aedix, Bo Bra, CR, SM, J&J, Klaraborg, Sveaplan, Steijner & Nordh, Bernt Johansson och Unifly.
+- Råobjekt från friska primärflöden: 17. Dubbletter: 0. DinPuls: 17.
+- Sekundärt upptäckta, ej primärverifierbara objekt: minst 7 hos SM, J&J, Steijner & Nordh, Bernt Johansson och Unifly.
+- Coverage kan inte uttryckas som 100 procent medan elva relevanta providers är blockerade. Status: **YELLOW**.
+
+### Filipstad closure
+
+- Relevanta providers: 9; två ytterligare poster är klassificerade `NOT_RELEVANT` som separata hyresobjektflöden.
+- `ACTIVE_WITH_OBJECTS`: Filipstadsbostäder 34, Strandell 10, Podium 3.
+- `VERIFIED_ZERO`: inga.
+- `NOT_RELEVANT`: Bocentrums försäljningskälla samt Hemgården som separat flöde eftersom uthyrningen hanteras i Filipstadsbostäders publika lista.
+- `BLOCKED`: HSB, PJ, ACJ Invest, Finnshyttan, Brattforsboendet och Bodil Warmland.
+- Råobjekt: 47. Dubbletter: 0. DinPuls: 47.
+- Filipstadsbostäder primärkälla: 34. DinPuls Filipstadsbostäder: 34. Pagination verifierad: **JA**.
+- Tre aktuella Bodil Warmland-objekt är bara sekundärt verifierbara.
+- Coverage kan inte uttryckas som 100 procent medan sex relevanta providers är blockerade. Status: **YELLOW**.
+
+### Bengtsfors closure
+
+- Relevanta providers: 14.
+- `ACTIVE_WITH_OBJECTS`: Bengtsforshus 36.
+- `VERIFIED_ZERO`: Orvelin Fastigheter 0 via fungerande GraphQL-inventering.
+- `NOT_RELEVANT`: inga.
+- `BLOCKED`: Billingsfors Bostäder, DANO, EP, Hallåsen, Lumi, Långevi gård, Mer Hem, Pineskär, Tallbacken, Stendalen, Hänsjön och BBF.
+- Råobjekt från friska primärflöden: 36. Dubbletter: 0. DinPuls: 36.
+- Privata providers med sekundärt aktuella objekt: Stendalen, Hänsjön och BBF, sammanlagt fem kandidater.
+- Coverage kan inte uttryckas som 100 procent medan tolv relevanta providers är blockerade. Status: **YELLOW**.
+
+Closure-resultatet är **0 GREEN, 3 YELLOW, 0 RED**. De tekniskt åtkomliga primärflödena är kompletta och friska, men STRICT LIVE 100 % v3 förbjuder grönt när aktuella objekt bara kan upptäckas sekundärt eller ett relevant primärflöde saknas.

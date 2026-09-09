@@ -19,7 +19,9 @@ on:
       - "scripts/test_dals_ed_imports.py"
       - "scripts/test_update_housing_launch.py"
       - "scripts/test_update_housing_forshaga.py"
+      - "scripts/update_housing_coverage_evidence.py"
       - "data/housing-launch-sources.json"
+      - "data/housing-coverage-sources.json"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
 
@@ -51,7 +53,8 @@ jobs:
           python scripts/update_housing.py --municipality Grums
           python scripts/update_housing.py --municipality Filipstad
           python scripts/update_housing.py --municipality Bengtsfors
-          git add data/housing.json
+          python scripts/update_housing_coverage_evidence.py
+          git add data/housing.json data/housing-coverage-evidence.json
           git diff --cached --quiet && exit 0
           git commit -m "Uppdatera Block 2-bostäder oberoende av övriga källor"
           for attempt in 1 2 3 4; do
@@ -124,6 +127,7 @@ jobs:
           python scripts/update_housing_forshaga.py
           python scripts/update_housing_fargelanda.py
           python scripts/update_housing_storfors.py
+          python scripts/update_housing_coverage_evidence.py
 
       - name: Verifiera kommunregistret och bostadskällornas hälsa
         run: |
@@ -266,7 +270,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/housing.json
+          git add data/housing.json data/housing-coverage-evidence.json
           if ! git diff --cached --quiet; then
             git commit -m "Uppdatera lediga bostäder"
             for attempt in 1 2 3 4; do

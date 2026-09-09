@@ -79,6 +79,33 @@ class HousingUpdateTests(unittest.TestCase):
         self.assertEqual(len(listings), 101)
         self.assertIn("offset=100", fetcher.call_args_list[-1].args[0])
 
+    def test_homeq_company_filters_to_configured_municipality(self):
+        payload = {"results": [
+            {"id": 1, "municipality": "Grums", "city": "Slottsbron", "title": "Testgatan 1",
+             "rooms": 2, "area": 61, "rent": 6500, "date_access": "2026-10-01",
+             "uri": "/lagenhet/1-testgatan"},
+            {"id": 2, "municipality": "Karlstad", "city": "Karlstad", "title": "Annan gata 2",
+             "rooms": 3, "area": 70, "rent": 8000, "uri": "/lagenhet/2-annan"},
+        ]}
+        provider = {"name": "Akka", "url": "https://example.test/ledigt", "parser": "homeq-company",
+                    "companyId": "344", "municipality": "Grums"}
+        with patch.object(update_housing, "post_json_url", return_value=payload) as fetcher:
+            listings = update_housing.parse_homeq_company(provider)
+        self.assertEqual(len(listings), 1)
+        self.assertEqual(listings[0]["id"], "1")
+        self.assertEqual(listings[0]["area"], "Slottsbron")
+        self.assertEqual(fetcher.call_args.args[1], {"company": "344"})
+
+    def test_orvelin_verifies_zero_when_public_inventory_has_no_local_residential_objects(self):
+        payload = {"data": {"allRentable": {"edges": [{"node": {
+            "slug": "office", "type": "Kontor", "space": 50,
+            "property": {"title": "Kontoret", "city": "Bengtsfors", "address": "Gatan 1",
+                         "zipCode": "666 00", "category": "Kommersiellt"},
+        }}]}}}
+        provider = {"name": "Orvelin", "url": "https://orvelin.example/", "municipality": "Bengtsfors"}
+        with patch.object(update_housing, "post_json_url", return_value=payload):
+            self.assertEqual(update_housing.parse_orvelin_residential(provider), [])
+
     def test_willhem_resolves_city_and_returns_all_objects(self):
         landing = {"data": {"regionPages": [{"name": "Karlstad", "contentLink": {"id": 6010}}]}}
         result = {"data": {"realEstates": [{
