@@ -14,13 +14,12 @@ on:
       - "scripts/update_housing_launch.py"
       - "scripts/update_housing_forshaga.py"
       - "scripts/update_housing_fargelanda.py"
-      - "scripts/apply_hammaro_housing.py"
+      - "scripts/update_housing_storfors.py"
       - "scripts/test_update_housing.py"
       - "scripts/test_dals_ed_imports.py"
       - "scripts/test_update_housing_launch.py"
       - "scripts/test_update_housing_forshaga.py"
       - "data/housing-launch-sources.json"
-      - "data/housing-hammaro-supplement.json"
       - "data/municipalities.json"
       - ".github/workflows/update-housing.yml"
 
@@ -92,7 +91,7 @@ jobs:
           python scripts/update_housing_launch.py
           python scripts/update_housing_forshaga.py
           python scripts/update_housing_fargelanda.py
-          python scripts/apply_hammaro_housing.py
+          python scripts/update_housing_storfors.py
 
       - name: Verifiera kommunregistret och bostadskällornas hälsa
         run: |
@@ -108,6 +107,7 @@ jobs:
           assert actual == expected, f'Bostadskommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
 
           launch_names = set((launch.get('municipalities') or {}).keys())
+          strict_provider_names = {'Karlstad', 'Kristinehamn', 'Hammarö'}
           for item in config.get('municipalities', []):
               name = item['name']
               municipality = data['municipalities'][name]
@@ -126,6 +126,13 @@ jobs:
                   assert not municipality.get('errors'), f'{name}: bostadskällfel {municipality.get("errors")}'
               else:
                   assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
+              if name in strict_provider_names:
+                  configured = [provider['name'] for provider in item.get('housingProviders', []) if provider.get('parser')]
+                  health = municipality.get('sourceHealth') or []
+                  assert [row.get('provider') for row in health] == configured, f'{name}: alla konfigurerade providers kördes inte: {health}'
+                  assert all(row.get('status') == 'ok' and row.get('stale') is False for row in health), f'{name}: källfel {health}'
+                  assert sum(row.get('rawCount') or 0 for row in health) == municipality.get('total'), f'{name}: råantal matchar inte total'
+                  assert len({(row.get('provider'), row.get('id')) for row in municipality['listings']}) == len(municipality['listings']), f'{name}: dubbletter'
           print(f'Bostadsdata innehåller alla {len(expected)} kommuner; {len(launch_names)} lanseringskällor är friska')
           PY
 
@@ -136,14 +143,17 @@ jobs:
           from pathlib import Path
           data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
           hammaro = data.get('municipalities', {}).get('Hammarö', {})
-          assert len(hammaro.get('listings') or []) >= 1, 'Hammarö saknar aktuellt bostadsobjekt'
+          assert hammaro.get('availabilityMode') == 'automatic', 'Hammarö är inte automatisk'
           assert hammaro.get('total') == len(hammaro.get('listings') or []), 'Hammarös total matchar inte listan'
           assert hammaro.get('stale') is False, 'Hammarö-data är markerad stale'
           assert not hammaro.get('errors'), f"Hammarö har källfel: {hammaro.get('errors')}"
+          health = hammaro.get('sourceHealth') or []
+          assert len(health) == 1 and health[0].get('status') == 'ok', f'Hammarö har osäker källhälsa: {health}'
+          assert health[0].get('rawCount') == len(hammaro.get('listings') or []), 'Hammarös råantal matchar inte listan'
           for item in hammaro.get('listings') or []:
               assert item.get('address'), f'Hammarö-objekt saknar adress: {item}'
               assert item.get('url'), f'Hammarö-objekt saknar länk: {item}'
-          print(f"Verifierat: Hammarö har {hammaro['total']} bostadsobjekt")
+          print(f"Verifierat: Hammaröportalen gav {hammaro['total']} aktuella bostadsobjekt")
           PY
 
       - name: Verifiera Färgelanda-data

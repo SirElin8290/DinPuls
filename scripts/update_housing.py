@@ -250,19 +250,40 @@ def parse_momentum(provider: dict) -> list[dict]:
     if not api_base or not api_key or not client_id:
         raise RuntimeError("Momentum-konfigurationen är ofullständig")
 
-    query = urlencode({"type": "residential", "limit": 100, "offset": 0})
-    api_url = urljoin(api_base.rstrip("/") + "/", "v2/market/objects") + "?" + query
-    payload = fetch_json_url(api_url, {
+    headers = {
         "X-Api-Key": api_key,
         "Accept-Language": "sv-SE",
         "X-Momentum-Client-Version": str(settings.get("appVersion") or ""),
         "X-Momentum-Client": "momentum.se-fastighetminasidor",
         "X-Momentum-Client-Id": client_id,
         "X-Momentum-Device-Key": str(uuid.uuid5(uuid.NAMESPACE_URL, provider["url"])),
-    })
+    }
+
+    items = []
+    expected_count = None
+    limit = 100
+    for offset in range(0, 10000, limit):
+        query = urlencode({"type": "residential", "limit": limit, "offset": offset})
+        api_url = urljoin(api_base.rstrip("/") + "/", "v2/market/objects") + "?" + query
+        payload = fetch_json_url(api_url, headers)
+        page_items = payload.get("items") if isinstance(payload, dict) else None
+        count = payload.get("count") if isinstance(payload, dict) else None
+        if not isinstance(page_items, list) or not isinstance(count, int):
+            raise RuntimeError("Momentum: oväntat svarsformat, inte ett verifierat resultat")
+        if expected_count is None:
+            expected_count = count
+        elif count != expected_count:
+            raise RuntimeError("Momentum: totalantalet ändrades under sidbläddringen")
+        items.extend(page_items)
+        if len(items) >= expected_count:
+            break
+        if not page_items:
+            raise RuntimeError("Momentum: ofullständig sidbläddring")
+    if expected_count is None or len(items) != expected_count:
+        raise RuntimeError(f"Momentum: hämtade {len(items)} av {expected_count} objekt")
 
     listings = []
-    for item in payload.get("items", []) if isinstance(payload, dict) else []:
+    for item in items:
         identifier = str(item.get("id") or "")
         if not identifier:
             continue
@@ -280,6 +301,102 @@ def parse_momentum(provider: dict) -> list[dict]:
             "rent": pricing.get("priceInclVAT") or pricing.get("price"),
             "available": momentum_date(availability.get("availableFrom")),
             "url": provider["url"].rstrip("/") + "/" + identifier,
+            "provider": provider["name"],
+        })
+    return listings
+
+
+def decode_web_text(raw: bytes) -> str:
+    """Decode Vitec's JSON, whose response lacks a reliable charset."""
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252")
+
+
+def parse_vitec_arena(provider: dict) -> list[dict]:
+    """Read all published apartments from a public Vitec Arena portal."""
+    opener = build_opener(HTTPCookieProcessor(CookieJar()))
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+    register = Request(
+        urljoin(provider["url"], "/api/v1/token/register/"),
+        data=json.dumps({"Guid": provider["appGuid"]}).encode(),
+        headers={**headers, "Content-Type": "application/json;charset=utf-8"},
+    )
+    try:
+        key = json.loads(decode_web_text(opener.open(register, timeout=35).read())).get("key")
+        if not key:
+            raise RuntimeError("Vitec Arena: registrering saknar nyckel")
+        validate = Request(
+            urljoin(provider["url"], "/api/v1/token/validate/"),
+            data=json.dumps({"key": key}).encode(),
+            headers={**headers, "Content-Type": "application/json;charset=utf-8"},
+        )
+        token = decode_web_text(opener.open(validate, timeout=35).read()).strip('"')
+        if not token:
+            raise RuntimeError("Vitec Arena: validering saknar token")
+        endpoint = urljoin(provider["url"], "/rentalobject/Listapartment/published?sortOrder=Address")
+        response = opener.open(Request(endpoint, headers={**headers, "Authorization": f"Bearer {token}"}), timeout=35)
+        payload = json.loads(decode_web_text(response.read()))
+    except HTTPError as error:
+        raise RuntimeError(f"Vitec Arena: HTTP {error.code}") from None
+    except (URLError, TimeoutError) as error:
+        raise RuntimeError(f"Vitec Arena kunde inte nås: {getattr(error, 'reason', error)}") from None
+    raw_items = payload.get("data") if isinstance(payload, dict) else None
+    items = json.loads(raw_items) if isinstance(raw_items, str) else raw_items
+    if not isinstance(items, list):
+        raise RuntimeError("Vitec Arena: oväntat svarsformat, inte ett verifierat resultat")
+
+    listings = []
+    for item in items:
+        identifier = str(item.get("Guid") or item.get("Id") or "")
+        if not identifier or not item.get("Adress1"):
+            raise RuntimeError("Vitec Arena: ofullständigt bostadsobjekt")
+        listings.append({
+            "id": identifier,
+            "address": " ".join(str(item["Adress1"]).split()),
+            "area": str(item.get("AreaName") or item.get("Adress3") or "").title(),
+            "rooms": room_count(item.get("NoOfRooms") or item.get("ObjectTypeName")),
+            "size": item.get("Size"),
+            "rent": item.get("TotalCost") or item.get("Cost"),
+            "available": item.get("AvailableDate") or item.get("MoveInDate"),
+            "url": urljoin(provider["url"], str(item.get("DetailsUrl") or "")),
+            "provider": provider["name"],
+        })
+    return listings
+
+
+def parse_willhem(provider: dict) -> list[dict]:
+    """Read a complete city result from Willhem's public search API."""
+    landing = fetch_json_url(urljoin(provider["url"], "/mvcapi/search-landing"))
+    regions = (landing.get("data") or {}).get("regionPages") if isinstance(landing, dict) else None
+    if not isinstance(regions, list):
+        raise RuntimeError("Willhem: regionregistret har oväntat format")
+    region = next((item for item in regions if str(item.get("name", "")).casefold() == provider["municipality"].casefold()), None)
+    page_id = ((region or {}).get("contentLink") or {}).get("id")
+    if not page_id:
+        raise RuntimeError(f"Willhem: kommunen {provider['municipality']} saknas i regionregistret")
+    endpoint = urljoin(provider["url"], "/mvcapi/region-container/search") + "?" + urlencode({"pageId": page_id})
+    payload = fetch_json_url(endpoint, {"x-page-id": str(page_id)})
+    items = (payload.get("data") or {}).get("realEstates") if isinstance(payload, dict) else None
+    if not isinstance(items, list):
+        raise RuntimeError("Willhem: objektsvaret har oväntat format")
+    listings = []
+    for item in items:
+        tracking = item.get("trackingData") or {}
+        identifier = str(tracking.get("id") or item.get("url") or "")
+        address = str(item.get("street") or tracking.get("title") or "")
+        if not identifier or not address:
+            raise RuntimeError("Willhem: ofullständigt bostadsobjekt")
+        listings.append({
+            "id": identifier,
+            "address": address,
+            "area": str(tracking.get("city") or provider["municipality"]),
+            "rooms": room_count(item.get("rooms") or tracking.get("rooms")),
+            "size": number(str(tracking.get("area") or "")),
+            "rent": item.get("rentMin") or number(str(item.get("rent") or "")),
+            "available": item.get("access"),
+            "url": urljoin(provider["url"], str(item.get("url") or "")),
             "provider": provider["name"],
         })
     return listings
@@ -340,9 +457,11 @@ def main() -> int:
 
     for municipality in configuration.get("municipalities", []):
         name = municipality.get("name", "")
+        strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö"}
         providers = municipality.get("housingProviders", [])
         listings = []
         errors = []
+        source_health = []
         fetched_any = False
         for provider in providers:
             parser_name = provider.get("parser")
@@ -353,8 +472,14 @@ def main() -> int:
                     fetched = parse_hss(provider)
                 elif parser_name == "vitec-arena":
                     fetched = parse_arvika(provider)
+                elif parser_name == "vitec-arena-token":
+                    fetched = parse_vitec_arena(provider)
                 elif parser_name == "momentum":
                     fetched = parse_momentum(provider)
+                elif parser_name == "hogia":
+                    fetched = parse_hogia(provider)
+                elif parser_name == "willhem":
+                    fetched = parse_willhem(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
                 previous_provider_listings = [
@@ -366,15 +491,28 @@ def main() -> int:
                         f"källan gav oväntat 0 objekt; behåller {len(previous_provider_listings)} tidigare objekt"
                     )
                 listings.extend(fetched)
+                if strict_v3:
+                    for item in fetched:
+                        item["municipality"] = name
                 fetched_any = True
+                if strict_v3:
+                    source_health.append({
+                        "provider": provider["name"], "status": "ok", "checkedAt": now,
+                        "rawCount": len(fetched), "error": None, "stale": False,
+                    })
                 print(f"{name}, {provider['name']}: {len(fetched)} objekt")
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
                 errors.append(f"{provider.get('name', 'Källa')}: {error}")
+                if strict_v3:
+                    source_health.append({
+                        "provider": provider.get("name", "Källa"), "status": "error", "checkedAt": now,
+                        "rawCount": None, "error": str(error), "stale": True,
+                    })
                 print(f"VARNING {name}: {errors[-1]}")
 
         unique_listings = {}
         for item in listings:
-            key = str(item.get("id") or item.get("url") or "")
+            key = f"{item.get('provider', '')}|{item.get('id') or item.get('url') or ''}"
             if key and key not in unique_listings:
                 unique_listings[key] = item
         listings = list(unique_listings.values())
@@ -390,6 +528,9 @@ def main() -> int:
                 "checkedAt": now,
                 "updatedAt": old.get("updatedAt", now) if core == old_core else now,
             }
+            if strict_v3:
+                content["sourceHealth"] = source_health
+                content["availabilityMode"] = "automatic"
             municipalities[name] = content
             successful += 1
         elif name in previous:

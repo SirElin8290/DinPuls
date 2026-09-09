@@ -21,6 +21,7 @@ class HousingUpdateTests(unittest.TestCase):
             "appVersion": "1",
         }
         payload = {
+            "count": 1,
             "items": [{
                 "id": "home-1",
                 "displayName": "Testgatan 1",
@@ -34,6 +35,31 @@ class HousingUpdateTests(unittest.TestCase):
         with patch.object(update_housing, "fetch_json_url", side_effect=[settings, payload]):
             listings = update_housing.parse_momentum(provider)
         self.assertEqual(listings[0]["rooms"], 3)
+
+    def test_momentum_fetches_every_page_and_checks_total(self):
+        settings = {"apiBaseUrl": "https://api.example/", "xApiKey": "key", "appInstanceId": "client", "appVersion": "1"}
+        first = {"count": 101, "items": [{"id": str(i), "displayName": f"Gatan {i}"} for i in range(100)]}
+        second = {"count": 101, "items": [{"id": "100", "displayName": "Gatan 100"}]}
+        provider = {"name": "Testbostäder", "url": "https://homes.example/market/residential"}
+        with patch.object(update_housing, "fetch_json_url", side_effect=[settings, first, second]) as fetcher:
+            listings = update_housing.parse_momentum(provider)
+        self.assertEqual(len(listings), 101)
+        self.assertIn("offset=100", fetcher.call_args_list[-1].args[0])
+
+    def test_willhem_resolves_city_and_returns_all_objects(self):
+        landing = {"data": {"regionPages": [{"name": "Karlstad", "contentLink": {"id": 6010}}]}}
+        result = {"data": {"realEstates": [{
+            "street": "Testgatan 1", "access": "2026-10-01", "rooms": 2,
+            "rentMin": 7000, "url": "/sok-bostad/Karlstad/testgatan-1/",
+            "trackingData": {"id": "42", "city": "Karlstad", "area": "62"},
+        }]}}
+        provider = {"name": "Willhem", "url": "https://www.willhem.se/sok-bostad/Karlstad/", "municipality": "Karlstad"}
+        with patch.object(update_housing, "fetch_json_url", side_effect=[landing, result]) as fetcher:
+            listings = update_housing.parse_willhem(provider)
+        self.assertEqual(len(listings), 1)
+        self.assertEqual(listings[0]["id"], "42")
+        self.assertEqual(listings[0]["size"], 62)
+        self.assertEqual(fetcher.call_args_list[-1].args[1]["x-page-id"], "6010")
 
     def test_hss_timeout_becomes_runtime_error(self):
         opener = Mock()
