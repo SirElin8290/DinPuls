@@ -1,13 +1,13 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-09T10:05:28+02:00
+Genererad: 2026-09-09T11:10:51+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 21 av 21 kommuner når 100 %
+## Resultat: 20 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne, Torsby
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -31,7 +31,7 @@ Tidigare status är nollställd. Hero och Matkassen ingår inte.
 | Munkfors | 🟢 100 % | 9 | 1 | 19 | 25 / 25 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
 | Storfors | 🟢 100 % | 4 | 3 | 5 | 63 / 64 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 13 | 34 |
 | Sunne | 🟢 100 % | 19 | 8 | 7 | 54 / 54 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
-| Torsby | 🟢 100 % | 23 | 1 | 31 | 44 / 44 färska | 7 / 6 kat | 8 / 4 kat | 5 | 11 | 21 |
+| Torsby | 🟡 EJ 100 % | 23 | 1 | 31 | 44 / 44 färska | 7 / 6 kat | 8 / 4 kat | 1 | 11 | 21 |
 
 ## Blockerare per kommun
 
@@ -95,5 +95,5 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Sunne — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Torsby — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Torsby — 🟡 EJ 100 %
+- **Dagens lunch:** 🟡 — endast 1 verifierade lunchställen; minst 4 krävs (1)
