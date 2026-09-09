@@ -69,4 +69,14 @@ Officiell inventering: https://anstalld.hammaro.se/Boendemiljo/bostader/
 
 Alla tre kommuner är YELLOW eftersom ett fullständigt verifierat universum ännu inte kan räknas. Nästa steg är att kontrollera varje kvarvarande kommunlistad värds egen aktuella uthyrningskanal, dokumentera verifierat nollresultat där utbud saknas, bygga adapter där objekt finns och därefter deduplicera mot de nu integrerade källorna. Karlstad har flest kvarvarande värdar och högst risk för HomeQ-överlapp.
 
-Livevärden och commit-SHA fylls i efter publicering och cachefri kontroll av `https://dinpuls.se/data/housing.json`.
+## Publicering och liveverifiering
+
+Implementationen publicerades i `73c53c969dd86bc7468693d0b844adf086b9ce20` och workflowskydden i `03cdd34d12f4a0ed7e7e5679956f39de5cd255fc`. Senaste efterföljande `main` vid verifieringen var `fc73665dd278cab4324848e3daee8bf4823a229a`. GitHub Pages-körning 34333824960 slutfördes framgångsrikt.
+
+Cachefri kontroll av `https://dinpuls.se/data/housing.json` gav 2026-09-09:
+
+- Karlstad: 53/53 objekt, KBAB 17 och Willhem 36, båda source-health `ok`.
+- Kristinehamn: 15/15 objekt, Kristinehamnsbostäder 15, source-health `ok`.
+- Hammarö: 2/2 objekt, AB Hammaröbostäder 2, source-health `ok`.
+
+Den gemensamma bostadsworkflowens Block 1-gates passerade. Samma körning stoppades senare av den befintliga, orelaterade kontrollen som kräver fler än noll Färgelandaobjekt; Block 1-källorna och deras gates hade då redan passerat. Den separata gamla Hammarö-workflowen togs bort efter att den korrekt avslöjade sin kvarvarande referens till det raderade supplementet.
