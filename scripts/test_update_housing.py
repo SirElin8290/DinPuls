@@ -8,6 +8,39 @@ import update_housing
 
 
 class HousingUpdateTests(unittest.TestCase):
+    def test_cross_provider_dedupe_normalizes_address_but_keeps_distinct_units(self):
+        rows = [
+            {"id": "primary", "provider": "Primary", "address": "Testgatan 1 A", "rooms": 2, "size": 60, "rent": 6000},
+            {"id": "copy", "provider": "Aggregator", "address": "Testgatan 1A", "rooms": 2, "size": 60, "rent": 6000},
+            {"id": "other", "provider": "Primary", "address": "Testgatan 1 A", "rooms": 3, "size": 75, "rent": 7000},
+        ]
+        result = update_housing.deduplicate_listings(rows)
+        self.assertEqual([row["id"] for row in result], ["primary", "other"])
+
+    def test_strandell_expands_explicit_unit_counts(self):
+        markup = """
+        <main>Följande lägenheter finns nu att söka: sex st 2 rok samt tre st 3 rok
+        med tillgång till hiss på Blombackavägen 4B. 5 ROK och 137 kvm stor våning i
+        Gamla Sparbankshuset, Allégatan 17 i Filipstad. Ledig 2027-08-01.
+        Varmhyra 13 572 kr/mån.</main>
+        """
+        with patch.object(update_housing, "fetch", return_value=markup.encode()):
+            result = update_housing.parse_strandell({"name": "Strandell", "url": "https://example.test/ledigt"})
+        self.assertEqual(len(result), 10)
+        self.assertEqual(sum(row["rooms"] == 2 for row in result), 6)
+        self.assertEqual(result[-1]["rent"], 13572)
+
+    def test_podium_requires_card_count_to_match_detail_links(self):
+        markup = """
+        <a href="https://example.test/ledigt/one/"><span>1 RKV Filipstad – 36 m</span><sup>2</sup></a>
+        <span>Filipstad</span><span>-</span><span>Hyra:</span><span>4 479 kr/mån</span>
+        <span>Adress:</span><span>Stora Torget 3 D</span><span>Inflyttning:</span><span>Enl ök</span>
+        """
+        with patch.object(update_housing, "fetch", return_value=markup.encode()):
+            result = update_housing.parse_podium({"name": "Podium", "url": "https://example.test/ledigt/"})
+        self.assertEqual(result[0]["address"], "Stora Torget 3 D")
+        self.assertEqual(result[0]["rent"], 4479)
+
     def test_room_count_reads_momentum_labels(self):
         self.assertEqual(update_housing.room_count("3 Rum och kök"), 3)
         self.assertEqual(update_housing.room_count("1,5 rum"), 1.5)

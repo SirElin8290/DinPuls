@@ -84,6 +84,39 @@ class HiddenFieldParser(HTMLParser):
             self.fields[str(attributes["name"])] = str(attributes.get("value") or "")
 
 
+class VisibleContentParser(HTMLParser):
+    """Collect visible text and links from server-rendered provider pages."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.links: list[str] = []
+        self.blocked = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in {"script", "style", "noscript", "svg"}:
+            self.blocked += 1
+        elif tag == "a" and not self.blocked:
+            href = dict(attrs).get("href")
+            if href:
+                self.links.append(str(href))
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in {"script", "style", "noscript", "svg"} and self.blocked:
+            self.blocked -= 1
+
+    def handle_data(self, data: str) -> None:
+        value = " ".join(data.replace("\xa0", " ").split())
+        if value and not self.blocked:
+            self.parts.append(value)
+
+
+def visible_content(url: str) -> tuple[list[str], list[str]]:
+    parser = VisibleContentParser()
+    parser.feed(fetch(url).decode("utf-8", errors="replace"))
+    return parser.parts, [urljoin(url, link) for link in parser.links]
+
+
 def get_json(path: Path, fallback: dict) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -306,6 +339,107 @@ def parse_momentum(provider: dict) -> list[dict]:
     return listings
 
 
+def parse_maleon(provider: dict) -> list[dict]:
+    """Read every Segmon apartment linked from Maleon's vacancies page."""
+    _, links = visible_content(provider["url"])
+    detail_urls = sorted({link.rstrip("/") + "/" for link in links if "/portfolio/segmon-" in link})
+    if not detail_urls:
+        raise RuntimeError("Maleon: sidan med lediga lägenheter saknar verifierbara objekt")
+    listings = []
+    for url in detail_urls:
+        parts, _ = visible_content(url)
+        text = " | ".join(parts)
+        detail = text[text.find("Beskrivning:"):] if "Beskrivning:" in text else text
+        detail = detail.split("| Kontakta oss", 1)[0]
+        title = next((part.split("–", 1)[0].strip() for part in parts
+                      if part.startswith("Segmon,") and re.search(r",\s*\d{4}\s*(?:–|$)", part)), "")
+        address_match = re.search(r"(?:Adress:|Street address:)\s*\|?\s*([^|]+)", detail, re.I)
+        if not address_match:
+            address_match = re.search(r"Grums kommun\s*\|\s*([^|]+)", detail, re.I)
+        address = " ".join((address_match.group(1) if address_match else title.removeprefix("Segmon,")).split())
+        title_address = title.removeprefix("Segmon,").rsplit(",", 1)[0].strip()
+        if (title and title_address.casefold() == address.casefold()
+                and re.search(r",\s*\d{4}$", title) and not re.search(r"\d{4}$", address)):
+            address += " " + title.rsplit(",", 1)[-1].strip()
+        size_match = re.search(r"(?:Storlek:|Size \(square meters\):)\s*(?:\|\s*)?(\d+(?:[,.]\d+)?)", detail, re.I)
+        if not size_match:
+            size_match = re.search(r"(?:^|\|)\s*(?:ca\s*)?(\d+(?:[,.]\d+)?)\s*kvm", detail, re.I)
+        rooms_match = re.search(r"(?:Rum:|Rooms:)\s*(?:\|\s*)?(\d+(?:[,.]\d+)?)", detail, re.I)
+        if not rooms_match:
+            rooms_match = re.search(r"(?:^|\|)\s*(\d+(?:[,.]\d+)?)\s+rum och kök", detail, re.I)
+        rent_match = re.search(r"(?:Hyra:|Rent price:)\s*(?:\|\s*)?([\d ,.]+)\s*(?:kr|SEK)", detail, re.I)
+        if not address:
+            raise RuntimeError(f"Maleon: objektet saknar adress: {url}")
+        listings.append({
+            "id": url.rstrip("/").rsplit("/", 1)[-1], "address": address, "area": "Segmon",
+            "rooms": number(rooms_match.group(1)) if rooms_match else None,
+            "size": number(size_match.group(1)) if size_match else None,
+            "rent": number(re.sub(r"\D", "", rent_match.group(1))) if rent_match else None,
+            "available": "Se källan", "url": url, "provider": provider["name"],
+        })
+    return listings
+
+
+def parse_strandell(provider: dict) -> list[dict]:
+    """Expand Strandell's stated multi-unit vacancies into stable items."""
+    parts, _ = visible_content(provider["url"])
+    text = " ".join(parts)
+    if "Följande lägenheter finns nu att söka" not in text:
+        raise RuntimeError("Strandell: ledigtsidan saknar verifierad bostadssektion")
+    listings = []
+    group = re.search(r"(\w+) st 2 rok samt (\w+) st 3 rok.*?på ([^.]+)", text, re.I)
+    swedish_numbers = {"en": 1, "ett": 1, "två": 2, "tre": 3, "fyra": 4, "fem": 5,
+                       "sex": 6, "sju": 7, "åtta": 8, "nio": 9, "tio": 10}
+    if group:
+        address = " ".join(group.group(3).split())
+        for rooms, word in ((2, group.group(1)), (3, group.group(2))):
+            count = swedish_numbers.get(word.casefold())
+            if count is None and word.isdigit():
+                count = int(word)
+            if count is None:
+                raise RuntimeError(f"Strandell: okänt antalsord {word!r}")
+            for index in range(1, count + 1):
+                listings.append({
+                    "id": f"blombacka-{rooms}rok-{index}", "address": f"{address} ({rooms} rok, objekt {index})",
+                    "area": "Filipstad", "rooms": rooms, "size": None, "rent": None,
+                    "available": "Från augusti/hösten 2026", "url": provider["url"], "provider": provider["name"],
+                })
+    single = re.search(r"5 ROK och (\d+) kvm.*?Allégatan 17.*?Ledig (\d{4}-\d{2}-\d{2}).*?Varmhyra ([\d ]+) kr", text, re.I)
+    if single:
+        listings.append({
+            "id": "allegatan-17-5rok", "address": "Allégatan 17", "area": "Filipstad", "rooms": 5,
+            "size": number(single.group(1)), "rent": number(single.group(3)), "available": single.group(2),
+            "url": provider["url"], "provider": provider["name"],
+        })
+    if not listings:
+        raise RuntimeError("Strandell: inga aktuella bostadsobjekt kunde tolkas")
+    return listings
+
+
+def parse_podium(provider: dict) -> list[dict]:
+    """Read all apartment cards on Podium's Filipstad vacancies page."""
+    parts, links = visible_content(provider["url"])
+    text = " | ".join(parts)
+    base = provider["url"].rstrip("/") + "/"
+    detail_urls = sorted({link.rstrip("/") + "/" for link in links if link.startswith(base) and link.rstrip("/") != base.rstrip("/")})
+    pattern = re.compile(
+        r"(\d+) R(?:O|K)K?V? Filipstad\s*[–-]\s*(\d+) m\s*\|\s*2\s*\|\s*Filipstad\s*\|\s*-\s*\|\s*"
+        r"Hyra:\s*\|\s*([\d ]+) kr/mån\s*\|\s*Adress:\s*\|\s*([^|]+)\s*\|\s*"
+        r"(?:Inflyttning:|Ledig fr\.o\.m:)\s*\|\s*([^|]+)", re.I)
+    matches = list(pattern.finditer(text))
+    if not matches or len(matches) != len(detail_urls):
+        raise RuntimeError(f"Podium: hittade {len(matches)} kort men {len(detail_urls)} objektslänkar")
+    listings = []
+    for match, url in zip(matches, detail_urls):
+        listings.append({
+            "id": url.rstrip("/").rsplit("/", 1)[-1], "address": " ".join(match.group(4).split()),
+            "area": "Filipstad", "rooms": number(match.group(1)), "size": number(match.group(2)),
+            "rent": number(match.group(3)), "available": " ".join(match.group(5).split()),
+            "url": url, "provider": provider["name"],
+        })
+    return listings
+
+
 def decode_web_text(raw: bytes) -> str:
     """Decode Vitec's JSON, whose response lacks a reliable charset."""
     try:
@@ -447,6 +581,25 @@ def parse_hogia(provider: dict) -> list[dict]:
     raise RuntimeError("Hogia: sidgränsen nåddes innan alla objekt hämtats")
 
 
+def deduplicate_listings(listings: list[dict]) -> list[dict]:
+    """Prefer the first source for exact cross-provider matches without merging distinct units."""
+    unique_listings = {}
+    cross_provider_keys = {}
+    for item in listings:
+        key = f"{item.get('provider', '')}|{item.get('id') or item.get('url') or ''}"
+        if not key or key in unique_listings:
+            continue
+        address = re.sub(r"[^a-z0-9]", "", str(item.get("address") or "").casefold())
+        numeric = (item.get("rooms"), item.get("size"), item.get("rent"))
+        cross_key = (address, *numeric) if address and sum(value is not None for value in numeric) >= 2 else None
+        if cross_key and cross_key in cross_provider_keys and cross_provider_keys[cross_key] != item.get("provider"):
+            continue
+        unique_listings[key] = item
+        if cross_key:
+            cross_provider_keys[cross_key] = item.get("provider")
+    return list(unique_listings.values())
+
+
 def main() -> int:
     configuration = get_json(MUNICIPALITY_FILE, {})
     existing = get_json(OUTPUT, {"municipalities": {}})
@@ -457,7 +610,7 @@ def main() -> int:
 
     for municipality in configuration.get("municipalities", []):
         name = municipality.get("name", "")
-        strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö"}
+        strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö", "Grums", "Filipstad", "Bengtsfors"}
         providers = municipality.get("housingProviders", [])
         listings = []
         errors = []
@@ -476,6 +629,15 @@ def main() -> int:
                     fetched = parse_vitec_arena(provider)
                 elif parser_name == "momentum":
                     fetched = parse_momentum(provider)
+                elif parser_name == "filipstad-table":
+                    from update_housing_launch import parse_filipstad
+                    fetched = parse_filipstad({"provider": provider["name"], "url": provider["url"]})
+                elif parser_name == "maleon":
+                    fetched = parse_maleon(provider)
+                elif parser_name == "strandell":
+                    fetched = parse_strandell(provider)
+                elif parser_name == "podium":
+                    fetched = parse_podium(provider)
                 elif parser_name == "hogia":
                     fetched = parse_hogia(provider)
                 elif parser_name == "willhem":
@@ -497,7 +659,8 @@ def main() -> int:
                 fetched_any = True
                 if strict_v3:
                     source_health.append({
-                        "provider": provider["name"], "status": "ok", "checkedAt": now,
+                        "provider": provider["name"], "url": provider["url"], "status": "ok", "checkedAt": now,
+                        "lastSuccessfulFetch": now,
                         "rawCount": len(fetched), "error": None, "stale": False,
                     })
                 print(f"{name}, {provider['name']}: {len(fetched)} objekt")
@@ -505,17 +668,13 @@ def main() -> int:
                 errors.append(f"{provider.get('name', 'Källa')}: {error}")
                 if strict_v3:
                     source_health.append({
-                        "provider": provider.get("name", "Källa"), "status": "error", "checkedAt": now,
+                        "provider": provider.get("name", "Källa"), "url": provider.get("url"),
+                        "status": "error", "checkedAt": now, "lastSuccessfulFetch": None,
                         "rawCount": None, "error": str(error), "stale": True,
                     })
                 print(f"VARNING {name}: {errors[-1]}")
 
-        unique_listings = {}
-        for item in listings:
-            key = f"{item.get('provider', '')}|{item.get('id') or item.get('url') or ''}"
-            if key and key not in unique_listings:
-                unique_listings[key] = item
-        listings = list(unique_listings.values())
+        listings = deduplicate_listings(listings)
         provider_view = [{key: item[key] for key in ("name", "url", "official") if key in item} for item in providers]
         if fetched_any or not any(item.get("parser") for item in providers):
             core = {"total": len(listings), "listings": listings, "providers": provider_view}

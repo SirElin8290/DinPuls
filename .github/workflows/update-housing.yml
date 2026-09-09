@@ -107,7 +107,7 @@ jobs:
           assert actual == expected, f'Bostadskommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
 
           launch_names = set((launch.get('municipalities') or {}).keys())
-          strict_provider_names = {'Karlstad', 'Kristinehamn', 'Hammarö'}
+          strict_provider_names = {'Karlstad', 'Kristinehamn', 'Hammarö', 'Grums', 'Filipstad', 'Bengtsfors'}
           for item in config.get('municipalities', []):
               name = item['name']
               municipality = data['municipalities'][name]
