@@ -81,6 +81,23 @@ def number(value: str) -> int | float | None:
         return None
 
 
+def rent_amount(value: str) -> int | float | None:
+    """Läs hyran direkt före kr/mån så att t.ex. rumsantal inte feltolkas som hyra."""
+    text = value.replace("\xa0", " ")
+    match = re.search(r"(\d{1,3}(?:[ .]\d{3})+|\d+(?:[,.]\d+)?)\s*kr/mån\b", text, flags=re.I)
+    if not match:
+        return None
+    raw = match.group(1).replace(" ", "")
+    if re.fullmatch(r"\d{1,3}(?:\.\d{3})+", raw):
+        raw = raw.replace(".", "")
+    raw = raw.replace(",", ".")
+    try:
+        value_num = float(raw)
+        return int(value_num) if value_num.is_integer() else value_num
+    except ValueError:
+        return None
+
+
 def current_detail_links(markup: str) -> list[str]:
     """Ta bara länkar från den aktuella annonsdelen, aldrig historiska/borttagna."""
     lower = markup.casefold()
@@ -115,8 +132,8 @@ def parse_detail(url: str) -> dict | None:
     if title_match:
         address = title_match.group(1).strip()
 
-    rent_text = next((value for value in values if re.search(r"\d[\d ]*\s*kr/mån", value, flags=re.I)), "")
-    rent = number(rent_text)
+    rent_text = next((value for value in values if re.search(r"\d[\d .]*\s*kr/mån", value, flags=re.I)), "")
+    rent = rent_amount(rent_text)
     rooms_text = after_label(values, "Rum")
     size_text = after_label(values, "Yta")
     provider = after_label(values, "Hyresvärd")
