@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-10T11:48:42+02:00
+Genererad: 2026-09-10T11:48:57+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -105,9 +105,6 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ### Torsby — 🟡 YELLOW
 - **Bostäder:** 🟡 — inga aktuella bostäder och inget verifierat nolläge (0)
-- **Dagens lunch:** 🟡 — Lunchunderlaget är uppenbart för tunt för kommunens kända lokala grundutbud. (1)
-- **Fritid & aktiviteter:** 🟡 — Fritidsunderlaget är uppenbart för tunt för Torsbys storlek och kända besöks-/friluftsutbud. (6)
-- **Idrott & föreningar:** 🟡 — Föreningsunderlaget är uppenbart för tunt för kommunens kända föreningsliv. (18)
 
 ## V4-princip
 
