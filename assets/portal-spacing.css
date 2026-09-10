@@ -1,0 +1,66 @@
+/* Shared readability fixes for admin and company portal. */
+.company-row > span,
+.contract-row > span,
+.recent-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.company-row > span > b,
+.company-row > span > strong,
+.company-row > span > small,
+.contract-row > span > b,
+.contract-row > span > strong,
+.contract-row > span > small,
+.recent-row > span > b,
+.recent-row > span > strong,
+.recent-row > span > small {
+  display: block;
+}
+.company-row > span > small,
+.contract-row > span > small,
+.recent-row > span > small {
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.contract-list div {
+  gap: 18px;
+  align-items: flex-start;
+}
+.contract-list dt {
+  flex: 0 0 auto;
+}
+.contract-list dd {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.banner-row b > small,
+.upload-zone span > small,
+.scheduled-banner div > strong,
+.scheduled-banner div > span,
+.scheduled-banner div > small {
+  display: block;
+}
+.banner-row b > small,
+.upload-zone span > small,
+.scheduled-banner div > span,
+.scheduled-banner div > small {
+  margin-top: 4px;
+}
+
+@media (max-width: 720px) {
+  .company-row > span > small,
+  .contract-row > span > small,
+  .recent-row > span > small {
+    margin-top: 5px;
+  }
+  .contract-list div {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .contract-list dd {
+    text-align: left;
+  }
+}
