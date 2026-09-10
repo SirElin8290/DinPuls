@@ -60,6 +60,7 @@
     $("#appView").hidden = false;
     scrollTo(0, 0);
     await Promise.all([refreshContracts(), refreshSystemStatus(), refreshOperations()]);
+    openNewContract();
   }
 
   function installSystemStatus() {
@@ -314,14 +315,16 @@ function openContract(id) {
   }
 
   function openNewContract() {
-    openView("contracts");
-    $("#contractForm").hidden = false;
+    openView("new-contract");
+    $$(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.newContract === "1"));
+    $("#contractForm").hidden = true;
     $("#contractForm").reset();
     $("#placements").innerHTML = "";
     const today = new Date().toISOString().slice(0, 10);
     $("#startDate").value = today;
     $("#endDate").value = endDateFrom(today);
     addPlacement();
+    $("#contractForm").hidden = false;
   }
 
   function installContractTermsFields() {
@@ -354,6 +357,7 @@ function openContract(id) {
       const signed = await api(`/portal/admin/contracts/${encodeURIComponent(id)}/sign`, { method: "POST", body: JSON.stringify({ ...signatures, snapshotHash: created.snapshotHash }) });
       event.target.reset(); $("#placements").innerHTML = ""; $("#contractForm").hidden = true;
       await refreshContracts();
+      openView("contracts");
       alert(`Avtalet är signerat, låst och aktiverat. PDF: ${signed.pdfHash.slice(0, 12)}…${signed.emailStatus === "failed" ? "\nAvtalsmejlet kunde inte skickas, men signeringen och PDF-filen är bevarade." : ""}`);
     } catch (error) { alert(error.message); }
   }
@@ -375,7 +379,7 @@ function openContract(id) {
       } catch (error) { showLogin(error.message); }
     };
     $("#logout").onclick = async () => { try { await api("/portal/auth/logout", { method: "POST" }); } catch {} sessionStorage.removeItem(TOKEN_KEY); showLogin(); };
-    $$(".tab").forEach(button => button.onclick = () => openView(button.dataset.view));
+    $$(".tab").forEach(button => button.onclick = () => button.dataset.newContract ? openNewContract() : openView(button.dataset.view));
     $$('[data-open]').forEach(button => button.onclick = () => button.dataset.new ? openNewContract() : openView(button.dataset.open));
     $("#closeCompanyDialog").onclick = () => $("#companyDialog").close();
     $("#inventoryMunicipality").onchange = renderInventory;
@@ -383,7 +387,7 @@ function openContract(id) {
     $("#startDate").onchange = () => $("#endDate").value = endDateFrom($("#startDate").value);
     $("#addPlacement").onclick = addPlacement;
     $("#newContract").onclick = openNewContract;
-    $("#cancelContract").onclick = () => $("#contractForm").hidden = true;
+    $("#cancelContract").onclick = () => openView("contracts");
     $("#contractForm").onsubmit = submitContract;
     if (token()) { try { await showApp(); } catch (error) { showLogin(error.message); } } else showLogin();
   }
