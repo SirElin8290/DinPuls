@@ -1,16 +1,16 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-10T10:39:09+02:00
+Genererad: 2026-09-10T11:00:20+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
 Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 16 GREEN / 5 YELLOW / 0 RED
+## Resultat: 17 GREEN / 4 YELLOW / 0 RED
 
-**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Kil, Kristinehamn, Munkfors, Storfors, Sunne
+**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Kil, Kristinehamn, Munkfors, Storfors, Sunne
 
-**YELLOW:** Färgelanda, Hagfors, Hammarö, Karlstad, Torsby
+**YELLOW:** Hagfors, Hammarö, Karlstad, Torsby
 
 **RED:** inga
 
@@ -27,7 +27,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Eda | 🟢 GREEN | 27 | 41 | 20 | 49 / 49 färska | 13 / 7 kat | 12 / 7 kat | 5 | 21 | 24 |
 | Filipstad | 🟢 GREEN | 9 | 47 | 29 | 68 / 68 färska | 8 / 5 kat | 14 / 8 kat | 5 | 9 | 6 |
 | Forshaga | 🟢 GREEN | 15 | 10 | 80 | 37 / 37 färska | 11 / 6 kat | 13 / 13 kat | 8 | 25 | 20 |
-| Färgelanda | 🟡 YELLOW | 7 | 4 | 7 | 23 / 23 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
+| Färgelanda | 🟢 GREEN | 7 | 4 | 7 | 23 / 23 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
 | Hagfors | 🟡 YELLOW | 23 | 23 | 61 | 50 / 50 färska | 14 / 9 kat | 12 / 7 kat | 8 | 14 | 22 |
 | Hammarö | 🟡 YELLOW | 8 | 2 | 62 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 8 | 11 |
 | Karlstad | 🟡 YELLOW | 92 | 53 | 80 | 91 / 91 färska | 36 / 10 kat | 8 / 6 kat | 4 | 2 | 1 |
@@ -73,8 +73,8 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 ### Forshaga — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Färgelanda — 🟡 YELLOW
-- **Bostäder:** 🟡 — Det samlade bostadsworkflowet har ett kvarvarande separat Färgelanda-kontrollfel. Den beslutade aktiva bostadskällan måste fungera stabilt för att kommunen ska vara lanseringsklar. (4)
+### Färgelanda — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ### Hagfors — 🟡 YELLOW
 - **Idrott & föreningar:** 🟡 — Nuvarande underlag bedöms vara så tunt mot kommunens kända föreningsliv att lanseringsnivån behöver verifieras eller kompletteras. (22)
