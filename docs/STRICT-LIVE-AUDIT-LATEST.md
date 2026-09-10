@@ -1,16 +1,16 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-10T11:48:57+02:00
+Genererad: 2026-09-10T12:05:32+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
 Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 19 GREEN / 2 YELLOW / 0 RED
+## Resultat: 20 GREEN / 1 YELLOW / 0 RED
 
-**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Kil, Kristinehamn, Munkfors, Storfors, Sunne
+**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne
 
-**YELLOW:** Karlstad, Torsby
+**YELLOW:** Torsby
 
 **RED:** inga
 
@@ -30,13 +30,13 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Färgelanda | 🟢 GREEN | 7 | 8 | 7 | 23 / 23 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
 | Hagfors | 🟢 GREEN | 23 | 23 | 61 | 52 / 52 färska | 14 / 9 kat | 12 / 7 kat | 8 | 14 | 22 |
 | Hammarö | 🟢 GREEN | 8 | 2 | 62 | 44 / 44 färska | 10 / 7 kat | 8 / 5 kat | 5 | 8 | 11 |
-| Karlstad | 🟡 YELLOW | 92 | 52 | 80 | 90 / 90 färska | 36 / 10 kat | 8 / 6 kat | 4 | 2 | 1 |
+| Karlstad | 🟢 GREEN | 92 | 52 | 80 | 90 / 90 färska | 36 / 10 kat | 13 / 6 kat | 10 | 9 | 4 |
 | Kil | 🟢 GREEN | 12 | 4 | 11 | 45 / 45 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 18 |
 | Kristinehamn | 🟢 GREEN | 55 | 16 | 80 | 56 / 56 färska | 6 / 4 kat | 9 / 6 kat | 4 | 7 | 23 |
 | Munkfors | 🟢 GREEN | 8 | 1 | 55 | 24 / 24 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
 | Storfors | 🟢 GREEN | 4 | 3 | 5 | 62 / 62 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
 | Sunne | 🟢 GREEN | 18 | 7 | 22 | 59 / 59 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
-| Torsby | 🟡 YELLOW | 28 | 0 | 80 | 42 / 42 färska | 7 / 6 kat | 9 / 5 kat | 1 | 6 | 18 |
+| Torsby | 🟡 YELLOW | 28 | 0 | 80 | 42 / 42 färska | 7 / 6 kat | 9 / 5 kat | 3 | 6 | 18 |
 
 ## Blockerare per kommun
 
@@ -82,11 +82,8 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 ### Hammarö — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Karlstad — 🟡 YELLOW
-- **Service & hantverk:** 🟡 — Servicekatalogen är uppenbart för tunn för kommunens storlek även på lanseringsnivå. (8 / 6 kat)
-- **Dagens lunch:** 🟡 — Fyra lunchställen är uppenbart oproportionerligt tunt för Karlstad även som grundutbud. (4)
-- **Fritid & aktiviteter:** 🟡 — Fritidsunderlaget är uppenbart för tunt för Karlstads verkliga grundutbud. (2)
-- **Idrott & föreningar:** 🟡 — Föreningsunderlaget är uppenbart för tunt för Karlstads storlek även som lanseringsgrund. (1)
+### Karlstad — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ### Kil — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
