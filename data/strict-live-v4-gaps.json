@@ -1,45 +1,15 @@
 {
-  "version": "4.0",
+  "version": "4.1-launch",
   "updatedAt": "2026-09-10",
   "calibrationMunicipality": "Åmål",
-  "principle": "Only known material gaps block GREEN. Theoretical uncertainty or a blocked provider without evidence of current missing content does not block GREEN.",
+  "principle": "Only concrete launch-blocking gaps are status blockers. Private housing providers and secondary housing sources are post-launch enrichment unless the designated municipal/main housing source itself fails.",
   "municipalities": {
-    "Bengtsfors": {
-      "status": "YELLOW",
-      "gaps": [
-        {
-          "module": "Bostäder",
-          "reason": "Konkreta aktuella privata bostadskandidater hos Stendalen, Hänsjön och BBF har sekundärverifierats men saknas i DinPuls eftersom stabil verifierbar primärkälla saknas.",
-          "evidence": "housing Block 2 closure"
-        }
-      ]
-    },
-    "Grums": {
-      "status": "YELLOW",
-      "gaps": [
-        {
-          "module": "Bostäder",
-          "reason": "Konkreta aktuella privata bostadsobjekt har upptäckts utanför de fungerande primärflödena, bland annat hos SM, J&J, Steijner & Nordh, Bernt Johansson och Unifly.",
-          "evidence": "housing Block 2 closure"
-        }
-      ]
-    },
-    "Filipstad": {
-      "status": "YELLOW",
-      "gaps": [
-        {
-          "module": "Bostäder",
-          "reason": "Tre aktuella Bodil Warmland-objekt har sekundärverifierats men saknar verifierbar primär import och finns därför inte i DinPuls.",
-          "evidence": "housing Block 2 closure"
-        }
-      ]
-    },
     "Färgelanda": {
       "status": "YELLOW",
       "gaps": [
         {
           "module": "Bostäder",
-          "reason": "Det samlade bostadsworkflowet har ett kvarvarande separat Färgelanda-kontrollfel. Live-data finns men automationen är inte fullt frisk.",
+          "reason": "Det samlade bostadsworkflowet har ett kvarvarande separat Färgelanda-kontrollfel. Den beslutade aktiva bostadskällan måste fungera stabilt för att kommunen ska vara lanseringsklar.",
           "evidence": "housing workflow Block 1-3"
         }
       ]
@@ -49,7 +19,7 @@
       "gaps": [
         {
           "module": "Idrott & föreningar",
-          "reason": "Nuvarande DinPuls-underlag är tydligt tunt mot kommunens officiella föreningsregister och behöver full registerjämförelse.",
+          "reason": "Nuvarande underlag bedöms vara så tunt mot kommunens kända föreningsliv att lanseringsnivån behöver verifieras eller kompletteras.",
           "evidence": "v4 full analysis"
         }
       ]
@@ -59,13 +29,8 @@
       "gaps": [
         {
           "module": "Jobb",
-          "reason": "Tidigare korskontroll har visat fler aktuella lokala jobb än DinPuls-resultatet.",
+          "reason": "Tidigare korskontroll har visat fler aktuella lokala jobb än DinPuls-resultatet. Jobbflödet behöver verifieras mot beslutad lanseringskälla innan kommunen kan grönas.",
           "evidence": "v4 full analysis"
-        },
-        {
-          "module": "Bostäder",
-          "reason": "Bostadsutbudet är mycket tunt och relevanta privata aktörer är kända; täckningen når ännu inte Åmål-nivå i lokal trovärdighet.",
-          "evidence": "housing Block 1"
         }
       ]
     },
@@ -73,49 +38,24 @@
       "status": "YELLOW",
       "gaps": [
         {
-          "module": "Bostäder",
-          "reason": "Endast en del av det kända hyresvärdsuniversumet är integrerat trots flera stora relevanta aktörer.",
-          "evidence": "housing Block 1"
-        },
-        {
           "module": "Service & hantverk",
-          "reason": "Servicekatalogen är uppenbart för tunn för kommunens storlek.",
+          "reason": "Servicekatalogen är uppenbart för tunn för kommunens storlek även på lanseringsnivå.",
           "evidence": "v4 full analysis"
         },
         {
           "module": "Dagens lunch",
-          "reason": "Fyra lunchställen är uppenbart oproportionerligt tunt för Karlstad.",
+          "reason": "Fyra lunchställen är uppenbart oproportionerligt tunt för Karlstad även som grundutbud.",
           "evidence": "v4 full analysis"
         },
         {
           "module": "Fritid & aktiviteter",
-          "reason": "Fritidsunderlaget är uppenbart för tunt för Karlstads verkliga lokala utbud.",
+          "reason": "Fritidsunderlaget är uppenbart för tunt för Karlstads verkliga grundutbud.",
           "evidence": "v4 full analysis"
         },
         {
           "module": "Idrott & föreningar",
-          "reason": "Föreningsunderlaget är uppenbart för tunt för Karlstads storlek och officiella föreningsverklighet.",
+          "reason": "Föreningsunderlaget är uppenbart för tunt för Karlstads storlek även som lanseringsgrund.",
           "evidence": "v4 full analysis"
-        }
-      ]
-    },
-    "Kristinehamn": {
-      "status": "YELLOW",
-      "gaps": [
-        {
-          "module": "Bostäder",
-          "reason": "Flera privata hyresvärdar och ett betydligt större sekundärt bostadsutbud är kända medan bara huvudflödet är fullt integrerat.",
-          "evidence": "housing Block 1"
-        }
-      ]
-    },
-    "Munkfors": {
-      "status": "YELLOW",
-      "gaps": [
-        {
-          "module": "Bostäder",
-          "reason": "DinPuls har tre objekt från Munkforsbostäder medan sekundär kontroll visar ytterligare aktuella objekt hos SM Fastigheter och JPM.",
-          "evidence": "housing Block 3"
         }
       ]
     },
@@ -124,17 +64,17 @@
       "gaps": [
         {
           "module": "Dagens lunch",
-          "reason": "Lunchunderlaget är uppenbart för tunt för kommunens lokala verklighet.",
+          "reason": "Lunchunderlaget är uppenbart för tunt för kommunens kända lokala grundutbud.",
           "evidence": "v4 full analysis"
         },
         {
           "module": "Fritid & aktiviteter",
-          "reason": "Fritidsunderlaget är uppenbart för tunt för Torsbys storlek och besöks-/friluftsutbud.",
+          "reason": "Fritidsunderlaget är uppenbart för tunt för Torsbys storlek och kända besöks-/friluftsutbud.",
           "evidence": "v4 full analysis"
         },
         {
           "module": "Idrott & föreningar",
-          "reason": "Fem föreningar är uppenbart för tunt för kommunens verkliga föreningsliv.",
+          "reason": "Föreningsunderlaget är uppenbart för tunt för kommunens kända föreningsliv.",
           "evidence": "v4 full analysis"
         }
       ]
