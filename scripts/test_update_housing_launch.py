@@ -1,4 +1,6 @@
 import unittest
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 import update_housing_launch
@@ -28,6 +30,10 @@ class FakeOpener:
 
 
 class LaunchHousingUpdateTests(unittest.TestCase):
+    def test_torsby_is_only_managed_by_active_housing_import(self):
+        config = json.loads((Path(__file__).parents[1] / "data" / "housing-launch-sources.json").read_text(encoding="utf-8"))
+        self.assertNotIn("Torsby", config["municipalities"])
+
     def test_filipstad_accepts_leading_media_cell(self):
         markup = """
         <table><tbody><tr>
@@ -83,3 +89,4 @@ class LaunchHousingUpdateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
