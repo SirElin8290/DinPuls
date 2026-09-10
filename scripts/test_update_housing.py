@@ -203,6 +203,29 @@ class HousingUpdateTests(unittest.TestCase):
             self.assertFalse(result["B"]["stale"])
             self.assertIn("checkedAt", result["A"])
 
+    def test_failed_provider_keeps_its_previous_rows_when_peer_provider_succeeds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config_path = root / "municipalities.json"
+            output_path = root / "housing.json"
+            providers = [
+                {"name": "Fresh", "url": "https://fresh.example", "parser": "momentum"},
+                {"name": "Flaky", "url": "https://flaky.example", "parser": "momentum"},
+            ]
+            config_path.write_text(json.dumps({"municipalities": [{"name": "Torsby", "housingProviders": providers}]}), encoding="utf-8")
+            old = {"id": "old", "provider": "Flaky", "address": "Gamla vägen 1", "url": "https://flaky.example/old"}
+            output_path.write_text(json.dumps({"municipalities": {"Torsby": {"total": 1, "listings": [old], "providers": []}}}), encoding="utf-8")
+            fresh = {"id": "new", "provider": "Fresh", "address": "Nya vägen 2", "url": "https://fresh.example/new"}
+            with (
+                patch.object(update_housing, "MUNICIPALITY_FILE", config_path),
+                patch.object(update_housing, "OUTPUT", output_path),
+                patch.object(update_housing, "parse_momentum", side_effect=[[fresh], RuntimeError("timeout")]),
+            ):
+                self.assertEqual(update_housing.main("Torsby"), 0)
+            result = json.loads(output_path.read_text(encoding="utf-8"))["municipalities"]["Torsby"]
+            self.assertEqual({row["id"] for row in result["listings"]}, {"new", "old"})
+            self.assertTrue(next(row for row in result["sourceHealth"] if row["provider"] == "Flaky")["stale"])
+
     def test_unexpected_zero_does_not_replace_previous_objects(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

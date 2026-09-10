@@ -805,6 +805,10 @@ def main(only_municipality: str | None = None) -> int:
             parser_name = provider.get("parser")
             if not parser_name:
                 continue
+            previous_provider_listings = [
+                item for item in previous.get(name, {}).get("listings", [])
+                if item.get("provider") == provider.get("name")
+            ]
             try:
                 if parser_name == "vitec-hss":
                     fetched = parse_hss(provider)
@@ -837,10 +841,6 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_orvelin_residential(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
-                previous_provider_listings = [
-                    item for item in previous.get(name, {}).get("listings", [])
-                    if item.get("provider") == provider.get("name")
-                ]
                 if not fetched and previous_provider_listings:
                     raise RuntimeError(
                         f"källan gav oväntat 0 objekt; behåller {len(previous_provider_listings)} tidigare objekt"
@@ -859,6 +859,7 @@ def main(only_municipality: str | None = None) -> int:
                 print(f"{name}, {provider['name']}: {len(fetched)} objekt")
             except (RuntimeError, ValueError, TypeError, json.JSONDecodeError) as error:
                 errors.append(f"{provider.get('name', 'Källa')}: {error}")
+                listings.extend(previous_provider_listings)
                 if strict_v3:
                     source_health.append({
                         "provider": provider.get("name", "Källa"), "url": provider.get("url"),

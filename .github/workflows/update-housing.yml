@@ -58,10 +58,19 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Uppdatera Block 3-bostäder oberoende av övriga källor"
           for attempt in 1 2 3 4; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
+            if git push origin HEAD:main; then
               exit 0
             fi
             git rebase --abort 2>/dev/null || true
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/update_housing.py --municipality Säffle
+            python scripts/update_housing.py --municipality Munkfors
+            python scripts/update_housing.py --municipality Torsby
+            python scripts/update_housing_coverage_evidence.py
+            git add data/housing.json data/housing-coverage-evidence.json
+            git diff --cached --quiet && exit 0
+            git commit -m "Uppdatera Block 3-bostäder oberoende av övriga källor"
             [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
           done
           exit 1
