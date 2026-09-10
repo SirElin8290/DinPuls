@@ -183,6 +183,14 @@ def room_count(value: object) -> int | float | None:
     return number(match.group(0)) if match else None
 
 
+def swedish_short_date(value: str) -> str:
+    match = re.fullmatch(r"\s*(\d{1,2})/(\d{1,2})-(\d{2})\s*", value)
+    if not match:
+        return value
+    day, month, year = (int(part) for part in match.groups())
+    return f"20{year:02d}-{month:02d}-{day:02d}"
+
+
 def parse_hss(provider: dict) -> list[dict]:
     parser = HousingTableParser()
     for page in fetch_hss_pages(provider["dataUrl"]):
@@ -320,7 +328,7 @@ def parse_munkfors(provider: dict) -> list[dict]:
             "rooms": number(rooms.group(1)) if rooms else None,
             "size": number(size.group(1)) if size else None,
             "rent": number(rent.group(1)) if rent else None,
-            "available": " ".join(available.group(1).split()) if available else "Se källan",
+            "available": swedish_short_date(" ".join(available.group(1).split())) if available else "Se källan",
             "url": provider["url"], "provider": provider["name"],
         })
     if sum(declared) != len(listings):

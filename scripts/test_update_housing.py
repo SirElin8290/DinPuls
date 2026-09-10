@@ -13,12 +13,13 @@ class HousingUpdateTests(unittest.TestCase):
         <h3><strong>Lediga lägenheter</strong> <strong>[1 st]</strong></h3>
         <p class="has-background"><strong>Adress:</strong> Testvägen 1, lägenhet 1001<br>
         <strong>Månadshyra:</strong> 5 100 kr/mån<br><strong>Storlek:</strong> 2 RoK<br>
-        <strong>Bostadsyta:</strong> 55 m<sup>2</sup><br><strong>Tillträde:</strong> ledig<br>
+        <strong>Bostadsyta:</strong> 55 m<sup>2</sup><br><strong>Tillträde:</strong> 1/10-26<br>
         <strong>Ingår:</strong> förråd</p>'''
         with patch.object(update_housing, "fetch", return_value=markup.encode()):
             result = update_housing.parse_munkfors({"name": "Munkforsbostäder", "url": "https://example.test"})
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["rent"], 5100)
+        self.assertEqual(result[0]["available"], "2026-10-01")
 
     def test_vitec_public_filter_keeps_only_configured_municipality(self):
         payload = {"data": json.dumps([
