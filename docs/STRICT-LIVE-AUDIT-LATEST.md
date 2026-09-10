@@ -1,102 +1,117 @@
-# DinPuls – STRICT LIVE 100 % audit
+# DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-10T10:17:50+02:00
+Genererad: 2026-09-10T10:24:56+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
+Kalibreringskommun: Åmål.
 
-Tidigare status är nollställd. Hero och Matkassen ingår inte.
+Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 19 av 21 kommuner når 100 %
+## Resultat: 11 GREEN / 10 YELLOW / 0 RED
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Kil, Kristinehamn, Munkfors, Storfors, Sunne
+**GREEN:** Åmål, Årjäng, Mellerud, Arvika, Säffle, Dals-Ed, Eda, Forshaga, Kil, Storfors, Sunne
+
+**YELLOW:** Bengtsfors, Grums, Filipstad, Färgelanda, Hagfors, Hammarö, Karlstad, Kristinehamn, Munkfors, Torsby
+
+**RED:** inga
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 100 % | 29 | 51 | 16 | 43 / 43 färska | 19 / 8 kat | 17 / 5 kat | 4 | 43 | 40 |
-| Årjäng | 🟢 100 % | 29 | 10 | 29 | 47 / 48 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
-| Bengtsfors | 🟢 100 % | 21 | 36 | 8 | 47 / 47 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 35 |
-| Mellerud | 🟢 100 % | 28 | 18 | 11 | 28 / 28 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
-| Arvika | 🟢 100 % | 50 | 8 | 30 | 72 / 72 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
-| Grums | 🟢 100 % | 14 | 15 | 8 | 33 / 33 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
-| Säffle | 🟢 100 % | 28 | 61 | 5 | 77 / 77 färska | 18 / 7 kat | 16 / 4 kat | 10 | 64 | 44 |
-| Dals-Ed | 🟢 100 % | 6 | 23 | 29 | 17 / 17 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
-| Eda | 🟢 100 % | 27 | 41 | 8 | 49 / 49 färska | 13 / 7 kat | 13 / 8 kat | 5 | 42 | 29 |
-| Filipstad | 🟢 100 % | 9 | 47 | 11 | 68 / 68 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 34 |
-| Forshaga | 🟢 100 % | 15 | 10 | 42 | 37 / 37 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
-| Färgelanda | 🟢 100 % | 7 | 4 | 6 | 23 / 23 färska | 9 / 8 kat | 8 / 5 kat | 4 | 12 | 24 |
-| Hagfors | 🟢 100 % | 23 | 23 | 24 | 50 / 50 färska | 13 / 7 kat | 12 / 7 kat | 8 | 24 | 23 |
-| Hammarö | 🟢 100 % | 8 | 2 | 39 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 21 |
-| Karlstad | 🟡 EJ 100 % | 92 | 53 | 32 | 90 / 91 färska | 36 / 10 kat | 8 / 6 kat | 4 | 8 | 19 |
-| Kil | 🟢 100 % | 12 | 4 | 5 | 39 / 39 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
-| Kristinehamn | 🟢 100 % | 55 | 15 | 34 | 55 / 56 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
-| Munkfors | 🟢 100 % | 8 | 3 | 18 | 24 / 24 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
-| Storfors | 🟢 100 % | 4 | 3 | 5 | 62 / 62 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 13 | 34 |
-| Sunne | 🟢 100 % | 18 | 8 | 8 | 59 / 59 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
-| Torsby | 🟡 EJ 100 % | 28 | 28 | 35 | 43 / 43 färska | 7 / 6 kat | 8 / 4 kat | 1 | 2 | 5 |
+| Åmål | 🟢 GREEN | 29 | 51 | 33 | 43 / 43 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
+| Årjäng | 🟢 GREEN | 29 | 10 | 80 | 48 / 48 färska | 8 / 5 kat | 11 / 4 kat | 7 | 39 | 29 |
+| Bengtsfors | 🟡 YELLOW | 21 | 36 | 8 | 47 / 47 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 18 |
+| Mellerud | 🟢 GREEN | 28 | 18 | 18 | 28 / 28 färska | 7 / 4 kat | 15 / 4 kat | 5 | 45 | 16 |
+| Arvika | 🟢 GREEN | 50 | 8 | 80 | 72 / 72 färska | 30 / 8 kat | 21 / 11 kat | 8 | 132 | 77 |
+| Grums | 🟡 YELLOW | 14 | 15 | 20 | 33 / 33 färska | 12 / 6 kat | 11 / 7 kat | 10 | 37 | 30 |
+| Säffle | 🟢 GREEN | 28 | 61 | 6 | 77 / 77 färska | 17 / 7 kat | 16 / 4 kat | 10 | 37 | 29 |
+| Dals-Ed | 🟢 GREEN | 6 | 23 | 42 | 17 / 17 färska | 9 / 7 kat | 12 / 8 kat | 6 | 12 | 2 |
+| Eda | 🟢 GREEN | 27 | 41 | 20 | 49 / 49 färska | 13 / 7 kat | 12 / 7 kat | 5 | 21 | 24 |
+| Filipstad | 🟡 YELLOW | 9 | 47 | 29 | 68 / 68 färska | 8 / 5 kat | 14 / 8 kat | 5 | 9 | 6 |
+| Forshaga | 🟢 GREEN | 15 | 10 | 80 | 37 / 37 färska | 11 / 6 kat | 13 / 13 kat | 8 | 25 | 20 |
+| Färgelanda | 🟡 YELLOW | 7 | 4 | 7 | 23 / 23 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
+| Hagfors | 🟡 YELLOW | 23 | 23 | 61 | 50 / 50 färska | 14 / 9 kat | 12 / 7 kat | 8 | 14 | 22 |
+| Hammarö | 🟡 YELLOW | 8 | 2 | 62 | 45 / 45 färska | 10 / 7 kat | 8 / 5 kat | 5 | 8 | 11 |
+| Karlstad | 🟡 YELLOW | 92 | 53 | 80 | 91 / 91 färska | 36 / 10 kat | 8 / 6 kat | 4 | 2 | 1 |
+| Kil | 🟢 GREEN | 12 | 4 | 11 | 39 / 39 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 18 |
+| Kristinehamn | 🟡 YELLOW | 55 | 15 | 80 | 56 / 56 färska | 6 / 4 kat | 9 / 6 kat | 4 | 7 | 23 |
+| Munkfors | 🟡 YELLOW | 8 | 3 | 55 | 24 / 24 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
+| Storfors | 🟢 GREEN | 4 | 3 | 5 | 62 / 62 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
+| Sunne | 🟢 GREEN | 18 | 8 | 22 | 59 / 59 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
+| Torsby | 🟡 YELLOW | 28 | 28 | 80 | 43 / 43 färska | 7 / 6 kat | 9 / 5 kat | 1 | 1 | 1 |
 
 ## Blockerare per kommun
 
-### Åmål — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Åmål — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Årjäng — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Årjäng — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Bengtsfors — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Bengtsfors — 🟡 YELLOW
+- **Bostäder:** 🟡 — Konkreta aktuella privata bostadskandidater hos Stendalen, Hänsjön och BBF har sekundärverifierats men saknas i DinPuls eftersom stabil verifierbar primärkälla saknas. (36)
 
-### Mellerud — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Mellerud — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Arvika — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Arvika — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Grums — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Grums — 🟡 YELLOW
+- **Bostäder:** 🟡 — Konkreta aktuella privata bostadsobjekt har upptäckts utanför de fungerande primärflödena, bland annat hos SM, J&J, Steijner & Nordh, Bernt Johansson och Unifly. (15)
 
-### Säffle — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Säffle — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Dals-Ed — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Dals-Ed — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Eda — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Eda — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Filipstad — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Filipstad — 🟡 YELLOW
+- **Bostäder:** 🟡 — Tre aktuella Bodil Warmland-objekt har sekundärverifierats men saknar verifierbar primär import och finns därför inte i DinPuls. (47)
 
-### Forshaga — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Forshaga — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Färgelanda — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Färgelanda — 🟡 YELLOW
+- **Bostäder:** 🟡 — Det samlade bostadsworkflowet har ett kvarvarande separat Färgelanda-kontrollfel. Live-data finns men automationen är inte fullt frisk. (4)
 
-### Hagfors — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Hagfors — 🟡 YELLOW
+- **Idrott & föreningar:** 🟡 — Nuvarande DinPuls-underlag är tydligt tunt mot kommunens officiella föreningsregister och behöver full registerjämförelse. (22)
 
-### Hammarö — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Hammarö — 🟡 YELLOW
+- **Jobb:** 🟡 — Tidigare korskontroll har visat fler aktuella lokala jobb än DinPuls-resultatet. (8)
+- **Bostäder:** 🟡 — Bostadsutbudet är mycket tunt och relevanta privata aktörer är kända; täckningen når ännu inte Åmål-nivå i lokal trovärdighet. (2)
 
-### Karlstad — 🟡 EJ 100 %
-- **Fritid & aktiviteter:** 🟡 — endast 8 lokala aktiviteter/anläggningar; minst 10 krävs (8)
-- **Idrott & föreningar:** 🟡 — endast 19 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (19)
+### Karlstad — 🟡 YELLOW
+- **Bostäder:** 🟡 — Endast en del av det kända hyresvärdsuniversumet är integrerat trots flera stora relevanta aktörer. (53)
+- **Service & hantverk:** 🟡 — Servicekatalogen är uppenbart för tunn för kommunens storlek. (8 / 6 kat)
+- **Dagens lunch:** 🟡 — Fyra lunchställen är uppenbart oproportionerligt tunt för Karlstad. (4)
+- **Fritid & aktiviteter:** 🟡 — Fritidsunderlaget är uppenbart för tunt för Karlstads verkliga lokala utbud. (2)
+- **Idrott & föreningar:** 🟡 — Föreningsunderlaget är uppenbart för tunt för Karlstads storlek och officiella föreningsverklighet. (1)
 
-### Kil — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Kil — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Kristinehamn — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Kristinehamn — 🟡 YELLOW
+- **Bostäder:** 🟡 — Flera privata hyresvärdar och ett betydligt större sekundärt bostadsutbud är kända medan bara huvudflödet är fullt integrerat. (15)
 
-### Munkfors — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Munkfors — 🟡 YELLOW
+- **Bostäder:** 🟡 — DinPuls har tre objekt från Munkforsbostäder medan sekundär kontroll visar ytterligare aktuella objekt hos SM Fastigheter och JPM. (3)
 
-### Storfors — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Storfors — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Sunne — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Sunne — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Torsby — 🟡 EJ 100 %
-- **Dagens lunch:** 🟡 — endast 1 verifierade lunchställen; minst 4 krävs (1)
-- **Fritid & aktiviteter:** 🟡 — endast 2 lokala aktiviteter/anläggningar; minst 10 krävs (2)
-- **Idrott & föreningar:** 🟡 — endast 5 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (5)
+### Torsby — 🟡 YELLOW
+- **Dagens lunch:** 🟡 — Lunchunderlaget är uppenbart för tunt för kommunens lokala verklighet. (1)
+- **Fritid & aktiviteter:** 🟡 — Fritidsunderlaget är uppenbart för tunt för Torsbys storlek och besöks-/friluftsutbud. (1)
+- **Idrott & föreningar:** 🟡 — Fem föreningar är uppenbart för tunt för kommunens verkliga föreningsliv. (1)
+
+## V4-princip
+
+En BLOCKED provider utan belägg för aktuellt saknat innehåll blockerar inte automatiskt GREEN. Konkret aktuell saknad data, uppenbart oproportionerligt tunn modul eller tekniskt fel gör däremot kommunen YELLOW eller RED.
+
+Hero och Matkassen ingår inte.
