@@ -1,37 +1,37 @@
 # DinPuls – STRICT LIVE 100 % audit
 
-Genererad: 2026-09-10T09:38:56+02:00
+Genererad: 2026-09-10T09:46:55+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 
 Tidigare status är nollställd. Hero och Matkassen ingår inte.
 
-## Resultat: 21 av 21 kommuner når 100 %
+## Resultat: 19 av 21 kommuner når 100 %
 
-**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne, Torsby
+**100 % gröna:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Kil, Kristinehamn, Munkfors, Storfors, Sunne
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Åmål | 🟢 100 % | 29 | 51 | 16 | 45 / 45 färska | 19 / 8 kat | 17 / 5 kat | 4 | 43 | 40 |
-| Årjäng | 🟢 100 % | 29 | 10 | 28 | 46 / 47 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
+| Årjäng | 🟢 100 % | 29 | 10 | 29 | 46 / 47 färska | 8 / 5 kat | 11 / 4 kat | 7 | 119 | 61 |
 | Bengtsfors | 🟢 100 % | 21 | 36 | 8 | 47 / 47 färska | 16 / 10 kat | 15 / 9 kat | 7 | 53 | 35 |
-| Mellerud | 🟢 100 % | 27 | 18 | 11 | 32 / 32 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
+| Mellerud | 🟢 100 % | 28 | 18 | 11 | 32 / 32 färska | 7 / 4 kat | 15 / 4 kat | 5 | 96 | 27 |
 | Arvika | 🟢 100 % | 50 | 8 | 30 | 67 / 67 färska | 30 / 8 kat | 21 / 11 kat | 8 | 202 | 103 |
-| Grums | 🟢 100 % | 14 | 7 | 8 | 32 / 32 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
-| Säffle | 🟢 100 % | 28 | 55 | 5 | 79 / 79 färska | 18 / 7 kat | 16 / 4 kat | 10 | 64 | 44 |
+| Grums | 🟢 100 % | 14 | 15 | 8 | 32 / 32 färska | 12 / 6 kat | 9 / 6 kat | 10 | 50 | 30 |
+| Säffle | 🟢 100 % | 28 | 64 | 5 | 79 / 79 färska | 18 / 7 kat | 16 / 4 kat | 10 | 64 | 44 |
 | Dals-Ed | 🟢 100 % | 6 | 23 | 29 | 17 / 17 färska | 9 / 7 kat | 12 / 10 kat | 6 | 24 | 25 |
 | Eda | 🟢 100 % | 27 | 41 | 8 | 47 / 47 färska | 13 / 7 kat | 13 / 8 kat | 5 | 42 | 29 |
 | Filipstad | 🟢 100 % | 9 | 47 | 11 | 67 / 67 färska | 8 / 5 kat | 14 / 8 kat | 5 | 14 | 34 |
-| Forshaga | 🟢 100 % | 14 | 10 | 42 | 38 / 38 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
+| Forshaga | 🟢 100 % | 15 | 10 | 42 | 38 / 38 färska | 11 / 6 kat | 10 / 10 kat | 8 | 34 | 20 |
 | Färgelanda | 🟢 100 % | 7 | 4 | 6 | 21 / 21 färska | 9 / 8 kat | 8 / 5 kat | 4 | 12 | 24 |
 | Hagfors | 🟢 100 % | 23 | 23 | 24 | 51 / 51 färska | 13 / 7 kat | 12 / 7 kat | 8 | 24 | 23 |
 | Hammarö | 🟢 100 % | 8 | 2 | 39 | 42 / 42 färska | 10 / 7 kat | 8 / 5 kat | 5 | 18 | 21 |
-| Karlstad | 🟢 100 % | 92 | 53 | 32 | 84 / 84 färska | 36 / 10 kat | 8 / 6 kat | 4 | 10 | 20 |
+| Karlstad | 🟡 EJ 100 % | 92 | 53 | 32 | 84 / 84 färska | 36 / 10 kat | 8 / 6 kat | 4 | 8 | 19 |
 | Kil | 🟢 100 % | 12 | 4 | 5 | 37 / 37 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 20 |
-| Kristinehamn | 🟢 100 % | 54 | 15 | 34 | 52 / 53 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
-| Munkfors | 🟢 100 % | 8 | 1 | 18 | 24 / 24 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
+| Kristinehamn | 🟢 100 % | 55 | 15 | 34 | 52 / 53 färska | 6 / 4 kat | 9 / 6 kat | 4 | 10 | 23 |
+| Munkfors | 🟢 100 % | 8 | 4 | 18 | 24 / 24 färska | 6 / 5 kat | 8 / 5 kat | 4 | 12 | 22 |
 | Storfors | 🟢 100 % | 4 | 3 | 5 | 63 / 63 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 13 | 34 |
 | Sunne | 🟢 100 % | 18 | 8 | 8 | 60 / 60 färska | 16 / 6 kat | 16 / 5 kat | 4 | 13 | 24 |
-| Torsby | 🟢 100 % | 25 | 1 | 35 | 41 / 41 färska | 7 / 6 kat | 8 / 4 kat | 5 | 11 | 21 |
+| Torsby | 🟡 EJ 100 % | 28 | 28 | 35 | 41 / 41 färska | 7 / 6 kat | 8 / 4 kat | 1 | 2 | 5 |
 
 ## Blockerare per kommun
 
@@ -77,8 +77,9 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Hammarö — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Karlstad — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Karlstad — 🟡 EJ 100 %
+- **Fritid & aktiviteter:** 🟡 — endast 8 lokala aktiviteter/anläggningar; minst 10 krävs (8)
+- **Idrott & föreningar:** 🟡 — endast 19 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (19)
 
 ### Kil — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
@@ -95,5 +96,7 @@ Samtliga obligatoriska moduler passerar den strikta auditen.
 ### Sunne — 🟢 100 %
 Samtliga obligatoriska moduler passerar den strikta auditen.
 
-### Torsby — 🟢 100 %
-Samtliga obligatoriska moduler passerar den strikta auditen.
+### Torsby — 🟡 EJ 100 %
+- **Dagens lunch:** 🟡 — endast 1 verifierade lunchställen; minst 4 krävs (1)
+- **Fritid & aktiviteter:** 🟡 — endast 2 lokala aktiviteter/anläggningar; minst 10 krävs (2)
+- **Idrott & föreningar:** 🟡 — endast 5 lokala föreningar; minst 20 krävs om inte verkligt utbud verifieras lägre (5)
