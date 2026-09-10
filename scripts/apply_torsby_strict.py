@@ -6,7 +6,6 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'data'
 SRC=json.loads((DATA/'torsby-strict-source.json').read_text(encoding='utf-8'))
-HOUSING_SRC=json.loads((DATA/'torsby-housing-source.json').read_text(encoding='utf-8'))
 
 def load(name): return json.loads((DATA/name).read_text(encoding='utf-8'))
 def save(name,obj): (DATA/name).write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -19,18 +18,6 @@ def merge_named(existing, additions):
 
 def cats(xs):
     return {str(x.get('category') or x.get('type') or x.get('serviceType') or x.get('activityType') or '').strip().casefold() for x in xs if str(x.get('category') or x.get('type') or x.get('serviceType') or x.get('activityType') or '').strip()}
-
-# Bostäder: ett faktiskt aktuellt objekt från Torsby Bostäders aktiva ledigt-lista.
-ho=load('housing.json')
-hor=ho.setdefault('municipalities',{}).setdefault('Torsby',{})
-hor['listings']=merge_named(hor.get('listings') or [],HOUSING_SRC['listings'])
-hor['total']=len(hor['listings'])
-hor['checkedAt']=HOUSING_SRC['sourceChecked']+'T14:00:00+02:00'
-hor['updatedAt']=hor['checkedAt']
-hor['stale']=False
-hor['errors']=[]
-hor['availabilityMode']='verified-current-source'
-save('housing.json',ho)
 
 # Vård: aktiv basfil som STRICT och frontend läser.
 h=load('health.json')
@@ -87,7 +74,6 @@ for fn in ['service.json','service-private-supplement.json','service-launch-supp
     service += [x for x in p.get('businesses',[]) if isinstance(x,dict) and x.get('municipality')=='Torsby']
 service=merge_named([],service)
 
-assert len(hor['listings'])>=1,len(hor['listings'])
 assert len(health)>=5 and len(cats(health))>=3,(len(health),cats(health))
 assert len(service)>=8 and len(cats(service))>=4,(len(service),cats(service))
 assert all(ar['serviceUrls'].get(k) for k in ['socialtjanst','ekonomiskt-bistand','budget-skuld','aldreomsorg','lss','bygglov'])
@@ -96,4 +82,4 @@ assert len(lr['activities'])>=10,len(lr['activities'])
 assert len(sr['clubs'])>=20,len(sr['clubs'])
 assert len(lur['restaurants'])>=4,len(lur['restaurants'])
 
-print(f"Torsby STRICT patch: housing={len(hor['listings'])}, health={len(health)}/{len(cats(health))} kat, service={len(service)}/{len(cats(service))} kat, authorities=6, cinema={len(c['municipalities']['Torsby'])}, leisure={len(lr['activities'])}, sports={len(sr['clubs'])}, lunch={len(lur['restaurants'])}")
+print(f"Torsby STRICT patch: health={len(health)}/{len(cats(health))} kat, service={len(service)}/{len(cats(service))} kat, authorities=6, cinema={len(c['municipalities']['Torsby'])}, leisure={len(lr['activities'])}, sports={len(sr['clubs'])}, lunch={len(lur['restaurants'])}")

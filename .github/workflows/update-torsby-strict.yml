@@ -6,8 +6,6 @@ on:
     branches: [main]
     paths:
       - "data/torsby-strict-source.json"
-      - "data/torsby-housing-source.json"
-      - "data/housing.json"
       - "scripts/apply_torsby_strict.py"
       - ".github/workflows/update-torsby-strict.yml"
   schedule:
@@ -45,7 +43,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/housing.json data/health.json data/service-local-supplement.json data/authorities.json data/cinemas.json data/leisure.json data/sports.json data/lunch.json
+          git add data/health.json data/service-local-supplement.json data/authorities.json data/cinemas.json data/leisure.json data/sports.json data/lunch.json
           git diff --cached --quiet && exit 0
           git commit -m "Uppdatera Torsby STRICT-data"
           for attempt in 1 2 3 4; do

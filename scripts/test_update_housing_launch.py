@@ -33,6 +33,8 @@ class LaunchHousingUpdateTests(unittest.TestCase):
     def test_torsby_is_only_managed_by_active_housing_import(self):
         config = json.loads((Path(__file__).parents[1] / "data" / "housing-launch-sources.json").read_text(encoding="utf-8"))
         self.assertNotIn("Torsby", config["municipalities"])
+        strict_script = (Path(__file__).parents[1] / "scripts" / "apply_torsby_strict.py").read_text(encoding="utf-8")
+        self.assertNotIn("housing.json", strict_script)
 
     def test_filipstad_accepts_leading_media_cell(self):
         markup = """
