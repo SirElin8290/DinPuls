@@ -1,168 +1,216 @@
-# DinPuls – STRICT LIVE 100 % kommunregel v3
+# DinPuls – STRICT LIVE kommunregel v4
 
-Detta dokument ersätter alla tidigare regler för kommunanalys och är den enda bindande standarden för att avgöra om en DinPuls-kommun är 100 % klar.
+Detta dokument ersätter samtliga tidigare kommunregler och är den enda bindande standarden för att avgöra om en DinPuls-kommun är GRÖN, GUL eller RÖD.
 
-## 1. Grundprincip: 100 % betyder full verifierad täckning
+## 1. Syfte
 
-Varje kommun bedöms från noll vid varje full revision. Tidigare grönt, pilot-/produktionsstatus, äldre rapporter eller tidigare godkännanden ger inget frikort.
+Regeln ska ge en praktiskt användbar produktionsstatus. Den får inte skapa ett läge där nästan alla kommuner blir GULA enbart därför att det teoretiskt kan finnas okända lokala aktörer eller källor som inte går att bevisa bort.
 
-Frågan är endast:
+Status ska svara på frågan:
 
-> Om en vanlig besökare öppnar DinPuls för kommunen nu – fungerar samtliga obligatoriska moduler, visar de rätt kommun och återger de hela det relevanta lokala utbud som rimligen går att verifiera från definierade källor?
+> Om en vanlig invånare öppnar DinPuls för kommunen nu – känns kommunen komplett, lokal, aktuell och användbar på samma kvalitetsnivå som den mest mogna referenskommunen Åmål, utan kända väsentliga luckor eller tekniska fel?
 
-En kommun är **🟢 100 % GRÖN** endast när alla obligatoriska moduler samtidigt är gröna.
+Åmål används som **kalibreringskommun** för kvalitetsnivå och mognadsgrad, inte som numerisk mall.
 
-En enda gul eller röd obligatorisk modul innebär att kommunen som helhet inte är 100 % grön.
+## 2. Åmål som kalibreringskommun
 
-## 2. Bindande FULL COVERAGE-princip
+Åmål är referensen för hur en GRÖN kommun ska upplevas:
 
-För varje innehållsmodul ska revisionen först fastställa ett **verifierat källuniversum**: det aktuella relevanta lokala utbud som kan identifieras genom samtliga definierade primära källor och väsentliga sekundära källor.
+- samtliga obligatoriska moduler finns och fungerar,
+- kommunen känns lokal i hela användarupplevelsen,
+- dynamiska flöden är aktuella,
+- bostäder, jobb, evenemang, nyheter, vård, service, lunch, fritid och föreningar har trovärdig bredd i relation till kommunens verkliga storlek och utbud,
+- länkar och objekt leder rätt,
+- inga kända betydande luckor finns,
+- små verkliga utbud accepteras när de är rimliga och korrekt representerade.
 
-Därefter ska DinPuls jämföras mot detta universum.
+Åmåls aktuella antal får aldrig göras till fasta trösklar för andra kommuner. En större kommun kan behöva betydligt fler poster och en mindre kommun betydligt färre.
 
-**Täckningsgrad = antal unika verifierade poster i DinPuls / antal unika verifierade poster i källuniversumet.**
+## 3. Statusdefinitioner
 
-### Status
+### 🟢 GRÖN – produktionsmässigt komplett
 
-- **🟢 GRÖN:** 100 % av det verifierade källuniversumet finns korrekt och aktuellt i DinPuls, eller modulen är en teknisk/nollägesmodul där full funktion och korrekt nolläge verifierats.
-- **🟡 GUL:** modulen fungerar men täcker mindre än 100 % av det verifierade relevanta utbudet, eller källuniversumet är ännu inte tillräckligt verifierat för att 100 % ska kunna bevisas.
-- **🔴 RÖD:** modulen är trasig, visar fel kommun/data, saknar nödvändig källa, importerar felaktigt eller kan inte användas som avsett.
+En kommun är GRÖN när:
 
-Ett fast numeriskt minimum får aldrig ensamt göra en modul grön.
+1. samtliga obligatoriska moduler fungerar tekniskt,
+2. rätt kommun och rätt lokala data visas,
+3. dynamiska flöden är aktuella och användbara,
+4. täckningen är rimligt bred och proportionerlig mot kommunens verkliga lokala utbud,
+5. alla kända väsentliga lokala primärkällor eller etablerade ersättningskällor är täckta där de faktiskt publicerar relevant innehåll,
+6. det inte finns någon känd betydande innehållslucka,
+7. kommunen sammantaget når minst Åmål-nivå i lokal trovärdighet och användbarhet.
 
-## 3. Absolut förbud mot att avbryta research vid ett minimiantal
+GRÖNT kräver inte matematisk bevisning att inga okända aktörer eller poster existerar någonstans.
 
-Revisionen får **inte avsluta research när ett visst antal poster har hittats**.
+En relevant aktör utan publik aktuell objektlista, endast telefon/e-postkontakt eller utan belägg för aktuellt utbud blockerar inte automatiskt GRÖNT.
 
-Att exempelvis hitta 10 jobb, 10 bostäder, 10 evenemang, 25 föreningar eller ett annat tidigare gränsvärde är aldrig bevis för fullständighet.
+### 🟡 GUL – fungerande men konkret förbättringsbehov
 
-Research ska fortsätta tills:
-1. alla definierade primära källor är genomgångna,
-2. alla väsentliga sekundära källor som behövs för rimlig full täckning är genomgångna,
-3. posterna är deduplicerade,
-4. det verifierade totalutbudet är fastställt så långt det rimligen går,
-5. DinPuls resultat har jämförts post för post eller på annat verifierbart sätt mot detta totalutbud.
+En kommun är GUL när sajten i huvudsak fungerar men det finns minst en konkret eller starkt underbyggd betydande lucka, exempelvis:
 
-## 4. Små och stora kommuner behandlas efter verkligt utbud – inte samma antal
+- kända aktuella bostäder, jobb, evenemang eller andra poster saknas,
+- en väsentlig lokal källa med aktuellt innehåll är känd men inte täckt,
+- en modul är uppenbart tunn i relation till kommunens storlek eller verifierade lokala verklighet,
+- en parser/import missar delar av en fungerande källa,
+- source coverage är så svag att användarupplevelsen inte når Åmål-nivå,
+- en viktig modul fungerar men är märkbart ofullständig.
 
-Kommunstorlek får inte i sig ge ett godkännande eller underkännande.
+Enbart teoretisk osäkerhet eller en BLOCKED-provider utan belägg för aktuellt innehåll räcker inte för GUL.
 
-En liten kommun kan vara 100 % grön med få poster om research visar att dessa få poster utgör hela det verifierade relevanta utbudet.
+### 🔴 RÖD – kritiskt fel eller grovt ofullständig
+
+En kommun är RÖD när minst en central funktion är trasig eller oanvändbar, exempelvis:
+
+- fel kommun eller fel data visas,
+- central modul laddar inte,
+- viktig källa/parser är trasig och ger felaktigt/tomt resultat,
+- stora kända delar av det lokala innehållet saknas,
+- data är systematiskt stale eller felaktig,
+- navigation/kommunval fungerar inte,
+- publicerad liveversion är väsentligt fel jämfört med aktiv datakälla.
+
+## 4. Väsentlig lucka – bindande definition
+
+En lucka räknas som **väsentlig** när minst ett av följande gäller:
+
+- verifierad aktuell primärkälla innehåller relevanta poster som saknas i DinPuls,
+- en trovärdig sekundär källa visar konkreta aktuella poster hos en identifierad aktör och dessa saknas i DinPuls,
+- en stor eller central lokal aktör/källa saknas helt,
+- modulen är uppenbart oproportionerligt tunn jämfört med kommunens storlek och lokala verklighet,
+- felaktig pagination, filter, deduplicering eller parser gör att kända delar av källan tappas,
+- jämförelse mot officiellt register visar tydlig undercoverage.
+
+En lucka är **inte automatiskt väsentlig** bara för att:
+
+- en liten privat aktör finns på en kommunal lista,
+- en aktör saknar publik objektsida,
+- det endast finns telefon/e-postkontakt,
+- audit inte kan matematiskt bevisa ett fullständigt universum,
+- ett absolut antal är lägre än i en annan kommun.
+
+## 5. Proportionalitetsprincip
+
+Kommuner ska bedömas mot sitt verkliga lokala utbud, inte samma numeriska minimikrav.
 
 Exempel:
-- Åmål kan vara grön på lunch med 4 lunchställen om aktuell research verifierar att det relevanta ordinarie utbudet faktiskt är 4 och DinPuls visar 4 av 4.
-- Dals-Ed kan vara grön på jobb med 6 jobb om aktuell research verifierar att det relevanta aktuella utbudet är 6 och DinPuls visar 6 av 6.
-- En större kommun som Karlstad får däremot inte bli grön på bostäder om DinPuls visar 1 objekt när det verifierade aktuella källuniversumet innehåller exempelvis 50, 100 eller fler objekt.
 
-**4 av 4 = 100 %. 6 av 6 = 100 %. 1 av 50 = 2 % och är inte grönt.**
+- Åmål kan vara GRÖN med 4 lunchställen om fyra är ett trovärdigt faktiskt ordinarie utbud.
+- Storfors kan vara GRÖN med 2 lunchställen om 2/2 är verifierat och rimligt.
+- Karlstad kan inte bli GRÖN med 4 lunchställen om det är uppenbart att ett stort antal relevanta lunchställen saknas.
+- Dals-Ed kan vara GRÖN med få jobb om det lokala aktuella utbudet är litet och inga kända betydande jobb saknas.
 
-## 5. Källtäckning är lika viktig som posttäckning
+Fast numerisk minimumgräns får aldrig ensam skapa GRÖNT eller GULT.
 
-En modul kan inte klassas som 100 % grön om DinPuls bara använder en liten del av de relevanta källorna.
+## 6. Åmål-benchmark – kvalitativ, inte numerisk
 
-Revisionen ska därför kontrollera både:
-- **source coverage:** om alla relevanta definierade källor faktiskt används eller täcks,
-- **item coverage:** om de relevanta poster som finns i dessa källor faktiskt återges i DinPuls.
+Vid tveksamhet ska varje kommun jämföras med Åmål på följande frågor:
 
-Om en viktig lokal eller officiell källa saknas ska modulen vara 🟡 eller 🔴 tills orsaken är utredd och täckningen är verifierad.
+- Känns modulen som en verklig lokal katalog eller bara ett urval?
+- Finns rimlig bredd i relation till kommunens storlek?
+- Är data aktuell och användbar?
+- Saknas någon känd central lokal aktör eller konkret aktuellt innehåll?
+- Skulle en lokal invånare uppleva ett tydligt hål jämfört med vad som faktiskt finns i kommunen?
 
-## 6. Obligatoriska moduler
+Åmål är referens för **mognadsgrad**, inte för samma antal poster.
 
-### Grundkonfiguration / kommunval
-Rätt kommun ska väljas, visas och bestå vid navigation/refresh.
+## 7. Obligatoriska moduler
 
-### Dagens viktigaste
-Lokal källa/fallback ska fungera. Ett legitimt nolläge är okej om källorna faktiskt är friska.
+Följande moduler ingår i totalstatus:
 
-### Väder
-Aktuell väderdata för rätt kommun.
+- Grundkonfiguration / kommunval
+- Dagens viktigaste
+- Väder
+- Vägtrafik
+- Kollektivtrafik
+- Flyg
+- Jobb
+- Bostäder
+- Evenemang
+- Lokala/kommunala nyheter
+- Missing People
+- Vård & hälsa
+- Service & hantverk
+- Myndigheter & samhällsservice
+- Dagens lunch
+- Bio
+- Fritid & aktiviteter
+- Idrott & föreningar
+- Community / Det pratas om
 
-### Vägtrafik
-Aktiv fungerande källa för kommunen. 0 händelser är okej om källan är frisk.
+Hero och Matkassen är undantagna.
 
-### Kollektivtrafik
-Rätt hållplats/område och aktuell användbar information.
-
-### Flyg
-Korrekt och användbar flyginformation. Realtid krävs inte.
+## 8. Modulprinciper
 
 ### Jobb
-Samtliga rimligen verifierbara aktuella lokala jobb från definierade relevanta källor ska ingå efter deduplicering. Ingen fast miniminivå ersätter full coverage.
+Platsbanken och andra väsentliga lokala rekryteringskällor ska ge ett trovärdigt aktuellt lokalt utbud. Kända aktuella jobb som saknas är en lucka. Ett litet antal i en liten kommun är inte i sig fel.
 
 ### Bostäder
-Samtliga rimligen verifierbara faktiskt aktuella lediga bostadsobjekt från definierade relevanta bostadskällor ska ingå efter deduplicering. Audit ska särskilt upptäcka om en kommun bara täcker en hyresvärd eller en liten del av det faktiska utbudet.
+Aktuella objekt från fungerande väsentliga primärkällor ska importeras. BLOCKED privata värdar utan publik aktuell lista blockerar inte automatiskt GRÖNT. Om sekundär eller primär kontroll visar konkreta aktuella objekt som saknas blir modulen GUL tills luckan är löst eller bedömd oväsentlig.
 
 ### Evenemang
-Samtliga rimligen verifierbara aktuella/framtida lokala evenemang från definierade relevanta källor ska ingå efter deduplicering. Lokala loppisar, marknader, föreningsevenemang, kultur, sport och andra relevanta publika aktiviteter ska inkluderas när de kan verifieras.
+Kalendern ska ge en trovärdig lokal bild med kommunala, kulturella, förenings-, marknads-, loppis-, sport- och andra publika arrangemang där sådant finns. Ett visst minimiantal är inte ett godkännandekrav.
 
-### Lokala/kommunala nyheter
-DinPuls ska täcka hela den definierade relevanta lokala nyhetskällbasen. Innehållet ska vara aktuellt, lokalt korrekt och deduplicerat. Antalet nyheter är inte i sig godkännandekriterium.
-
-### Missing People
-Korrekt lokal/grannkommunal logik och fungerande källa/fallback. 0 aktiva efterlysningar är okej.
+### Nyheter
+Kända centrala lokala nyhetskällor ska vara representerade, innehållet aktuellt, lokalt korrekt och deduplicerat.
 
 ### Vård & hälsa
-Samtliga rimligen verifierbara relevanta lokala verksamheter ska täckas, med kategoribredd där verksamheter faktiskt finns: vårdcentral/läkare, tandvård, BVC/barnmorska, rehab/fysioterapi, apotek, privat vård/behandling och andra relevanta tjänster.
+Modulen ska kännas som en användbar lokal vårdkatalog med relevant bredd. Större kommuner kräver större faktisk bredd än små.
 
 ### Service & hantverk
-Samtliga rimligen verifierbara relevanta lokala företag inom definierade servicekategorier ska täckas. Audit får inte sluta när ett visst antal företag eller kategorier uppnåtts.
-
-### Myndigheter & samhällsservice
-Samtliga definierade centrala kommunala och relevanta statliga samhällsfunktioner ska täckas och länkas korrekt.
+Modulen ska vara en användbar lokal katalog, inte bara ett numeriskt minimum. En större kommun med endast ett fåtal företag är GUL om det finns tydligt känt större utbud.
 
 ### Dagens lunch
-Samtliga rimligen verifierbara ordinarie lokala lunchställen som faktiskt serverar lunch ska finnas. En kommun med fyra verifierade relevanta lunchställen kan vara 100 % grön om resultatet är 4 av 4.
-
-### Bio
-Finns aktiv lokal bio ska korrekt biograf samt aktuell program-/visningsinformation eller fungerande direkt programkälla finnas. Om lokal bio saknas får modulen vara grön endast om detta hanteras korrekt och tydligt.
+Bedöm verkligt lokalt lunchutbud. 2/2 eller 4/4 kan vara GRÖNT. Ett uppenbart litet urval i en större kommun är GULT.
 
 ### Fritid & aktiviteter
-Samtliga rimligen verifierbara relevanta lokala aktiviteter och anläggningar inom definierade kategorier ska täckas, inklusive kultur, bibliotek, bad, friluftsliv, motionsområden, ungdomsverksamhet och andra lokala aktiviteter där sådant finns.
+Kommunens centrala fritids-, kultur-, frilufts- och aktivitetsutbud ska vara rimligt representerat i proportion till verkligheten.
 
 ### Idrott & föreningar
-Målet är full föreningstäckning. Samtliga verifierbara aktiva lokala föreningar i relevanta kommunala/officiella register och andra definierade källor ska finnas efter deduplicering. Om kommunens verifierade register innehåller 84 aktiva föreningar ska målet vara 84 av 84 – inte 25.
+Officiella eller etablerade föreningsregister används som stark kontrollkälla när sådana finns. Tydlig differens mellan register och DinPuls är en konkret lucka. Ett register behöver inte matematiskt bevisas perfekt för att kommunen ska kunna bli GRÖN, men kända större luckor får inte ignoreras.
 
-### Community / Det pratas om
-Funktionen ska bete sig korrekt. Privata grupper får inte skrapas utan godkännande. Avsaknad av godkänd privat/community-källa blockerar inte grönt om funktionen i övrigt hanteras korrekt och inget innehåll fabriceras.
+### Tekniska/nollägesmoduler
+Väder, trafik, Missing People, bio och andra nollägesmoduler kan vara GRÖNA med 0 poster när källa/funktion är frisk och nolläget är legitimt.
 
-## 7. Källuniversum och beviskrav
+## 9. BLOCKED-källor
 
-För varje dynamisk innehållsmodul ska auditrapporten så långt möjligt redovisa:
-- vilka källor som granskats,
-- datum och tid för verifieringen,
-- antal råposter per källa,
-- antal poster efter deduplicering,
-- antal poster i DinPuls,
-- täckningsgrad i procent,
-- saknade poster eller saknade källor,
-- källfel/parserfel/importfel,
-- om resultatet är live, repo-fallback eller inte verifierbart.
+Källstatus BLOCKED är ett evidensfält, inte automatiskt kommunstatus.
 
-Dynamiska moduler som jobb, bostäder, evenemang och nyheter ska tidsstämplas eftersom källuniversumet förändras löpande.
+BLOCKED bedöms så här:
 
-## 8. Auditmotorn måste följa samma regel
+- **ingen känd aktuell relevant post + liten/sekundär aktör:** blockerar inte automatiskt GRÖNT,
+- **konkreta aktuella poster upptäckta utanför DinPuls:** GUL,
+- **central/stor aktör vars bortfall sannolikt gör modulen tydligt ofullständig:** GUL,
+- **källfel i en aktiv kritisk integration:** GUL eller RÖD beroende på konsekvens.
 
-`DINPULS-AUDIT-RULES.md` är bindande och auditmotorn får inte använda lägre eller äldre hårdkodade gränser som kan ge grönt i strid med denna regel.
+## 10. Auditmetod
 
-Om auditkod, workflow eller annan automatik fortfarande använder en äldre v1/v2-gräns ska den automatiska gröna statusen betraktas som ogiltig tills motorn är synkroniserad med v3.
+Varje full revision ska börja från aktuell liveversion och aktuell main.
 
-En teknisk lyckad hämtning, HTTP 200, ett antal poster eller en lyckad commit är aldrig ensamt bevis för 100 % täckning.
+Revisionen ska:
 
-## 9. Live/aktiv kod är facit
+1. kontrollera teknisk funktion,
+2. kontrollera aktualitet,
+3. jämföra mot definierade och kända väsentliga källor,
+4. identifiera konkreta saknade poster/källor,
+5. göra proportionalitetsbedömning mot kommunens verkliga storlek och Åmål-benchmark,
+6. skilja på faktisk lucka och endast obevisad teoretisk fullständighet,
+7. sätta GRÖN, GUL eller RÖD med exakt blockerare där kommunen inte är grön.
 
-Verifieringsnivåerna ska hållas isär:
-1. data/kod finns i repo,
-2. aktiv kodväg använder datan,
-3. workflow/runtime har producerat aktuell output,
-4. live-sidan visar korrekt resultat,
-5. källuniversumet har verifierats,
-6. DinPuls täcker 100 % av det verifierade relevanta universumet.
+Auditmotorn får använda numeriska värden som **varningssignaler**, men aldrig som ensam statuslogik.
 
-Data i GitHub räknas inte som fullgod täckning om den aktiva frontend- eller pipeline-koden inte använder den.
+## 11. Automatisk audit
 
-## 10. Full kommunanalys
+`DINPULS-AUDIT-RULES.md` är bindande.
 
-Samtliga 21 kommuner ska bedömas från noll enligt exakt samma STRICT LIVE 100 % v3-standard:
+En auditmotor som fortfarande använder fasta gamla miniminivåer som ensam beslutsgrund är inte v4-kompatibel.
+
+Automatiken ska successivt använda coverage-evidence, källstatus, kända blockerare, sanity checks och Åmål-kalibrerad proportionalitetsbedömning.
+
+Om automation och manuell v4-bedömning skiljer sig gäller v4-regeln och den bäst verifierade aktuella evidensen.
+
+## 12. De 21 kommunerna
+
+Samtliga ska bedömas med samma v4-princip:
 
 - Åmål
 - Årjäng
@@ -186,28 +234,26 @@ Samtliga 21 kommuner ska bedömas från noll enligt exakt samma STRICT LIVE 100 
 - Sunne
 - Torsby
 
-Hero och Matkassen undantas. Alla övriga obligatoriska moduler ska kontrolleras.
+## 13. Slutregel
 
-En kommun som tidigare fungerat väl, exempelvis Åmål, ska fortfarande verifieras i full revision, men den ska inte underkännas för att dess verkliga lokala utbud är mindre än ett gammalt numeriskt minimum. Full coverage mot verkligheten är det bindande kriteriet.
+> **GRÖN = en tekniskt fungerande, aktuell och trovärdigt komplett lokal kommunupplevelse på minst Åmål-nivå, utan kända väsentliga luckor.**
 
-## 11. Slutregel
+> **GUL = kommunen fungerar men har minst en konkret eller starkt underbyggd betydande lucka som påverkar lokal fullständighet.**
 
-> **100 % GRÖN = samtliga obligatoriska moduler fungerar korrekt, rätt kommun visas, aktuell aktiv/live data är verifierad, samtliga definierade relevanta källor har granskats tillräckligt för att fastställa källuniversumet, och DinPuls återger 100 % av det rimligen verifierbara relevanta lokala utbudet efter deduplicering.**
+> **RÖD = kritisk funktion är trasig, data är väsentligt fel eller stora kända delar av kommunen saknas.**
 
-Om full täckning inte kan bevisas ska modulen inte klassas som 100 % grön.
+Teoretisk möjlighet att mer innehåll kan existera får aldrig ensam göra en kommun GUL.
 
-## 12. Rapportering
+## 14. Rapportering
 
-Slutrapporten för de 21 kommunerna ska visa:
-- totalstatus per kommun,
-- status per obligatorisk modul,
-- verifierat totalutbud där detta kan fastställas,
-- DinPuls antal,
-- täckningsgrad i procent,
-- granskade och saknade källor,
-- saknade poster,
-- tekniska käll-/parser-/importfel,
-- exakt blockerare för varje icke-grön modul,
-- vilka kommuner som faktiskt når 100 %.
+Slutrapporten ska för varje kommun visa:
 
-Inga tidigare statusar, fasta miniminivåer eller gamla auditresultat får användas som argument för grönt. Nuläget och verifierad täckning är facit.
+- totalstatus,
+- viktigaste styrkor,
+- konkreta blockerare,
+- kända saknade poster/källor,
+- tekniska fel,
+- moduler som är oproportionerligt tunna,
+- varför kommunen når eller inte når Åmål-nivå.
+
+Rapporten ska vara beslutsbar: färgerna ska skilja produktionsklara kommuner från kommuner med verkliga åtgärdsbehov.
