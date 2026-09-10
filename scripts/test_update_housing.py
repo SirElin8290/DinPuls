@@ -8,6 +8,38 @@ import update_housing
 
 
 class HousingUpdateTests(unittest.TestCase):
+    def test_munkfors_parser_requires_declared_count_to_match_cards(self):
+        markup = '''<h1>Lediga lägenheter</h1>
+        <h3><strong>Lediga lägenheter</strong> <strong>[1 st]</strong></h3>
+        <p class="has-background"><strong>Adress:</strong> Testvägen 1, lägenhet 1001<br>
+        <strong>Månadshyra:</strong> 5 100 kr/mån<br><strong>Storlek:</strong> 2 RoK<br>
+        <strong>Bostadsyta:</strong> 55 m<sup>2</sup><br><strong>Tillträde:</strong> ledig<br>
+        <strong>Ingår:</strong> förråd</p>'''
+        with patch.object(update_housing, "fetch", return_value=markup.encode()):
+            result = update_housing.parse_munkfors({"name": "Munkforsbostäder", "url": "https://example.test"})
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["rent"], 5100)
+
+    def test_vitec_public_filter_keeps_only_configured_municipality(self):
+        payload = {"data": json.dumps([
+            {"Id": "1", "Adress1": "A 1", "Adress3": "Säffle", "DetailsUrl": "/1"},
+            {"Id": "2", "Adress1": "B 2", "Adress3": "Karlstad", "DetailsUrl": "/2"},
+        ])}
+        provider = {"name": "Albèr", "url": "https://example.test/ledigt", "dataUrl": "https://example.test/api", "municipality": "Säffle"}
+        with patch.object(update_housing, "fetch", return_value=json.dumps(payload).encode()):
+            result = update_housing.parse_arvika(provider)
+        self.assertEqual([row["id"] for row in result], ["1"])
+
+    def test_torsby_municipal_parser_reads_current_rows(self):
+        markup = '''<h1>Lediga lägenheter hos kommunen</h1><p>Här ser du vilka lägenheter som är lediga just nu.</p>
+        <p>Testvägen 1, 2 r.o.k, 63 m², 5 307 kr/månad. Ledig 2026-10-01</p>
+        <p>Senast genomgången: 2026-09-10</p>'''
+        with patch.object(update_housing, "visible_content", return_value=(
+            ["Lediga lägenheter hos kommunen", "Testvägen 1, 2 r.o.k, 63 m², 5 307 kr/månad. Ledig 2026-10-01", "Senast genomgången:"], [])):
+            result = update_housing.parse_torsby_municipal({"name": "Torsby kommun", "url": "https://example.test"})
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["size"], 63)
+
     def test_cross_provider_dedupe_normalizes_address_but_keeps_distinct_units(self):
         rows = [
             {"id": "primary", "provider": "Primary", "address": "Testgatan 1 A", "rooms": 2, "size": 60, "rent": 6000},

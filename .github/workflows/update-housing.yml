@@ -33,6 +33,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  block3-fallback:
+    needs: update
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py
+      - name: Publicera Block 3 oberoende av andra bostadskällor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python scripts/update_housing.py --municipality Säffle
+          python scripts/update_housing.py --municipality Munkfors
+          python scripts/update_housing.py --municipality Torsby
+          python scripts/update_housing_coverage_evidence.py
+          git add data/housing.json data/housing-coverage-evidence.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Uppdatera Block 3-bostäder oberoende av övriga källor"
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+          done
+          exit 1
+
   block2-fallback:
     needs: [update, edshus-fallback]
     if: always() && needs.update.result == 'failure'

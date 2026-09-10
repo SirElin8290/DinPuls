@@ -111,6 +111,37 @@ class VisibleContentParser(HTMLParser):
             self.parts.append(value)
 
 
+class MunkforsVacancyParser(HTMLParser):
+    """Collect vacancy cards from Munkforsbostader's official WordPress page."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.card_depth = 0
+        self.parts: list[str] = []
+        self.cards: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "p" and "has-background" in str(attributes.get("class") or "").split():
+            self.card_depth = 1
+            self.parts = []
+        elif self.card_depth:
+            self.card_depth += 1
+
+    def handle_data(self, data: str) -> None:
+        if self.card_depth:
+            value = " ".join(data.replace("\xa0", " ").split())
+            if value:
+                self.parts.append(value)
+
+    def handle_endtag(self, tag: str) -> None:
+        if not self.card_depth:
+            return
+        self.card_depth -= 1
+        if tag == "p" and self.card_depth == 0:
+            self.cards.append(" ".join(self.parts))
+
+
 def visible_content(url: str) -> tuple[list[str], list[str]]:
     parser = VisibleContentParser()
     parser.feed(fetch(url).decode("utf-8", errors="replace"))
@@ -238,6 +269,9 @@ def parse_arvika(provider: dict) -> list[dict]:
     objects = json.loads(raw) if isinstance(raw, str) else raw
     listings = []
     for item in objects if isinstance(objects, list) else []:
+        municipality = str(provider.get("municipality") or "")
+        if municipality and str(item.get("Adress3") or "").casefold() != municipality.casefold():
+            continue
         identifier = str(item.get("Guid") or item.get("Id") or "")
         if not identifier:
             continue
@@ -252,6 +286,76 @@ def parse_arvika(provider: dict) -> list[dict]:
             "url": urljoin(provider["url"], str(item.get("DetailsUrl") or provider["url"])),
             "provider": provider["name"],
         })
+    return listings
+
+
+def parse_munkfors(provider: dict) -> list[dict]:
+    """Read and structurally verify Munkforsbostader's current vacancy cards."""
+    raw = fetch(provider["url"])
+    text = raw.decode("utf-8", errors="replace")
+    content_start = text.find("<h1")
+    if content_start >= 0:
+        text = text[content_start:]
+    declared = [int(value) for value in re.findall(r"Lediga lägenheter\s*(?:</?[^>]+>\s*)*\[(\d+)\s*st\]", text, re.I)]
+    if not declared:
+        raise RuntimeError("Munkforsbostäder: inga verifierbara sektionsantal hittades")
+    cards = []
+    for fragment in re.findall(r'<p[^>]*class="[^"]*has-background[^"]*"[^>]*>(.*?)</p>', text, re.I | re.S):
+        parser = VisibleContentParser()
+        parser.feed(fragment)
+        cards.append(" ".join(parser.parts))
+    listings = []
+    for card in cards:
+        address = re.search(r"Adress:\s*(.+?)\s*Månadshyra:", card, re.I)
+        rent = re.search(r"Månadshyra:\s*([\d ]+)\s*kr", card, re.I)
+        rooms = re.search(r"Storlek:\s*(\d+(?:[,.]\d+)?)\s*RoK", card, re.I)
+        size = re.search(r"Bostadsyta:\s*(\d+(?:[,.]\d+)?)\s*m", card, re.I)
+        available = re.search(r"Tillträde:\s*(.+?)\s*Ingår:", card, re.I)
+        if not address:
+            continue
+        normalized_address = " ".join(address.group(1).split())
+        identifier = re.sub(r"[^a-z0-9]+", "-", normalized_address.casefold()).strip("-")
+        listings.append({
+            "id": identifier, "address": normalized_address, "area": "Munkfors",
+            "rooms": number(rooms.group(1)) if rooms else None,
+            "size": number(size.group(1)) if size else None,
+            "rent": number(rent.group(1)) if rent else None,
+            "available": " ".join(available.group(1).split()) if available else "Se källan",
+            "url": provider["url"], "provider": provider["name"],
+        })
+    if sum(declared) != len(listings):
+        raise RuntimeError(
+            f"Munkforsbostäder: sektionsantal {sum(declared)} matchar inte {len(listings)} tolkade objekt"
+        )
+    return listings
+
+
+def parse_torsby_municipal(provider: dict) -> list[dict]:
+    """Read the municipality's dated list, including explicitly advertised 65+ homes."""
+    parts, _ = visible_content(provider["url"])
+    text = " | ".join(parts)
+    if "Lediga lägenheter hos kommunen" not in text or "Senast genomgången:" not in text:
+        raise RuntimeError("Torsby kommun: den förväntade aktuella bostadslistan saknas")
+    pattern = re.compile(
+        r"(?:^|\|)\s*([^|]+?\d[^|]*?),\s*(?:lgh\.\s*\d+,\s*)?(\d+(?:[,.]\d+)?)\s*r\.o\.k[,.]\s*"
+        r"(\d+(?:[,.]\d+)?)\s*m[^|]*?,\s*([\d ]+)\s*kr/månad\.([^|]*)",
+        re.I,
+    )
+    listings = []
+    for match in pattern.finditer(text):
+        address = " ".join(match.group(1).split())
+        suffix = " ".join(match.group(5).split())
+        available = re.search(r"Ledig(?:\s+([\d-]+))?", suffix, re.I)
+        identifier = re.sub(r"[^a-z0-9]+", "-", address.casefold()).strip("-")
+        listings.append({
+            "id": identifier, "address": address, "area": "Torsby kommun",
+            "rooms": number(match.group(2)), "size": number(match.group(3)),
+            "rent": number(match.group(4)),
+            "available": available.group(1) if available and available.group(1) else "Ledig / se källan",
+            "url": provider["url"], "provider": provider["name"],
+        })
+    if not listings:
+        raise RuntimeError("Torsby kommun: inga bostadsrader kunde tolkas")
     return listings
 
 
@@ -691,7 +795,7 @@ def main(only_municipality: str | None = None) -> int:
         name = municipality.get("name", "")
         if only_municipality and name != only_municipality:
             continue
-        strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö", "Grums", "Filipstad", "Bengtsfors"}
+        strict_v3 = name in {"Karlstad", "Kristinehamn", "Hammarö", "Grums", "Filipstad", "Bengtsfors", "Säffle", "Munkfors", "Torsby"}
         providers = municipality.get("housingProviders", [])
         listings = []
         errors = []
@@ -706,6 +810,10 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_hss(provider)
                 elif parser_name == "vitec-arena":
                     fetched = parse_arvika(provider)
+                elif parser_name == "munkfors-wordpress":
+                    fetched = parse_munkfors(provider)
+                elif parser_name == "torsby-municipal":
+                    fetched = parse_torsby_municipal(provider)
                 elif parser_name == "vitec-arena-token":
                     fetched = parse_vitec_arena(provider)
                 elif parser_name == "momentum":
