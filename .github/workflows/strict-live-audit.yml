@@ -1,9 +1,7 @@
-name: STRICT LIVE 100 audit
+name: STRICT LIVE v4 audit
 
-# Auditen ska alltid läsa publicerad live-data. Manuell omkörningsväg efter kommunfixar.
-# Färgelanda/Hammarö/Karlstad/Kristinehamn/Munkfors verifieras först efter publicerad Pages-data.
-# Kristinehamn lunch omverifieras 2026-09-08 efter publicerad aktiv lunch.json.
-# Munkfors omverifieras 2026-09-08 efter lyckad Pages-publicering av den beständiga STRICT-kompletteringen.
+# V4 läser publicerad live-data och kombinerar tekniska kontroller med
+# dokumenterade kända väsentliga luckor. Fasta numeriska miniminivåer används inte.
 on:
   push:
     branches: [main]
@@ -11,6 +9,7 @@ on:
       - 'DINPULS-AUDIT-RULES.md'
       - 'scripts/audit_strict_live_100.py'
       - 'scripts/audit_strict_live_100_runner.py'
+      - 'data/strict-live-v4-gaps.json'
       - 'data/housing.json'
       - 'scripts/update_housing.py'
       - 'data/service.json'
@@ -57,12 +56,14 @@ on:
   schedule:
     - cron: '11 * * * *'
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   audit:
     if: >-
-      ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_commit.message != 'Uppdatera STRICT LIVE 100 kommunrapport') }}
+      ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_commit.message != 'Uppdatera STRICT LIVE v4 kommunrapport') }}
     runs-on: ubuntu-latest
     steps:
       - name: Hämta repo
@@ -74,9 +75,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Kör STRICT LIVE 100 audit
+      - name: Kör STRICT LIVE v4 audit
         run: python scripts/audit_strict_live_100_runner.py
-      - name: Publicera senaste auditrapport
+      - name: Publicera senaste v4-auditrapport
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
@@ -86,14 +87,14 @@ jobs:
             echo 'Ingen rapportändring att committa.'
             exit 0
           fi
-          git commit -m 'Uppdatera STRICT LIVE 100 kommunrapport'
+          git commit -m 'Uppdatera STRICT LIVE v4 kommunrapport'
           for attempt in 1 2 3 4; do
             if git pull --rebase origin main && git push origin HEAD:main; then
-              echo 'STRICT-rapport publicerad.'
+              echo 'STRICT v4-rapport publicerad.'
               exit 0
             fi
             git rebase --abort 2>/dev/null || true
             [ "$attempt" -lt 4 ] && sleep $((attempt * 3))
           done
-          echo 'Kunde inte publicera STRICT-rapporten efter fyra försök.' >&2
+          echo 'Kunde inte publicera STRICT v4-rapporten efter fyra försök.' >&2
           exit 1
