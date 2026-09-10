@@ -23,6 +23,7 @@ on:
       - "data/association-filipstad-supplement.json"
       - "data/sports-fargelanda-supplement.json"
       - "data/association-enrichment-prerequisites.json"
+      - "data/karlstad-strict-source.json"
       - "scripts/import_associations.py"
       - "scripts/apply_forshaga_fri.py"
       - "scripts/test_forshaga_fri.py"
@@ -30,6 +31,7 @@ on:
       - "scripts/apply_hammaro_associations.py"
       - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
+      - "scripts/apply_karlstad_strict.py"
       - ".github/workflows/update-associations.yml"
   schedule:
     - cron: "20 3 * * 1"
@@ -81,6 +83,9 @@ jobs:
       - name: Säkerställ gränsen mellan Fritid och Idrott
         run: python scripts/normalize_association_boundaries.py
 
+      - name: Återapplicera Karlstads verifierade v4-täckning
+        run: python scripts/apply_karlstad_strict.py --modules leisure sports
+
       - name: Verifiera alla kommuner
         run: |
           python - <<'PY'
@@ -118,7 +123,12 @@ jobs:
           assert len(filipstad_sports) >= 20, f'Filipstad: för få idrottsföreningar: {len(filipstad_sports)}'
           fargelanda_sports = sports.get('Färgelanda', {}).get('clubs') or []
           assert len(fargelanda_sports) >= 20, f'Färgelanda: för få idrottsföreningar: {len(fargelanda_sports)}'
-          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Hammarö {len(hammaro_sports)} idrott; Dals-Ed {len(dalsed_sports)} idrott; Filipstad {len(filipstad_sports)} idrott; Färgelanda {len(fargelanda_sports)} idrott')
+          karlstad_sports = sports.get('Karlstad', {}).get('clubs') or []
+          karlstad_leisure = leisure.get('Karlstad', {}).get('activities') or []
+          assert any(item.get('name') == 'Färjestad BK' for item in karlstad_sports), 'Karlstad: verifierat hockeyankare saknas'
+          assert any(item.get('name') == 'Sundstabadet' for item in karlstad_leisure), 'Karlstad: Sundstabadet saknas'
+          assert 'karlstad.se' in sports.get('Karlstad', {}).get('directoryUrl', ''), 'Karlstad: officiellt föreningsregister saknas'
+          print(f'Verifierade föreningsdata för {len(expected)} kommuner; Karlstad {len(karlstad_sports)} idrott och {len(karlstad_leisure)} fritid')
           PY
           PYTHONPATH=scripts python -m unittest scripts/test_forshaga_fri.py
           node scripts/test_leisure_quality.js
