@@ -59,7 +59,7 @@
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     scrollTo(0, 0);
-    await Promise.all([refreshContracts(), refreshSystemStatus()]);
+    await Promise.all([refreshContracts(), refreshSystemStatus(), refreshOperations()]);
   }
 
   function installSystemStatus() {
@@ -87,6 +87,55 @@
       target.innerHTML = checks.map(([label, ready, yes, no]) => `<div><span class="check" style="${ready ? "" : "background:var(--danger)"}" aria-hidden="true">${ready ? "✓" : "!"}</span><p><b>${escapeHtml(label)}</b><small>${ready ? yes : no}</small></p></div>`).join("");
     } catch {
       target.innerHTML = '<div><span class="check" style="background:var(--danger)" aria-hidden="true">!</span><p><b>Portalserver</b><small>Fel – kunde inte nås</small></p></div>';
+    }
+  }
+
+  const HEALTH_LABELS = {
+    news: "Nyheter", jobs: "Jobb", housing: "Bostäder", events: "Evenemang",
+    weather: "Väder", lunch: "Lunch", health: "Vård", service: "Service",
+    cinema: "Bio", leisure: "Fritid", sports: "Föreningar/idrott"
+  };
+  const HEALTH_ICONS = { green: "🟢", warning: "🟡", critical: "🔴" };
+  const HEALTH_REASONS = {
+    zero_records: "0 poster", stale_data: "Data verkar gammal",
+    missing_timestamp: "Tidsstämpel saknas", unreadable_source: "Livefilen kan inte läsas"
+  };
+
+  function healthCheckRows(data) {
+    return Object.entries(data.municipalities || {}).flatMap(([municipality, modules]) =>
+      Object.entries(modules || {}).map(([module, check]) => ({ municipality, module, ...check }))
+    );
+  }
+
+  function renderOperations(data) {
+    const target = $("#operationsContent");
+    const summary = data.summary || {};
+    const rows = healthCheckRows(data);
+    const problems = rows.filter(row => row.status !== "green").sort((a, b) =>
+      (a.status === "critical" ? 0 : 1) - (b.status === "critical" ? 0 : 1) || a.municipality.localeCompare(b.municipality, "sv")
+    );
+    const municipalities = Object.entries(data.municipalities || {});
+    const incidents = problems.length ? problems.map(row => `<article class="incident-card ${escapeHtml(row.status)}"><b>${HEALTH_ICONS[row.status]} ${escapeHtml(row.municipality)} – ${escapeHtml(HEALTH_LABELS[row.module] || row.module)}</b><span>${row.currentCount == null ? "Antal saknas" : `${row.currentCount} poster`}</span><small>Orsak: ${escapeHtml(HEALTH_REASONS[row.reason] || row.reason || "Okänd")}</small></article>`).join("") : '<p class="health-empty">Inga aktiva problem.</p>';
+    const fullRows = municipalities.map(([municipality, modules]) => {
+      const checks = Object.entries(modules || {});
+      const worst = checks.some(([, row]) => row.status === "critical") ? "critical" : checks.some(([, row]) => row.status === "warning") ? "warning" : "green";
+      const moduleMarkup = checks.map(([module, row]) => `<span class="health-module ${escapeHtml(row.status)}"><i>${HEALTH_ICONS[row.status]}</i><b>${escapeHtml(HEALTH_LABELS[module] || module)}</b><small>${row.currentCount == null ? "–" : row.currentCount}${row.reason ? ` · ${escapeHtml(HEALTH_REASONS[row.reason] || row.reason)}` : ""}</small></span>`).join("");
+      return `<article class="municipality-health"><h3>${HEALTH_ICONS[worst]} ${escapeHtml(municipality)}</h3><div>${moduleMarkup}</div></article>`;
+    }).join("");
+    const checked = data.generatedAt ? new Date(data.generatedAt).toLocaleString("sv-SE") : "okänd";
+    target.innerHTML = `<div class="health-summary"><article class="green"><strong>🟢 ${Number(summary.green || 0)}</strong><span>OK</span></article><article class="warning"><strong>🟡 ${Number(summary.warning || 0)}</strong><span>varningar</span></article><article class="critical"><strong>🔴 ${Number(summary.critical || 0)}</strong><span>kritiska</span></article><p>Senaste kontroll: <b>${escapeHtml(checked)}</b></p></div><section class="panel health-section"><h2>Aktiva problem</h2><div class="incident-grid">${incidents}</div></section><section class="panel health-section"><h2>Full kommunstatus</h2><div class="municipality-health-grid">${fullRows}</div></section>`;
+  }
+
+  async function refreshOperations() {
+    const target = $("#operationsContent");
+    if (!target) return;
+    target.innerHTML = '<div class="panel"><p class="muted">Läser driftstatus…</p></div>';
+    try {
+      const response = await fetch(`../data/system-health.json?time=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      renderOperations(await response.json());
+    } catch (error) {
+      target.innerHTML = `<div class="panel health-load-error"><b>🔴 Driftstatus kunde inte läsas</b><p>${escapeHtml(error.message)}</p></div>`;
     }
   }
 
@@ -260,6 +309,7 @@ function openContract(id) {
     $$(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === id));
     $$(".view").forEach(view => view.hidden = view.id !== id);
     if (id === "inventory") renderInventory();
+    if (id === "operations") refreshOperations();
     scrollTo(0, 0);
   }
 
@@ -313,6 +363,7 @@ function openContract(id) {
     catch (error) { showLogin(error.message); return; }
     installContractTermsFields();
     installSystemStatus();
+    $("#refreshOperations").onclick = refreshOperations;
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {

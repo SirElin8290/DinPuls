@@ -1,0 +1,63 @@
+name: Övervaka DinPuls driftstatus
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monitor-system-health
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta aktuell main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Installera Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Testa driftkontrollen
+        run: PYTHONPATH=scripts python -m unittest scripts/test_system_health.py
+      - name: Kontrollera publicerade livefiler
+        run: python scripts/check_system_health.py
+      - name: Publicera driftstatus
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/system-health.json
+          if git diff --cached --quiet; then
+            echo 'Ingen statusändring att publicera.'
+            exit 0
+          fi
+          git commit -m 'Uppdatera DinPuls driftstatus'
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 3))
+          done
+          exit 1
+      - name: Skicka valfri webhook vid problem
+        if: ${{ always() && secrets.HEALTH_WEBHOOK_URL != '' }}
+        env:
+          HEALTH_WEBHOOK_URL: ${{ secrets.HEALTH_WEBHOOK_URL }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          from pathlib import Path
+          data = json.loads(Path('data/system-health.json').read_text())
+          summary = data['summary']
+          if summary['warning'] or summary['critical']:
+              body = json.dumps({'text': f"DinPuls driftstatus: {summary['green']} OK, {summary['warning']} varningar, {summary['critical']} kritiska"}).encode()
+              request = urllib.request.Request(os.environ['HEALTH_WEBHOOK_URL'], data=body, headers={'Content-Type': 'application/json'})
+              urllib.request.urlopen(request, timeout=15)
+          PY
