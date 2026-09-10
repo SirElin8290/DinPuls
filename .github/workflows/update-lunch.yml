@@ -10,10 +10,13 @@ on:
       - "data/lunch-hagfors-supplement.json"
       - "data/lunch-fargelanda-supplement.json"
       - "data/lunch-storfors-supplement.json"
+      - "data/lunch-torsby-supplement.json"
+      - "data/karlstad-strict-source.json"
       - "data/municipalities.json"
       - "scripts/update_lunch.py"
       - "scripts/apply_fargelanda_lunch.py"
       - "scripts/apply_storfors_lunch.py"
+      - "scripts/apply_karlstad_strict.py"
       - "scripts/test_update_lunch.py"
       - ".github/workflows/update-lunch.yml"
   schedule:
@@ -56,6 +59,7 @@ jobs:
           python scripts/update_lunch.py
           python scripts/apply_fargelanda_lunch.py
           python scripts/apply_storfors_lunch.py
+          python scripts/apply_karlstad_strict.py --modules lunch
 
       - name: Verifiera att alla kommuner finns med och att lanseringskommunerna har matkälla
         run: |
@@ -83,7 +87,11 @@ jobs:
           storfors = lunch['municipalities']['Storfors']
           assert len(storfors.get('restaurants') or []) >= 2, f"Storfors: verifierade lunchställen saknas: {len(storfors.get('restaurants') or [])}"
           assert storfors.get('referenceSources'), 'Storfors: kommunal matguide saknas'
-          print(f"Verifierade lunchdata för {len(expected)} kommuner; Hammarö {len(hammaro.get('restaurants') or [])}, Hagfors {len(hagfors.get('restaurants') or [])}, Färgelanda {len(fargelanda.get('restaurants') or [])}, Storfors {len(storfors.get('restaurants') or [])} restaurangkällor")
+          karlstad = lunch['municipalities']['Karlstad']
+          names = {item.get('name') for item in (karlstad.get('restaurants') or [])}
+          assert {'Go Medda', "Joan's Karlstad", 'Nöjesfabriken', 'Scandic Winn Restaurang'} <= names, 'Karlstad: verifierade lunchankare saknas'
+          assert any('karlstad.com/restauranger' in item.get('url','') for item in (karlstad.get('referenceSources') or [])), 'Karlstad: bred restaurangguide saknas'
+          print(f"Verifierade lunchdata för {len(expected)} kommuner; Karlstad {len(karlstad.get('restaurants') or [])} restaurangkällor")
           PY
 
       - name: Publicera lunchdata
