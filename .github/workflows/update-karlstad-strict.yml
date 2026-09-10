@@ -1,4 +1,4 @@
-name: Uppdatera Karlstad STRICT
+name: Uppdatera Karlstad STRICT v4
 
 on:
   workflow_dispatch:
@@ -36,16 +36,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Applicera Karlstad STRICT-data
+      - name: Applicera verifierad Karlstad-täckning enligt STRICT LIVE v4
         run: python scripts/apply_karlstad_strict.py
       - name: Publicera aktiva Karlstad-data
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/service-local-supplement.json data/authorities.json data/leisure.json data/sports.json
+          git add data/service-local-supplement.json data/authorities.json data/lunch.json data/leisure.json data/sports.json
           git diff --cached --quiet && exit 0
-          git commit -m "Uppdatera Karlstad STRICT-data"
+          git commit -m "Uppdatera Karlstad STRICT v4-data"
           for attempt in 1 2 3 4; do
             if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
             git rebase --abort 2>/dev/null || true
