@@ -3,7 +3,8 @@
 
 Supplements are additive: automated association imports remain authoritative and
 future imported entries replace the need for manual launch coverage without creating
-duplicates.
+duplicates. Torsbys verifierade STRICT-underlag behandlas som beständig
+lanseringstäckning så att ordinarie föreningsuppdatering inte skriver bort det.
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ SUPPLEMENTS = (
     DATA / "sports-fargelanda-supplement.json",
     DATA / "association-enrichment-prerequisites.json",
 )
+TORSBY_SOURCE = DATA / "torsby-strict-source.json"
 
 
 def load(path: Path) -> dict:
@@ -73,6 +75,17 @@ def main() -> None:
             merged["clubs"] = merge_named(merged.get("clubs") or [], extra.get("clubs") or [])
             merged["activities"] = merge_named(merged.get("activities") or [], extra.get("activities") or [])
 
+    # Torsbys STRICT-underlag är redan verifierat men har en annan filstruktur än
+    # övriga supplement. Lägg in det i samma merge före publicering.
+    if TORSBY_SOURCE.exists():
+        torsby = load(TORSBY_SOURCE)
+        merged = merged_municipalities.setdefault(
+            "Torsby",
+            {"directoryUrl": "https://torsby.se/upplevagora/idrottmotionochfriluftsliv.4.39f7460415485c9fa0f90d.html", "clubs": [], "activities": []},
+        )
+        merged["clubs"] = merge_named(merged.get("clubs") or [], torsby.get("sports") or [])
+        merged["activities"] = merge_named(merged.get("activities") or [], torsby.get("leisure") or [])
+
     for municipality, extra in merged_municipalities.items():
         sport_entry = (sports.setdefault("municipalities", {})).setdefault(
             municipality,
@@ -102,7 +115,12 @@ def main() -> None:
             missing.append(f"{municipality}: fritid")
     if missing:
         raise SystemExit("Launch association merge failed: " + ", ".join(missing))
-    print(f"Launch association coverage verified for {len(merged_municipalities)} municipalities")
+
+    torsby_sports = sports.get("municipalities", {}).get("Torsby", {}).get("clubs") or []
+    torsby_leisure = leisure.get("municipalities", {}).get("Torsby", {}).get("activities") or []
+    if TORSBY_SOURCE.exists() and (len(torsby_sports) < 20 or len(torsby_leisure) < 10):
+        raise SystemExit(f"Torsby launch coverage failed: sports={len(torsby_sports)}, leisure={len(torsby_leisure)}")
+    print(f"Launch association coverage verified for {len(merged_municipalities)} municipalities; Torsby sport={len(torsby_sports)}, fritid={len(torsby_leisure)}")
 
 
 if __name__ == "__main__":
