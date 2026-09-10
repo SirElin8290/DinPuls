@@ -47,10 +47,14 @@ jobs:
           done
           exit 1
       - name: Skicka valfri webhook vid problem
-        if: ${{ always() && secrets.HEALTH_WEBHOOK_URL != '' }}
+        if: ${{ always() }}
         env:
           HEALTH_WEBHOOK_URL: ${{ secrets.HEALTH_WEBHOOK_URL }}
         run: |
+          if [ -z "$HEALTH_WEBHOOK_URL" ]; then
+            echo 'Ingen HEALTH_WEBHOOK_URL konfigurerad.'
+            exit 0
+          fi
           python - <<'PY'
           import json, os, urllib.request
           from pathlib import Path
