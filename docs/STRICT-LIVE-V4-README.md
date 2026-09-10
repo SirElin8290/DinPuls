@@ -1,0 +1,1 @@
+STRICT LIVE v4 använder Åmål som kvalitativ kalibreringskommun. Se DINPULS-AUDIT-RULES.md och den separata 21-kommunersanalysen.
