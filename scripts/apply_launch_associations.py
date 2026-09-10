@@ -54,6 +54,24 @@ def merge_named(existing: list[dict], supplemental: list[dict]) -> list[dict]:
     return sorted(result, key=lambda item: str(item.get("name") or "").casefold())
 
 
+def torsby_leisure_item(item: dict) -> dict:
+    """Översätt äldre Torsby-STRICT-format till fritidsmodulens produktionsschema."""
+    name = str(item.get("name") or "").strip()
+    label = str(item.get("categoryLabel") or item.get("type") or "aktivitet").strip()
+    lower = f"{name} {label}".casefold()
+    if any(word in lower for word in ("bibliotek", "bio", "biograf", "kultur")):
+        category = "kultur"
+    elif any(word in lower for word in ("bad", "spår", "skid", "mtb", "cykel", "pumptrack", "discgolf", "utegym", "friluft", "idrott")):
+        category = "natur"
+    else:
+        category = "gemenskap"
+    tags = []
+    for value in (label, str(item.get("type") or "").strip(), name):
+        if value and value.casefold() not in {tag.casefold() for tag in tags}:
+            tags.append(value)
+    return {**item, "category": category, "tags": tags}
+
+
 def main() -> None:
     sports_path = DATA / "sports.json"
     leisure_path = DATA / "leisure.json"
@@ -75,8 +93,6 @@ def main() -> None:
             merged["clubs"] = merge_named(merged.get("clubs") or [], extra.get("clubs") or [])
             merged["activities"] = merge_named(merged.get("activities") or [], extra.get("activities") or [])
 
-    # Torsbys STRICT-underlag är redan verifierat men har en annan filstruktur än
-    # övriga supplement. Lägg in det i samma merge före publicering.
     if TORSBY_SOURCE.exists():
         torsby = load(TORSBY_SOURCE)
         merged = merged_municipalities.setdefault(
@@ -84,7 +100,8 @@ def main() -> None:
             {"directoryUrl": "https://torsby.se/upplevagora/idrottmotionochfriluftsliv.4.39f7460415485c9fa0f90d.html", "clubs": [], "activities": []},
         )
         merged["clubs"] = merge_named(merged.get("clubs") or [], torsby.get("sports") or [])
-        merged["activities"] = merge_named(merged.get("activities") or [], torsby.get("leisure") or [])
+        normalized_leisure = [torsby_leisure_item(item) for item in (torsby.get("leisure") or []) if isinstance(item, dict)]
+        merged["activities"] = merge_named(merged.get("activities") or [], normalized_leisure)
 
     for municipality, extra in merged_municipalities.items():
         sport_entry = (sports.setdefault("municipalities", {})).setdefault(
