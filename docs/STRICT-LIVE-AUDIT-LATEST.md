@@ -1,16 +1,16 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-10T12:05:32+02:00
+Genererad: 2026-09-10T12:11:20+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
 Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 20 GREEN / 1 YELLOW / 0 RED
+## Resultat: 21 GREEN / 0 YELLOW / 0 RED
 
-**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne
+**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Storfors, Sunne, Torsby
 
-**YELLOW:** Torsby
+**YELLOW:** inga
 
 **RED:** inga
 
@@ -36,7 +36,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Munkfors | 🟢 GREEN | 8 | 1 | 55 | 24 / 24 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
 | Storfors | 🟢 GREEN | 4 | 3 | 5 | 62 / 62 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
 | Sunne | 🟢 GREEN | 18 | 7 | 22 | 59 / 59 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
-| Torsby | 🟡 YELLOW | 28 | 0 | 80 | 42 / 42 färska | 7 / 6 kat | 9 / 5 kat | 3 | 6 | 18 |
+| Torsby | 🟢 GREEN | 28 | 1 | 80 | 42 / 42 färska | 7 / 6 kat | 9 / 5 kat | 4 | 7 | 21 |
 
 ## Blockerare per kommun
 
@@ -100,8 +100,8 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 ### Sunne — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Torsby — 🟡 YELLOW
-- **Bostäder:** 🟡 — inga aktuella bostäder och inget verifierat nolläge (0)
+### Torsby — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ## V4-princip
 
