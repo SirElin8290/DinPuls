@@ -7,6 +7,7 @@ import html
 import json
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
@@ -102,13 +103,16 @@ class HiddenFieldParser(HTMLParser):
 
 def fetch_text(url: str) -> str:
     request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"})
-    try:
-        with urlopen(request, timeout=35) as response:
-            return response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace")
-    except HTTPError as error:
-        raise RuntimeError(f"HTTP {error.code}") from None
-    except (URLError, TimeoutError) as error:
-        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+    for attempt in range(3):
+        try:
+            with urlopen(request, timeout=35) as response:
+                return response.read().decode(response.headers.get_content_charset() or "utf-8", errors="replace")
+        except HTTPError as error:
+            raise RuntimeError(f"HTTP {error.code}") from None
+        except (URLError, TimeoutError) as error:
+            if attempt == 2:
+                raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+            time.sleep(2 ** attempt)
 
 
 def num(value: object) -> int | float | None:

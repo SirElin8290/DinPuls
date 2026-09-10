@@ -2,6 +2,7 @@ import unittest
 import json
 from pathlib import Path
 from unittest.mock import patch
+from urllib.error import URLError
 
 import update_housing_launch
 
@@ -30,6 +31,15 @@ class FakeOpener:
 
 
 class LaunchHousingUpdateTests(unittest.TestCase):
+    def test_fetch_text_retries_a_temporary_connection_failure(self):
+        with (
+            patch.object(update_housing_launch, "urlopen", side_effect=[URLError("temporary TLS error"), FakeResponse("ok")]) as fetch,
+            patch.object(update_housing_launch.time, "sleep") as sleep,
+        ):
+            self.assertEqual(update_housing_launch.fetch_text("https://example.test"), "ok")
+        self.assertEqual(fetch.call_count, 2)
+        sleep.assert_called_once_with(1)
+
     def test_torsby_is_only_managed_by_active_housing_import(self):
         config = json.loads((Path(__file__).parents[1] / "data" / "housing-launch-sources.json").read_text(encoding="utf-8"))
         self.assertNotIn("Torsby", config["municipalities"])
