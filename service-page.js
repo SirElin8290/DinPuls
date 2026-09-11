@@ -141,8 +141,8 @@ function renderServicePage() {
   document.querySelector("#service-category-grid").innerHTML = categories.map(group => {
     const items = businesses.filter(business => business.category === group);
     return `
-      <section class="health-directory-group service-directory-group">
-        <div class="health-directory-group-heading"><h3>${escapeService(group)}</h3><span>${items.length}</span></div>
+      <section class="service-directory-group">
+        <div class="service-directory-group-heading"><h3>${escapeService(group)}</h3><span>${items.length}</span></div>
         <div class="service-category-grid">${items.map(renderServiceCard).join("")}</div>
       </section>`;
   }).join("");

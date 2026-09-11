@@ -1,0 +1,71 @@
+.service-directory-groups {
+  display: block;
+  column-count: 3;
+  column-gap: 22px;
+}
+
+.service-directory-group {
+  display: inline-grid;
+  width: 100%;
+  gap: 12px;
+  margin: 0 0 22px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  min-width: 0;
+  vertical-align: top;
+}
+
+.service-directory-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(155, 89, 17, 0.24);
+}
+
+.service-directory-group-heading h3 {
+  margin: 0;
+  color: #704515;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.service-directory-group-heading span {
+  min-width: 30px;
+  padding: 4px 9px;
+  border: 1px solid #efd2a6;
+  border-radius: 999px;
+  color: #704515;
+  background: #fff7e8;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.service-directory-group .service-category-grid {
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .service-directory-groups {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .service-directory-groups {
+    column-count: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .service-directory-group {
+    margin-bottom: 20px;
+  }
+
+  .service-directory-group-heading {
+    align-items: flex-start;
+  }
+}
