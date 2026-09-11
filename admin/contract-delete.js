@@ -6,15 +6,17 @@
   let selectedId = "";
 
   fetch("../data/business-config.json", { cache: "no-store" })
-    .then(response => response.ok ? response.json() : Promise.reject(new Error("Konfigurationen kunde inte läsas.")))
+    .then(r => r.ok ? r.json() : Promise.reject(new Error("Konfigurationen kunde inte läsas.")))
     .then(config => { apiBase = String(config.apiBase || "").replace(/\/$/, ""); })
     .catch(() => {});
 
-  async function requestRemoval(id) {
-    if (!apiBase) throw new Error("API-konfiguration saknas.");
+  async function removeContract(id) {
+    if (!apiBase) throw new Error("API-konfiguration saknas. Ladda om sidan.");
+    const token = sessionStorage.getItem(TOKEN_KEY) || "";
+    if (!token) throw new Error("Adminsession saknas. Logga in igen.");
     const response = await fetch(`${apiBase}/portal/admin/contracts/${encodeURIComponent(id)}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${sessionStorage.getItem(TOKEN_KEY) || ""}` },
+      headers: { Authorization: `Bearer ${token}` },
       cache: "no-store"
     });
     const data = await response.json().catch(() => ({}));
@@ -22,10 +24,19 @@
     return data;
   }
 
+  function getId(dialog) {
+    if (selectedId) return selectedId;
+    const match = (dialog?.querySelector("p.muted")?.textContent || "").match(/DP-\d{4}-\d+/i);
+    return match ? match[0] : "";
+  }
+
   function installButton() {
     const dialog = document.querySelector("#contractDialog");
     const actions = dialog?.querySelector(".actions");
-    if (!dialog?.open || !actions || !selectedId || actions.querySelector(".contract-delete-action")) return;
+    if (!dialog?.open || !actions || actions.querySelector(".contract-delete-action")) return;
+    const id = getId(dialog);
+    if (!id) return;
+    selectedId = id;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -35,32 +46,33 @@
     button.style.color = "#b42318";
     actions.append(button);
 
-    button.onclick = async () => {
-      const id = selectedId;
-      if (!confirm(`Ta bort avtal ${id} och frigöra dess annonsplatser?`)) return;
-      const typed = prompt(`Skriv avtalsnumret ${id} för att bekräfta.`);
-      if (typed !== id) return;
-
+    button.addEventListener("click", async () => {
+      if (!confirm(`Ta bort avtal ${id} och frigöra annonsplatserna?`)) return;
+      const typed = prompt(`Skriv ${id} för att bekräfta.`);
+      if (typed === null) return;
+      if (typed.trim() !== id) {
+        alert("Avtalsnumret stämde inte. Ingenting ändrades.");
+        return;
+      }
       button.disabled = true;
       button.textContent = "Tar bort…";
       try {
-        const result = await requestRemoval(id);
-        alert(result.message || "Avtalet har tagits bort.");
+        await removeContract(id);
+        alert(`Avtal ${id} har tagits bort.`);
         location.reload();
       } catch (error) {
         button.disabled = false;
         button.textContent = "Ta bort avtal";
         alert(error.message || "Avtalet kunde inte tas bort.");
       }
-    };
+    });
   }
 
   document.addEventListener("click", event => {
     const row = event.target.closest?.("[data-contract]");
     if (!row) return;
     selectedId = row.dataset.contract || "";
-    setTimeout(installButton, 0);
-    setTimeout(installButton, 60);
+    [0, 50, 150].forEach(delay => setTimeout(installButton, delay));
   }, true);
 
   new MutationObserver(installButton).observe(document.body, { childList: true, subtree: true });
