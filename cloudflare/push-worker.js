@@ -615,7 +615,7 @@ async function requestPasswordReset(request, env) {
 
 function snapshotForContract(input, placements, price) {
   return {
-    document: "DinPuls Annonsavtal v4.0",
+    document: `DinPuls Annonsavtal v${CONTRACT_VERSION}`,
     contractVersion: CONTRACT_VERSION,
     contractNumber: input.id,
     company: { name: input.company, orgNo: input.orgNo, contact: input.contact, email: input.email, phone: input.phone },
@@ -652,7 +652,7 @@ async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const pageSize = [595.28, 841.89]; const margin = 48; const maxWidth = pageSize[0] - margin * 2;
   let page; let y;
-  const newPage = () => { page = pdf.addPage(pageSize); y = pageSize[1] - margin; page.drawText("DinPuls Annonsavtal v4.0", { x: margin, y, size: 15, font: bold, color: rgb(0.09, 0.21, 0.30) }); y -= 28; };
+  const newPage = () => { page = pdf.addPage(pageSize); y = pageSize[1] - margin; page.drawText(`DinPuls Annonsavtal v${snapshot.contractVersion}`, { x: margin, y, size: 15, font: bold, color: rgb(0.09, 0.21, 0.30) }); y -= 28; };
   const ensure = height => { if (y - height < margin) newPage(); };
   const drawLines = (text, size = 9.5, font = regular, gap = 13) => { const lines = wrapPdfText(font, text, size, maxWidth); ensure(lines.length * gap + 8); for (const line of lines) { page.drawText(line, { x: margin, y, size, font, color: rgb(0.12, 0.16, 0.18) }); y -= gap; } y -= 5; };
   newPage();
@@ -676,7 +676,7 @@ async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
   page.drawText(signatures.dinpuls.title, { x: 335, y: y - 13, size: 9, font: regular }); y -= 34;
   drawLines(`Signeringstidpunkt: ${signedAt}`);
   drawLines(`Avtalssnapshot SHA-256: ${snapshotHash}`, 8);
-  pdf.setTitle(`DinPuls Annonsavtal ${snapshot.contractNumber}`); pdf.setSubject(`Signerad v4.0-avtalskopia, SHA-256 ${snapshotHash}`);
+  pdf.setTitle(`DinPuls Annonsavtal ${snapshot.contractNumber}`); pdf.setSubject(`Signerad v${snapshot.contractVersion}-avtalskopia, SHA-256 ${snapshotHash}`);
   return pdf.save();
 }
 
@@ -685,12 +685,17 @@ function uint8ToBase64(bytes) {
   return btoa(value);
 }
 
-async function sendSignedContractEmail(env, contract, pdfBytes) {
+async function sendSignedContractEmail(env, contract, pdfBytes, snapshotOverride) {
   if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM) throw new Error("E-posttjänsten är inte konfigurerad.");
+  const snapshot = snapshotOverride || JSON.parse(contract.contract_snapshot_json || "null");
+  if (!snapshot?.company || !snapshot?.billing || !Array.isArray(snapshot.placements) || !Array.isArray(snapshot.terms)) throw new Error("Avtalets kompletta innehåll saknas.");
+  const placementText = snapshot.placements.map(item => `${item.slotId} – ${item.location}`).join("; ");
+  const summaryHtml = `<h2>Företagsuppgifter</h2><p><strong>${htmlEscape(snapshot.company.name)}</strong><br>Org.nr: ${htmlEscape(snapshot.company.orgNo)}<br>Kontakt: ${htmlEscape(snapshot.company.contact)}<br>E-post: ${htmlEscape(snapshot.company.email)}<br>Telefon: ${htmlEscape(snapshot.company.phone)}</p><h2>Beställning</h2><p>Kommun: ${htmlEscape(snapshot.municipality)}<br>Annonsplatser: ${htmlEscape(placementText)}</p><h2>Pris och avtalsperiod</h2><p>${htmlEscape(snapshot.period.startDate)} – ${htmlEscape(snapshot.period.endDate)}<br>${htmlEscape(snapshot.billing.label)} · ${snapshot.billing.unitPrice} kr per plats · ${snapshot.billing.invoiceTotal} kr ${htmlEscape(snapshot.billing.interval)}<br>Exklusive moms · ${htmlEscape(snapshot.billing.paymentTerms)}</p>${snapshot.specialTerms ? `<p><strong>Särskilda villkor:</strong> ${htmlEscape(snapshot.specialTerms)}</p>` : ""}`;
+  const summaryText = `Företagsuppgifter\n${snapshot.company.name}\nOrg.nr: ${snapshot.company.orgNo}\nKontakt: ${snapshot.company.contact}\nE-post: ${snapshot.company.email}\nTelefon: ${snapshot.company.phone}\n\nBeställning\nKommun: ${snapshot.municipality}\nAnnonsplatser: ${placementText}\n\nPris och avtalsperiod\n${snapshot.period.startDate} – ${snapshot.period.endDate}\n${snapshot.billing.label} · ${snapshot.billing.unitPrice} kr per plats · ${snapshot.billing.invoiceTotal} kr ${snapshot.billing.interval}\nExklusive moms · ${snapshot.billing.paymentTerms}${snapshot.specialTerms ? `\nSärskilda villkor: ${snapshot.specialTerms}` : ""}`;
   const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({
     from: env.PORTAL_EMAIL_FROM, to: [contract.email], subject: "Välkommen till DinPuls – ert signerade annonsavtal",
-    html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>Välkommen till DinPuls</h1><p>Hej ${htmlEscape(contract.contact || contract.company)},</p><p>Avtalet för ${htmlEscape(contract.company)} är nu signerat av båda parter och aktiverat. Samma signerade PDF finns bifogad och i företagsportalen.</p><p>I portalen kan ni hantera banners, schemaläggning, statistik och avtalsinformation.</p><p>Vänliga hälsningar<br>DinPuls</p></div>`,
-    text: `Hej ${contract.contact || contract.company},\n\nErt annonsavtal är signerat av båda parter och aktiverat. Den signerade PDF-kopian finns bifogad och i företagsportalen.\n\nVänliga hälsningar\nDinPuls`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>Välkommen till DinPuls</h1><p>Hej ${htmlEscape(snapshot.company.contact || snapshot.company.name)},</p><p>Ert avtal är signerat och aktiverat. Uppgifterna nedan kommer från samma låsta avtalsdata som den bifogade PDF-kopian.</p>${summaryHtml}<p><strong>Fullständiga avtalsvillkor</strong><br>Samtliga ${snapshot.terms.length} villkorspunkter i version ${htmlEscape(snapshot.contractVersion)} finns i den bifogade signerade PDF-kopian och i företagsportalen.</p><p>Vänliga hälsningar<br>DinPuls</p></div>`,
+    text: `Hej ${snapshot.company.contact || snapshot.company.name},\n\nErt avtal är signerat och aktiverat. Uppgifterna nedan kommer från samma låsta avtalsdata som den bifogade PDF-kopian.\n\n${summaryText}\n\nFullständiga avtalsvillkor\nSamtliga ${snapshot.terms.length} villkorspunkter i version ${snapshot.contractVersion} finns i den bifogade signerade PDF-kopian och i företagsportalen.\n\nVänliga hälsningar\nDinPuls`,
     attachments: [{ filename: `DinPuls-annonsavtal-${contract.id}.pdf`, content: uint8ToBase64(pdfBytes) }]
   }) });
   if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
@@ -708,7 +713,7 @@ async function resendSignedContractEmail(request, env, id) {
   if (!object) return json(request, { ok: false, error: "Den signerade PDF-filen saknas i avtalsarkivet." }, 404);
   const pdfBytes = new Uint8Array(await object.arrayBuffer());
   try {
-    await sendSignedContractEmail(env, contract, pdfBytes);
+    await sendSignedContractEmail(env, contract, pdfBytes, JSON.parse(contract.contract_snapshot_json));
     const sentAt = new Date().toISOString();
     await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(sentAt, id).run();
     return json(request, { ok: true, message: "Den signerade avtalskopian har skickats igen.", sentAt });
@@ -817,7 +822,8 @@ async function signContract(request, env, id) {
   const legacyConflict = (legacyContracts.results || []).find(row => { try { return JSON.parse(row.placements || "[]").some(item => requestedSlots.has(item.slotId)); } catch { return false; } });
   if (legacyConflict) return json(request, { ok: false, error: "En annonsplats är redan upptagen av ett aktivt befintligt avtal under perioden." }, 409);
   const signedAt = new Date().toISOString();
-  const pdfBytes = await buildSignedPdf(JSON.parse(contract.contract_snapshot_json), { customer: { name: customerName, title: customerTitle, bytes: customerBytes }, dinpuls: { name: dinpulsName, title: dinpulsTitle, bytes: dinpulsBytes } }, signedAt, calculatedHash);
+  const snapshot = JSON.parse(contract.contract_snapshot_json);
+  const pdfBytes = await buildSignedPdf(snapshot, { customer: { name: customerName, title: customerTitle, bytes: customerBytes }, dinpuls: { name: dinpulsName, title: dinpulsTitle, bytes: dinpulsBytes } }, signedAt, calculatedHash);
   const pdfHash = bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", pdfBytes)));
   const baseKey = `contracts/${id}/${calculatedHash}`;
   const customerKey = `${baseKey}/customer-signature.png`, dinpulsKey = `${baseKey}/dinpuls-signature.png`, pdfKey = `${baseKey}/signed-contract.pdf`;
@@ -831,7 +837,7 @@ async function signContract(request, env, id) {
   try { await env.DB.batch(statements); }
   catch (error) { console.error("DinPuls avtalslåsning:", error); await Promise.all([customerKey, dinpulsKey, pdfKey].map(key => env.AD_ASSETS.delete(key))); return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "Annonsplatsen hann reserveras av ett annat avtal. Avtalet aktiverades inte." : "Avtalet kunde inte låsas i databasen." }, 409); }
   let emailStatus = "sent";
-  try { await sendSignedContractEmail(env, { ...contract, id }, pdfBytes); await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(new Date().toISOString(), id).run(); }
+  try { await sendSignedContractEmail(env, { ...contract, id }, pdfBytes, snapshot); await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(new Date().toISOString(), id).run(); }
   catch (error) { emailStatus = "failed"; await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error.message, 300), id).run(); }
   let onboarding = "unchanged";
   if (!contract.activated_at && !contract.welcome_sent_at) {

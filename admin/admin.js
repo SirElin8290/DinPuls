@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const CONTRACT_VERSION = "4.0";
+  const CONTRACT_VERSION = "4.1";
   const TOKEN_KEY = "dp-admin-session";
   const AD_SLOTS = window.DINPULS_AD_INVENTORY || [];
   const $ = selector => document.querySelector(selector);
@@ -60,7 +60,7 @@
     $("#appView").hidden = false;
     scrollTo(0, 0);
     await Promise.all([refreshContracts(), refreshSystemStatus(), refreshOperations()]);
-    openNewContract();
+    openView("start");
   }
 
   function installSystemStatus() {
@@ -175,7 +175,7 @@
   }
 
   function statusActions(contract) {
-    if (contract.contractVersion === "4.0" && contract.status === "Utkast") return `<span class="badge draft">Väntar på båda underskrifterna</span>`;
+    if (["4.0", CONTRACT_VERSION].includes(contract.contractVersion) && contract.status === "Utkast") return `<span class="badge draft">Väntar på båda underskrifterna</span>`;
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
     if (contract.status === "Skickat") return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Markera signerat</button>`;
@@ -309,6 +309,7 @@ function openContract(id) {
   function openView(id) {
     $$(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === id));
     $$(".view").forEach(view => view.hidden = view.id !== id);
+    $(".admin-main")?.classList.toggle("start-open", id === "start");
     if (id === "inventory") renderInventory();
     if (id === "operations") refreshOperations();
     scrollTo(0, 0);

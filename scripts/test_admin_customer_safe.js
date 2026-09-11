@@ -1,22 +1,23 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-
 const html = fs.readFileSync("admin/index.html", "utf8");
 const script = fs.readFileSync("admin/admin.js", "utf8");
-
+assert.match(html, /class="tab active" data-view="start"><i>⌂<\/i>Start/);
 assert.match(html, /data-new-contract="1"[^>]*><i>＋<\/i>Nytt avtal/);
-assert.match(html, /data-view="overview"><i>⌂<\/i>Kontrollpanel/);
+assert.match(html, /data-view="overview"><i>▦<\/i>Kontrollpanel/);
 assert.match(html, /data-view="contracts"><i>▤<\/i>CRM \/ Avtal/);
 assert.match(html, /<section id="overview" class="view" hidden>/);
-assert.match(html, /<section id="new-contract" class="view">/);
-
+assert.match(html, /<section id="start" class="view admin-start">/);
+assert.match(html, /<section id="new-contract" class="view" hidden>/);
+assert.match(html, /assets\/logo\.svg/);
+assert.match(html, /Tillsammans bygger vi din kommuns lokala informationssida/);
+assert.match(html, /\+ Skapa nytt avtal/);
 const newContractStart = html.indexOf('<section id="new-contract"');
 const contractsStart = html.indexOf('<section id="contracts"');
 assert(newContractStart >= 0 && contractsStart > newContractStart);
 assert(html.slice(newContractStart, contractsStart).includes('id="contractForm"'));
 assert(!html.slice(contractsStart, html.indexOf('<section id="companies"')).includes('id="contractForm"'));
-
-assert.match(script, /await Promise\.all\(\[refreshContracts\(\), refreshSystemStatus\(\), refreshOperations\(\)\]\);\s*openNewContract\(\);/);
+assert.match(script, /await Promise\.all\(\[refreshContracts\(\), refreshSystemStatus\(\), refreshOperations\(\)\]\);\s*openView\("start"\);/);
 assert.match(script, /openView\("new-contract"\)/);
-
-console.log("Admin öppnar en kundsäker Nytt avtal-vy och håller KPI/CRM bakom separata menyval");
+assert.match(script, /classList\.toggle\("start-open", id === "start"\)/);
+console.log("Admin öppnar en kundsäker Start-vy och håller KPI/CRM bakom separata menyval");

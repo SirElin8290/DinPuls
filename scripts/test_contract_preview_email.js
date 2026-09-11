@@ -1,0 +1,15 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const adminHtml = fs.readFileSync("admin/index.html", "utf8");
+const wizard = fs.readFileSync("admin/contract-wizard.js", "utf8");
+const worker = fs.readFileSync("cloudflare/push-worker.js", "utf8");
+for (const field of ["name", "orgNo", "contact", "email", "phone"]) assert(wizard.includes(`contract.company.${field}`), `Förhandsgranskningen saknar ${field}`);
+for (const section of ["Företagsuppgifter", "Beställning", "Pris och avtalsperiod", "Avtalsvillkor"]) assert(wizard.includes(section), `Förhandsgranskningen saknar ${section}`);
+assert(wizard.includes("terms:CONTRACT_TERMS"), "Förhandsgranskningen ska använda de faktiska avtalsvillkoren");
+assert(!wizard.includes("Fullständiga v4.0-villkor"), "Förhandsgranskningen får inte hårdkoda en gammal avtalsversion");
+assert(adminHtml.includes("DinPuls Annonsavtal v4.1"), "Adminlistan måste visa aktuell avtalsversion");
+assert(worker.includes("snapshotOverride || JSON.parse(contract.contract_snapshot_json"), "Mejlet ska använda den låsta avtalssnapshoten");
+for (const field of ["snapshot.company.name", "snapshot.company.orgNo", "snapshot.company.contact", "snapshot.company.email", "snapshot.company.phone", "snapshot.placements", "snapshot.period.startDate", "snapshot.period.endDate", "snapshot.billing.invoiceTotal", "snapshot.terms.length"]) assert(worker.includes(field), `Avtalsmejlet saknar ${field}`);
+assert(worker.includes("attachments: [{ filename: `DinPuls-annonsavtal-${contract.id}.pdf`"), "Den kompletta signerade PDF-kopian ska bifogas mejlet");
+assert(worker.includes("page.drawText(`DinPuls Annonsavtal v${snapshot.contractVersion}`"), "PDF-rubriken ska använda snapshotens avtalsversion");
+console.log("Förhandsgranskning, signerad PDF och kundmejl använder samma kompletta avtalsdata");

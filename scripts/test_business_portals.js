@@ -8,6 +8,7 @@ const company = fs.readFileSync(path.join(root, "foretag/foretag.js"), "utf8");
 const account = fs.readFileSync(path.join(root, "foretag/konto.js"), "utf8");
 const worker = fs.readFileSync(path.join(root, "cloudflare/push-worker.js"), "utf8");
 const contractV4 = fs.readFileSync(path.join(root, "cloudflare/contract-v4.js"), "utf8");
+const contractV4Base = fs.readFileSync(path.join(root, "cloudflare/contract-v4-base.js"), "utf8");
 const config = JSON.parse(fs.readFileSync(path.join(root, "data/business-config.json"), "utf8"));
 
 for (const [name, source] of [["admin", admin], ["företag", company]]) {
@@ -30,7 +31,7 @@ assert(worker.includes("portal_activation_tokens") && worker.includes("activate-
 assert(worker.includes("await sha256(token)") && !account.includes("RESEND_API_KEY") && !account.includes("PORTAL_PASSWORD_PEPPER"), "Token ska hash-lagras och inga hemligheter får finnas i frontend");
 assert(worker.includes("ACCOUNT_TOKEN_HOURS = 48") && worker.includes("used_at IS NULL"), "Kontolänkar ska gälla 48 timmar och vara engångslänkar");
 assert(worker.includes("RESEND_API_KEY") && worker.includes("PORTAL_EMAIL_FROM"), "Transaktionell e-post ska använda Cloudflare-miljövariabler/secrets");
-assert((contractV4.match(/"title": "\d+\./g) || []).length === 14 && contractV4.includes("Fyra gånger per påbörjad 30-dagarsperiod") === false && contractV4.includes("upp till fyra gånger per påbörjad 30-dagarsperiod"), "v4 måste innehålla alla 14 beslutade villkorspunkter");
+assert((`${contractV4Base}\n${contractV4}`.match(/(?:"title"|title):\s*"\d+\./g) || []).length === 15 && contractV4Base.includes("Fyra gånger per påbörjad 30-dagarsperiod") === false && contractV4Base.includes("upp till fyra gånger per påbörjad 30-dagarsperiod"), "v4.1 måste innehålla alla 15 beslutade villkorspunkter");
 assert(worker.includes("contract_snapshot_hash") && worker.includes("signed_pdf_hash") && worker.includes("prevent_contract_slot_overlap"), "v4 ska hash-låsas, PDF-arkiveras och skyddas mot platskrockar");
 assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") && worker.includes("attachments"), "Det signerade avtalet ska skickas i ett separat PDF-mejl");
 assert(worker.includes("resendSignedContractEmail") && worker.includes("contractEmailMatch") && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den signerade avtalskopian utan att ändra avtalet");
