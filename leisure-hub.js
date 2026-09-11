@@ -15,14 +15,11 @@
     gemenskap:{title:"Hembygd, byalag & gemenskap",icon:"heart-handshake",accent:"cyan",text:"Mötesplatser, lokalhistoria och föreningar som håller bygden levande."}
   };
   let data;
-  let municipality = state.getInitial();
-  const ALL_MUNICIPALITIES = "Alla kommuner";
+  const municipality = state.getInitial();
   const expandedCategories = new Set();
   const INITIAL_ROWS = 6;
   const normalize = value => String(value || "").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const current = () => municipality === ALL_MUNICIPALITIES
-    ? {activities:Object.entries(data?.municipalities||{}).flatMap(([name,payload])=>(payload.activities||[]).map(item=>({...item,municipality:name}))),directoryUrl:""}
-    : data?.municipalities?.[municipality] || {activities:[],directoryUrl:""};
+  const current = () => data?.municipalities?.[municipality] || {activities:[],directoryUrl:""};
   function render(){
     const query = normalize(document.querySelector("#leisure-search")?.value);
     const requested = normalize(params.get("kategori"));
@@ -69,9 +66,6 @@
     if(!response.ok) throw new Error(`Fritidsdata kunde inte laddas: ${response.status}`);
     data = await response.json();
     if (fargelandaResponse?.ok) mergeFargelandaSupplement(await fargelandaResponse.json());
-    const select = document.querySelector("#leisure-municipality");
-    select.innerHTML = `<option value="${ALL_MUNICIPALITIES}">Alla kommuner</option>` + state.MUNICIPALITIES.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
-    select.value = municipality;
     document.querySelector("#leisure-place").textContent = municipality;
     document.querySelector("#leisure-sport-link").href = `sport.html?kommun=${encodeURIComponent(municipality)}`;
     const input = document.querySelector("#leisure-search");
@@ -79,7 +73,6 @@
     input.addEventListener("input",()=>{params.delete("kategori");render();});
     document.querySelector("#leisure-clear").addEventListener("click",()=>{input.value="";params.delete("kategori");input.focus();render();});
     document.querySelectorAll("[data-query]").forEach(button=>button.addEventListener("click",()=>{input.value=button.dataset.query;params.delete("kategori");render();}));
-    select.addEventListener("change",event=>{municipality=event.target.value;if(municipality!==ALL_MUNICIPALITIES)state.set(municipality);document.querySelector("#leisure-place").textContent=municipality;document.querySelector("#leisure-sport-link").href=municipality===ALL_MUNICIPALITIES?"sport.html":`sport.html?kommun=${encodeURIComponent(municipality)}`;render();});
     render();
   }
   init().catch(error=>{console.error(error);document.querySelector("#leisure-view").innerHTML='<div class="leisure-loading">Fritidsinformationen kunde inte laddas. Försök igen om en stund.</div>';});
