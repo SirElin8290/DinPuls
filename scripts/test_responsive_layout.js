@@ -4,6 +4,11 @@ const assert = require('assert');
 
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const hasRule = (css, selector, declaration) => {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapedDeclaration = declaration.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*');
+  return new RegExp(`${escapedSelector}\\s*\\{[^}]*${escapedDeclaration}`, 's').test(css);
+};
 
 const publicPages = [
   'index.html', 'bostader.html', 'jobb.html', 'vard.html', 'service.html',
@@ -34,7 +39,7 @@ assert(company.includes('.banner-row>*{min-width:0}'), 'Företagsportal: banneri
 
 const scheduler = read('foretag/banner-scheduler.css');
 assert(scheduler.includes('@media(max-width:700px)'), 'Bannerplanerare: saknar mobil breakpoint');
-assert(scheduler.includes('.schedule-fields,.simple-steps{grid-template-columns:1fr}'), 'Bannerplanerare: formulär faller inte till en kolumn');
+assert(/\.schedule-fields,\.simple-steps\s*\{\s*grid-template-columns\s*:\s*1fr/.test(scheduler), 'Bannerplanerare: formulär faller inte till en kolumn');
 
 const health = read('health-page.css');
 assert(health.includes('column-count: 3'), 'Vård: desktop ska ha tre kategorikolumner');
@@ -55,8 +60,8 @@ assert(leisure.includes('.leisure-ad-row{grid-template-columns:1fr'), 'Fritid: a
 
 const sport = read('sport-hub-fixes.css');
 assert(sport.includes('@media (max-width: 720px)'), 'Sport: saknar mobil breakpoint');
-assert(sport.includes('.activity-club-form {\n    grid-template-columns: 1fr;'), 'Sport: klubbdata faller inte till en kolumn på mobil');
-assert(sport.includes('.activity-matches article {\n    grid-template-columns: 1fr auto;'), 'Sport: matchrad saknar mobil layout');
+assert(hasRule(sport, '.activity-club-form', 'grid-template-columns: 1fr;'), 'Sport: klubbdata faller inte till en kolumn på mobil');
+assert(hasRule(sport, '.activity-matches article', 'grid-template-columns: 1fr auto;'), 'Sport: matchrad saknar mobil layout');
 
 const home = read('styles.css');
 assert(home.includes('.mobile-menu-button{display:none}'), 'Startsida: mobil menyknapp saknas');
