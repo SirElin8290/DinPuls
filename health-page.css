@@ -1,12 +1,29 @@
+:root {
+  --health-rose: #823b56;
+  --health-rose-deep: #652c42;
+  --health-rose-soft: #f8edf1;
+  --health-rose-border: #e4c3cf;
+}
+
+.portal-hero.health-page {
+  background: linear-gradient(120deg, #552438, #823b56 58%, #ad6b80);
+}
+
 .health-directory-groups {
-  display: grid;
-  gap: 28px;
+  display: block;
+  column-count: 3;
+  column-gap: 22px;
 }
 
 .health-directory-group {
-  display: grid;
+  display: inline-grid;
+  width: 100%;
   gap: 12px;
+  margin: 0 0 22px;
+  break-inside: avoid;
+  page-break-inside: avoid;
   min-width: 0;
+  vertical-align: top;
 }
 
 .health-directory-group-heading {
@@ -15,11 +32,12 @@
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 9px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  border-bottom: 1px solid var(--health-rose-border);
 }
 
 .health-directory-group-heading h3 {
   margin: 0;
+  color: var(--health-rose-deep);
   font-size: 1.05rem;
   line-height: 1.25;
 }
@@ -27,15 +45,33 @@
 .health-directory-group-heading span {
   min-width: 30px;
   padding: 4px 9px;
+  border: 1px solid var(--health-rose-border);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.06);
+  color: var(--health-rose-deep);
+  background: var(--health-rose-soft);
   text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
 }
 
 .health-directory-group .health-category-grid {
+  grid-template-columns: 1fr;
   margin: 0;
+}
+
+.health-category-card>svg,
+.health-category-card em {
+  color: var(--health-rose);
+}
+
+.portal-card-icon.health {
+  color: var(--health-rose);
+  background: var(--health-rose-soft);
+}
+
+.health-category-card:focus-visible {
+  outline: 3px solid var(--health-rose-border);
+  outline-offset: 2px;
 }
 
 .health-contact-lines {
@@ -56,9 +92,21 @@
   cursor: default;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1100px) {
   .health-directory-groups {
-    gap: 22px;
+    column-count: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .health-directory-groups {
+    column-count: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .health-directory-group {
+    margin-bottom: 20px;
   }
 
   .health-directory-group-heading {

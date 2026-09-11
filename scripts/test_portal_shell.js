@@ -21,6 +21,6 @@ assert(/\.leisure-show-more\{/.test(fs.readFileSync("leisure-hub.css", "utf8")),
 
 const health = fs.readFileSync("health-page.js", "utf8");
 assert(/selectedCategory/.test(health) && /health-group/.test(health), "Vårdens kategorifilter saknar funktionell koppling");
-assert(/categorySelect\.addEventListener\("change", renderHealthPage\)/.test(health), "Vårdens kategoribyte renderar inte om resultatet");
+assert(/categorySelect\.addEventListener\("change",\s*renderHealthPage\)/.test(health), "Vårdens kategoribyte renderar inte om resultatet");
 
 console.log(`Portalstruktur verifierad för ${pages.length} publika undersidor.`);
