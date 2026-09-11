@@ -21,6 +21,40 @@
   box-sizing:border-box;
 }
 
+/* Håll annonsetikett, rubrik och pris tydligt separerade på desktop. */
+.leisure-ad-row .strategic-ad:not(.scheduled-public-ad){
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  grid-template-areas:
+    "badge title"
+    "badge meta";
+  align-content:center;
+  align-items:center;
+  column-gap:18px;
+  row-gap:5px;
+  padding:20px 22px;
+  text-align:left;
+}
+.leisure-ad-row .strategic-ad:not(.scheduled-public-ad)>b{
+  grid-area:badge;
+  align-self:center;
+  white-space:nowrap;
+}
+.leisure-ad-row .strategic-ad:not(.scheduled-public-ad)>strong{
+  grid-area:title;
+  display:block;
+  margin:0;
+  font-size:1rem;
+  line-height:1.2;
+}
+.leisure-ad-row .strategic-ad:not(.scheduled-public-ad)>small{
+  grid-area:meta;
+  display:block;
+  margin:0;
+  font-size:.78rem;
+  line-height:1.35;
+}
+
 /* En kommun med bara en innehållsmodul ska inte lämna ett tomt halvt rutnät. */
 .leisure-view.leisure-view-single{
   grid-template-columns:1fr;
@@ -42,4 +76,11 @@
   .leisure-ad-row-bottom{margin-top:16px;margin-bottom:0}
   .leisure-ad-row .strategic-ad,
   .leisure-ad-row .secondary-ad{min-height:104px}
+  .leisure-ad-row .strategic-ad:not(.scheduled-public-ad){
+    grid-template-columns:1fr;
+    grid-template-areas:"badge" "title" "meta";
+    justify-items:start;
+    row-gap:6px;
+    padding:18px;
+  }
 }
