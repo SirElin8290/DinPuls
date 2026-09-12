@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-12T16:06:39+02:00
+Genererad: 2026-09-12T19:09:17+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -36,7 +36,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Munkfors | 🟢 GREEN | 7 | 2 | 52 | 24 / 24 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
 | Storfors | 🟢 GREEN | 3 | 3 | 5 | 61 / 61 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
 | Sunne | 🟢 GREEN | 20 | 7 | 22 | 61 / 61 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
-| Torsby | 🟢 GREEN | 26 | 25 | 80 | 50 / 50 färska | 7 / 6 kat | 9 / 5 kat | 3 | 7 | 21 |
+| Torsby | 🟢 GREEN | 26 | 25 | 80 | 50 / 50 färska | 7 / 6 kat | 9 / 5 kat | 4 | 7 | 21 |
 
 ## Blockerare per kommun
 
