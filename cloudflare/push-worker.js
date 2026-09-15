@@ -745,6 +745,7 @@ async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
   for (const term of snapshot.terms) { ensure(40); drawLines(term.title, 10, bold, 14); for (const paragraph of term.paragraphs) drawLines(paragraph); }
   newPage(); drawLines("UNDERSKRIFTER", 13, bold, 18);
   drawLines("Genom att skriva under bekräftar jag att jag har rätt att företräda företaget och att jag godkänner avtalet och dess villkor.");
+  if (signatures.dinpuls.mode === "preapproved-fixed") drawLines(`SirElin AB:s fasta förhandsgodkända motpartssignatur ingår i det låsta avtalsunderlaget. Originalets SHA-256: ${snapshot.dinpulsFixedSignature.sha256}. Ingen DinPuls-företrädare har signerat manuellt vid kundens underskrift.`);
   const customerImage = await pdf.embedPng(signatures.customer.bytes);
   const dinpulsImage = await pdf.embedPng(signatures.dinpuls.bytes);
   page.drawImage(customerImage, { x: margin, y: y - 95, width: 210, height: 80 });
@@ -753,7 +754,7 @@ async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
   page.drawText(signatures.customer.title, { x: margin, y: y - 13, size: 9, font: regular });
   page.drawText(`DinPuls: ${signatures.dinpuls.name}`, { x: 335, y, size: 9, font: bold });
   page.drawText(signatures.dinpuls.title, { x: 335, y: y - 13, size: 9, font: regular }); y -= 34;
-  drawLines(`Signeringstidpunkt: ${signedAt}`);
+  drawLines(`${signatures.dinpuls.mode === "preapproved-fixed" ? "Kundens signeringstidpunkt" : "Signeringstidpunkt"}: ${signedAt}`);
   drawLines(`Avtalssnapshot SHA-256: ${snapshotHash}`, 8);
   pdf.setTitle(`DinPuls Annonsavtal ${snapshot.contractNumber}`); pdf.setSubject(`Signerad v${snapshot.contractVersion}-avtalskopia, SHA-256 ${snapshotHash}`);
   return pdf.save();
@@ -889,6 +890,7 @@ async function signContract(request, env, id) {
   const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id = ?`).bind(id).first();
   if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
   const foundationOrder = await env.DB.prepare("SELECT * FROM self_service_orders WHERE foundation_contract_id=? AND company_user_id=? AND status='customer_signed'").bind(id, contract.company_user_id).first();
+  if (contract.contract_snapshot_json && JSON.parse(contract.contract_snapshot_json).dinpulsFixedSignature) return json(request, { ok: false, error: "Detta självserviceavtal använder en låst förhandsgodkänd motpartssignatur och kan inte manuellt motundertecknas." }, 409);
   if (contract.customer_signature_object_key && !foundationOrder) return json(request, { ok: false, error: "Det självsignerade avtalet saknar en giltig väntande motunderskrift och får inte signeras om." }, 409);
   const customerName = foundationOrder ? cleanText(contract.customer_signer_name) : cleanText(body.customerSignerName);
   const customerTitle = foundationOrder ? cleanText(contract.customer_signer_title) : cleanText(body.customerSignerTitle);
@@ -1061,6 +1063,32 @@ async function listAvailableCompanySlots(request, env, url) {
     pricing: { monthlyExVat: BILLING.monthly.unitPrice, annualExVat: BILLING.annual.unitPrice, vatRate: 0.25 } });
 }
 
+const FIXED_SIGNATURE_KEY = "approved/sirelin-ab/v1.png";
+const FIXED_SIGNATURE_SHA256 = "3055a756094c8bcc6166517a61d3deb484a85ac43d5dd2043b82b1b23b9a38f1";
+async function preapprovedSignature(env) {
+  if (!env.CONTRACT_SIGNATURES) throw new Error("FIXED_SIGNATURE_UNAVAILABLE");
+  const object = await env.CONTRACT_SIGNATURES.get(FIXED_SIGNATURE_KEY);
+  if (!object) throw new Error("FIXED_SIGNATURE_UNAVAILABLE");
+  const bytes = new Uint8Array(await object.arrayBuffer());
+  const digest = bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)));
+  if (!safeEqual(digest, env.SELF_SERVICE_FIXED_SIGNATURE_SHA256 || FIXED_SIGNATURE_SHA256)) throw new Error("FIXED_SIGNATURE_MISMATCH");
+  return { bytes, digest, snapshot: { mode: "preapproved-fixed", signer: "SirElin AB", role: "Förhandsgodkänd fast motpartssignatur för DinPuls", signatureId: "sirelin-ab-v1", sha256: digest } };
+}
+
+async function foundationSignatureImage(request, env, orderId) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const order = await env.DB.prepare("SELECT snapshot_json, snapshot_hash, status, expires_at FROM self_service_orders WHERE id=? AND company_user_id=?").bind(orderId, session.subject_id).first();
+  if (!order || order.status !== "held" || order.expires_at <= new Date().toISOString()) return json(request, { ok: false, error: "Avtalsutkastet finns inte." }, 404);
+  if (!safeEqual(await sha256(order.snapshot_json), order.snapshot_hash)) return json(request, { ok: false, error: "Avtalsutkastet kunde inte verifieras." }, 409);
+  const signature = JSON.parse(order.snapshot_json).dinpulsFixedSignature;
+  if (signature?.mode !== "preapproved-fixed") return json(request, { ok: false, error: "Detta avtal saknar fast signatur." }, 404);
+  let fixed;
+  try { fixed = await preapprovedSignature(env); } catch { return json(request, { ok: false, error: "Den privata signaturen kunde inte verifieras." }, 503); }
+  if (!safeEqual(signature.sha256, fixed.digest)) return json(request, { ok: false, error: "Signaturen matchar inte det låsta avtalet." }, 409);
+  return new Response(fixed.bytes, { headers: { ...corsHeaders(request), "Content-Type": "image/png", "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" } });
+}
+
 async function getContractSnapshot(request, env, id) {
   const session = await requireSession(request, env);
   if (!session || !["admin", "company"].includes(session.role)) return json(request, { ok: false, error: "Obehörig." }, 401);
@@ -1105,12 +1133,59 @@ async function prepareFoundationOrder(request, env) {
   const now = new Date().toISOString(), expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString(), orderId = crypto.randomUUID();
   const price = calculateContractPrice(billingType, placements.length), municipality = [...new Set(lines.map(line => line.municipality))].join(", ");
   const snapshot = snapshotForContract({ id, company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city, municipality, startDate: lines[0].startDate, endDate: lines[0].endDate }, placements, price);
+  if (env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED === "true") {
+    try { snapshot.dinpulsFixedSignature = (await preapprovedSignature(env)).snapshot; }
+    catch { return json(request, { ok: false, error: "Den godkända privata DinPuls-signaturen saknas eller matchar inte originalet." }, 503); }
+  }
   const snapshotJson = stableStringify(snapshot), snapshotHash = await sha256(snapshotJson);
   const statements = [env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, renewal_type, signature_required, start_date, end_date, status, contract_snapshot_json, contract_snapshot_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,'annual-review',1,?,?,'Utkast',?,?,?,?)").bind(id, user.id, CONTRACT_VERSION, municipality, JSON.stringify(placements), price.unitPrice, billingType === "annual" ? price.unitPrice : 0, price.monthlyTotal, price.annualTotal, billingType, lines[0].startDate, lines[0].endDate, snapshotJson, snapshotHash, now, now), env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
   for (const line of lines) statements.push(env.DB.prepare("INSERT INTO self_service_holds (order_id,company_user_id,municipality,slot_id,start_date,end_date,status,expires_at,created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, line.municipality, line.slotId, line.startDate, line.endDate, expiresAt, now));
   try { await env.DB.batch(statements); }
   catch (error) { return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "En plats hann reserveras av någon annan." : "Avtalsutkastet kunde inte skapas. Försök igen." }, 409); }
   return json(request, { ok: true, orderId, contractId: id, snapshot, snapshotHash, expiresAt }, 201);
+}
+
+async function finalizePreapprovedFoundation(request, env, order, contract, name, title, customerBytes, snapshot, signedAt) {
+  if (env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED !== "true") return json(request, { ok: false, error: "Den fasta signaturvägen är inte aktiverad." }, 503);
+  let fixed;
+  try { fixed = await preapprovedSignature(env); } catch { return json(request, { ok: false, error: "DinPuls privata signatur kunde inte verifieras." }, 503); }
+  if (snapshot.dinpulsFixedSignature?.signatureId !== fixed.snapshot.signatureId || !safeEqual(snapshot.dinpulsFixedSignature.sha256, fixed.digest)) return json(request, { ok: false, error: "Den fasta signaturen matchar inte det låsta avtalet." }, 409);
+  const placements = JSON.parse(contract.placements || "[]");
+  const lines = placements.map(item => ({ municipality: item.municipality, slotId: item.slotId, startDate: item.startDate, endDate: item.endDate }));
+  if (await oldContractConflict(env, lines)) return json(request, { ok: false, error: "En plats är redan upptagen av ett aktivt avtal." }, 409);
+  for (const line of lines) {
+    const hold = await env.DB.prepare("SELECT 1 FROM self_service_holds WHERE order_id=? AND company_user_id=? AND municipality=? AND slot_id=? AND status='held' AND expires_at>?").bind(order.id, contract.company_user_id, line.municipality, line.slotId, signedAt).first();
+    const other = await env.DB.prepare("SELECT 1 FROM self_service_holds WHERE order_id<>? AND municipality=? AND slot_id=? AND start_date<=? AND end_date>=? AND (status='committed' OR (status='held' AND expires_at>?)) LIMIT 1").bind(order.id, line.municipality, line.slotId, line.endDate, line.startDate, signedAt).first();
+    if (!hold || other) return json(request, { ok: false, error: "En platsreservation är inte längre giltig." }, 409);
+  }
+  const keyBase = `contracts/${contract.id}/${order.snapshot_hash}`;
+  const customerKey = `${keyBase}/customer-signature.png`, pdfKey = `${keyBase}/signed-contract.pdf`;
+  if (await env.AD_ASSETS.head(customerKey) || await env.AD_ASSETS.head(pdfKey)) return json(request, { ok: false, error: "En signerad avtalsfil finns redan och får inte ersättas." }, 409);
+  const claim = await env.DB.prepare("UPDATE self_service_orders SET status='signing' WHERE id=? AND company_user_id=? AND status='held' AND expires_at>?").bind(order.id, contract.company_user_id, signedAt).run();
+  if (claim.meta.changes !== 1) return json(request, { ok: false, error: "Avtalet signeras redan eller reservationen har gått ut." }, 409);
+  let pdfBytes, pdfHash;
+  try {
+    pdfBytes = await buildSignedPdf(snapshot, { customer: { name, title, bytes: customerBytes }, dinpuls: { name: "SirElin AB", title: "Fast förhandsgodkänd signatur", mode: "preapproved-fixed", bytes: fixed.bytes } }, signedAt, order.snapshot_hash);
+    pdfHash = bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", pdfBytes)));
+    await env.AD_ASSETS.put(customerKey, customerBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: contract.id, snapshotHash: order.snapshot_hash } });
+    await env.AD_ASSETS.put(pdfKey, pdfBytes, { httpMetadata: { contentType: "application/pdf", cacheControl: "private, no-store" }, customMetadata: { contractId: contract.id, snapshotHash: order.snapshot_hash, pdfHash } });
+    const confirmation = stableStringify({ orderId: order.id, companyId: contract.company_user_id, foundationContractId: contract.id, snapshotHash: order.snapshot_hash, confirmedAt: signedAt, customerSignerName: name, customerSignerTitle: title, dinpulsSignatureId: fixed.snapshot.signatureId, dinpulsSignatureHash: fixed.digest, explicitConfirmation: true, channel: "preapproved-fixed-foundation-signature" });
+    const confirmationHash = await sha256(confirmation);
+    const statements = [env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND status='signing' AND expires_at>?").bind(signedAt, order.id, signedAt)];
+    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), order.id, contract.company_user_id, contract.id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, CONTRACT_VERSION, confirmation, confirmationHash, signedAt));
+    statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND status='held' AND expires_at>?").bind(order.id, signedAt));
+    statements.push(env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, dinpuls_signer_name='SirElin AB', dinpuls_signer_title='Fast förhandsgodkänd signatur', customer_signature_object_key=?, dinpuls_signature_object_key=?, signed_at=?, signed_pdf_object_key=?, signed_pdf_hash=?, status='Aktivt', updated_at=? WHERE id=? AND company_user_id=? AND status='Utkast' AND signed_at IS NULL AND contract_snapshot_hash=?").bind(name, title, customerKey, `r2:dinpuls-contract-signatures/${FIXED_SIGNATURE_KEY}`, signedAt, pdfKey, pdfHash, signedAt, contract.id, contract.company_user_id, order.snapshot_hash));
+    await env.DB.batch(statements);
+  } catch (error) {
+    console.error("DinPuls fast avtalssignering:", error);
+    await Promise.all([customerKey, pdfKey].map(key => env.AD_ASSETS.delete(key)));
+    await env.DB.prepare("UPDATE self_service_orders SET status='held' WHERE id=? AND status='signing'").bind(order.id).run();
+    return json(request, { ok: false, error: "Avtalet kunde inte låsas. Den privata fasta signaturen och reservationen har inte förbrukats." }, 409);
+  }
+  let emailStatus = "sent";
+  try { await sendSignedContractEmail(env, contract, pdfBytes, snapshot); await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(new Date().toISOString(), contract.id).run(); }
+  catch (error) { emailStatus = "failed"; await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error.message, 300), contract.id).run(); }
+  return json(request, { ok: true, contractId: contract.id, orderId: order.id, status: "Aktivt", purchaseCount: placements.length, snapshotHash: order.snapshot_hash, pdfHash, emailStatus, signatureMode: "preapproved-fixed" });
 }
 
 async function signFoundationByCompany(request, env, orderId) {
@@ -1128,8 +1203,13 @@ async function signFoundationByCompany(request, env, orderId) {
   const now = new Date().toISOString();
   if (order.expires_at <= now) return json(request, { ok: false, error: "Platsreservationen har gått ut. Börja om." }, 409);
   if (!safeEqual(order.snapshot_hash, body?.snapshotHash) || !safeEqual(await sha256(order.snapshot_json), order.snapshot_hash)) return json(request, { ok: false, error: "Avtalet som visas matchar inte det låsta underlaget." }, 409);
-  const contract = await env.DB.prepare("SELECT id, contract_snapshot_hash, customer_signature_object_key, status FROM ad_contracts WHERE id=? AND company_user_id=?").bind(order.foundation_contract_id, session.subject_id).first();
+  const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id=? AND c.company_user_id=?`).bind(order.foundation_contract_id, session.subject_id).first();
   if (!contract || contract.status !== "Utkast" || contract.customer_signature_object_key || !safeEqual(contract.contract_snapshot_hash, order.snapshot_hash)) return json(request, { ok: false, error: "Avtalet är inte längre oförändrat och signeringsbart." }, 409);
+  const snapshot = JSON.parse(order.snapshot_json);
+  if (snapshot.dinpulsFixedSignature) {
+    if (!safeEqual(await sha256(contract.contract_snapshot_json || ""), order.snapshot_hash)) return json(request, { ok: false, error: "Avtalets låsta innehåll matchar inte beställningen." }, 409);
+    return finalizePreapprovedFoundation(request, env, order, contract, name, title, bytes, snapshot, now);
+  }
   const key = `contracts/${contract.id}/${order.snapshot_hash}/customer-signature.png`;
   if (await env.AD_ASSETS.head(key)) return json(request, { ok: false, error: "En kundsignatur finns redan och får inte ersättas." }, 409);
   await env.AD_ASSETS.put(key, bytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: contract.id, snapshotHash: order.snapshot_hash } });
@@ -1372,6 +1452,7 @@ export default {
           portalAuthVersion: "hmac-sha256-v1",
           selfServiceSignupEnabled: env.SELF_SERVICE_SIGNUP_ENABLED === "true",
           selfServicePurchaseEnabled: env.SELF_SERVICE_PURCHASE_ENABLED === "true",
+          selfServiceFixedSignatureEnabled: env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED === "true",
           spirisEnabled: false
         });
       }
@@ -1407,6 +1488,8 @@ export default {
       if (request.method === "GET" && url.pathname === "/portal/company/available-slots") return listAvailableCompanySlots(request, env, url);
       if (request.method === "POST" && url.pathname === "/portal/company/orders") return prepareCompanyOrder(request, env);
       if (request.method === "POST" && url.pathname === "/portal/company/foundation/orders") return prepareFoundationOrder(request, env);
+      const fixedSignatureMatch = /^\/portal\/company\/foundation\/orders\/([^/]+)\/dinpuls-signature$/.exec(url.pathname);
+      if (request.method === "GET" && fixedSignatureMatch) return foundationSignatureImage(request, env, decodeURIComponent(fixedSignatureMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/foundation/current") return currentFoundationOrder(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/purchases") return listCompanyPurchases(request, env);
       if (request.method === "GET" && url.pathname === "/portal/admin/billing/basis") return readBillingBasis(request, env, url);

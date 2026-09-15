@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Välj annonsplatser · DinPuls</title>
   <link rel="icon" href="../favicon.ico">
-  <link rel="stylesheet" href="kop.css?v=1">
+  <link rel="stylesheet" href="kop.css?v=2">
 </head>
 <body>
   <main class="buy-shell">
@@ -28,8 +28,8 @@
       </section>
     </div>
     <dialog id="placementDialog"><button id="closePlacement" type="button">Stäng</button><h2 id="placementTitle"></h2><div id="placementDiagram"></div><p id="placementDetails"></p></dialog>
-    <dialog id="orderDialog" class="order-dialog"><button id="closeOrder" type="button">Stäng</button><h2 id="orderTitle">Granska och bekräfta</h2><div id="orderSummary"></div><h3>Fullständiga avtalsvillkor</h3><div id="orderTerms"></div><div id="foundationSignature" hidden><p><strong>Genom att skriva under bekräftar jag att jag har rätt att företräda företaget och att jag godkänner avtalet och dess villkor.</strong></p><div class="signature-fields"><label>Namn<input id="signerName" autocomplete="name"></label><label>Roll/befattning<input id="signerTitle"></label></div><label for="signaturePad">Rita din underskrift</label><canvas id="signaturePad" width="520" height="160"></canvas><button id="clearSignature" type="button">Rensa underskrift</button></div><label class="order-confirm"><input id="confirmTerms" type="checkbox"> Jag bekräftar uttryckligen denna beställning med de visade platserna, priserna, perioderna och avtalsvillkoren.</label><button id="confirmOrder" type="button" disabled>Bekräfta tilläggsköp</button><p id="confirmationMessage" role="status"></p></dialog>
+    <dialog id="orderDialog" class="order-dialog"><button id="closeOrder" type="button">Stäng</button><h2 id="orderTitle">Granska och bekräfta</h2><div id="orderSummary"></div><div id="dinpulsFixedSignature" hidden><strong>SirElin AB:s förhandsgodkända fasta motpartssignatur</strong><img id="dinpulsSignaturePreview" alt="Förhandsgodkänd fast signatur för DinPuls/SirElin AB"><p>Signaturen ingår i samma låsta grundavtal som du granskar. Ingen DinPuls-företrädare undertecknar manuellt vid din signering.</p></div><h3>Fullständiga avtalsvillkor</h3><div id="orderTerms"></div><div id="foundationSignature" hidden><p><strong>Genom att skriva under bekräftar jag att jag har rätt att företräda företaget och att jag godkänner avtalet och dess villkor.</strong></p><div class="signature-fields"><label>Namn<input id="signerName" autocomplete="name"></label><label>Roll/befattning<input id="signerTitle"></label></div><label for="signaturePad">Rita din underskrift</label><canvas id="signaturePad" width="520" height="160"></canvas><button id="clearSignature" type="button">Rensa underskrift</button></div><label class="order-confirm"><input id="confirmTerms" type="checkbox"> Jag bekräftar uttryckligen denna beställning med de visade platserna, priserna, perioderna och avtalsvillkoren.</label><button id="confirmOrder" type="button" disabled>Bekräfta tilläggsköp</button><p id="confirmationMessage" role="status"></p></dialog>
   </main>
-  <script type="module" src="kop.js?v=2"></script>
+  <script type="module" src="kop.js?v=3"></script>
 </body>
 </html>

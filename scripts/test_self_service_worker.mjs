@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { normalizeSwedishOrgNumber } from "../cloudflare/swedish-org-number.js";
 
 const bundle = await build({
@@ -13,20 +15,25 @@ const bundle = await build({
   }}]
 });
 const mail = [];
+const signature = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+const fixedBytes = process.env.DINPULS_TEST_SIGNATURE_PATH ? readFileSync(process.env.DINPULS_TEST_SIGNATURE_PATH) : Buffer.from(signature.split(",")[1], "base64");
+const fixedHash = createHash("sha256").update(fixedBytes).digest("hex");
 const worker = new Miniflare({
   modules: true, script: bundle.outputFiles[0].text,
   compatibilityDate: "2026-08-06", compatibilityFlags: ["nodejs_compat"],
   bindings: { ADMIN_USERNAME: "localadmin", ADMIN_PASSWORD: "LocalAdmin-Test-2026",
     PORTAL_PASSWORD_PEPPER: "LocalPepper-Test-2026", RESEND_API_KEY: "local-test-only",
     PORTAL_EMAIL_FROM: "DinPuls <test@example.invalid>", SELF_SERVICE_SIGNUP_ENABLED: "true",
-    SELF_SERVICE_PURCHASE_ENABLED: "true" },
+    SELF_SERVICE_PURCHASE_ENABLED: "true", SELF_SERVICE_FIXED_SIGNATURE_ENABLED: "true",
+    SELF_SERVICE_FIXED_SIGNATURE_SHA256: fixedHash },
   outboundService: async request => {
     if (request.url !== "https://api.resend.com/emails") throw new Error("Oväntat externt anrop");
     mail.push(await request.json());
     return new Response(JSON.stringify({ id: `mail-${mail.length}` }), { status: 200, headers: { "Content-Type": "application/json" } });
   },
-  d1Databases: { DB: "self-service-test-db" }, r2Buckets: ["AD_ASSETS"]
+  d1Databases: { DB: "self-service-test-db" }, r2Buckets: ["AD_ASSETS", "CONTRACT_SIGNATURES"]
 });
+await (await worker.getR2Bucket("CONTRACT_SIGNATURES")).put("approved/sirelin-ab/v1.png", fixedBytes);
 const endpoint = "http://dinpuls.test";
 const send = (path, method = "GET", body, token) => worker.dispatchFetch(`${endpoint}${path}`, {
   method, headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -51,6 +58,7 @@ try {
   const health = await read("/health");
   assert.equal(health.selfServiceSignupEnabled, true);
   assert.equal(health.selfServicePurchaseEnabled, true);
+  assert.equal(health.selfServiceFixedSignatureEnabled, true);
   assert.equal(health.spirisEnabled, false);
   await read("/portal/company/register", "POST", { ...signup, orgNo: orgNo.slice(0, 9) + ((Number(orgNo[9]) + 1) % 10) }, null, 400);
   assert.equal(mail.length, 0);
@@ -82,7 +90,6 @@ try {
     placements: [{ slotId: "P1-04", module: "Startsida", group: "premium-ad-1", label: "Plats 4", location: "Övre annonsblocket", page: "index.html" }],
     startDate: start, endDate: end, billingType: "annual", renewalType: "annual-review", termsReviewed: true
   }, admin.token, 201);
-  const signature = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
   await read(`/portal/admin/contracts/${contractId}/sign`, "POST", { customerSignerName: "Kund Test", customerSignerTitle: "Företrädare",
     dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature
   }, admin.token);
@@ -120,14 +127,27 @@ try {
     { municipality: "Säffle", slotId: "P3-21", startDate: start, endDate: end }
   ], billingType: "annual" }, session.token, 201);
   assert.equal(first.snapshot.contractVersion, "4.1");
+  assert.equal(first.snapshot.dinpulsFixedSignature.mode, "preapproved-fixed");
+  assert.equal(first.snapshot.dinpulsFixedSignature.signer, "SirElin AB");
+  assert.equal(first.snapshot.dinpulsFixedSignature.sha256, fixedHash);
   assert.equal(first.snapshot.placements.length, 2);
   assert.equal(first.snapshot.company.address, signup.address);
   assert.equal(first.snapshot.billing.invoiceVat, 2500);
+  assert.equal((await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`)).status, 401, "Originalet får inte läcka utan autentisering");
+  assert.equal((await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`, "GET", null, buyer.token)).status, 404, "En annan kund får inte se signaturen i detta avtal");
+  const preview = await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`, "GET", null, session.token);
+  assert.equal(preview.status, 200);
+  assert.equal(preview.headers.get("cache-control"), "private, no-store");
+  assert.equal(createHash("sha256").update(Buffer.from(await preview.arrayBuffer())).digest("hex"), fixedHash);
+  assert.equal((await send("/ads/assets/approved%2Fsirelin-ab%2Fv1.png")).status, 404, "Originalet får inte vara en publik annonsasset");
   await read(`/portal/company/foundation/orders/${first.orderId}/sign`, "POST", { customerSignerName: "Anna Test", customerSignerTitle: "Företrädare", customerSignature: signature, snapshotHash: "fel", explicitConfirmation: true }, session.token, 409);
   const customerSigned = await read(`/portal/company/foundation/orders/${first.orderId}/sign`, "POST", { customerSignerName: "Anna Test", customerSignerTitle: "Företrädare", customerSignature: signature, snapshotHash: first.snapshotHash, explicitConfirmation: true }, session.token);
-  assert.equal(customerSigned.status, "waiting_for_dinpuls_signature");
-  const coSigned = await read(`/portal/admin/contracts/${first.contractId}/sign`, "POST", { dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", dinpulsSignature: signature, snapshotHash: first.snapshotHash }, admin.token);
-  assert.equal(coSigned.status, "Aktivt");
+  assert.equal(customerSigned.status, "Aktivt");
+  assert.equal(customerSigned.signatureMode, "preapproved-fixed");
+  await read(`/portal/admin/contracts/${first.contractId}/sign`, "POST", { dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", dinpulsSignature: signature, snapshotHash: first.snapshotHash }, admin.token, 409);
+  const signedCopy = await send(`/portal/company/contracts/${first.contractId}/pdf`, "GET", null, session.token);
+  assert.equal(signedCopy.status, 200);
+  assert.ok((await signedCopy.arrayBuffer()).byteLength > 2000, "Signerad PDF saknas");
   const firstPurchases = await read("/portal/company/purchases", "GET", null, session.token);
   assert.equal(firstPurchases.purchases.length, 2);
   assert.equal(new Set(firstPurchases.purchases.map(item => item.municipality)).size, 2);

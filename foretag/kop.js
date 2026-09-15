@@ -4,6 +4,7 @@ const cart = new Map();
 let apiBase = "", slots = [];
 let preparedOrder = null;
 let hasFoundation = false, signatureDrawn = false;
+let fixedSignatureImageUrl = null;
 const token = () => sessionStorage.getItem("dp-company-session") || "";
 
 function endDate(start) {
@@ -23,7 +24,7 @@ function renderCart() {
   document.querySelectorAll("[data-remove]").forEach(button => button.onclick = () => { cart.delete(button.dataset.remove); renderCart(); });
 }
 
-function displayOrder(data) {
+async function displayOrder(data) {
   preparedOrder = data;
   const snapshot = data.snapshot;
   const foundation = !hasFoundation;
@@ -34,6 +35,15 @@ function displayOrder(data) {
   const yearly = foundation ? snapshot.billing.annualTotal : snapshot.totals.twelveMonthsExVat;
   $("#orderTitle").textContent = foundation ? "Granska och signera grundavtalet" : "Granska och bekräfta tilläggsköpet";
   $("#foundationSignature").hidden = !foundation;
+  if (fixedSignatureImageUrl) { URL.revokeObjectURL(fixedSignatureImageUrl); fixedSignatureImageUrl = null; }
+  $("#dinpulsFixedSignature").hidden = true;
+  if (foundation && snapshot.dinpulsFixedSignature?.mode === "preapproved-fixed") {
+    const imageResponse = await fetch(`${apiBase}/portal/company/foundation/orders/${encodeURIComponent(data.orderId)}/dinpuls-signature`, { headers: { Authorization: `Bearer ${token()}` }, cache: "no-store" });
+    if (!imageResponse.ok) throw new Error("DinPuls privata fasta signatur kunde inte verifieras för detta avtal.");
+    fixedSignatureImageUrl = URL.createObjectURL(await imageResponse.blob());
+    $("#dinpulsSignaturePreview").src = fixedSignatureImageUrl;
+    $("#dinpulsFixedSignature").hidden = false;
+  }
   $("#confirmOrder").textContent = foundation ? "Signera grundavtal" : "Bekräfta tilläggsköp";
   if (foundation) clearSignature();
   $("#orderSummary").innerHTML = `<p><strong>${escapeHtml(snapshot.company.name)}</strong> · Org.nr ${escapeHtml(snapshot.company.orgNo)}<br>${escapeHtml(snapshot.company.address)}, ${escapeHtml(snapshot.company.postalCode)} ${escapeHtml(snapshot.company.city)}<br>${escapeHtml(snapshot.company.contact)} · ${escapeHtml(snapshot.company.email)} · ${escapeHtml(snapshot.company.phone)}</p><p>${foundation ? `Avtal ${escapeHtml(data.contractId)}` : `Grundavtal ${escapeHtml(snapshot.foundationContractId)}`} · version ${escapeHtml(snapshot.contractVersion)}</p><ul>${lines}</ul><p>Per debitering: ${net.toLocaleString("sv-SE")} kr exkl. moms + ${vat.toLocaleString("sv-SE")} kr moms = <strong>${total.toLocaleString("sv-SE")} kr</strong>. Totalt över 12 månader: ${yearly.toLocaleString("sv-SE")} kr exkl. moms.</p><p>Reservationen gäller till ${escapeHtml(new Date(data.expiresAt).toLocaleString("sv-SE"))}.</p>`;
@@ -54,7 +64,7 @@ async function prepareOrder() {
     const response = await fetch(`${apiBase}${path}`, { method: "POST", headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" }, body: JSON.stringify({ placements, billingType }), cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Beställningen kunde inte reserveras.");
-    displayOrder(data);
+    await displayOrder(data);
     $("#orderMessage").textContent = "Platserna är reserverade i 20 minuter. Granska hela beställningen före bekräftelse.";
   } catch (error) { $("#orderMessage").textContent = error.message; }
   finally { $("#prepareOrder").disabled = cart.size === 0; }
@@ -71,7 +81,7 @@ async function confirmOrder() {
     const response = await fetch(`${apiBase}${path}`, { method: "POST", headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Beställningen kunde inte slutföras.");
-    $("#confirmationMessage").innerHTML = foundation ? `Din underskrift är låst i avtal ${escapeHtml(data.contractId)}. DinPuls behöver underteckna separat innan avtalet blir bindande. Du får tillgång till avtalskopian i portalen efter båda underskrifterna.` : `Beställning ${escapeHtml(data.orderId)} är registrerad. ${escapeHtml(data.purchaseCount)} annonsplats(er) väntar på lansering och fakturering. <a href="./">Se dina köp i företagsportalen</a>.`;
+    $("#confirmationMessage").innerHTML = foundation ? (data.status === "Aktivt" ? `Grundavtal ${escapeHtml(data.contractId)} är låst med kundens underskrift och SirElin AB:s förhandsgodkända signatur. ${escapeHtml(data.purchaseCount)} plats(er) är registrerade. <a href="./">Se dina köp och avtalskopian i portalen</a>.` : `Din underskrift är låst i avtal ${escapeHtml(data.contractId)}. DinPuls behöver underteckna separat innan avtalet blir bindande. Du får tillgång till avtalskopian i portalen efter båda underskrifterna.`) : `Beställning ${escapeHtml(data.orderId)} är registrerad. ${escapeHtml(data.purchaseCount)} annonsplats(er) väntar på lansering och fakturering. <a href="./">Se dina köp i företagsportalen</a>.`;
     cart.clear(); renderCart(); preparedOrder = null;
   } catch (error) { $("#confirmationMessage").textContent = error.message; $("#confirmOrder").disabled = false; }
 }
@@ -146,7 +156,7 @@ try {
   document.querySelectorAll('input[name="billing"]').forEach(input => input.onchange = renderCart);
   $("#closePlacement").onclick = () => $("#placementDialog").close();
   $("#prepareOrder").onclick = prepareOrder;
-  $("#closeOrder").onclick = () => $("#orderDialog").close();
+  $("#closeOrder").onclick = () => { $("#orderDialog").close(); if (fixedSignatureImageUrl) { URL.revokeObjectURL(fixedSignatureImageUrl); fixedSignatureImageUrl = null; } };
   $("#confirmTerms").onchange = () => $("#confirmOrder").disabled = !$("#confirmTerms").checked;
   $("#confirmOrder").onclick = confirmOrder;
   enableSignature();
