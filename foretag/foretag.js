@@ -33,6 +33,11 @@
     const config = await response.json();
     if (!config.enabled || !config.apiBase) throw new Error("Företagsportalen är inte aktiverad.");
     apiBase = config.apiBase.replace(/\/$/, "");
+    try {
+      const status = await fetch(`${apiBase}/health`, { cache: "no-store" }).then(response => response.json());
+      $("#registerEntry").hidden = !status.selfServiceSignupEnabled;
+      $("#buyEntry").hidden = !status.selfServicePurchaseEnabled;
+    } catch { $("#registerEntry").hidden = true; $("#buyEntry").hidden = true; }
   }
 
   function showLogin(message = "") {

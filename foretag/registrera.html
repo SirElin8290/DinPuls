@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Skapa företagskonto · DinPuls</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="konto.css?v=1">
+  <link rel="stylesheet" href="registrera.css?v=1">
+</head>
+<body>
+  <main class="account-stage registration-stage">
+    <div class="account-brand"><img src="../assets/compass-mark.svg" alt=""><span>DinPuls.se</span></div>
+    <section class="account-card registration-card">
+      <p class="label">FÖRETAGSPORTAL</p>
+      <h1>Skapa företagskonto</h1>
+      <p>Kontot hör till företaget och kan senare användas för annonser i flera kommuner. Ett konto innebär ännu inget köp eller signerat avtal.</p>
+      <p id="registrationUnavailable" role="status">Kontrollerar om självregistrering är öppen…</p>
+      <form id="registrationForm" hidden>
+        <div class="registration-grid">
+          <label>Organisationsnummer<input name="orgNo" inputmode="numeric" autocomplete="off" placeholder="556123-4567" required></label>
+          <label>Företagsnamn<input name="company" autocomplete="organization" required></label>
+          <label class="wide">Adress<input name="address" autocomplete="street-address" required></label>
+          <label>Postnummer<input name="postalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{3} ?[0-9]{2}" required></label>
+          <label>Ort<input name="city" autocomplete="address-level2" required></label>
+          <label>Kontaktperson<input name="contact" autocomplete="name" required></label>
+          <label>Telefon<input name="phone" type="tel" autocomplete="tel" required></label>
+          <label class="wide">E-post för inloggning<input name="email" type="email" autocomplete="email" required></label>
+        </div>
+        <p class="hint">Organisationsnumret kontrolleras formellt. Det bevisar inte att företaget är registrerat eller att du företräder det.</p>
+        <button class="button" type="submit">Skapa konto och skicka aktiveringslänk</button>
+        <p id="registrationResult" role="status" hidden></p>
+      </form>
+      <p><a href="./">Till företagsinloggningen</a></p>
+    </section>
+  </main>
+  <script type="module" src="registrera.js?v=1"></script>
+</body>
+</html>

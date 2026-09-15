@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Välj annonsplatser · DinPuls</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="kop.css?v=1">
+</head>
+<body>
+  <main class="buy-shell">
+    <header><a href="./">← Företagsportalen</a><strong>DinPuls.se</strong></header>
+    <section class="buy-heading"><p>FÖRETAGSPORTAL</p><h1>Välj annonsplatser</h1><p>Se lediga platser, förstå placeringen och sammanställ flera kommuner. Köp blir bindande först när rätt avtal och signering är klara.</p></section>
+    <p id="buyStatus" role="status">Kontrollerar annonsköpstjänsten…</p>
+    <div id="buyApp" hidden>
+      <section class="buy-panel">
+        <h2>1. Välj kommun och avtalsstart</h2>
+        <div class="buy-filters"><label>Kommun<select id="buyMunicipality"></select></label><label>Startdatum<input id="buyStart" type="date"></label><button id="findSlots" type="button">Visa lediga platser</button></div>
+        <p>Annonsperioden är 12 månader. Ett företag kan välja platser i flera kommuner oavsett sin registrerade adress.</p>
+      </section>
+      <section class="buy-panel"><h2>2. Lediga annonsplatser</h2><p id="slotMessage" role="status"></p><div id="slotResults" class="slot-results"></div></section>
+      <section class="buy-panel"><h2>3. Sammanställning</h2><div id="buyCart"></div>
+        <fieldset><legend>Betalning per plats</legend><label><input type="radio" name="billing" value="monthly" checked> 500 kr/månad exkl. moms</label><label><input type="radio" name="billing" value="annual"> 5 000 kr/12 månader exkl. moms, årsvis i förskott</label></fieldset>
+        <div id="buyTotals"></div>
+        <p class="buy-note">Avtalsversion och fullständiga villkor ska visas före bindande signering. Denna vy gör ännu inga köp.</p>
+      </section>
+    </div>
+    <dialog id="placementDialog"><button id="closePlacement" type="button">Stäng</button><h2 id="placementTitle"></h2><div id="placementDiagram"></div><p id="placementDetails"></p></dialog>
+  </main>
+  <script type="module" src="kop.js?v=1"></script>
+</body>
+</html>

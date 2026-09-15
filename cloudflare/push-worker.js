@@ -59,10 +59,15 @@ async function ensureDatabase(env) {
   const existingUserColumns = new Set((userColumns.results || []).map(column => column.name));
   for (const [name, definition] of [
     ["activated_at", "TEXT"],
-    ["welcome_sent_at", "TEXT"]
+    ["welcome_sent_at", "TEXT"],
+    ["address", "TEXT NOT NULL DEFAULT ''"],
+    ["postal_code", "TEXT NOT NULL DEFAULT ''"],
+    ["city", "TEXT NOT NULL DEFAULT ''"],
+    ["registration_source", "TEXT NOT NULL DEFAULT 'admin'"]
   ]) {
     if (!existingUserColumns.has(name)) await env.DB.prepare(`ALTER TABLE business_users ADD COLUMN ${name} ${definition}`).run();
   }
+  await env.DB.prepare("CREATE UNIQUE INDEX IF NOT EXISTS business_users_self_service_org ON business_users(org_no) WHERE registration_source = 'self-service'").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_contracts (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_version TEXT NOT NULL, municipality TEXT NOT NULL, " +
@@ -537,7 +542,9 @@ async function sendAccountEmail(env, user, token, purpose) {
   const title = activation ? "Välkommen till DinPuls" : "Återställ ditt lösenord";
   const button = activation ? "Skapa ditt lösenord" : "Välj ett nytt lösenord";
   const introduction = activation
-    ? `Avtalet för ${htmlEscape(user.company)} är nu aktiverat. I företagsportalen kan ni hantera banners och schemaläggning samt se statistik och avtalsinformation.`
+    ? user.registration_source === "self-service"
+      ? `Företagskontot för ${htmlEscape(user.company)} är skapat. Välj ett lösenord för att logga in. Inget annonsavtal har ännu tecknats.`
+      : `Avtalet för ${htmlEscape(user.company)} är nu aktiverat. I företagsportalen kan ni hantera banners och schemaläggning samt se statistik och avtalsinformation.`
     : "Vi har fått en begäran om att återställa lösenordet till ert företagskonto.";
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -547,7 +554,7 @@ async function sendAccountEmail(env, user, token, purpose) {
       to: [user.email],
       subject,
       html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>${title}</h1><p>Hej ${htmlEscape(user.contact || user.company)},</p><p>${introduction}</p><p style="margin:30px 0"><a href="${accountLink(token, purpose)}" style="background:#8d4d24;color:#fff;text-decoration:none;padding:14px 22px;border-radius:8px;font-weight:700">${button}</a></p><p>Länken gäller i 48 timmar och kan bara användas en gång.</p><p>Om ni behöver hjälp, kontakta DinPuls genom kontaktuppgifterna på dinpuls.se.</p></div>`,
-      text: `Hej ${user.contact || user.company},\n\n${activation ? `Avtalet för ${user.company} är nu aktiverat.` : "Vi har fått en begäran om lösenordsåterställning."}\n\n${button}: ${accountLink(token, purpose)}\n\nLänken gäller i 48 timmar och kan bara användas en gång.\n\nDinPuls`
+      text: `Hej ${user.contact || user.company},\n\n${activation ? user.registration_source === "self-service" ? `Företagskontot för ${user.company} är skapat. Inget annonsavtal har ännu tecknats.` : `Avtalet för ${user.company} är nu aktiverat.` : "Vi har fått en begäran om lösenordsåterställning."}\n\n${button}: ${accountLink(token, purpose)}\n\nLänken gäller i 48 timmar och kan bara användas en gång.\n\nDinPuls`
     })
   });
   if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
@@ -557,6 +564,53 @@ async function issueAndSendAccountToken(env, user, purpose) {
   const created = await createAccountToken(env, user.id, purpose);
   await sendAccountEmail(env, user, created.token, purpose);
   return created;
+}
+
+async function registerCompany(request, env) {
+  // Registration stays disabled until the existing two-party contract flow has a safe owner-approved self-service path.
+  if (env.SELF_SERVICE_SIGNUP_ENABLED !== "true") return json(request, { ok: false, error: "Självregistrering är inte aktiverad ännu." }, 503);
+  if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM || !env.PORTAL_PASSWORD_PEPPER) return json(request, { ok: false, error: "Kontotjänsten är inte konfigurerad." }, 503);
+  const body = await readBody(request);
+  const email = cleanText(body.email, 254).toLowerCase();
+  const limit = await checkLoginLimit(request, env, email, "company-registration");
+  if (!limit.allowed) return json(request, { ok: false, error: "För många registreringsförsök. Försök igen senare." }, 429);
+  await recordLoginFailure(env, limit.key);
+  const orgNo = normalizeSwedishOrgNumber(body.orgNo);
+  const company = cleanText(body.company), address = cleanText(body.address), postalCode = cleanText(body.postalCode, 20);
+  const city = cleanText(body.city), contact = cleanText(body.contact), phone = cleanText(body.phone, 40);
+  if (!orgNo || !company || !address || !/^\d{3}\s?\d{2}$/.test(postalCode) || !city || !contact || !phone || !validEmail(email)) {
+    return json(request, { ok: false, error: "Fyll i giltigt organisationsnummer och samtliga företags- och kontaktuppgifter." }, 400);
+  }
+  // One business identity, irrespective of where it later advertises. Never overwrite an admin-created account.
+  const accounts = await env.DB.prepare("SELECT id, email, org_no, company, contact, active, registration_source FROM business_users").all();
+  const existing = (accounts.results || []).find(account => account.email === email || normalizeSwedishOrgNumber(account.org_no) === orgNo);
+  if (existing) {
+    if (existing.email === email && normalizeSwedishOrgNumber(existing.org_no) === orgNo && existing.registration_source === "self-service" && !Number(existing.active)) {
+      try {
+        await issueAndSendAccountToken(env, existing, "activate-account");
+        await env.DB.prepare("UPDATE business_users SET welcome_sent_at = ? WHERE id = ?").bind(new Date().toISOString(), existing.id).run();
+        return json(request, { ok: true, message: "En ny aktiveringslänk har skickats till företagets e-postadress." });
+      } catch { return json(request, { ok: false, error: "Aktiveringsmejlet kunde inte skickas just nu. Försök igen senare." }, 502); }
+    }
+    return json(request, { ok: false, error: "Företaget eller e-postadressen finns redan. Använd inloggning eller kontakta DinPuls." }, 409);
+  }
+  const now = new Date().toISOString();
+  const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+  const unusableHash = await sha256(bytesToHex(crypto.getRandomValues(new Uint8Array(32))));
+  let id;
+  try {
+    const result = await env.DB.prepare("INSERT INTO business_users (email, password_salt, password_hash, password_iterations, company, org_no, contact, phone, municipality, address, postal_code, city, registration_source, active, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?, ?, ?, '', ?, ?, ?, 'self-service', 0, ?, ?)")
+      .bind(email, salt, unusableHash, company, orgNo, contact, phone, address, postalCode.replace(/\s/g, ""), city, now, now).run();
+    id = result.meta.last_row_id;
+  } catch { return json(request, { ok: false, error: "Kontot kunde inte skapas. Kontrollera om företaget redan är registrerat." }, 409); }
+  try {
+    await issueAndSendAccountToken(env, { id, email, company, contact, registration_source: "self-service" }, "activate-account");
+    await env.DB.prepare("UPDATE business_users SET welcome_sent_at = ? WHERE id = ?").bind(new Date().toISOString(), id).run();
+  } catch (error) {
+    console.error("DinPuls självregistrering – aktiveringsmejl:", error);
+    return json(request, { ok: false, error: "Kontot är skapat men aktiveringsmejlet kunde inte skickas. Kontakta DinPuls för en ny länk." }, 502);
+  }
+  return json(request, { ok: true, message: "Kontot är skapat. Följ aktiveringslänken i mejlet för att välja lösenord." }, 201);
 }
 
 async function verifyAccountToken(request, env) {
@@ -905,10 +959,49 @@ async function resendActivation(request, env, contractId) {
 async function companyAccount(request, env) {
   const session = await requireSession(request, env, "company");
   if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
-  const user = await env.DB.prepare("SELECT id, email, company, org_no, contact, phone, municipality FROM business_users WHERE id = ? AND active = 1").bind(session.subject_id).first();
+  const user = await env.DB.prepare("SELECT id, email, company, org_no, contact, phone, municipality, address, postal_code, city FROM business_users WHERE id = ? AND active = 1").bind(session.subject_id).first();
   if (!user) return json(request, { ok: false, error: "Företagskontot är inte aktivt." }, 403);
   const result = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.company_user_id = ? AND c.status = 'Aktivt' ORDER BY c.updated_at DESC LIMIT 1`).bind(user.id).first();
-  return json(request, { ok: true, profile: { company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, municipality: user.municipality }, contract: result ? contractFromRow(result) : null });
+  return json(request, { ok: true, profile: { company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, municipality: user.municipality, address: user.address, postalCode: user.postal_code, city: user.city }, contract: result ? contractFromRow(result) : null });
+}
+
+function slotDisplay(slot, municipality) {
+  const home = /^P([123])-\d{2}$/.exec(slot.id);
+  if (home) {
+    const block = Number(home[1]);
+    const withinBlock = slot.position - (block - 1) * 10;
+    const blockLabel = ["Övre annonsblocket", "Mellersta annonsblocket", "Nedre annonsblocket"][block - 1];
+    return { ...slot, municipality, blockLabel, withinBlock, blockCount: 10,
+      displayLabel: `${municipality} → Startsidan → ${blockLabel} → Plats ${withinBlock} av 10` };
+  }
+  const blockCount = globalThis.DINPULS_AD_INVENTORY.filter(item => item.page === slot.page).length;
+  return { ...slot, municipality, blockLabel: slot.module, withinBlock: slot.position, blockCount,
+    displayLabel: `${municipality} → ${slot.module} → Annonsplats ${slot.position} av ${blockCount}` };
+}
+
+async function listAvailableCompanySlots(request, env, url) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (env.SELF_SERVICE_PURCHASE_ENABLED !== "true") return json(request, { ok: false, error: "Annonsköp öppnar när avtals- och signeringsflödet är färdigt." }, 503);
+  const municipality = cleanText(url.searchParams.get("municipality"), 80);
+  const startDate = cleanText(url.searchParams.get("startDate"), 10);
+  const endDate = cleanText(url.searchParams.get("endDate"), 10);
+  if (!isSupportedMunicipality(municipality) || !isTwelveMonthContract(startDate, endDate)) {
+    return json(request, { ok: false, error: "Välj en kommun och en avtalsperiod om 12 månader." }, 400);
+  }
+  const reservations = await env.DB.prepare("SELECT slot_id FROM contract_slot_reservations WHERE municipality = ? AND start_date <= ? AND end_date >= ?")
+    .bind(municipality, endDate, startDate).all();
+  const occupied = new Set((reservations.results || []).map(row => row.slot_id));
+  // Older active contracts may predate the reservation table.
+  const legacy = await env.DB.prepare("SELECT placements FROM ad_contracts WHERE municipality = ? AND status = 'Aktivt' AND start_date <= ? AND end_date >= ?")
+    .bind(municipality, endDate, startDate).all();
+  for (const row of legacy.results || []) {
+    try { for (const item of JSON.parse(row.placements || "[]")) occupied.add(item.slotId); }
+    catch { return json(request, { ok: false, error: "Äldre avtalsdata kunde inte verifieras. Lediga platser visas inte." }, 503); }
+  }
+  return json(request, { ok: true, municipality, startDate, endDate,
+    slots: globalThis.DINPULS_AD_INVENTORY.filter(slot => !occupied.has(slot.id)).map(slot => slotDisplay(slot, municipality)),
+    pricing: { monthlyExVat: BILLING.monthly.unitPrice, annualExVat: BILLING.annual.unitPrice, vatRate: 0.25 } });
 }
 
 async function updateCompanyProfile(request, env) {
@@ -1031,7 +1124,10 @@ export default {
           portalConfigured: Boolean(env.ADMIN_USERNAME && env.ADMIN_PASSWORD && env.PORTAL_PASSWORD_PEPPER),
           portalEmailConfigured: Boolean(env.RESEND_API_KEY && env.PORTAL_EMAIL_FROM),
           adAssetsConfigured: Boolean(env.AD_ASSETS),
-          portalAuthVersion: "hmac-sha256-v1"
+          portalAuthVersion: "hmac-sha256-v1",
+          selfServiceSignupEnabled: env.SELF_SERVICE_SIGNUP_ENABLED === "true",
+          selfServicePurchaseEnabled: env.SELF_SERVICE_PURCHASE_ENABLED === "true",
+          spirisEnabled: false
         });
       }
       if (request.method === "GET" && url.pathname === "/config") {
@@ -1042,6 +1138,7 @@ export default {
       }
       if (request.method === "POST" && url.pathname === "/portal/auth/admin") return adminLogin(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/company") return companyLogin(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/company/register") return registerCompany(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/logout") return logoutPortal(request, env);
       if (request.method === "POST" && url.pathname === "/portal/account/token/verify") return verifyAccountToken(request, env);
       if (request.method === "POST" && url.pathname === "/portal/account/password") return completeAccountPassword(request, env);
@@ -1060,6 +1157,7 @@ export default {
       const contractEmailMatch = /^\/portal\/admin\/contracts\/([^/]+)\/email$/.exec(url.pathname);
       if (request.method === "POST" && contractEmailMatch) return resendSignedContractEmail(request, env, decodeURIComponent(contractEmailMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/company/available-slots") return listAvailableCompanySlots(request, env, url);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/stats") return companyStats(request, env);
@@ -1085,3 +1183,5 @@ import webpush from "web-push";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { BILLING, CONTRACT_TERMS, CONTRACT_VERSION, calculateContractPrice, stableStringify } from "./contract-v4.js";
 import municipalityConfig from "../data/municipalities.json";
+import { normalizeSwedishOrgNumber } from "./swedish-org-number.js";
+import "../admin/ad-inventory.js";

@@ -39,5 +39,6 @@
     };
   }));
 
-  window.DINPULS_AD_INVENTORY = Object.freeze([...homepageSlots, ...subpageSlots].map(slot => Object.freeze(slot)));
+  const target = typeof window === "undefined" ? globalThis : window;
+  target.DINPULS_AD_INVENTORY = Object.freeze([...homepageSlots, ...subpageSlots].map(slot => Object.freeze(slot)));
 })();
