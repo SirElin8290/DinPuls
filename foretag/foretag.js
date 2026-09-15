@@ -48,12 +48,14 @@
 
   async function showApp() {
     const details = await api("/portal/company/me");
-    let schedule = { banners: [] }, stats = null, bannerScheduleReady = true;
+    let schedule = { banners: [] }, stats = null, purchaseData = { purchases: [] }, bannerScheduleReady = true;
     try { schedule = await api("/portal/company/banners"); }
     catch { bannerScheduleReady = false; }
     try { stats = await api("/portal/company/stats"); }
     catch { stats = null; }
-    account = { ...details, banners: schedule.banners || [], stats, bannerScheduleReady };
+    try { purchaseData = await api("/portal/company/purchases"); }
+    catch { purchaseData = { purchases: [] }; }
+    account = { ...details, banners: schedule.banners || [], purchases: purchaseData.purchases || [], stats, bannerScheduleReady };
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
     renderCompany();
@@ -73,8 +75,15 @@
     const profile = account.profile || {};
     const contract = account.contract;
     const placements = contract?.placements || [];
+    const bannerPlacements = [
+      ...(contract?.hasCustomerSignature ? [] : placements).map(item => ({ key: `base:${item.slotId}`, slotId: item.slotId, municipality: contract.municipality, location: item.location, purchaseId: null, status: "Avtalad" })),
+      ...(account.purchases || []).map(item => ({ key: `purchase:${item.id}`, slotId: item.slot_id, municipality: item.municipality, location: item.placement_label, purchaseId: item.id, status: item.publication_status === "active" ? "Aktiv" : "Väntar på lansering" }))
+    ];
+    account.bannerPlacements = bannerPlacements;
     $("#accountName").textContent = profile.company || "Företagskonto";
-    $("#companyMunicipality").textContent = `⌖ ${profile.municipality || "–"}`;
+    const municipalities = [...new Set([profile.municipality, ...(account.purchases || []).map(item => item.municipality)].filter(Boolean))];
+    $("#companyMunicipality").textContent = `⌖ ${municipalities.join(", ") || "–"}`;
+    $("#companyPurchaseRows").innerHTML = account.purchases.length ? account.purchases.map(item => `<article class="purchase-row"><strong>${escapeHtml(item.placement_label)}</strong><span>Plats-ID: ${escapeHtml(item.slot_id)} · Order ${escapeHtml(item.order_id)}</span><span>${escapeHtml(item.start_date)} – ${escapeHtml(item.end_date)} · ${escapeHtml(item.billing_type === "annual" ? "Årsvis i förskott" : "Månadsvis")}</span><span>${Number(item.unit_price).toLocaleString("sv-SE")} kr exkl. moms + ${Number(item.vat_amount).toLocaleString("sv-SE")} kr moms · Status: ${escapeHtml(item.billing_status === "waiting_for_launch" ? "Väntar på lansering" : item.billing_status)}</span></article>`).join("") : '<p class="muted">Inga tilläggsköp har registrerats ännu. Platser i det ursprungliga signerade avtalet visas under Avtal.</p>';
     const stats = account.stats || { activeBanners: 0, impressions: 0, clicks: 0, ctr: 0 };
     $("#activeBanners").textContent = Number(stats.activeBanners || 0).toLocaleString("sv-SE");
     $("#bannerViews").textContent = Number(stats.impressions || 0).toLocaleString("sv-SE");
@@ -83,14 +92,14 @@
     const priceLabel = contract?.billingType === "complimentary" ? "Kostnadsfri annonsplats" : contract?.billingType === "annual" ? `${Number(contract?.annualTotal || 0).toLocaleString("sv-SE")} kr / 12 månader exkl. moms` : `${Number(contract?.monthlyTotal || 0).toLocaleString("sv-SE")} kr / månad exkl. moms`;
     $("#contractSummary").innerHTML = contract ? `<p>Avtalsperiod<br><strong>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</strong></p><p>Månader kvar<br><strong class="months">${monthsLeft(contract.endDate)} månader</strong></p><p>Annonsplatser<br><strong>${placements.map(item => escapeHtml(item.slotId)).join(", ") || "–"}</strong></p><p>Avtalspris<br><strong>${priceLabel}</strong></p>` : "<p>Inget aktivt avtal hittades.</p>";
     const banners = account.banners || [];
-    $("#companyBannerRows").innerHTML = placements.length ? placements.map(placement => {
-      const slotBanners = banners.filter(item => item.slotId === placement.slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+    $("#companyBannerRows").innerHTML = bannerPlacements.length ? bannerPlacements.map(placement => {
+      const slotBanners = banners.filter(item => placement.purchaseId ? item.purchaseId === placement.purchaseId : !item.purchaseId && item.slotId === placement.slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
       const current = slotBanners.filter(item => Date.parse(item.startAt) <= Date.now()).at(-1);
       const next = slotBanners.find(item => Date.parse(item.startAt) > Date.now());
       const preview = current ? `<div class="demo-banner company-banner-thumb" style="background-image:url('${escapeHtml(apiBase + current.imageUrl)}')"></div>` : '<div class="demo-banner">Ingen publicerad banner</div>';
-      return `<div class="banner-row"><b>${escapeHtml(placement.slotId)}<br><small>${escapeHtml(placement.location)}</small></b>${preview}<span class="status">${current ? "Visas nu" : "Avtalad"}</span><span>${next ? formatSwedishDateTime(next.startAt) : "–"}</span><span>–</span><span>–</span><button class="change-banner" data-slot="${escapeHtml(placement.slotId)}">Planera</button></div>`;
+      return `<div class="banner-row"><b>${escapeHtml(placement.municipality)} · ${escapeHtml(placement.slotId)}<br><small>${escapeHtml(placement.location)}</small></b>${preview}<span class="status">${current ? "Visas nu" : placement.status}</span><span>${next ? formatSwedishDateTime(next.startAt) : "–"}</span><span>–</span><span>–</span><button class="change-banner" data-key="${escapeHtml(placement.key)}">Planera</button></div>`;
     }).join("") : '<p class="muted">Inga annonsplatser i ett aktivt avtal.</p>';
-    $("#bannerSlot").innerHTML = placements.map(placement => `<option value="${escapeHtml(placement.slotId)}">${escapeHtml(placement.slotId)} · ${escapeHtml(placement.location)}</option>`).join("");
+    $("#bannerSlot").innerHTML = bannerPlacements.map(placement => `<option value="${escapeHtml(placement.key)}">${escapeHtml(placement.municipality)} · ${escapeHtml(placement.location)}</option>`).join("");
     const included = Number(contract?.includedChanges || 0);
     $("#companyContractDetail").innerHTML = contract ? `<article class="panel contract-document"><h3>Annonsavtal ${escapeHtml(contract.id)}</h3><dl class="contract-list"><div><dt>Företag</dt><dd>${escapeHtml(profile.company)}</dd></div><div><dt>Organisationsnummer</dt><dd>${escapeHtml(profile.orgNo)}</dd></div><div><dt>Avtalsversion</dt><dd>${escapeHtml(contract.contractVersion)}</dd></div><div><dt>Avtalsperiod</dt><dd>${escapeHtml(contract.startDate)} – ${escapeHtml(contract.endDate)}</dd></div><div><dt>Pris</dt><dd>${priceLabel}</dd></div><div><dt>Förnyelse</dt><dd>${contract.renewalType === "annual-review" ? "Prövas gemensamt efter 12 månader" : "Avslutas vid periodens slut"}</dd></div><div><dt>Signatur</dt><dd>${contract.signedAt ? `Signerades ${escapeHtml(new Date(contract.signedAt).toLocaleString("sv-SE"))}` : "Ej färdigsignerat"}</dd></div></dl>${contract.valueNote ? `<p><b>Särskild notering:</b> ${escapeHtml(contract.valueNote)}</p>` : ""}</article><article class="panel contract-terms"><h3>Sammanfattning av avtalet</h3><p><b>Annonsplatser:</b><br>${placements.map(item => `${escapeHtml(item.slotId)} – ${escapeHtml(item.location)}`).join("<br>")}</p><ol><li>DinPuls visar företagets material på de annonsplatser och under den period som anges ovan.</li><li>Företaget ansvarar för att bilder, texter, länkar och rättigheter till materialet är korrekta.</li><li>Fyra faktiska bannerbyten ingår per annonsplats och påbörjad 30-dagarsperiod. Framtida schemaläggning räknas först vid publicering. Publicerat material kan stoppas av DinPuls om det är olagligt, vilseledande eller tekniskt skadligt.</li><li>Statistik i portalen är en teknisk mätning och garanterar inte ett visst antal visningar, klick eller affärer.</li><li>Fyra bannerbyten per plats återställs för varje ny 30-dagarsperiod. Avtalet förnyas inte automatiskt utan den förnyelseprövning som anges ovan.</li></ol><p class="contract-copy-date">Detta är en portalöversikt. Den signerade originalkopian finns som PDF och är den låsta avtalsversionen.</p></article>` : '<article class="panel"><h3>Inget aktivt avtal</h3><p>Kontakta DinPuls om du förväntar dig att se ett aktivt avtal.</p></article>';
     $("#printContract").hidden = !contract;
@@ -99,7 +108,7 @@
     $("#profileContact").value = profile.contact || "";
     $("#profileEmail").value = profile.email || "";
     $("#profilePhone").value = profile.phone || "";
-    $$(".change-banner").forEach(button => button.onclick = () => { showView("banners"); $("#bannerSlot").value = button.dataset.slot; renderBannerSchedule(); });
+    $$(".change-banner").forEach(button => button.onclick = () => { showView("banners"); $("#bannerSlot").value = button.dataset.key; renderBannerSchedule(); });
     renderBannerSchedule();
   }
 
@@ -110,8 +119,8 @@
   function renderBannerSchedule() {
     const container = $("#bannerSchedule");
     if (!container || !account) return;
-    const slotId = $("#bannerSlot").value;
-    const banners = (account.banners || []).filter(item => item.slotId === slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
+    const placement = (account.bannerPlacements || []).find(item => item.key === $("#bannerSlot").value);
+    const banners = (account.banners || []).filter(item => placement && (placement.purchaseId ? item.purchaseId === placement.purchaseId : !item.purchaseId && item.slotId === placement.slotId)).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
     const past = banners.filter(item => Date.parse(item.startAt) <= Date.now());
     const currentId = past.at(-1)?.id;
     const futureCount = banners.filter(item => Date.parse(item.startAt) > Date.now()).length;
@@ -155,6 +164,7 @@
         sessionStorage.setItem(TOKEN_KEY, data.token);
         $("#password").value = "";
         $("#loginError").hidden = true;
+        if (new URLSearchParams(location.search).get("next") === "kop") { location.assign("kop.html"); return; }
         await showApp();
       } catch (error) { showLogin(error.message); }
     };
@@ -184,8 +194,10 @@
       button.disabled = true; button.textContent = "Sparar…";
       try {
         const link = $("#bannerLink").value.trim();
+        const placement = (account.bannerPlacements || []).find(item => item.key === $("#bannerSlot").value);
+        if (!placement) throw new Error("Välj en annonsplats som tillhör ditt företag.");
         const headers = { Authorization: `Bearer ${token()}`, "Content-Type": selectedBannerFile.type,
-          "X-Banner-Slot": $("#bannerSlot").value, "X-Banner-Start": startDate.toISOString(),
+          "X-Banner-Slot": placement.slotId, "X-Banner-Municipality": encodeURIComponent(placement.municipality), "X-Banner-Start": startDate.toISOString(),
           "X-Banner-Name": encodeURIComponent(selectedBannerFile.name), "X-Banner-Link": encodeURIComponent(link) };
         const response = await fetch(`${apiBase}/portal/company/banners`, { method: "POST", headers, body: selectedBannerFile });
         const data = await response.json().catch(() => ({ error: "Servern gav ett ogiltigt svar." }));

@@ -175,6 +175,7 @@
   }
 
   function statusActions(contract) {
+    if (contract.status === "Utkast" && contract.hasCustomerSignature) return `<button class="primary foundation-countersign" data-id="${escapeHtml(contract.id)}">Granska och underteckna för DinPuls</button>`;
     if (["4.0", CONTRACT_VERSION].includes(contract.contractVersion) && contract.status === "Utkast") return `<span class="badge draft">Väntar på båda underskrifterna</span>`;
     if (contract.status === "Utkast" && !contract.signatureRequired) return `<button class="primary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Aktivt">Aktivera utan signatur</button>`;
     if (contract.status === "Utkast") return `<button class="secondary contract-action" data-id="${escapeHtml(contract.id)}" data-status="Skickat">Markera skickat</button>`;
@@ -223,6 +224,30 @@
   alert(result.message || "Den signerade avtalskopian har skickats igen.");
 }
 
+async function openFoundationCountersign(contract, dialog) {
+    const result = await api(`/portal/admin/contracts/${encodeURIComponent(contract.id)}/snapshot`);
+    const snapshot = result.snapshot;
+    if (result.status !== "Utkast" || !result.snapshotHash || snapshot.contractVersion !== CONTRACT_VERSION) throw new Error("Avtalet kan inte motundertecknas i denna version.");
+    dialog.innerHTML = `<button class="dialog-x" type="button">×</button><span class="eyebrow">DINPULS UNDERSKRIFT · v${escapeHtml(snapshot.contractVersion)}</span><h2>Granska ${escapeHtml(contract.company)}s grundavtal</h2><p>Kunden har redan undertecknat det låsta underlaget. Du undertecknar samma avtalsversion för DinPuls.</p><div class="foundation-review"><p><strong>${escapeHtml(snapshot.company.name)}</strong> · ${escapeHtml(snapshot.company.orgNo)}<br>${escapeHtml(snapshot.company.address || "")} ${escapeHtml(snapshot.company.postalCode || "")} ${escapeHtml(snapshot.company.city || "")}<br>${escapeHtml(snapshot.company.contact)} · ${escapeHtml(snapshot.company.email)} · ${escapeHtml(snapshot.company.phone)}</p><p>Avtal ${escapeHtml(snapshot.contractNumber)} · ${escapeHtml(snapshot.municipality)} · ${escapeHtml(snapshot.period.startDate)} – ${escapeHtml(snapshot.period.endDate)}</p><ul>${snapshot.placements.map(item => `<li>${escapeHtml(item.location)} · Plats-ID ${escapeHtml(item.slotId)}</li>`).join("")}</ul><p>${escapeHtml(snapshot.billing.label)}: ${Number(snapshot.billing.invoiceTotal).toLocaleString("sv-SE")} kr exkl. moms + ${Number(snapshot.billing.invoiceVat).toLocaleString("sv-SE")} kr moms = ${Number(snapshot.billing.invoiceInclVat).toLocaleString("sv-SE")} kr per debitering. Tolv månader totalt: ${Number(snapshot.billing.annualTotal).toLocaleString("sv-SE")} kr exkl. moms.</p><h3>Fullständiga avtalsvillkor</h3><div class="foundation-terms">${snapshot.terms.map(term => `<section><h4>${escapeHtml(term.title)}</h4>${term.paragraphs.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join("")}</section>`).join("")}</div></div><label>Namn för DinPuls<input id="foundationDinPulsName"></label><label>Roll/befattning<input id="foundationDinPulsTitle"></label><p>Rita DinPuls underskrift på samma låsta avtal.</p><canvas id="foundationDinPulsPad" width="520" height="160"></canvas><button id="foundationClear" class="secondary" type="button">Rensa underskrift</button><label class="foundation-check"><input id="foundationReviewed" type="checkbox"> Jag har granskat det låsta avtalet och undertecknar det för DinPuls.</label><button id="foundationSign" class="primary" type="button">Underteckna och lås avtalet</button><p id="foundationSignMessage" role="status"></p>`;
+    dialog.querySelector(".dialog-x").onclick = () => dialog.close();
+    const canvas = dialog.querySelector("#foundationDinPulsPad"), ctx = canvas.getContext("2d");
+    let drawn = false, drawing = false;
+    const clear = () => { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = "#17364d"; ctx.lineWidth = 2.5; ctx.lineCap = "round"; drawn = false; };
+    const point = event => { const rect = canvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height }; };
+    canvas.onpointerdown = event => { canvas.setPointerCapture(event.pointerId); drawing = true; const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+    canvas.onpointermove = event => { if (!drawing) return; const p = point(event); ctx.lineTo(p.x, p.y); ctx.stroke(); drawn = true; };
+    canvas.onpointerup = () => { drawing = false; }; canvas.onpointercancel = () => { drawing = false; };
+    dialog.querySelector("#foundationClear").onclick = clear; clear();
+    dialog.querySelector("#foundationSign").onclick = async () => {
+      const name = dialog.querySelector("#foundationDinPulsName").value.trim(), title = dialog.querySelector("#foundationDinPulsTitle").value.trim();
+      if (!name || !title || !drawn || !dialog.querySelector("#foundationReviewed").checked) return void (dialog.querySelector("#foundationSignMessage").textContent = "Ange namn och roll, rita underskriften och bekräfta granskningen.");
+      const button = dialog.querySelector("#foundationSign"); button.disabled = true;
+      try { const done = await api(`/portal/admin/contracts/${encodeURIComponent(contract.id)}/sign`, { method: "POST", body: JSON.stringify({ dinpulsSignerName: name, dinpulsSignerTitle: title, dinpulsSignature: canvas.toDataURL("image/png"), snapshotHash: result.snapshotHash }) }); dialog.querySelector("#foundationSignMessage").textContent = `Avtalet är låst. PDF: ${done.pdfHash}.`; await refreshContracts(); dialog.close(); }
+      catch (error) { dialog.querySelector("#foundationSignMessage").textContent = error.message; }
+      finally { button.disabled = false; }
+    };
+  }
+
 function openContract(id) {
     const contract = contractCache.find(item => item.id === id);
     if (!contract) return;
@@ -235,6 +260,7 @@ function openContract(id) {
     dialog.querySelectorAll(".contract-action").forEach(button => button.onclick = async () => { await changeStatus(button.dataset.id, button.dataset.status); dialog.close(); });
     dialog.querySelectorAll(".activation-action").forEach(button => button.onclick = async () => { await resendActivation(button.dataset.id); dialog.close(); });
     dialog.querySelectorAll(".contract-email-action").forEach(button => button.onclick = async () => { await resendContractCopy(button.dataset.id); dialog.close(); });
+    dialog.querySelectorAll(".foundation-countersign").forEach(button => button.onclick = async () => { try { await openFoundationCountersign(contract, dialog); } catch (error) { alert(error.message); } });
     dialog.querySelectorAll(".invoice-copy-action").forEach(button => button.onclick = async () => { try { await copyInvoiceBasis(button.dataset.id); } catch { alert("Fakturaunderlaget kunde inte kopieras. Kontrollera webbläsarens urklippsbehörighet."); } });
   dialog.querySelectorAll(".pdf-action").forEach(button => button.onclick = () => downloadPdf(button.dataset.id));
     dialog.showModal();

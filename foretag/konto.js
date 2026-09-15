@@ -1,7 +1,7 @@
 (function(){
   "use strict";
   const $=selector=>document.querySelector(selector);
-  let apiBase="", token="", purpose="";
+  let apiBase="", token="", purpose="", next="";
   async function api(path,body){
     const response=await fetch(`${apiBase}${path}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store"});
     const data=await response.json().catch(()=>({ok:false,error:"Servern gav ett ogiltigt svar."}));
@@ -18,7 +18,7 @@
   async function init(){
     const config=await fetch("../data/business-config.json",{cache:"no-store"}).then(response=>response.json());
     apiBase=String(config.apiBase||"").replace(/\/$/,"");
-    const params=new URLSearchParams(location.hash.slice(1)); token=params.get("token")||"";purpose=params.get("purpose")||"";
+    const params=new URLSearchParams(location.hash.slice(1)); token=params.get("token")||"";purpose=params.get("purpose")||"";next=params.get("next")==="kop"?"kop":"";
     if(!token){hideAll();$("#resetRequestForm").hidden=false;return}
     try{
       const result=await api("/portal/account/token/verify",{token,purpose});
@@ -31,7 +31,8 @@
     event.preventDefault();$("#formError").hidden=true;
     try{
       const result=await api(purpose==="reset-password"?"/portal/account/reset/complete":"/portal/account/password",{token,purpose,password:$("#newPassword").value,passwordConfirmation:$("#confirmPassword").value});
-      history.replaceState(null,"",location.pathname);showStatus("Klart!",result.message);
+      history.replaceState(null,"",location.pathname);showStatus("Klart!",next?`${result.message} Logga in för att välja annonsplatser.`:result.message);
+      if(next)$("#loginAfterPassword").href="./?next=kop";
     }catch(error){if(error.state)return tokenError(error);$("#formError").textContent=error.message;$("#formError").hidden=false}
   };
   $("#resetRequestForm").onsubmit=async event=>{

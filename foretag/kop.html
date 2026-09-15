@@ -21,11 +21,15 @@
       <section class="buy-panel"><h2>3. Sammanställning</h2><div id="buyCart"></div>
         <fieldset><legend>Betalning per plats</legend><label><input type="radio" name="billing" value="monthly" checked> 500 kr/månad exkl. moms</label><label><input type="radio" name="billing" value="annual"> 5 000 kr/12 månader exkl. moms, årsvis i förskott</label></fieldset>
         <div id="buyTotals"></div>
-        <p class="buy-note">Avtalsversion och fullständiga villkor ska visas före bindande signering. Denna vy gör ännu inga köp.</p>
+        <p class="buy-note">Beställningen kontrolleras och reserveras på servern innan du kan bekräfta. Reservationen gäller i 20 minuter.</p>
+        <button id="prepareOrder" type="button" disabled>Granska beställningen</button>
+        <button id="resumeFoundation" type="button" hidden>Fortsätt avtalsutkastet</button>
+        <p id="orderMessage" role="status"></p>
       </section>
     </div>
     <dialog id="placementDialog"><button id="closePlacement" type="button">Stäng</button><h2 id="placementTitle"></h2><div id="placementDiagram"></div><p id="placementDetails"></p></dialog>
+    <dialog id="orderDialog" class="order-dialog"><button id="closeOrder" type="button">Stäng</button><h2 id="orderTitle">Granska och bekräfta</h2><div id="orderSummary"></div><h3>Fullständiga avtalsvillkor</h3><div id="orderTerms"></div><div id="foundationSignature" hidden><p><strong>Genom att skriva under bekräftar jag att jag har rätt att företräda företaget och att jag godkänner avtalet och dess villkor.</strong></p><div class="signature-fields"><label>Namn<input id="signerName" autocomplete="name"></label><label>Roll/befattning<input id="signerTitle"></label></div><label for="signaturePad">Rita din underskrift</label><canvas id="signaturePad" width="520" height="160"></canvas><button id="clearSignature" type="button">Rensa underskrift</button></div><label class="order-confirm"><input id="confirmTerms" type="checkbox"> Jag bekräftar uttryckligen denna beställning med de visade platserna, priserna, perioderna och avtalsvillkoren.</label><button id="confirmOrder" type="button" disabled>Bekräfta tilläggsköp</button><p id="confirmationMessage" role="status"></p></dialog>
   </main>
-  <script type="module" src="kop.js?v=1"></script>
+  <script type="module" src="kop.js?v=2"></script>
 </body>
 </html>

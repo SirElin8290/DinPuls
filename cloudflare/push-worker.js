@@ -12,7 +12,7 @@ function corsHeaders(request) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://dinpuls.se",
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token, X-Banner-Slot, X-Banner-Start, X-Banner-Name, X-Banner-Link",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token, X-Banner-Slot, X-Banner-Municipality, X-Banner-Start, X-Banner-Name, X-Banner-Link",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin"
   };
@@ -121,7 +121,7 @@ async function ensureDatabase(env) {
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_banners_schedule ON ad_banners (contract_id, slot_id, start_at)").run();
   const bannerColumns = await env.DB.prepare("PRAGMA table_info(ad_banners)").all();
   const existingBannerColumns = new Set((bannerColumns.results || []).map(column => column.name));
-  for (const [name, definition] of [["published_at", "TEXT"], ["change_period", "INTEGER"]]) {
+  for (const [name, definition] of [["published_at", "TEXT"], ["change_period", "INTEGER"], ["municipality", "TEXT"], ["purchase_id", "TEXT"]]) {
     if (!existingBannerColumns.has(name)) await env.DB.prepare(`ALTER TABLE ad_banners ADD COLUMN ${name} ${definition}`).run();
   }
   await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS limit_published_banner_changes BEFORE UPDATE OF published_at ON ad_banners WHEN OLD.published_at IS NULL AND NEW.published_at IS NOT NULL BEGIN SELECT CASE WHEN (SELECT COUNT(*) FROM ad_banners b WHERE b.contract_id=NEW.contract_id AND b.slot_id=NEW.slot_id AND b.change_period=NEW.change_period AND b.published_at IS NOT NULL) >= 4 THEN RAISE(ABORT, 'BANNER_CHANGE_LIMIT') END; END").run();
@@ -132,6 +132,16 @@ async function ensureDatabase(env) {
   await env.DB.prepare(
     "CREATE TRIGGER IF NOT EXISTS prevent_contract_slot_overlap BEFORE INSERT ON contract_slot_reservations BEGIN SELECT CASE WHEN EXISTS (SELECT 1 FROM contract_slot_reservations r WHERE r.municipality = NEW.municipality AND r.slot_id = NEW.slot_id AND r.start_date <= NEW.end_date AND r.end_date >= NEW.start_date AND r.contract_id <> NEW.contract_id) THEN RAISE(ABORT, 'SLOT_PERIOD_OCCUPIED') END; END"
   ).run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS self_service_orders (id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, foundation_contract_id TEXT NOT NULL, billing_type TEXT NOT NULL, snapshot_json TEXT NOT NULL, snapshot_hash TEXT NOT NULL, status TEXT NOT NULL, expires_at TEXT NOT NULL, confirmed_at TEXT, created_at TEXT NOT NULL, FOREIGN KEY(company_user_id) REFERENCES business_users(id), FOREIGN KEY(foundation_contract_id) REFERENCES ad_contracts(id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS self_service_orders_company ON self_service_orders(company_user_id, created_at)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS self_service_holds (order_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, municipality TEXT NOT NULL, slot_id TEXT NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, status TEXT NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(order_id, municipality, slot_id), FOREIGN KEY(order_id) REFERENCES self_service_orders(id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS self_service_holds_period ON self_service_holds(municipality, slot_id, start_date, end_date, status, expires_at)").run();
+  await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS prevent_self_service_hold_overlap BEFORE INSERT ON self_service_holds BEGIN SELECT CASE WHEN EXISTS (SELECT 1 FROM self_service_holds h WHERE h.municipality=NEW.municipality AND h.slot_id=NEW.slot_id AND h.start_date<=NEW.end_date AND h.end_date>=NEW.start_date AND (h.status='committed' OR (h.status='held' AND h.expires_at>NEW.created_at))) OR EXISTS (SELECT 1 FROM contract_slot_reservations r WHERE r.municipality=NEW.municipality AND r.slot_id=NEW.slot_id AND r.start_date<=NEW.end_date AND r.end_date>=NEW.start_date) THEN RAISE(ABORT, 'SLOT_PERIOD_OCCUPIED') END; END").run();
+  await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS prevent_contract_self_service_overlap BEFORE INSERT ON contract_slot_reservations BEGIN SELECT CASE WHEN EXISTS (SELECT 1 FROM self_service_holds h WHERE h.municipality=NEW.municipality AND h.slot_id=NEW.slot_id AND h.start_date<=NEW.end_date AND h.end_date>=NEW.start_date AND (h.status='committed' OR (h.status='held' AND h.expires_at>NEW.created_at))) THEN RAISE(ABORT, 'SLOT_PERIOD_OCCUPIED') END; END").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS self_service_purchases (id TEXT PRIMARY KEY, order_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, foundation_contract_id TEXT NOT NULL, municipality TEXT NOT NULL, slot_id TEXT NOT NULL, placement_label TEXT NOT NULL, billing_type TEXT NOT NULL, unit_price INTEGER NOT NULL, vat_amount INTEGER NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, contract_version TEXT NOT NULL, billing_status TEXT NOT NULL DEFAULT 'waiting_for_launch', publication_status TEXT NOT NULL DEFAULT 'waiting_for_launch', confirmation_json TEXT NOT NULL, confirmation_hash TEXT NOT NULL, confirmed_at TEXT NOT NULL, spiris_invoice_id TEXT, FOREIGN KEY(order_id) REFERENCES self_service_orders(id))").run();
+  await env.DB.prepare("CREATE UNIQUE INDEX IF NOT EXISTS self_service_purchases_order_slot ON self_service_purchases(order_id, municipality, slot_id)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS self_service_purchases_company ON self_service_purchases(company_user_id, confirmed_at)").run();
+  await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS prevent_invalid_self_service_purchase BEFORE INSERT ON self_service_purchases BEGIN SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM self_service_orders o JOIN self_service_holds h ON h.order_id=o.id WHERE o.id=NEW.order_id AND o.company_user_id=NEW.company_user_id AND o.foundation_contract_id=NEW.foundation_contract_id AND o.status='confirmed' AND o.confirmed_at=NEW.confirmed_at AND h.company_user_id=NEW.company_user_id AND h.municipality=NEW.municipality AND h.slot_id=NEW.slot_id AND h.status='held' AND h.expires_at>NEW.confirmed_at) THEN RAISE(ABORT, 'ORDER_CONFLICT') END; END").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_daily_stats (" +
     "banner_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, day TEXT NOT NULL, impressions INTEGER NOT NULL DEFAULT 0, clicks INTEGER NOT NULL DEFAULT 0, " +
@@ -222,13 +232,14 @@ function stockholmDateKey(value) {
 
 function bannerFromRow(row) {
   return { id: row.id, slotId: row.slot_id, fileName: row.file_name, contentType: row.content_type,
+    municipality: row.municipality || null, purchaseId: row.purchase_id || null,
     fileSize: Number(row.file_size), targetUrl: row.target_url || "", startAt: row.start_at,
     imageUrl: `/ads/assets/${encodeURIComponent(row.id)}`, createdAt: row.created_at,
     publishedAt: row.published_at || null, changePeriod: row.change_period == null ? null : Number(row.change_period) };
 }
 
 async function activeCompanyContract(env, companyUserId) {
-  return env.DB.prepare("SELECT id, placements, start_date, end_date FROM ad_contracts WHERE company_user_id = ? AND status = 'Aktivt' ORDER BY updated_at DESC LIMIT 1")
+  return env.DB.prepare("SELECT id, municipality, placements, start_date, end_date FROM ad_contracts WHERE company_user_id = ? AND status = 'Aktivt' ORDER BY updated_at DESC LIMIT 1")
     .bind(companyUserId).first();
 }
 
@@ -266,28 +277,36 @@ async function uploadCompanyBanner(request, env) {
   const size = Number(request.headers.get("Content-Length") || 0);
   const contentType = cleanText(request.headers.get("Content-Type"), 80).split(";")[0].toLowerCase();
   const slotId = cleanText(request.headers.get("X-Banner-Slot"), 40);
+  let selectedMunicipality;
+  try { selectedMunicipality = cleanText(decodeURIComponent(request.headers.get("X-Banner-Municipality") || ""), 80); }
+  catch { return json(request, { ok: false, error: "Kommunen kunde inte läsas." }, 400); }
   const startAt = cleanText(request.headers.get("X-Banner-Start"), 40);
   const fileName = cleanText(decodeURIComponent(request.headers.get("X-Banner-Name") || "banner"), 160);
   const targetUrl = cleanText(decodeURIComponent(request.headers.get("X-Banner-Link") || ""), 500);
   if (!size || size > 5 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(contentType)) return json(request, { ok: false, error: "Välj en PNG-, JPG- eller WebP-bild på högst 5 MB." }, 400);
   if (!slotId || !validDateTime(startAt) || !validTargetUrl(targetUrl)) return json(request, { ok: false, error: "Annonsplats, publiceringstid eller länk är ogiltig." }, 400);
   const contract = await activeCompanyContract(env, session.subject_id);
-  if (!contract || !contractHasSlot(contract, slotId)) return json(request, { ok: false, error: "Annonsplatsen ingår inte i ditt aktiva avtal." }, 403);
   const scheduledDate = stockholmDateKey(startAt);
-  if (scheduledDate < contract.start_date || scheduledDate > contract.end_date) return json(request, { ok: false, error: "Publiceringsdatumet måste ligga inom avtalsperioden." }, 400);
+  if (!contract) return json(request, { ok: false, error: "Ett aktivt grundavtal krävs." }, 403);
+  const municipality = selectedMunicipality || contract.municipality;
+  const purchase = isSupportedMunicipality(municipality) ? await env.DB.prepare("SELECT id, start_date, end_date FROM self_service_purchases WHERE company_user_id=? AND foundation_contract_id=? AND municipality=? AND slot_id=? AND start_date<=? AND end_date>=? ORDER BY confirmed_at DESC LIMIT 1").bind(session.subject_id, contract.id, municipality, slotId, scheduledDate, scheduledDate).first() : null;
+  const baseSlot = !purchase && contract.municipality === municipality && contractHasSlot(contract, slotId);
+  if (!purchase && !baseSlot) return json(request, { ok: false, error: "Annonsplatsen ingår inte i ditt signerade avtal eller köp i vald kommun." }, 403);
+  const periodStart = purchase?.start_date || contract.start_date, periodEnd = purchase?.end_date || contract.end_date;
+  if (scheduledDate < periodStart || scheduledDate > periodEnd) return json(request, { ok: false, error: "Publiceringsdatumet måste ligga inom annonsperioden." }, 400);
   const buffer = await request.arrayBuffer();
   const bytes = new Uint8Array(buffer);
   if (bytes.byteLength !== size || !imageTypeMatches(bytes, contentType)) return json(request, { ok: false, error: "Bildfilen kunde inte verifieras." }, 400);
   const id = crypto.randomUUID();
   const extension = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
-  const objectKey = `companies/${session.subject_id}/${contract.id}/${slotId}/${id}.${extension}`;
+  const objectKey = `companies/${session.subject_id}/${contract.id}/${encodeURIComponent(municipality)}/${slotId}/${id}.${extension}`;
   await env.AD_ASSETS.put(objectKey, buffer, { httpMetadata: { contentType, cacheControl: "public, max-age=300" } });
   const now = new Date().toISOString();
   try {
-    await env.DB.prepare("INSERT INTO ad_banners (id, company_user_id, contract_id, slot_id, object_key, file_name, content_type, file_size, target_url, start_at, change_period, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(id, session.subject_id, contract.id, slotId, objectKey, fileName, contentType, size, targetUrl, startAt, bannerChangePeriod(contract.start_date, startAt), now, now).run();
+    await env.DB.prepare("INSERT INTO ad_banners (id, company_user_id, contract_id, slot_id, municipality, purchase_id, object_key, file_name, content_type, file_size, target_url, start_at, change_period, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(id, session.subject_id, contract.id, slotId, municipality, purchase?.id || null, objectKey, fileName, contentType, size, targetUrl, startAt, bannerChangePeriod(periodStart, startAt), now, now).run();
   } catch (error) { await env.AD_ASSETS.delete(objectKey); throw error; }
-  return json(request, { ok: true, banner: bannerFromRow({ id, slot_id: slotId, file_name: fileName, content_type: contentType, file_size: size, target_url: targetUrl, start_at: startAt, created_at: now }) }, 201);
+  return json(request, { ok: true, banner: bannerFromRow({ id, slot_id: slotId, municipality, purchase_id: purchase?.id || null, file_name: fileName, content_type: contentType, file_size: size, target_url: targetUrl, start_at: startAt, created_at: now }) }, 201);
 }
 
 async function deleteCompanyBanner(request, env, id) {
@@ -305,14 +324,17 @@ async function currentBanner(request, env, slotId, municipality) {
   if (!isSupportedMunicipality(municipality)) return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
   const now = new Date().toISOString();
   const today = stockholmDateKey(now);
-  const due = await env.DB.prepare("SELECT b.id FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id WHERE b.slot_id=? AND c.municipality=? AND c.status='Aktivt' AND b.start_at<=? AND b.published_at IS NULL AND c.start_date<=? AND c.end_date>=? ORDER BY b.start_at ASC")
-    .bind(slotId, municipality, now, today, today).all();
+  const predicate = "b.slot_id=? AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.municipality=? AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.municipality=? AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))";
+  const from = "ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id";
+  const parameters = [slotId, municipality, today, today, municipality, today, today];
+  const due = await env.DB.prepare(`SELECT b.id FROM ${from} WHERE ${predicate} AND b.start_at<=? AND b.published_at IS NULL ORDER BY b.start_at ASC`)
+    .bind(...parameters, now).all();
   for (const banner of due.results || []) {
     try { await env.DB.prepare("UPDATE ad_banners SET published_at=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(now, now, banner.id).run(); }
     catch (error) { if (!String(error).includes("BANNER_CHANGE_LIMIT")) throw error; }
   }
-  const row = await env.DB.prepare("SELECT b.* FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id WHERE b.slot_id=? AND c.municipality=? AND c.status='Aktivt' AND b.published_at IS NOT NULL AND c.start_date<=? AND c.end_date>=? ORDER BY b.start_at DESC LIMIT 1")
-    .bind(slotId, municipality, today, today).first();
+  const row = await env.DB.prepare(`SELECT b.* FROM ${from} WHERE ${predicate} AND b.published_at IS NOT NULL ORDER BY b.start_at DESC LIMIT 1`)
+    .bind(...parameters).first();
   return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
 }
 
@@ -325,9 +347,9 @@ async function recordBannerEvent(request, env) {
   }
   const today = stockholmDateKey(new Date().toISOString());
   const banner = await env.DB.prepare(
-    "SELECT b.company_user_id FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id " +
-    "WHERE b.id = ? AND b.published_at IS NOT NULL AND c.status = 'Aktivt' AND c.start_date <= ? AND c.end_date >= ?"
-  ).bind(bannerId, today, today).first();
+    "SELECT b.company_user_id FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id " +
+    "WHERE b.id=? AND b.published_at IS NOT NULL AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
+  ).bind(bannerId, today, today, today, today).first();
   if (!banner) return json(request, { ok: false, error: "Annonsen är inte aktiv." }, 404);
   const impressions = eventType === "impression" ? 1 : 0;
   const clicks = eventType === "click" ? 1 : 0;
@@ -391,9 +413,9 @@ async function companyStats(request, env) {
     "FROM ad_daily_stats WHERE company_user_id = ? AND day BETWEEN ? AND ? GROUP BY day ORDER BY day ASC"
   ).bind(session.subject_id, startDate, endDate).all();
   const active = await env.DB.prepare(
-    "SELECT COUNT(*) AS count FROM ad_banners b JOIN ad_contracts c ON c.id = b.contract_id " +
-    "WHERE b.company_user_id = ? AND c.status = 'Aktivt' AND b.start_at <= ?"
-  ).bind(session.subject_id, new Date().toISOString()).first();
+    "SELECT COUNT(*) AS count FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id " +
+    "WHERE b.company_user_id=? AND c.status='Aktivt' AND b.start_at<=? AND (b.purchase_id IS NULL OR (p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
+  ).bind(session.subject_id, new Date().toISOString(), today, today).first();
   const impressions = Number(totals?.impressions || 0);
   const clicks = Number(totals?.clicks || 0);
   const series = (seriesResult.results || []).map(row => ({
@@ -531,8 +553,8 @@ async function createAccountToken(env, companyUserId, purpose) {
   return { token, expiresAt };
 }
 
-function accountLink(token, purpose) {
-  return `${PUBLIC_PORTAL_URL}#token=${encodeURIComponent(token)}&purpose=${encodeURIComponent(purpose)}`;
+function accountLink(token, purpose, selfService = false) {
+  return `${PUBLIC_PORTAL_URL}#token=${encodeURIComponent(token)}&purpose=${encodeURIComponent(purpose)}${selfService && purpose === "activate-account" ? "&next=kop" : ""}`;
 }
 
 async function sendAccountEmail(env, user, token, purpose) {
@@ -541,6 +563,7 @@ async function sendAccountEmail(env, user, token, purpose) {
   const subject = activation ? "Välkommen till DinPuls – skapa ditt företagskonto" : "Återställ lösenordet till DinPuls företagsportal";
   const title = activation ? "Välkommen till DinPuls" : "Återställ ditt lösenord";
   const button = activation ? "Skapa ditt lösenord" : "Välj ett nytt lösenord";
+  const link = accountLink(token, purpose, user.registration_source === "self-service");
   const introduction = activation
     ? user.registration_source === "self-service"
       ? `Företagskontot för ${htmlEscape(user.company)} är skapat. Välj ett lösenord för att logga in. Inget annonsavtal har ännu tecknats.`
@@ -553,8 +576,8 @@ async function sendAccountEmail(env, user, token, purpose) {
       from: env.PORTAL_EMAIL_FROM,
       to: [user.email],
       subject,
-      html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>${title}</h1><p>Hej ${htmlEscape(user.contact || user.company)},</p><p>${introduction}</p><p style="margin:30px 0"><a href="${accountLink(token, purpose)}" style="background:#8d4d24;color:#fff;text-decoration:none;padding:14px 22px;border-radius:8px;font-weight:700">${button}</a></p><p>Länken gäller i 48 timmar och kan bara användas en gång.</p><p>Om ni behöver hjälp, kontakta DinPuls genom kontaktuppgifterna på dinpuls.se.</p></div>`,
-      text: `Hej ${user.contact || user.company},\n\n${activation ? user.registration_source === "self-service" ? `Företagskontot för ${user.company} är skapat. Inget annonsavtal har ännu tecknats.` : `Avtalet för ${user.company} är nu aktiverat.` : "Vi har fått en begäran om lösenordsåterställning."}\n\n${button}: ${accountLink(token, purpose)}\n\nLänken gäller i 48 timmar och kan bara användas en gång.\n\nDinPuls`
+      html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>${title}</h1><p>Hej ${htmlEscape(user.contact || user.company)},</p><p>${introduction}</p><p style="margin:30px 0"><a href="${link}" style="background:#8d4d24;color:#fff;text-decoration:none;padding:14px 22px;border-radius:8px;font-weight:700">${button}</a></p><p>Länken gäller i 48 timmar och kan bara användas en gång.</p><p>Om ni behöver hjälp, kontakta DinPuls genom kontaktuppgifterna på dinpuls.se.</p></div>`,
+      text: `Hej ${user.contact || user.company},\n\n${activation ? user.registration_source === "self-service" ? `Företagskontot för ${user.company} är skapat. Inget annonsavtal har ännu tecknats.` : `Avtalet för ${user.company} är nu aktiverat.` : "Vi har fått en begäran om lösenordsåterställning."}\n\n${button}: ${link}\n\nLänken gäller i 48 timmar och kan bara användas en gång.\n\nDinPuls`
     })
   });
   if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
@@ -672,11 +695,11 @@ function snapshotForContract(input, placements, price) {
     document: `DinPuls Annonsavtal v${CONTRACT_VERSION}`,
     contractVersion: CONTRACT_VERSION,
     contractNumber: input.id,
-    company: { name: input.company, orgNo: input.orgNo, contact: input.contact, email: input.email, phone: input.phone },
+    company: { name: input.company, orgNo: input.orgNo, contact: input.contact, email: input.email, phone: input.phone, address: input.address || "", postalCode: input.postalCode || "", city: input.city || "" },
     municipality: input.municipality,
     placements,
     period: { startDate: input.startDate, endDate: input.endDate },
-    billing: { ...price, placementCount: placements.length },
+    billing: { ...price, placementCount: placements.length, invoiceVat: Math.round(price.invoiceTotal * 0.25), invoiceInclVat: Math.round(price.invoiceTotal * 1.25), twelveMonthsVat: Math.round(price.annualTotal * 0.25), vatRate: 0.25 },
     specialTerms: input.valueNote || "",
     terms: CONTRACT_TERMS
   };
@@ -691,7 +714,7 @@ function dataUrlBytes(value) {
 }
 
 function wrapPdfText(font, text, size, maxWidth) {
-  const words = String(text).split(/\s+/); const lines = []; let line = "";
+  const words = String(text).replace(/→/g, " / ").split(/\s+/); const lines = []; let line = "";
   for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
     if (font.widthOfTextAtSize(candidate, size) <= maxWidth) line = candidate;
@@ -713,9 +736,11 @@ async function buildSignedPdf(snapshot, signatures, signedAt, snapshotHash) {
   drawLines(`Avtalsnummer: ${snapshot.contractNumber}`, 11, bold, 15);
   drawLines(`Företag: ${snapshot.company.name} (${snapshot.company.orgNo})`);
   drawLines(`Kontakt: ${snapshot.company.contact}, ${snapshot.company.email}, ${snapshot.company.phone}`);
+  if (snapshot.company.address) drawLines(`Adress: ${snapshot.company.address}, ${snapshot.company.postalCode} ${snapshot.company.city}`);
   drawLines(`Kommun och period: ${snapshot.municipality}, ${snapshot.period.startDate} – ${snapshot.period.endDate}`);
   drawLines(`Annonsplatser: ${snapshot.placements.map(item => `${item.slotId} – ${item.location}`).join("; ")}`);
   drawLines(`Betalning: ${snapshot.billing.label}; ${snapshot.billing.unitPrice} kr per plats; ${snapshot.billing.placementCount} plats(er); total debitering ${snapshot.billing.invoiceTotal} kr ${snapshot.billing.interval}; exklusive moms; ${snapshot.billing.paymentTerms}.`);
+  drawLines(`Moms 25 %: ${snapshot.billing.invoiceVat} kr; summa inklusive moms: ${snapshot.billing.invoiceInclVat} kr per debitering. Tolv månader totalt exklusive moms: ${snapshot.billing.annualTotal} kr.`);
   if (snapshot.specialTerms) drawLines(`Särskilda villkor: ${snapshot.specialTerms}`);
   for (const term of snapshot.terms) { ensure(40); drawLines(term.title, 10, bold, 14); for (const paragraph of term.paragraphs) drawLines(paragraph); }
   newPage(); drawLines("UNDERSKRIFTER", 13, bold, 18);
@@ -790,6 +815,7 @@ function contractFromRow(row) {
     customerSignerName: row.customer_signer_name || null, customerSignerTitle: row.customer_signer_title || null,
     dinpulsSignerName: row.dinpuls_signer_name || null, dinpulsSignerTitle: row.dinpuls_signer_title || null,
     signedAt: row.signed_at || null, snapshotHash: row.contract_snapshot_hash || null,
+    hasCustomerSignature: Boolean(row.customer_signature_object_key),
     pdfHash: row.signed_pdf_hash || null, hasSignedPdf: Boolean(row.signed_pdf_object_key),
     contractEmailStatus: row.contract_email_status || null, contractEmailSentAt: row.contract_email_sent_at || null,
     created: row.created_at, updated: row.updated_at
@@ -855,26 +881,48 @@ async function signContract(request, env, id) {
   if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
   if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet i R2 är inte konfigurerat." }, 503);
   const body = await readBody(request);
-  const customerName = cleanText(body.customerSignerName), customerTitle = cleanText(body.customerSignerTitle);
   const dinpulsName = cleanText(body.dinpulsSignerName), dinpulsTitle = cleanText(body.dinpulsSignerTitle);
-  if (!customerName || !customerTitle || !dinpulsName || !dinpulsTitle) return json(request, { ok: false, error: "Namn och befattning krävs för båda parter." }, 400);
-  let customerBytes; let dinpulsBytes;
-  try { customerBytes = dataUrlBytes(body.customerSignature); dinpulsBytes = dataUrlBytes(body.dinpulsSignature); }
-  catch { return json(request, { ok: false, error: "Båda signaturerna måste vara ritade och giltiga." }, 400); }
+  if (!dinpulsName || !dinpulsTitle) return json(request, { ok: false, error: "DinPuls namn och befattning krävs." }, 400);
+  let dinpulsBytes;
+  try { dinpulsBytes = dataUrlBytes(body.dinpulsSignature); }
+  catch { return json(request, { ok: false, error: "DinPuls underskrift måste vara ritad och giltig." }, 400); }
   const contract = await env.DB.prepare(`${CONTRACT_SELECT} WHERE c.id = ?`).bind(id).first();
   if (!contract) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  const foundationOrder = await env.DB.prepare("SELECT * FROM self_service_orders WHERE foundation_contract_id=? AND company_user_id=? AND status='customer_signed'").bind(id, contract.company_user_id).first();
+  if (contract.customer_signature_object_key && !foundationOrder) return json(request, { ok: false, error: "Det självsignerade avtalet saknar en giltig väntande motunderskrift och får inte signeras om." }, 409);
+  const customerName = foundationOrder ? cleanText(contract.customer_signer_name) : cleanText(body.customerSignerName);
+  const customerTitle = foundationOrder ? cleanText(contract.customer_signer_title) : cleanText(body.customerSignerTitle);
+  let customerBytes;
+  if (foundationOrder) {
+    const customerObject = contract.customer_signature_object_key && await env.AD_ASSETS.get(contract.customer_signature_object_key);
+    if (!customerObject || foundationOrder.expires_at <= new Date().toISOString()) return json(request, { ok: false, error: "Kundens underskrift saknas eller reservationen har gått ut." }, 409);
+    customerBytes = new Uint8Array(await customerObject.arrayBuffer());
+  } else {
+    try { customerBytes = dataUrlBytes(body.customerSignature); }
+    catch { return json(request, { ok: false, error: "Kundens underskrift måste vara ritad och giltig." }, 400); }
+  }
+  if (!customerName || !customerTitle) return json(request, { ok: false, error: "Kundens namn och befattning saknas." }, 400);
   if (contract.contract_version !== CONTRACT_VERSION) return json(request, { ok: false, error: "Endast v4-avtal kan signeras i detta flöde." }, 409);
   if (contract.signed_at || contract.status === "Aktivt") return json(request, { ok: false, error: "Avtalet är redan signerat och låst." }, 409);
   const calculatedHash = await sha256(contract.contract_snapshot_json || "");
   if (!contract.contract_snapshot_json || !safeEqual(calculatedHash, contract.contract_snapshot_hash)) return json(request, { ok: false, error: "Avtalets låsta innehåll kunde inte verifieras." }, 409);
   if (body.snapshotHash && !safeEqual(body.snapshotHash, calculatedHash)) return json(request, { ok: false, error: "Förhandsgranskningen matchar inte avtalet som ska signeras." }, 409);
-  const overlap = await env.DB.prepare(`SELECT r.contract_id, r.slot_id FROM contract_slot_reservations r WHERE r.municipality = ? AND r.start_date <= ? AND r.end_date >= ? AND r.contract_id <> ? AND r.slot_id IN (${JSON.parse(contract.placements).map(() => "?").join(",")}) LIMIT 1`)
-    .bind(contract.municipality, contract.end_date, contract.start_date, id, ...JSON.parse(contract.placements).map(item => item.slotId)).first();
-  if (overlap) return json(request, { ok: false, error: `Annonsplats ${overlap.slot_id} är redan reserverad under perioden.` }, 409);
-  const legacyContracts = await env.DB.prepare("SELECT id, placements FROM ad_contracts WHERE municipality=? AND status='Aktivt' AND start_date<=? AND end_date>=? AND id<>?").bind(contract.municipality, contract.end_date, contract.start_date, id).all();
-  const requestedSlots = new Set(JSON.parse(contract.placements).map(item => item.slotId));
-  const legacyConflict = (legacyContracts.results || []).find(row => { try { return JSON.parse(row.placements || "[]").some(item => requestedSlots.has(item.slotId)); } catch { return false; } });
-  if (legacyConflict) return json(request, { ok: false, error: "En annonsplats är redan upptagen av ett aktivt befintligt avtal under perioden." }, 409);
+  const placements = JSON.parse(contract.placements);
+  if (foundationOrder) {
+    const lines = placements.map(item => ({ municipality: item.municipality, slotId: item.slotId, startDate: item.startDate, endDate: item.endDate }));
+    if (await oldContractConflict(env, lines)) return json(request, { ok: false, error: "En plats är redan upptagen av ett annat aktivt avtal." }, 409);
+    const now = new Date().toISOString();
+    for (const line of lines) {
+      const hold = await env.DB.prepare("SELECT 1 FROM self_service_holds WHERE order_id=? AND company_user_id=? AND municipality=? AND slot_id=? AND status='held' AND expires_at>?").bind(foundationOrder.id, contract.company_user_id, line.municipality, line.slotId, now).first();
+      const competing = await env.DB.prepare("SELECT 1 FROM self_service_holds WHERE order_id<>? AND municipality=? AND slot_id=? AND start_date<=? AND end_date>=? AND (status='committed' OR (status='held' AND expires_at>?)) LIMIT 1").bind(foundationOrder.id, line.municipality, line.slotId, line.endDate, line.startDate, now).first();
+      if (!hold || competing) return json(request, { ok: false, error: "En platsreservation är inte längre giltig." }, 409);
+    }
+  } else {
+    const overlap = await env.DB.prepare(`SELECT r.contract_id, r.slot_id FROM contract_slot_reservations r WHERE r.municipality = ? AND r.start_date <= ? AND r.end_date >= ? AND r.contract_id <> ? AND r.slot_id IN (${placements.map(() => "?").join(",")}) LIMIT 1`)
+      .bind(contract.municipality, contract.end_date, contract.start_date, id, ...placements.map(item => item.slotId)).first();
+    if (overlap) return json(request, { ok: false, error: `Annonsplats ${overlap.slot_id} är redan reserverad under perioden.` }, 409);
+    if (await oldContractConflict(env, placements.map(item => ({ municipality: contract.municipality, slotId: item.slotId, startDate: contract.start_date, endDate: contract.end_date })))) return json(request, { ok: false, error: "En plats är redan upptagen av ett aktivt befintligt avtal." }, 409);
+  }
   const signedAt = new Date().toISOString();
   const snapshot = JSON.parse(contract.contract_snapshot_json);
   const pdfBytes = await buildSignedPdf(snapshot, { customer: { name: customerName, title: customerTitle, bytes: customerBytes }, dinpuls: { name: dinpulsName, title: dinpulsTitle, bytes: dinpulsBytes } }, signedAt, calculatedHash);
@@ -882,14 +930,20 @@ async function signContract(request, env, id) {
   const baseKey = `contracts/${id}/${calculatedHash}`;
   const customerKey = `${baseKey}/customer-signature.png`, dinpulsKey = `${baseKey}/dinpuls-signature.png`, pdfKey = `${baseKey}/signed-contract.pdf`;
   if (await env.AD_ASSETS.head(pdfKey)) return json(request, { ok: false, error: "En signerad avtalskopia finns redan och får inte skrivas över." }, 409);
-  await env.AD_ASSETS.put(customerKey, customerBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash } });
+  if (!foundationOrder) await env.AD_ASSETS.put(customerKey, customerBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash } });
   await env.AD_ASSETS.put(dinpulsKey, dinpulsBytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash } });
   await env.AD_ASSETS.put(pdfKey, pdfBytes, { httpMetadata: { contentType: "application/pdf", contentDisposition: `attachment; filename="DinPuls-annonsavtal-${id}.pdf"`, cacheControl: "private, no-store" }, customMetadata: { contractId: id, snapshotHash: calculatedHash, pdfHash } });
-  const placements = JSON.parse(contract.placements);
-  const statements = placements.map(item => env.DB.prepare("INSERT INTO contract_slot_reservations(contract_id, municipality, slot_id, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(id, contract.municipality, item.slotId, contract.start_date, contract.end_date, signedAt));
+  const statements = foundationOrder ? [] : placements.map(item => env.DB.prepare("INSERT INTO contract_slot_reservations(contract_id, municipality, slot_id, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(id, contract.municipality, item.slotId, contract.start_date, contract.end_date, signedAt));
+  if (foundationOrder) {
+    const confirmation = stableStringify({ orderId: foundationOrder.id, companyId: contract.company_user_id, foundationContractId: id, snapshotHash: calculatedHash, confirmedAt: signedAt, customerSignerName: customerName, customerSignerTitle: customerTitle, dinpulsSignerName: dinpulsName, explicitConfirmation: true, channel: "two-party-foundation-signature" });
+    const confirmationHash = await sha256(confirmation);
+    statements.push(env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND status='customer_signed' AND expires_at>?").bind(signedAt, foundationOrder.id, signedAt));
+    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), foundationOrder.id, contract.company_user_id, id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, CONTRACT_VERSION, confirmation, confirmationHash, signedAt));
+    statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND status='held' AND expires_at>?").bind(foundationOrder.id, signedAt));
+  }
   statements.push(env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, dinpuls_signer_name=?, dinpuls_signer_title=?, customer_signature_object_key=?, dinpuls_signature_object_key=?, signed_at=?, signed_pdf_object_key=?, signed_pdf_hash=?, status='Aktivt', updated_at=? WHERE id=? AND status='Utkast' AND signed_at IS NULL").bind(customerName, customerTitle, dinpulsName, dinpulsTitle, customerKey, dinpulsKey, signedAt, pdfKey, pdfHash, signedAt, id));
   try { await env.DB.batch(statements); }
-  catch (error) { console.error("DinPuls avtalslåsning:", error); await Promise.all([customerKey, dinpulsKey, pdfKey].map(key => env.AD_ASSETS.delete(key))); return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "Annonsplatsen hann reserveras av ett annat avtal. Avtalet aktiverades inte." : "Avtalet kunde inte låsas i databasen." }, 409); }
+  catch (error) { console.error("DinPuls avtalslåsning:", error); await Promise.all((foundationOrder ? [dinpulsKey, pdfKey] : [customerKey, dinpulsKey, pdfKey]).map(key => env.AD_ASSETS.delete(key))); return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "Annonsplatsen hann reserveras av ett annat avtal. Avtalet aktiverades inte." : "Avtalet kunde inte låsas i databasen." }, 409); }
   let emailStatus = "sent";
   try { await sendSignedContractEmail(env, { ...contract, id }, pdfBytes, snapshot); await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='sent', contract_email_sent_at=?, contract_email_error=NULL WHERE id=?").bind(new Date().toISOString(), id).run(); }
   catch (error) { emailStatus = "failed"; await env.DB.prepare("UPDATE ad_contracts SET contract_email_status='failed', contract_email_error=? WHERE id=?").bind(cleanText(error.message, 300), id).run(); }
@@ -992,6 +1046,9 @@ async function listAvailableCompanySlots(request, env, url) {
   const reservations = await env.DB.prepare("SELECT slot_id FROM contract_slot_reservations WHERE municipality = ? AND start_date <= ? AND end_date >= ?")
     .bind(municipality, endDate, startDate).all();
   const occupied = new Set((reservations.results || []).map(row => row.slot_id));
+  const otherOrders = await env.DB.prepare("SELECT slot_id FROM self_service_holds WHERE municipality=? AND start_date<=? AND end_date>=? AND (status='committed' OR (status='held' AND expires_at>?))")
+    .bind(municipality, endDate, startDate, new Date().toISOString()).all();
+  for (const row of otherOrders.results || []) occupied.add(row.slot_id);
   // Older active contracts may predate the reservation table.
   const legacy = await env.DB.prepare("SELECT placements FROM ad_contracts WHERE municipality = ? AND status = 'Aktivt' AND start_date <= ? AND end_date >= ?")
     .bind(municipality, endDate, startDate).all();
@@ -1002,6 +1059,194 @@ async function listAvailableCompanySlots(request, env, url) {
   return json(request, { ok: true, municipality, startDate, endDate,
     slots: globalThis.DINPULS_AD_INVENTORY.filter(slot => !occupied.has(slot.id)).map(slot => slotDisplay(slot, municipality)),
     pricing: { monthlyExVat: BILLING.monthly.unitPrice, annualExVat: BILLING.annual.unitPrice, vatRate: 0.25 } });
+}
+
+async function getContractSnapshot(request, env, id) {
+  const session = await requireSession(request, env);
+  if (!session || !["admin", "company"].includes(session.role)) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const row = await env.DB.prepare("SELECT company_user_id, contract_snapshot_json, contract_snapshot_hash, status FROM ad_contracts WHERE id=?").bind(id).first();
+  if (!row || (session.role === "company" && String(row.company_user_id) !== String(session.subject_id))) return json(request, { ok: false, error: "Avtalet finns inte." }, 404);
+  if (!row.contract_snapshot_json || !safeEqual(await sha256(row.contract_snapshot_json), row.contract_snapshot_hash)) return json(request, { ok: false, error: "Avtalsinnehållet kunde inte verifieras." }, 409);
+  return json(request, { ok: true, snapshot: JSON.parse(row.contract_snapshot_json), snapshotHash: row.contract_snapshot_hash, status: row.status });
+}
+
+function checkedOrderLines(value) {
+  if (!Array.isArray(value) || !value.length || value.length > 20) return null;
+  const lines = value.map(item => ({ municipality: cleanText(item.municipality, 80), slotId: cleanText(item.slotId, 40), startDate: cleanText(item.startDate, 10), endDate: cleanText(item.endDate, 10) }));
+  if (lines.some(item => !isSupportedMunicipality(item.municipality) || !isTwelveMonthContract(item.startDate, item.endDate) || !globalThis.DINPULS_AD_INVENTORY.some(slot => slot.id === item.slotId) || item.startDate < new Date().toISOString().slice(0, 10))) return null;
+  if (new Set(lines.map(item => `${item.municipality}|${item.slotId}|${item.startDate}|${item.endDate}`)).size !== lines.length) return null;
+  return lines;
+}
+
+async function prepareFoundationOrder(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (env.SELF_SERVICE_PURCHASE_ENABLED !== "true") return json(request, { ok: false, error: "Annonsköp är inte aktiverade." }, 503);
+  const body = await readBody(request);
+  const lines = checkedOrderLines(body?.placements), billingType = cleanText(body?.billingType, 20);
+  if (!lines || !["monthly", "annual"].includes(billingType) || lines.some(line => line.startDate !== lines[0].startDate || line.endDate !== lines[0].endDate)) return json(request, { ok: false, error: "Första grundavtalet kräver giltiga platser med samma tolvmånadersperiod och betalningsmodell." }, 400);
+  const user = await env.DB.prepare("SELECT id, company, org_no, contact, email, phone, address, postal_code, city, registration_source FROM business_users WHERE id=? AND active=1").bind(session.subject_id).first();
+  if (!user || user.registration_source !== "self-service") return json(request, { ok: false, error: "Ett aktiverat självregistrerat konto krävs." }, 403);
+  const expired = await env.DB.prepare("SELECT id, foundation_contract_id FROM self_service_orders WHERE company_user_id=? AND status IN ('held','customer_signed') AND expires_at<=?").bind(user.id, new Date().toISOString()).all();
+  for (const row of expired.results || []) await env.DB.batch([
+    env.DB.prepare("UPDATE self_service_orders SET status='expired' WHERE id=? AND status IN ('held','customer_signed')").bind(row.id),
+    env.DB.prepare("UPDATE self_service_holds SET status='expired' WHERE order_id=? AND status='held'").bind(row.id),
+    env.DB.prepare("UPDATE ad_contracts SET status='Avslutat', updated_at=? WHERE id=? AND company_user_id=? AND status='Utkast' AND signed_at IS NULL").bind(new Date().toISOString(), row.foundation_contract_id, user.id)
+  ]);
+  const old = await env.DB.prepare("SELECT id FROM ad_contracts WHERE company_user_id=? AND status<>'Avslutat' LIMIT 1").bind(user.id).first();
+  if (old) return json(request, { ok: false, error: "Ett grundavtal finns redan. Använd tilläggsköp eller kontakta DinPuls om avtalsutkastet behöver avslutas." }, 409);
+  if (await oldContractConflict(env, lines)) return json(request, { ok: false, error: "En plats är redan upptagen under vald period." }, 409);
+  const placements = lines.map(line => {
+    const slot = globalThis.DINPULS_AD_INVENTORY.find(item => item.id === line.slotId);
+    const display = slotDisplay(slot, line.municipality);
+    return { slotId: line.slotId, municipality: line.municipality, module: slot.module, group: slot.group, label: slot.label, location: display.displayLabel, page: slot.page, startDate: line.startDate, endDate: line.endDate };
+  });
+  const id = `DP-${new Date().getUTCFullYear()}-${String(crypto.getRandomValues(new Uint16Array(1))[0] % 10000).padStart(4, "0")}`;
+  const now = new Date().toISOString(), expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString(), orderId = crypto.randomUUID();
+  const price = calculateContractPrice(billingType, placements.length), municipality = [...new Set(lines.map(line => line.municipality))].join(", ");
+  const snapshot = snapshotForContract({ id, company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city, municipality, startDate: lines[0].startDate, endDate: lines[0].endDate }, placements, price);
+  const snapshotJson = stableStringify(snapshot), snapshotHash = await sha256(snapshotJson);
+  const statements = [env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, renewal_type, signature_required, start_date, end_date, status, contract_snapshot_json, contract_snapshot_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,'annual-review',1,?,?,'Utkast',?,?,?,?)").bind(id, user.id, CONTRACT_VERSION, municipality, JSON.stringify(placements), price.unitPrice, billingType === "annual" ? price.unitPrice : 0, price.monthlyTotal, price.annualTotal, billingType, lines[0].startDate, lines[0].endDate, snapshotJson, snapshotHash, now, now), env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
+  for (const line of lines) statements.push(env.DB.prepare("INSERT INTO self_service_holds (order_id,company_user_id,municipality,slot_id,start_date,end_date,status,expires_at,created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, line.municipality, line.slotId, line.startDate, line.endDate, expiresAt, now));
+  try { await env.DB.batch(statements); }
+  catch (error) { return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "En plats hann reserveras av någon annan." : "Avtalsutkastet kunde inte skapas. Försök igen." }, 409); }
+  return json(request, { ok: true, orderId, contractId: id, snapshot, snapshotHash, expiresAt }, 201);
+}
+
+async function signFoundationByCompany(request, env, orderId) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (env.SELF_SERVICE_PURCHASE_ENABLED !== "true") return json(request, { ok: false, error: "Signeringen är inte aktiverad." }, 503);
+  if (!env.AD_ASSETS) return json(request, { ok: false, error: "Avtalsarkivet saknas." }, 503);
+  const body = await readBody(request);
+  const name = cleanText(body?.customerSignerName), title = cleanText(body?.customerSignerTitle);
+  let bytes;
+  try { bytes = dataUrlBytes(body?.customerSignature); } catch { return json(request, { ok: false, error: "Rita en giltig underskrift." }, 400); }
+  if (!name || !title || body?.explicitConfirmation !== true) return json(request, { ok: false, error: "Namn, roll och uttryckligt godkännande krävs." }, 400);
+  const order = await env.DB.prepare("SELECT * FROM self_service_orders WHERE id=? AND company_user_id=? AND status='held'").bind(orderId, session.subject_id).first();
+  if (!order) return json(request, { ok: false, error: "Avtalsbeställningen finns inte eller har redan signerats." }, 404);
+  const now = new Date().toISOString();
+  if (order.expires_at <= now) return json(request, { ok: false, error: "Platsreservationen har gått ut. Börja om." }, 409);
+  if (!safeEqual(order.snapshot_hash, body?.snapshotHash) || !safeEqual(await sha256(order.snapshot_json), order.snapshot_hash)) return json(request, { ok: false, error: "Avtalet som visas matchar inte det låsta underlaget." }, 409);
+  const contract = await env.DB.prepare("SELECT id, contract_snapshot_hash, customer_signature_object_key, status FROM ad_contracts WHERE id=? AND company_user_id=?").bind(order.foundation_contract_id, session.subject_id).first();
+  if (!contract || contract.status !== "Utkast" || contract.customer_signature_object_key || !safeEqual(contract.contract_snapshot_hash, order.snapshot_hash)) return json(request, { ok: false, error: "Avtalet är inte längre oförändrat och signeringsbart." }, 409);
+  const key = `contracts/${contract.id}/${order.snapshot_hash}/customer-signature.png`;
+  if (await env.AD_ASSETS.head(key)) return json(request, { ok: false, error: "En kundsignatur finns redan och får inte ersättas." }, 409);
+  await env.AD_ASSETS.put(key, bytes, { httpMetadata: { contentType: "image/png", cacheControl: "private, no-store" }, customMetadata: { contractId: contract.id, snapshotHash: order.snapshot_hash } });
+  const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+  try { await env.DB.batch([env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, customer_signature_object_key=?, updated_at=? WHERE id=? AND company_user_id=? AND status='Utkast' AND customer_signature_object_key IS NULL").bind(name, title, key, now, contract.id, session.subject_id), env.DB.prepare("UPDATE self_service_orders SET status='customer_signed', expires_at=? WHERE id=? AND status='held'").bind(expiresAt, orderId), env.DB.prepare("UPDATE self_service_holds SET expires_at=? WHERE order_id=? AND status='held'").bind(expiresAt, orderId)]); }
+  catch { await env.AD_ASSETS.delete(key); return json(request, { ok: false, error: "Underskriften kunde inte låsas. Försök igen." }, 409); }
+  return json(request, { ok: true, contractId: contract.id, orderId, status: "waiting_for_dinpuls_signature", expiresAt, message: "Din underskrift är låst. Avtalet blir bindande först när DinPuls också har undertecknat det." });
+}
+
+async function currentFoundationOrder(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const row = await env.DB.prepare("SELECT id, foundation_contract_id, status, expires_at, snapshot_json, snapshot_hash FROM self_service_orders WHERE company_user_id=? AND status IN ('held','customer_signed') ORDER BY created_at DESC LIMIT 1").bind(session.subject_id).first();
+  if (!row || row.expires_at <= new Date().toISOString()) return json(request, { ok: true, order: null });
+  if (!safeEqual(await sha256(row.snapshot_json), row.snapshot_hash)) return json(request, { ok: false, error: "Avtalsutkastet kunde inte verifieras." }, 409);
+  return json(request, { ok: true, order: { orderId: row.id, contractId: row.foundation_contract_id, status: row.status, expiresAt: row.expires_at, snapshot: JSON.parse(row.snapshot_json), snapshotHash: row.snapshot_hash } });
+}
+
+async function oldContractConflict(env, lines) {
+  for (const line of lines) {
+    const legacy = await env.DB.prepare("SELECT placements FROM ad_contracts WHERE municipality=? AND status='Aktivt' AND start_date<=? AND end_date>=?")
+      .bind(line.municipality, line.endDate, line.startDate).all();
+    for (const row of legacy.results || []) {
+      let placements;
+      try { placements = JSON.parse(row.placements || "[]"); } catch { return true; }
+      if (placements.some(item => item.slotId === line.slotId)) return true;
+    }
+  }
+  return false;
+}
+
+async function foundationForCompany(env, companyId) {
+  return env.DB.prepare("SELECT id, contract_version FROM ad_contracts WHERE company_user_id=? AND status='Aktivt' AND signed_at IS NOT NULL AND signed_pdf_object_key IS NOT NULL ORDER BY signed_at DESC LIMIT 1").bind(companyId).first();
+}
+
+async function prepareCompanyOrder(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (env.SELF_SERVICE_PURCHASE_ENABLED !== "true") return json(request, { ok: false, error: "Annonsköp är inte aktiverade." }, 503);
+  const body = await readBody(request);
+  const lines = checkedOrderLines(body?.placements), billingType = cleanText(body?.billingType, 20);
+  if (!lines || !["monthly", "annual"].includes(billingType)) return json(request, { ok: false, error: "Välj giltiga platser, en tolvmånadersperiod och en betalningsmodell." }, 400);
+  const user = await env.DB.prepare("SELECT id, company, org_no, contact, email, phone, address, postal_code, city FROM business_users WHERE id=? AND active=1").bind(session.subject_id).first();
+  if (!user) return json(request, { ok: false, error: "Företagskontot är inte aktivt." }, 403);
+  const foundation = await foundationForCompany(env, user.id);
+  if (!foundation) return json(request, { ok: false, error: "Ett färdigsignerat grundavtal krävs före ett tilläggsköp." }, 409);
+  if (await oldContractConflict(env, lines)) return json(request, { ok: false, error: "En plats är redan upptagen under vald period." }, 409);
+  const price = calculateContractPrice(billingType, lines.length);
+  const placements = lines.map(line => {
+    const slot = globalThis.DINPULS_AD_INVENTORY.find(item => item.id === line.slotId);
+    const display = slotDisplay(slot, line.municipality);
+    return { ...line, placementLabel: display.displayLabel, module: slot.module, page: slot.page, unitPrice: price.unitPrice, vatAmount: Math.round(price.unitPrice * 0.25) };
+  });
+  const id = crypto.randomUUID(), now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString();
+  const snapshot = { orderId: id, companyId: user.id, company: { name: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city }, foundationContractId: foundation.id, contractVersion: foundation.contract_version, billingType, placements, totals: { perInvoiceExVat: price.invoiceTotal, perInvoiceVat: Math.round(price.invoiceTotal * 0.25), perInvoiceInclVat: Math.round(price.invoiceTotal * 1.25), twelveMonthsExVat: price.annualTotal, twelveMonthsVat: Math.round(price.annualTotal * 0.25) }, terms: CONTRACT_TERMS, createdAt: now, expiresAt };
+  const snapshotJson = stableStringify(snapshot), snapshotHash = await sha256(snapshotJson);
+  const statements = [env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(id, user.id, foundation.id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
+  for (const line of placements) statements.push(env.DB.prepare("INSERT INTO self_service_holds (order_id, company_user_id, municipality, slot_id, start_date, end_date, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(id, user.id, line.municipality, line.slotId, line.startDate, line.endDate, expiresAt, now));
+  try { await env.DB.batch(statements); }
+  catch (error) { return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "En plats hann reserveras av någon annan. Välj en annan plats." : "Beställningen kunde inte reserveras." }, 409); }
+  return json(request, { ok: true, orderId: id, expiresAt, snapshot, snapshotHash }, 201);
+}
+
+async function confirmCompanyOrder(request, env, id) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  if (env.SELF_SERVICE_PURCHASE_ENABLED !== "true") return json(request, { ok: false, error: "Annonsköp är inte aktiverade." }, 503);
+  const body = await readBody(request);
+  const order = await env.DB.prepare("SELECT * FROM self_service_orders WHERE id=? AND company_user_id=?").bind(id, session.subject_id).first();
+  if (!order) return json(request, { ok: false, error: "Beställningen finns inte." }, 404);
+  if (order.status === "confirmed") return json(request, { ok: true, orderId: id, status: "confirmed" });
+  const now = new Date().toISOString();
+  if (order.status !== "held" || order.expires_at <= now) return json(request, { ok: false, error: "Reservationen har gått ut. Välj plats på nytt." }, 409);
+  if (body?.explicitConfirmation !== true || !safeEqual(body?.snapshotHash, order.snapshot_hash)) return json(request, { ok: false, error: "Bekräfta den oförändrade beställningen och villkoren uttryckligen." }, 400);
+  if (!await foundationForCompany(env, session.subject_id)) return json(request, { ok: false, error: "Grundavtalet är inte längre giltigt." }, 409);
+  const snapshot = JSON.parse(order.snapshot_json);
+  const confirmation = { orderId: id, companyId: Number(session.subject_id), foundationContractId: order.foundation_contract_id, snapshotHash: order.snapshot_hash, confirmedAt: now, explicitConfirmation: true, channel: "authenticated-company-portal" };
+  const confirmationJson = stableStringify(confirmation), confirmationHash = await sha256(confirmationJson);
+  const statements = [env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND company_user_id=? AND status='held' AND expires_at>?").bind(now, id, session.subject_id, now)];
+  for (const line of snapshot.placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), id, session.subject_id, order.foundation_contract_id, line.municipality, line.slotId, line.placementLabel, order.billing_type, line.unitPrice, line.vatAmount, line.startDate, line.endDate, snapshot.contractVersion, confirmationJson, confirmationHash, now));
+  statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND company_user_id=? AND status='held' AND expires_at>?").bind(id, session.subject_id, now));
+  try { await env.DB.batch(statements); }
+  catch { return json(request, { ok: false, error: "Beställningen kunde inte låsas. Kontrollera reservationen och försök igen." }, 409); }
+  return json(request, { ok: true, orderId: id, status: "confirmed", purchaseCount: snapshot.placements.length, billingStatus: "waiting_for_launch", confirmationHash });
+}
+
+async function listCompanyPurchases(request, env) {
+  const session = await requireSession(request, env, "company");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const rows = await env.DB.prepare("SELECT id, order_id, foundation_contract_id, municipality, slot_id, placement_label, billing_type, unit_price, vat_amount, start_date, end_date, contract_version, billing_status, publication_status, confirmed_at FROM self_service_purchases WHERE company_user_id=? ORDER BY confirmed_at DESC").bind(session.subject_id).all();
+  return json(request, { ok: true, purchases: rows.results || [] });
+}
+
+async function activatePurchaseForPublication(request, env, id) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const body = await readBody(request);
+  if (body?.explicitActivation !== true) return json(request, { ok: false, error: "Bekräfta kommunens och annonsplatsens aktivering uttryckligen." }, 400);
+  const purchase = await env.DB.prepare("SELECT p.id, p.municipality, p.slot_id, p.publication_status, c.status contract_status, c.signed_at FROM self_service_purchases p JOIN ad_contracts c ON c.id=p.foundation_contract_id WHERE p.id=?").bind(id).first();
+  if (!purchase) return json(request, { ok: false, error: "Köpet finns inte." }, 404);
+  if (purchase.contract_status !== "Aktivt" || !purchase.signed_at) return json(request, { ok: false, error: "Grundavtalet är inte färdigsignerat och aktivt." }, 409);
+  if (purchase.publication_status === "active") return json(request, { ok: true, status: "active" });
+  if (purchase.publication_status !== "waiting_for_launch") return json(request, { ok: false, error: "Köpet kan inte aktiveras från nuvarande status." }, 409);
+  await env.DB.prepare("UPDATE self_service_purchases SET publication_status='active', billing_status='ready_for_invoice' WHERE id=? AND publication_status='waiting_for_launch'").bind(id).run();
+  return json(request, { ok: true, status: "active", billingStatus: "ready_for_invoice", municipality: purchase.municipality, slotId: purchase.slot_id, spirisEnabled: false });
+}
+
+async function readBillingBasis(request, env, url) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const companyId = Number(url.searchParams.get("companyId"));
+  if (!Number.isSafeInteger(companyId) || companyId < 1) return json(request, { ok: false, error: "Ange ett giltigt företags-ID." }, 400);
+  const user = await env.DB.prepare("SELECT id, company, org_no, address, postal_code, city, contact, email FROM business_users WHERE id=?").bind(companyId).first();
+  if (!user) return json(request, { ok: false, error: "Företaget finns inte." }, 404);
+  const rows = await env.DB.prepare("SELECT id, municipality, slot_id, placement_label, billing_type, unit_price, start_date, end_date FROM self_service_purchases WHERE company_user_id=? AND billing_status='ready_for_invoice' AND spiris_invoice_id IS NULL ORDER BY start_date, id").bind(companyId).all();
+  if (!(rows.results || []).length) return json(request, { ok: true, basis: null, purchaseCount: 0, spirisEnabled: false });
+  const basis = buildBillingBasis({ id: user.id, company: user.company, orgNo: user.org_no, address: user.address, postalCode: user.postal_code, city: user.city, contact: user.contact, email: user.email }, rows.results.map(row => ({ id: row.id, municipality: row.municipality, slotId: row.slot_id, placementLabel: row.placement_label, billingType: row.billing_type, unitPriceExVat: row.unit_price, startDate: row.start_date, endDate: row.end_date })));
+  return json(request, { ok: true, basis, purchaseCount: rows.results.length, spirisEnabled: false });
 }
 
 async function updateCompanyProfile(request, env) {
@@ -1150,6 +1395,8 @@ export default {
       if (request.method === "POST" && signContractMatch) return signContract(request, env, decodeURIComponent(signContractMatch[1]));
       const pdfContractMatch = /^\/portal\/(?:admin|company)\/contracts\/([^/]+)\/pdf$/.exec(url.pathname);
       if (request.method === "GET" && pdfContractMatch) return downloadContractPdf(request, env, decodeURIComponent(pdfContractMatch[1]));
+      const snapshotContractMatch = /^\/portal\/(?:admin|company)\/contracts\/([^/]+)\/snapshot$/.exec(url.pathname);
+      if (request.method === "GET" && snapshotContractMatch) return getContractSnapshot(request, env, decodeURIComponent(snapshotContractMatch[1]));
       const contractMatch = /^\/portal\/admin\/contracts\/([^/]+)$/.exec(url.pathname);
       if (request.method === "PATCH" && contractMatch) return updateContractStatus(request, env, decodeURIComponent(contractMatch[1]));
       const activationMatch = /^\/portal\/admin\/contracts\/([^/]+)\/activation$/.exec(url.pathname);
@@ -1158,6 +1405,17 @@ export default {
       if (request.method === "POST" && contractEmailMatch) return resendSignedContractEmail(request, env, decodeURIComponent(contractEmailMatch[1]));
       if (request.method === "GET" && url.pathname === "/portal/company/me") return companyAccount(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/available-slots") return listAvailableCompanySlots(request, env, url);
+      if (request.method === "POST" && url.pathname === "/portal/company/orders") return prepareCompanyOrder(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/company/foundation/orders") return prepareFoundationOrder(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/company/foundation/current") return currentFoundationOrder(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/company/purchases") return listCompanyPurchases(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/billing/basis") return readBillingBasis(request, env, url);
+      const foundationSignMatch = /^\/portal\/company\/foundation\/orders\/([0-9a-f-]{36})\/sign$/i.exec(url.pathname);
+      if (request.method === "POST" && foundationSignMatch) return signFoundationByCompany(request, env, foundationSignMatch[1]);
+      const companyOrderMatch = /^\/portal\/company\/orders\/([0-9a-f-]{36})\/confirm$/i.exec(url.pathname);
+      if (request.method === "POST" && companyOrderMatch) return confirmCompanyOrder(request, env, companyOrderMatch[1]);
+      const activatePurchaseMatch = /^\/portal\/admin\/purchases\/([0-9a-f-]{36})\/activate$/i.exec(url.pathname);
+      if (request.method === "POST" && activatePurchaseMatch) return activatePurchaseForPublication(request, env, activatePurchaseMatch[1]);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/stats") return companyStats(request, env);
@@ -1184,4 +1442,5 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { BILLING, CONTRACT_TERMS, CONTRACT_VERSION, calculateContractPrice, stableStringify } from "./contract-v4.js";
 import municipalityConfig from "../data/municipalities.json";
 import { normalizeSwedishOrgNumber } from "./swedish-org-number.js";
+import { buildBillingBasis } from "./spiris-adapter.js";
 import "../admin/ad-inventory.js";

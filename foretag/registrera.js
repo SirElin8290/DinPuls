@@ -32,7 +32,7 @@ form.addEventListener("submit", async event => {
     });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Kontot kunde inte skapas.");
-    form.reset(); result.textContent = payload.message;
+    form.reset(); result.textContent = `${payload.message} När lösenordet är valt loggar du in och fortsätter direkt till Välj annonsplatser.`;
   } catch (error) { result.textContent = error.message; }
   finally { button.disabled = false; }
 });
