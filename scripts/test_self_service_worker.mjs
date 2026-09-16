@@ -212,7 +212,7 @@ try {
   assert.deepEqual([firstBilling.net, firstBilling.vat, firstBilling.total], [10000, 2500, 12500]);
   assert.equal(billing.spirisEnabled, false);
   assert.equal(billing.automaticInvoicing, false);
-  assert.equal((await send(`/portal/admin/billing/orders/${first.orderId}/approve`, "POST", {}, session.token)).status, 401, "Endast admin får godkänna fakturering");
+  assert.equal((await send(`/portal/admin/billing/orders/${first.orderId}/approve`, "POST", {})).status, 401, "Endast admin får godkänna fakturering");
   const approved = await read(`/portal/admin/billing/orders/${first.orderId}/approve`, "POST", {}, admin.token);
   assert.equal(approved.status, "approved_for_invoice");
   const approvedAgain = await read(`/portal/admin/billing/orders/${first.orderId}/approve`, "POST", {}, admin.token);
