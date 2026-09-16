@@ -8,6 +8,7 @@
   const $$ = selector => [...document.querySelectorAll(selector)];
   let municipalities = [];
   let contractCache = [];
+  let bannerPreviewUrls = [];
   let apiBase = "";
 
   function escapeHtml(value = "") {
@@ -248,6 +249,26 @@ async function openFoundationCountersign(contract, dialog) {
     };
   }
 
+  async function refreshBannerReviews() {
+    const target = $("#bannerReviewList");
+    if (!target) return;
+    target.innerHTML = '<div class="panel"><p class="muted">Läser banners…</p></div>';
+    bannerPreviewUrls.forEach(URL.revokeObjectURL); bannerPreviewUrls = [];
+    try {
+      const data = await api("/portal/admin/banners/reviews");
+      const labels = { pending: "Väntar på granskning", approved: "Godkänd", rejected: "Avvisad" };
+      target.innerHTML = data.banners.length ? data.banners.map(item => `<article class="panel banner-review-card" data-banner-review="${escapeHtml(item.id)}"><div class="banner-review-preview"><span>Laddar bild…</span></div><div><span class="badge ${escapeHtml(item.approvalStatus)}">${item.publishedAt ? "Publicerad" : escapeHtml(labels[item.approvalStatus] || item.approvalStatus)}</span><h2>${escapeHtml(item.company)}</h2><p><b>${escapeHtml(item.municipality)} · ${escapeHtml(item.placementLabel)}</b><br>Plats ${escapeHtml(item.slotId)} · önskad publicering ${escapeHtml(new Date(item.startAt).toLocaleString("sv-SE"))}</p><p><a href="${escapeHtml(item.targetUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.targetUrl || "Ingen mållänk")}</a></p><label>Granskningskommentar<textarea rows="3" maxlength="500">${escapeHtml(item.reviewComment)}</textarea></label><div class="actions"><button class="primary approve-banner" type="button" ${item.publishedAt ? "disabled" : ""}>Godkänn</button><button class="secondary reject-banner" type="button" ${item.publishedAt ? "disabled" : ""}>Avvisa</button></div></div></article>`).join("") : '<div class="panel"><p class="muted">Inga banners att granska.</p></div>';
+      for (const item of data.banners) {
+        const card = target.querySelector(`[data-banner-review="${CSS.escape(item.id)}"]`);
+        const response = await fetch(`${apiBase}${item.previewUrl}`, { headers: { Authorization: `Bearer ${token()}` }, cache: "no-store" });
+        if (response.ok) { const url = URL.createObjectURL(await response.blob()); bannerPreviewUrls.push(url); card.querySelector(".banner-review-preview").innerHTML = `<img src="${url}" alt="Banner från ${escapeHtml(item.company)}">`; }
+        const review = async approvalStatus => { try { await api(`/portal/admin/banners/${encodeURIComponent(item.id)}/review`, { method: "PATCH", body: JSON.stringify({ approvalStatus, reviewComment: card.querySelector("textarea").value.trim() }) }); await refreshBannerReviews(); } catch (error) { alert(error.message); } };
+        card.querySelector(".approve-banner").onclick = () => review("approved");
+        card.querySelector(".reject-banner").onclick = () => review("rejected");
+      }
+    } catch (error) { target.innerHTML = `<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`; }
+  }
+
 function openContract(id) {
     const contract = contractCache.find(item => item.id === id);
     if (!contract) return;
@@ -338,6 +359,7 @@ function openContract(id) {
     $(".admin-main")?.classList.toggle("start-open", id === "start");
     if (id === "inventory") renderInventory();
     if (id === "operations") refreshOperations();
+    if (id === "banner-reviews") refreshBannerReviews();
     scrollTo(0, 0);
   }
 
@@ -395,6 +417,7 @@ function openContract(id) {
     installContractTermsFields();
     installSystemStatus();
     $("#refreshOperations").onclick = refreshOperations;
+    $("#refreshBannerReviews").onclick = refreshBannerReviews;
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {

@@ -121,9 +121,11 @@ async function ensureDatabase(env) {
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS ad_banners_schedule ON ad_banners (contract_id, slot_id, start_at)").run();
   const bannerColumns = await env.DB.prepare("PRAGMA table_info(ad_banners)").all();
   const existingBannerColumns = new Set((bannerColumns.results || []).map(column => column.name));
-  for (const [name, definition] of [["published_at", "TEXT"], ["change_period", "INTEGER"], ["municipality", "TEXT"], ["purchase_id", "TEXT"]]) {
+  const bannerApprovalMigrationNeeded = !existingBannerColumns.has("approval_status");
+  for (const [name, definition] of [["published_at", "TEXT"], ["change_period", "INTEGER"], ["municipality", "TEXT"], ["purchase_id", "TEXT"], ["approval_status", "TEXT NOT NULL DEFAULT 'pending'"], ["review_comment", "TEXT NOT NULL DEFAULT ''"], ["reviewed_at", "TEXT"], ["reviewed_by", "TEXT"]]) {
     if (!existingBannerColumns.has(name)) await env.DB.prepare(`ALTER TABLE ad_banners ADD COLUMN ${name} ${definition}`).run();
   }
+  if (bannerApprovalMigrationNeeded) await env.DB.prepare("UPDATE ad_banners SET approval_status='approved', review_comment='Befintlig banner vid införande av granskning', reviewed_at=COALESCE(published_at, updated_at), reviewed_by='migration-v1'").run();
   await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS limit_published_banner_changes BEFORE UPDATE OF published_at ON ad_banners WHEN OLD.published_at IS NULL AND NEW.published_at IS NOT NULL BEGIN SELECT CASE WHEN (SELECT COUNT(*) FROM ad_banners b WHERE b.contract_id=NEW.contract_id AND b.slot_id=NEW.slot_id AND b.change_period=NEW.change_period AND b.published_at IS NOT NULL) >= 4 THEN RAISE(ABORT, 'BANNER_CHANGE_LIMIT') END; END").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS contract_slot_reservations (contract_id TEXT NOT NULL, municipality TEXT NOT NULL, slot_id TEXT NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(contract_id, slot_id), FOREIGN KEY(contract_id) REFERENCES ad_contracts(id))"
@@ -235,7 +237,8 @@ function bannerFromRow(row) {
     municipality: row.municipality || null, purchaseId: row.purchase_id || null,
     fileSize: Number(row.file_size), targetUrl: row.target_url || "", startAt: row.start_at,
     imageUrl: `/ads/assets/${encodeURIComponent(row.id)}`, createdAt: row.created_at,
-    publishedAt: row.published_at || null, changePeriod: row.change_period == null ? null : Number(row.change_period) };
+    publishedAt: row.published_at || null, changePeriod: row.change_period == null ? null : Number(row.change_period),
+    approvalStatus: row.approval_status || "pending", reviewComment: row.review_comment || "", reviewedAt: row.reviewed_at || null };
 }
 
 async function activeCompanyContract(env, companyUserId) {
@@ -312,9 +315,9 @@ async function uploadCompanyBanner(request, env) {
 async function deleteCompanyBanner(request, env, id) {
   const session = await requireSession(request, env, "company");
   if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
-  const banner = await env.DB.prepare("SELECT object_key, start_at FROM ad_banners WHERE id = ? AND company_user_id = ?").bind(id, session.subject_id).first();
+  const banner = await env.DB.prepare("SELECT object_key, published_at FROM ad_banners WHERE id = ? AND company_user_id = ?").bind(id, session.subject_id).first();
   if (!banner) return json(request, { ok: false, error: "Bannern finns inte." }, 404);
-  if (Date.parse(banner.start_at) <= Date.now()) return json(request, { ok: false, error: "En redan publicerad banner kan inte tas bort här. Kontakta DinPuls." }, 409);
+  if (banner.published_at) return json(request, { ok: false, error: "En redan publicerad banner kan inte tas bort här. Kontakta DinPuls." }, 409);
   await env.DB.prepare("DELETE FROM ad_banners WHERE id = ? AND company_user_id = ?").bind(id, session.subject_id).run();
   if (env.AD_ASSETS) await env.AD_ASSETS.delete(banner.object_key);
   return json(request, { ok: true });
@@ -327,13 +330,13 @@ async function currentBanner(request, env, slotId, municipality) {
   const predicate = "b.slot_id=? AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.municipality=? AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.municipality=? AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))";
   const from = "ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id";
   const parameters = [slotId, municipality, today, today, municipality, today, today];
-  const due = await env.DB.prepare(`SELECT b.id FROM ${from} WHERE ${predicate} AND b.start_at<=? AND b.published_at IS NULL ORDER BY b.start_at ASC`)
+  const due = await env.DB.prepare(`SELECT b.id FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.start_at<=? AND b.published_at IS NULL ORDER BY b.start_at ASC`)
     .bind(...parameters, now).all();
   for (const banner of due.results || []) {
     try { await env.DB.prepare("UPDATE ad_banners SET published_at=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(now, now, banner.id).run(); }
     catch (error) { if (!String(error).includes("BANNER_CHANGE_LIMIT")) throw error; }
   }
-  const row = await env.DB.prepare(`SELECT b.* FROM ${from} WHERE ${predicate} AND b.published_at IS NOT NULL ORDER BY b.start_at DESC LIMIT 1`)
+  const row = await env.DB.prepare(`SELECT b.* FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.published_at IS NOT NULL ORDER BY b.start_at DESC LIMIT 1`)
     .bind(...parameters).first();
   return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
 }
@@ -348,7 +351,7 @@ async function recordBannerEvent(request, env) {
   const today = stockholmDateKey(new Date().toISOString());
   const banner = await env.DB.prepare(
     "SELECT b.company_user_id FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id " +
-    "WHERE b.id=? AND b.published_at IS NOT NULL AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
+    "WHERE b.id=? AND b.approval_status='approved' AND b.published_at IS NOT NULL AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
   ).bind(bannerId, today, today, today, today).first();
   if (!banner) return json(request, { ok: false, error: "Annonsen är inte aktiv." }, 404);
   const impressions = eventType === "impression" ? 1 : 0;
@@ -414,7 +417,7 @@ async function companyStats(request, env) {
   ).bind(session.subject_id, startDate, endDate).all();
   const active = await env.DB.prepare(
     "SELECT COUNT(*) AS count FROM ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id " +
-    "WHERE b.company_user_id=? AND c.status='Aktivt' AND b.start_at<=? AND (b.purchase_id IS NULL OR (p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
+    "WHERE b.company_user_id=? AND b.approval_status='approved' AND c.status='Aktivt' AND b.start_at<=? AND (b.purchase_id IS NULL OR (p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))"
   ).bind(session.subject_id, new Date().toISOString(), today, today).first();
   const impressions = Number(totals?.impressions || 0);
   const clicks = Number(totals?.clicks || 0);
@@ -439,13 +442,47 @@ async function companyStats(request, env) {
 
 async function serveBannerAsset(request, env, id) {
   if (!env.AD_ASSETS || !/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
-  const row = await env.DB.prepare("SELECT object_key FROM ad_banners WHERE id = ?").bind(id).first();
+  const row = await env.DB.prepare("SELECT object_key FROM ad_banners WHERE id = ? AND approval_status='approved'").bind(id).first();
   if (!row) return new Response("Not found", { status: 404 });
   const object = await env.AD_ASSETS.get(row.object_key);
   if (!object?.body) return new Response("Not found", { status: 404 });
   const headers = new Headers({ "Cache-Control": "public, max-age=300", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'" });
   object.writeHttpMetadata(headers);
   headers.set("ETag", object.httpEtag);
+  return new Response(object.body, { headers });
+}
+
+async function listBannerReviews(request, env) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const result = await env.DB.prepare("SELECT b.*, u.company, p.placement_label FROM ad_banners b JOIN business_users u ON u.id=b.company_user_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id ORDER BY CASE b.approval_status WHEN 'pending' THEN 0 WHEN 'rejected' THEN 1 ELSE 2 END, b.created_at DESC").all();
+  return json(request, { ok: true, banners: (result.results || []).map(row => ({ ...bannerFromRow(row), company: row.company, placementLabel: row.placement_label || row.slot_id, previewUrl: `/portal/admin/banners/${encodeURIComponent(row.id)}/asset` })) });
+}
+
+async function reviewBanner(request, env, id) {
+  const session = await requireSession(request, env, "admin");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const body = await readBody(request);
+  const status = cleanText(body?.approvalStatus, 20), comment = cleanText(body?.reviewComment, 500);
+  if (!['approved', 'rejected'].includes(status)) return json(request, { ok: false, error: "Välj Godkänd eller Avvisad." }, 400);
+  if (status === 'rejected' && !comment) return json(request, { ok: false, error: "Ange varför bannern avvisas." }, 400);
+  const banner = await env.DB.prepare("SELECT id, purchase_id, published_at FROM ad_banners WHERE id=?").bind(id).first();
+  if (!banner) return json(request, { ok: false, error: "Bannern finns inte." }, 404);
+  if (banner.published_at) return json(request, { ok: false, error: "En publicerad banner kan inte granskas om." }, 409);
+  const now = new Date().toISOString();
+  const statements = [env.DB.prepare("UPDATE ad_banners SET approval_status=?, review_comment=?, reviewed_at=?, reviewed_by=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(status, comment, now, String(session.subject_id), now, id)];
+  if (status === 'approved' && banner.purchase_id) statements.push(env.DB.prepare("UPDATE self_service_purchases SET publication_status='active', billing_status='ready_for_invoice' WHERE id=? AND publication_status='waiting_for_launch'").bind(banner.purchase_id));
+  await env.DB.batch(statements);
+  return json(request, { ok: true, approvalStatus: status, reviewedAt: now });
+}
+
+async function serveAdminBannerAsset(request, env, id) {
+  if (!await requireSession(request, env, "admin") || !env.AD_ASSETS) return new Response("Not found", { status: 404 });
+  const row = await env.DB.prepare("SELECT object_key FROM ad_banners WHERE id=?").bind(id).first();
+  if (!row) return new Response("Not found", { status: 404 });
+  const object = await env.AD_ASSETS.get(row.object_key);
+  if (!object?.body) return new Response("Not found", { status: 404 });
+  const headers = new Headers({ "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'" });
+  object.writeHttpMetadata(headers);
   return new Response(object.body, { headers });
 }
 
@@ -1501,6 +1538,11 @@ export default {
       if (request.method === "POST" && activatePurchaseMatch) return activatePurchaseForPublication(request, env, activatePurchaseMatch[1]);
       if (request.method === "PATCH" && url.pathname === "/portal/company/profile") return updateCompanyProfile(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/banners") return listCompanyBanners(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/banners/reviews") return listBannerReviews(request, env);
+      const adminBannerReviewMatch = /^\/portal\/admin\/banners\/([0-9a-f-]{36})\/review$/i.exec(url.pathname);
+      if (request.method === "PATCH" && adminBannerReviewMatch) return reviewBanner(request, env, adminBannerReviewMatch[1]);
+      const adminBannerAssetMatch = /^\/portal\/admin\/banners\/([0-9a-f-]{36})\/asset$/i.exec(url.pathname);
+      if (request.method === "GET" && adminBannerAssetMatch) return serveAdminBannerAsset(request, env, adminBannerAssetMatch[1]);
       if (request.method === "GET" && url.pathname === "/portal/company/stats") return companyStats(request, env);
       if (request.method === "POST" && url.pathname === "/portal/company/banners") return uploadCompanyBanner(request, env);
       const companyBannerMatch = /^\/portal\/company\/banners\/([0-9a-f-]{36})$/i.exec(url.pathname);

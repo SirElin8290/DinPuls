@@ -94,10 +94,10 @@
     const banners = account.banners || [];
     $("#companyBannerRows").innerHTML = bannerPlacements.length ? bannerPlacements.map(placement => {
       const slotBanners = banners.filter(item => placement.purchaseId ? item.purchaseId === placement.purchaseId : !item.purchaseId && item.slotId === placement.slotId).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
-      const current = slotBanners.filter(item => Date.parse(item.startAt) <= Date.now()).at(-1);
-      const next = slotBanners.find(item => Date.parse(item.startAt) > Date.now());
+      const current = slotBanners.filter(item => item.publishedAt).at(-1);
+      const next = slotBanners.find(item => !item.publishedAt && item.approvalStatus !== "rejected");
       const preview = current ? `<div class="demo-banner company-banner-thumb" style="background-image:url('${escapeHtml(apiBase + current.imageUrl)}')"></div>` : '<div class="demo-banner">Ingen publicerad banner</div>';
-      return `<div class="banner-row"><b>${escapeHtml(placement.municipality)} · ${escapeHtml(placement.slotId)}<br><small>${escapeHtml(placement.location)}</small></b>${preview}<span class="status">${current ? "Visas nu" : placement.status}</span><span>${next ? formatSwedishDateTime(next.startAt) : "–"}</span><span>–</span><span>–</span><button class="change-banner" data-key="${escapeHtml(placement.key)}">Planera</button></div>`;
+      return `<div class="banner-row"><b>${escapeHtml(placement.municipality)} · ${escapeHtml(placement.slotId)}<br><small>${escapeHtml(placement.location)}</small></b>${preview}<span class="status">${current ? "Visas nu" : next ? (next.approvalStatus === "approved" ? "Godkänd" : "Väntar på granskning") : placement.status}</span><span>${next ? formatSwedishDateTime(next.startAt) : "–"}</span><span>–</span><span>–</span><button class="change-banner" data-key="${escapeHtml(placement.key)}">Planera</button></div>`;
     }).join("") : '<p class="muted">Inga annonsplatser i ett aktivt avtal.</p>';
     $("#bannerSlot").innerHTML = bannerPlacements.map(placement => `<option value="${escapeHtml(placement.key)}">${escapeHtml(placement.municipality)} · ${escapeHtml(placement.location)}</option>`).join("");
     const included = Number(contract?.includedChanges || 0);
@@ -121,18 +121,17 @@
     if (!container || !account) return;
     const placement = (account.bannerPlacements || []).find(item => item.key === $("#bannerSlot").value);
     const banners = (account.banners || []).filter(item => placement && (placement.purchaseId ? item.purchaseId === placement.purchaseId : !item.purchaseId && item.slotId === placement.slotId)).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt));
-    const past = banners.filter(item => Date.parse(item.startAt) <= Date.now());
-    const currentId = past.at(-1)?.id;
-    const futureCount = banners.filter(item => Date.parse(item.startAt) > Date.now()).length;
+    const currentId = banners.filter(item => item.publishedAt).at(-1)?.id;
+    const pendingCount = banners.filter(item => !item.publishedAt).length;
     const latestPeriod = Math.max(-1, ...banners.filter(item => item.publishedAt).map(item => Number(item.changePeriod)));
     const publishedThisPeriod = banners.filter(item => item.publishedAt && Number(item.changePeriod) === latestPeriod).length;
-    $("#scheduleCount").textContent = account.bannerScheduleReady ? `${publishedThisPeriod} av 4 publicerade · ${futureCount} planerade` : "Schema kunde inte läsas";
+    $("#scheduleCount").textContent = account.bannerScheduleReady ? `${publishedThisPeriod} av 4 publicerade · ${Math.max(0, 4 - publishedThisPeriod)} kvar · ${pendingCount} under granskning/planerade` : "Schema kunde inte läsas";
     container.innerHTML = !account.bannerScheduleReady
       ? '<p class="muted">Det befintliga bannerschemat kunde inte läsas. Du kan fortfarande prova att planera en ny banner; om servern stoppar uppladdningen visas det riktiga felet.</p>'
       : banners.length ? banners.map(item => {
-      const future = Date.parse(item.startAt) > Date.now();
-      const state = future ? "Planerad" : item.id === currentId ? "Visas nu" : "Tidigare";
-      return `<article class="scheduled-banner"><img src="${escapeHtml(apiBase + item.imageUrl)}" alt=""><div><strong>${escapeHtml(state)}</strong><span>${escapeHtml(formatSwedishDateTime(item.startAt))}</span><small>${escapeHtml(item.fileName)}</small></div>${future ? `<button type="button" class="remove-banner" data-banner-id="${escapeHtml(item.id)}">Ta bort</button>` : ""}</article>`;
+      const state = item.publishedAt ? (item.id === currentId ? "Publicerad" : "Tidigare publicerad") : item.approvalStatus === "approved" ? "Godkänd" : item.approvalStatus === "rejected" ? "Avvisad" : "Väntar på granskning";
+      const image = item.approvalStatus === "approved" ? `<img src="${escapeHtml(apiBase + item.imageUrl)}" alt="">` : '<span class="banner-review-placeholder">Bild inskickad</span>';
+      return `<article class="scheduled-banner">${image}<div><strong>${escapeHtml(state)}</strong><span>${escapeHtml(formatSwedishDateTime(item.startAt))}</span><small>${escapeHtml(item.fileName)}${item.reviewComment ? ` · ${escapeHtml(item.reviewComment)}` : ""}</small></div>${!item.publishedAt ? `<button type="button" class="remove-banner" data-banner-id="${escapeHtml(item.id)}">Ta bort</button>` : ""}</article>`;
     }).join("") : '<p class="muted">Inga banners är planerade för den här annonsplatsen ännu.</p>';
     $$(".remove-banner").forEach(button => button.onclick = async () => {
       if (!confirm("Ta bort den planerade bannern?")) return;
@@ -203,7 +202,7 @@
         const data = await response.json().catch(() => ({ error: "Servern gav ett ogiltigt svar." }));
         if (!response.ok) throw new Error(data.error || "Bannern kunde inte sparas.");
         selectedBannerFile = null; $("#bannerUpload").value = ""; $("#bannerLink").value = "";
-        $("#bannerPreview").innerHTML = "<span>Din bild visas här</span>"; $("#uploadStatus").textContent = "Bannern är planerad och byts automatiskt vid vald tid.";
+        $("#bannerPreview").innerHTML = "<span>Din bild visas här</span>"; $("#uploadStatus").textContent = "Bannern är inskickad och väntar på granskning. Ett byte räknas först när den publiceras.";
         await showApp(); showView("banners");
       } catch (error) { alert(error.message); }
       finally { button.textContent = "Planera bannern"; updateBannerButton(); }

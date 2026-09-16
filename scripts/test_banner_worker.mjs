@@ -162,7 +162,22 @@ try {
     body: png
   }), 201);
 
+  const badBytes = Buffer.from("not-a-png");
+  const badMagic = await request("/portal/company/banners", { method: "POST", headers: { Authorization: `Bearer ${company.token}`, "Content-Type": "image/png", "Content-Length": String(badBytes.length), "X-Banner-Slot": "SERV-01", "X-Banner-Start": new Date().toISOString(), "X-Banner-Name": "fake.png", "X-Banner-Link": "https%3A%2F%2Fexample.com" }, body: badBytes });
+  assert.equal(badMagic.status, 400, "Felaktiga magic bytes ska stoppas");
+  const badLink = await request("/portal/company/banners", { method: "POST", headers: { Authorization: `Bearer ${company.token}`, "Content-Type": "image/png", "Content-Length": String(png.length), "X-Banner-Slot": "SERV-01", "X-Banner-Start": new Date().toISOString(), "X-Banner-Name": "bad-link.png", "X-Banner-Link": "javascript%3Aalert(1)" }, body: png });
+  assert.equal(badLink.status, 400, "Otillåten mållänk ska stoppas");
+
   const first = await upload("gammal-banner.png", new Date(Date.now() - 60_000).toISOString(), "https://example.com/gammal");
+  assert.equal(first.banner.approvalStatus, "pending");
+  assert.equal((await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng")).status, 200);
+  assert.equal((await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200)).banner, null, "Ogranskad banner får aldrig serveras");
+  assert.equal((await request(first.banner.imageUrl)).status, 404, "Ogranskad bannerasset får inte vara publik");
+  const reviews = await responseJson(await request("/portal/admin/banners/reviews", { headers: { Authorization: `Bearer ${admin.token}` } }), 200);
+  assert.equal(reviews.banners[0].company, "Åslanda bannerkedjetest");
+  assert.equal((await request(reviews.banners[0].previewUrl)).status, 404, "Adminpreview kräver autentisering");
+  assert.equal((await request(reviews.banners[0].previewUrl, { headers: { Authorization: `Bearer ${admin.token}` } })).status, 200);
+  await responseJson(await jsonRequest(`/portal/admin/banners/${first.banner.id}/review`, "PATCH", { approvalStatus: "approved", reviewComment: "Godkänd pilotbanner" }, admin.token), 200);
   const switchTime = new Date(Date.now() + 1_500).toISOString();
   const second = await upload("ny-banner.png", switchTime, "https://example.com/ny");
 
@@ -170,6 +185,7 @@ try {
   assert.equal(beforeSwitch.banner.id, first.banner.id, "Den gamla bannern ska ligga kvar före bytestiden");
   assert.equal(beforeSwitch.banner.targetUrl, "https://example.com/gammal");
 
+  await responseJson(await jsonRequest(`/portal/admin/banners/${second.banner.id}/review`, "PATCH", { approvalStatus: "approved", reviewComment: "" }, admin.token), 200);
   await new Promise(resolve => setTimeout(resolve, 1_700));
   const afterSwitch = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
   assert.equal(afterSwitch.banner.id, second.banner.id, "Den nya bannern ska visas efter bytestiden");
@@ -178,10 +194,18 @@ try {
   const third = await upload("tre.png", new Date(Date.now() - 900).toISOString(), "https://example.com/tre");
   const fourth = await upload("fyra.png", new Date(Date.now() - 800).toISOString(), "https://example.com/fyra");
   const fifth = await upload("fem.png", new Date(Date.now() - 700).toISOString(), "https://example.com/fem");
+  for (const item of [third, fourth, fifth]) await responseJson(await jsonRequest(`/portal/admin/banners/${item.banner.id}/review`, "PATCH", { approvalStatus: "approved", reviewComment: "" }, admin.token), 200);
   await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
   const publicationRows = await database.prepare("SELECT id, published_at FROM ad_banners WHERE contract_id=? AND slot_id='SERV-01' ORDER BY start_at").bind(contractId).all();
   assert.equal(publicationRows.results.filter(row => row.published_at).length, 4, "Bara fyra byten får publiceras i samma 30-dagarsperiod");
   assert.equal(publicationRows.results.find(row => row.id === fifth.banner.id).published_at, null, "Det femte materialet ska förbli opublicerat");
+
+  const rejected = await upload("avvisad.png", new Date(Date.now() - 600).toISOString(), "https://example.com/avvisad");
+  await responseJson(await jsonRequest(`/portal/admin/banners/${rejected.banner.id}/review`, "PATCH", { approvalStatus: "rejected", reviewComment: "Fel budskap" }, admin.token), 200);
+  await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
+  const rejectedRow = await database.prepare("SELECT approval_status, published_at FROM ad_banners WHERE id=?").bind(rejected.banner.id).first();
+  assert.deepEqual([rejectedRow.approval_status, rejectedRow.published_at], ["rejected", null], "Avvisad banner får aldrig publiceras");
+  assert.equal((await request(rejected.banner.imageUrl)).status, 404, "Avvisad bannerasset får inte vara publik");
 
   const asset = await request(second.banner.imageUrl);
   assert.equal(asset.status, 200);

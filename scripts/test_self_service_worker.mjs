@@ -198,10 +198,12 @@ try {
     "X-Banner-Slot": "P3-21", "X-Banner-Municipality": "%C3%85m%C3%A5l", "X-Banner-Start": bannerTime,
     "X-Banner-Name": "test.png", "X-Banner-Link": "https%3A%2F%2Fexample.invalid"
   }, body: bannerBytes });
-  assert.equal(bannerResponse.status, 201, await bannerResponse.text());
+  const bannerBody = await bannerResponse.json();
+  assert.equal(bannerResponse.status, 201, JSON.stringify(bannerBody));
+  assert.equal((await send(`/portal/company/banners/${bannerBody.banner.id}`, "DELETE", null, buyer.token)).status, 404, "En annan kund får inte hantera bannern");
   const beforeActivation = await read("/ads/current/P3-21?municipality=%C3%85m%C3%A5l");
-  assert.equal(beforeActivation.banner, null, "Förlanseringsbanner får inte visas live");
-  await read(`/portal/admin/purchases/${amalPurchase.id}/activate`, "POST", { explicitActivation: true }, admin.token);
+  assert.equal(beforeActivation.banner, null, "Ogranskad banner får inte visas live");
+  await read(`/portal/admin/banners/${bannerBody.banner.id}/review`, "PATCH", { approvalStatus: "approved", reviewComment: "Pilot godkänd" }, admin.token);
   const db = await worker.getD1Database("DB");
   const companyRow = await db.prepare("SELECT company_user_id FROM self_service_orders WHERE id=?").bind(first.orderId).first();
   const basis = await read(`/portal/admin/billing/basis?companyId=${companyRow.company_user_id}`, "GET", null, admin.token);
