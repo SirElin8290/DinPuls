@@ -36,10 +36,12 @@ const footerHtml = await readFile(new URL("../components/footer.html", import.me
 const entryCss = await readFile(new URL("../foretag/start.css", import.meta.url), "utf8");
 assert.match(footerHtml, /href="foretag\/start\.html"[^>]*>Företag/);
 assert.match(entryHtml, /id="companyEntryLogin"/);
-assert.match(entryHtml, /href="registrera\.html">Skapa företagskonto/);
+assert.match(entryHtml, /id="showRegistration"[^>]*href="registrera\.html">Skapa företagskonto/);
 assert.match(entryHtml, /name="email"/);
 assert.match(entryHtml, /name="password"/);
-assert.match(entryCss, /@media\(max-width:760px\).*\.cards,.facts\{grid-template-columns:1fr\}/s);
+assert.match(entryHtml, /id="registrationForm"/);
+assert.match(entryCss, /perspective:1400px/);
+assert.match(entryCss, /@media\(prefers-reduced-motion:reduce\)/);
 assert.match(registerCss, /@media\(max-width:640px\).*grid-template-columns:minmax\(0,1fr\)/s);
 assert.match(buyCss, /@media\(max-width:800px\)/);
 assert.match(buyCss, /@media\(max-width:640px\).*\.slot-results\{grid-template-columns:minmax\(0,1fr\)/s);
