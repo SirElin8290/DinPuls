@@ -145,6 +145,8 @@ async function ensureDatabase(env) {
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS self_service_purchases_company ON self_service_purchases(company_user_id, confirmed_at)").run();
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS billing_approvals (order_id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, foundation_contract_id TEXT NOT NULL, basis_json TEXT NOT NULL, basis_hash TEXT NOT NULL, status TEXT NOT NULL, approved_by TEXT NOT NULL, approved_at TEXT NOT NULL, idempotency_key TEXT NOT NULL UNIQUE, spiris_customer_id TEXT, spiris_draft_id TEXT UNIQUE, last_error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, FOREIGN KEY(order_id) REFERENCES self_service_orders(id))").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS billing_approvals_status ON billing_approvals(status, approved_at)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS spiris_oauth_states (state_hash TEXT PRIMARY KEY, admin_id TEXT NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS spiris_connections (id TEXT PRIMARY KEY, token_ciphertext TEXT NOT NULL, token_expires_at TEXT NOT NULL, scopes TEXT NOT NULL, connected_at TEXT NOT NULL, updated_at TEXT NOT NULL, last_refresh_at TEXT)").run();
   await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS prevent_invalid_self_service_purchase BEFORE INSERT ON self_service_purchases BEGIN SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM self_service_orders o JOIN self_service_holds h ON h.order_id=o.id WHERE o.id=NEW.order_id AND o.company_user_id=NEW.company_user_id AND o.foundation_contract_id=NEW.foundation_contract_id AND o.status='confirmed' AND o.confirmed_at=NEW.confirmed_at AND h.company_user_id=NEW.company_user_id AND h.municipality=NEW.municipality AND h.slot_id=NEW.slot_id AND h.status='held' AND h.expires_at>NEW.confirmed_at) THEN RAISE(ABORT, 'ORDER_CONFLICT') END; END").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_daily_stats (" +
@@ -173,6 +175,81 @@ function hexToBytes(value) {
 
 async function sha256(value) {
   return bytesToHex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value))));
+}
+
+const SPIRIS_AUTH_URL = "https://identity.vismaonline.com/connect/authorize";
+const SPIRIS_TOKEN_URL = "https://identity.vismaonline.com/connect/token";
+const SPIRIS_SCOPES = "ea:api ea:sales offline_access";
+const SPIRIS_SERVICE = "service:44643EB1-3F76-4C1C-A672-402AE8085934";
+
+function spirisOAuthConfiguration(env) {
+  const clientId = cleanText(env.SPIRIS_CLIENT_ID, 120);
+  const redirectUri = cleanText(env.SPIRIS_REDIRECT_URI, 500);
+  return {
+    clientId,
+    redirectUri,
+    ready: Boolean(clientId && redirectUri && env.SPIRIS_CLIENT_SECRET && env.SPIRIS_TOKEN_ENCRYPTION_KEY)
+  };
+}
+
+async function spirisEncryptionKey(env) {
+  const bytes = hexToBytes(String(env.SPIRIS_TOKEN_ENCRYPTION_KEY || ""));
+  if (bytes.length !== 32) throw new Error("SPIRIS_TOKEN_ENCRYPTION_KEY måste vara 64 hextecken.");
+  return crypto.subtle.importKey("raw", bytes, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (const value of bytes) binary += String.fromCharCode(value);
+  return btoa(binary);
+}
+
+function base64ToBytes(value) {
+  const binary = atob(value);
+  return new Uint8Array([...binary].map(character => character.charCodeAt(0)));
+}
+
+async function encryptSpirisTokens(env, value) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: new TextEncoder().encode("dinpuls-spiris-oauth-v1") }, await spirisEncryptionKey(env), new TextEncoder().encode(stableStringify(value)));
+  return `v1.${bytesToBase64(iv)}.${bytesToBase64(new Uint8Array(ciphertext))}`;
+}
+
+async function decryptSpirisTokens(env, value) {
+  const [version, ivValue, cipherValue] = String(value || "").split(".");
+  if (version !== "v1" || !ivValue || !cipherValue) throw new Error("Ogiltig krypterad Spiris-token.");
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(ivValue), additionalData: new TextEncoder().encode("dinpuls-spiris-oauth-v1") }, await spirisEncryptionKey(env), base64ToBytes(cipherValue));
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+
+async function exchangeSpirisToken(env, parameters) {
+  const config = spirisOAuthConfiguration(env);
+  if (!config.ready) throw new Error("Spiris OAuth är inte fullständigt konfigurerad.");
+  const response = await fetch(SPIRIS_TOKEN_URL, {
+    method: "POST",
+    headers: { Authorization: `Basic ${btoa(`${config.clientId}:${env.SPIRIS_CLIENT_SECRET}`)}`, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body: new URLSearchParams(parameters)
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.access_token || !payload.refresh_token) throw new Error("Spiris nekade OAuth-tokenutbytet.");
+  return payload;
+}
+
+async function saveSpirisConnection(env, payload, connectedAt, lastRefreshAt = null) {
+  const expiresAt = new Date(Date.now() + Math.max(60, Number(payload.expires_in || 3600)) * 1000).toISOString();
+  const ciphertext = await encryptSpirisTokens(env, { accessToken: payload.access_token, refreshToken: payload.refresh_token, tokenType: payload.token_type || "bearer" });
+  await env.DB.prepare("INSERT INTO spiris_connections (id,token_ciphertext,token_expires_at,scopes,connected_at,updated_at,last_refresh_at) VALUES ('primary',?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET token_ciphertext=excluded.token_ciphertext,token_expires_at=excluded.token_expires_at,scopes=excluded.scopes,updated_at=excluded.updated_at,last_refresh_at=excluded.last_refresh_at").bind(ciphertext, expiresAt, SPIRIS_SCOPES, connectedAt, new Date().toISOString(), lastRefreshAt).run();
+  return expiresAt;
+}
+
+async function refreshSpirisAccessToken(env) {
+  const row = await env.DB.prepare("SELECT * FROM spiris_connections WHERE id='primary'").first();
+  if (!row) throw new Error("Spiris är inte anslutet.");
+  const tokens = await decryptSpirisTokens(env, row.token_ciphertext);
+  if (Date.parse(row.token_expires_at) > Date.now() + 120000) return tokens.accessToken;
+  const refreshed = await exchangeSpirisToken(env, { grant_type: "refresh_token", refresh_token: tokens.refreshToken });
+  await saveSpirisConnection(env, refreshed, row.connected_at, new Date().toISOString());
+  return refreshed.access_token;
 }
 
 async function hashPassword(password, saltHex, pepper) {
@@ -1421,6 +1498,64 @@ async function createSpirisDraft(request, env, orderId) {
   return json(request, { ok: false, error: "Spiris-produktionskopplingen saknar verifierade credentials och är därför spärrad." }, 503);
 }
 
+async function spirisConnectionStatus(request, env) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const config = spirisOAuthConfiguration(env);
+  const connection = await env.DB.prepare("SELECT token_expires_at,scopes,connected_at,updated_at,last_refresh_at FROM spiris_connections WHERE id='primary'").first();
+  return json(request, {
+    ok: true,
+    configured: config.ready,
+    connected: Boolean(connection),
+    clientId: config.clientId,
+    redirectUri: config.redirectUri,
+    scopes: SPIRIS_SCOPES.split(" "),
+    tokenExpiresAt: connection?.token_expires_at || null,
+    connectedAt: connection?.connected_at || null,
+    lastRefreshAt: connection?.last_refresh_at || null,
+    spirisEnabled: env.SPIRIS_ENABLED === "true"
+  });
+}
+
+async function startSpirisOAuth(request, env) {
+  const session = await requireSession(request, env, "admin");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const config = spirisOAuthConfiguration(env);
+  if (!config.ready) return json(request, { ok: false, error: "Spiris Client Secret eller tokenkrypteringsnyckel saknas i Cloudflare." }, 503);
+  const state = bytesToHex(crypto.getRandomValues(new Uint8Array(32)));
+  const stateHash = await sha256(state), now = new Date().toISOString(), expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM spiris_oauth_states WHERE expires_at<=?").bind(now),
+    env.DB.prepare("INSERT INTO spiris_oauth_states (state_hash,admin_id,expires_at,created_at) VALUES (?,?,?,?)").bind(stateHash,String(session.subject_id),expiresAt,now)
+  ]);
+  const authorization = new URL(SPIRIS_AUTH_URL);
+  authorization.search = new URLSearchParams({ client_id: config.clientId, redirect_uri: config.redirectUri, scope: SPIRIS_SCOPES, state, response_type: "code", prompt: "select_account", acr_values: SPIRIS_SERVICE }).toString();
+  return json(request, { ok: true, authorizationUrl: authorization.toString(), expiresAt });
+}
+
+function spirisCallbackPage(ok, message) {
+  const title = ok ? "Spiris är anslutet" : "Spiris kunde inte anslutas";
+  return `<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${title}</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f1e7;color:#2b241e;font:16px/1.5 system-ui}.card{width:min(560px,calc(100% - 40px));padding:32px;background:#fff;border:1px solid #e4d9c9;border-radius:18px;box-shadow:0 16px 50px #38281218}h1{margin-top:0;color:${ok ? "#354330" : "#a64e48"}}a{color:#315a79;font-weight:700}</style><main class="card"><h1>${title}</h1><p>${htmlEscape(message)}</p><p><a href="https://dinpuls.se/admin/">Tillbaka till DinPuls administration</a></p></main></html>`;
+}
+
+async function completeSpirisOAuth(request, env, url) {
+  const state = cleanText(url.searchParams.get("state"), 128), code = cleanText(url.searchParams.get("code"), 2048);
+  if (url.searchParams.get("error")) return new Response(spirisCallbackPage(false, "Auktoriseringen avbröts eller nekades i Spiris."), { status: 400, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" } });
+  if (!/^[0-9a-f]{64}$/i.test(state) || !code) return new Response(spirisCallbackPage(false, "Ogiltigt OAuth-svar."), { status: 400, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+  const stateHash = await sha256(state), now = new Date().toISOString();
+  const stored = await env.DB.prepare("SELECT admin_id,expires_at FROM spiris_oauth_states WHERE state_hash=?").bind(stateHash).first();
+  if (!stored || stored.expires_at <= now) return new Response(spirisCallbackPage(false, "OAuth-länken har gått ut eller har redan använts."), { status: 400, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+  const consumed = await env.DB.prepare("DELETE FROM spiris_oauth_states WHERE state_hash=?").bind(stateHash).run();
+  if (consumed.meta.changes !== 1) return new Response(spirisCallbackPage(false, "OAuth-länken har redan använts."), { status: 409, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+  try {
+    const config = spirisOAuthConfiguration(env);
+    const payload = await exchangeSpirisToken(env, { grant_type: "authorization_code", code, redirect_uri: config.redirectUri });
+    await saveSpirisConnection(env, payload, now);
+    return new Response(spirisCallbackPage(true, "Sandboxanslutningen är sparad krypterat. Fakturering är fortfarande avstängd."), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'", "X-Content-Type-Options": "nosniff" } });
+  } catch {
+    return new Response(spirisCallbackPage(false, "Tokenutbytet misslyckades. Inga tokens sparades och fakturering är fortsatt avstängd."), { status: 502, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" } });
+  }
+}
+
 async function updateCompanyProfile(request, env) {
   const session = await requireSession(request, env, "company");
   if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
@@ -1586,6 +1721,9 @@ export default {
       if (request.method === "GET" && url.pathname === "/portal/company/purchases") return listCompanyPurchases(request, env);
       if (request.method === "GET" && url.pathname === "/portal/admin/billing/basis") return readBillingBasis(request, env, url);
       if (request.method === "GET" && url.pathname === "/portal/admin/billing/orders") return listBillingOrders(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/spiris/status") return spirisConnectionStatus(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/admin/spiris/connect") return startSpirisOAuth(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/spiris/callback") return completeSpirisOAuth(request, env, url);
       const billingApproveMatch = /^\/portal\/admin\/billing\/orders\/([0-9a-f-]{36})\/approve$/i.exec(url.pathname);
       if (request.method === "POST" && billingApproveMatch) return approveBillingOrder(request, env, billingApproveMatch[1]);
       const billingDraftMatch = /^\/portal\/admin\/billing\/orders\/([0-9a-f-]{36})\/spiris-draft$/i.exec(url.pathname);

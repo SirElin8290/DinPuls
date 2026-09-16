@@ -27,8 +27,17 @@ const worker = new Miniflare({
     PORTAL_PASSWORD_PEPPER: "LocalPepper-Test-2026", RESEND_API_KEY: "local-test-only",
     PORTAL_EMAIL_FROM: "DinPuls <test@example.invalid>", SELF_SERVICE_SIGNUP_ENABLED: "true",
     SELF_SERVICE_PURCHASE_ENABLED: "true", SELF_SERVICE_FIXED_SIGNATURE_ENABLED: "true",
-    SELF_SERVICE_FIXED_SIGNATURE_SHA256: fixedHash },
+    SELF_SERVICE_FIXED_SIGNATURE_SHA256: fixedHash, SPIRIS_CLIENT_ID: "elinkarlssonsandbox",
+    SPIRIS_CLIENT_SECRET: "sandbox-secret-test", SPIRIS_TOKEN_ENCRYPTION_KEY: "11".repeat(32),
+    SPIRIS_REDIRECT_URI: "https://dinpuls-push.test/portal/admin/spiris/callback", SPIRIS_ENABLED: "false" },
   outboundService: async request => {
+    if (request.url === "https://identity.vismaonline.com/connect/token") {
+      assert.equal(request.headers.get("authorization"), `Basic ${Buffer.from("elinkarlssonsandbox:sandbox-secret-test").toString("base64")}`);
+      const form = new URLSearchParams(await request.text());
+      assert.equal(form.get("grant_type"), "authorization_code");
+      assert.equal(form.get("redirect_uri"), "https://dinpuls-push.test/portal/admin/spiris/callback");
+      return new Response(JSON.stringify({ access_token: "access-token-must-be-encrypted", refresh_token: "refresh-token-must-be-encrypted", token_type: "bearer", expires_in: 3600 }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
     if (request.url !== "https://api.resend.com/emails") throw new Error("Oväntat externt anrop");
     mail.push(await request.json());
     return new Response(JSON.stringify({ id: `mail-${mail.length}` }), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -94,6 +103,26 @@ try {
   await read(`/portal/company/available-slots?municipality=S%C3%A4ffle&startDate=${start}&endDate=${end}`, "GET", null, session.token);
   await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, null, 401);
   const admin = await read("/portal/auth/admin", "POST", { username: "localadmin", password: "LocalAdmin-Test-2026" });
+  const disconnected = await read("/portal/admin/spiris/status", "GET", null, admin.token);
+  assert.deepEqual([disconnected.configured, disconnected.connected, disconnected.spirisEnabled], [true, false, false]);
+  assert.equal(disconnected.clientId, "elinkarlssonsandbox");
+  assert.deepEqual(disconnected.scopes, ["ea:api", "ea:sales", "offline_access"]);
+  const oauth = await read("/portal/admin/spiris/connect", "POST", {}, admin.token);
+  const authorization = new URL(oauth.authorizationUrl);
+  assert.equal(authorization.origin + authorization.pathname, "https://identity.vismaonline.com/connect/authorize");
+  assert.equal(authorization.searchParams.get("scope"), "ea:api ea:sales offline_access");
+  assert.equal(authorization.searchParams.get("redirect_uri"), "https://dinpuls-push.test/portal/admin/spiris/callback");
+  assert.equal((await send("/portal/admin/spiris/callback?state=bad&code=test")).status, 400);
+  const callback = await send(`/portal/admin/spiris/callback?state=${authorization.searchParams.get("state")}&code=sandbox-code`);
+  assert.equal(callback.status, 200);
+  assert.match(await callback.text(), /Sandboxanslutningen är sparad krypterat/);
+  assert.equal((await send(`/portal/admin/spiris/callback?state=${authorization.searchParams.get("state")}&code=sandbox-code`)).status, 400, "OAuth-state får bara användas en gång");
+  const connected = await read("/portal/admin/spiris/status", "GET", null, admin.token);
+  assert.deepEqual([connected.connected, connected.spirisEnabled], [true, false]);
+  const oauthDb = await worker.getD1Database("DB");
+  const encrypted = await oauthDb.prepare("SELECT token_ciphertext FROM spiris_connections WHERE id='primary'").first();
+  assert.match(encrypted.token_ciphertext, /^v1\./);
+  assert.ok(!encrypted.token_ciphertext.includes("access-token") && !encrypted.token_ciphertext.includes("refresh-token"), "Spiris-tokens måste lagras krypterat");
   const contractId = "DP-2026-9911";
   const adminDraft = await read("/portal/admin/contracts", "POST", { id: contractId, company: "Adminföretag AB", orgNo: "000000-0000",
     contact: "Admin test", email: "admin@example.invalid", phone: "0700000000", municipality: "Åmål",
