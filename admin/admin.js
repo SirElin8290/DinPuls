@@ -269,6 +269,22 @@ async function openFoundationCountersign(contract, dialog) {
     } catch (error) { target.innerHTML = `<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`; }
   }
 
+  async function refreshBilling() {
+    const target = $("#billingList");
+    if (!target) return;
+    target.innerHTML = '<div class="panel"><p class="muted">Läser fakturaunderlag…</p></div>';
+    try {
+      const data = await api("/portal/admin/billing/orders");
+      const labels = { awaiting_approval: "Väntar på godkännande", approved_for_invoice: "Godkänd för fakturering", spiris_draft_created: "Utkast skapat i Spiris" };
+      target.innerHTML = data.orders.length ? data.orders.map(order => `<article class="panel billing-card" data-billing-order="${escapeHtml(order.orderId)}"><div class="panel-heading"><div><span class="badge">${escapeHtml(labels[order.status] || order.status)}</span><h2>${escapeHtml(order.company)}</h2><p>${escapeHtml(order.orgNo)} · order ${escapeHtml(order.orderId)}</p></div><strong>${money(order.total)} inkl. moms</strong></div><div class="billing-details"><p><b>Fakturaadress</b><br>${escapeHtml(order.address || "Saknas")}<br>${escapeHtml(order.postalCode || "")} ${escapeHtml(order.city || "")}</p><p><b>Kontakt</b><br>${escapeHtml(order.contact)}<br>${escapeHtml(order.email)} · ${escapeHtml(order.phone || "")}</p><p><b>Köp</b><br>${escapeHtml(new Date(order.purchaseDate).toLocaleString("sv-SE"))}<br>Grundavtal ${escapeHtml(order.contractId)} · v${escapeHtml(order.contractVersion)}</p><p><b>Betalning</b><br>${order.billingType === "annual" ? "Årsbetalning" : "Månadsbetalning"}<br>${money(order.net)} exkl. · ${money(order.vat)} moms</p></div><ul>${order.lines.map(line => `<li><b>${escapeHtml(line.municipality)}</b> · ${escapeHtml(line.description)} · ${money(line.unitPriceExVat)} exkl. moms · ${escapeHtml(line.startDate)}–${escapeHtml(line.endDate)}</li>`).join("")}</ul><div class="actions"><button class="primary billing-approve" type="button" ${order.status !== "awaiting_approval" ? "disabled" : ""}>Godkänn för fakturering</button><button class="secondary billing-draft" type="button" ${order.status !== "approved_for_invoice" || !data.spirisEnabled ? "disabled" : ""}>Skapa faktura i Spiris</button></div>${!data.spirisEnabled ? '<p class="muted small">Spiris är avstängt. Knappen skapar aldrig eller skickar någon faktura innan OAuth och utkastläget har verifierats.</p>' : ""}</article>`).join("") : '<div class="panel"><p class="muted">Inga ofakturerade självserviceköp.</p></div>';
+      for (const order of data.orders) {
+        const card = target.querySelector(`[data-billing-order="${CSS.escape(order.orderId)}"]`);
+        card.querySelector(".billing-approve").onclick = async () => { try { await api(`/portal/admin/billing/orders/${encodeURIComponent(order.orderId)}/approve`, { method: "POST", body: "{}" }); await refreshBilling(); } catch (error) { alert(error.message); } };
+        card.querySelector(".billing-draft").onclick = async () => { try { await api(`/portal/admin/billing/orders/${encodeURIComponent(order.orderId)}/spiris-draft`, { method: "POST", body: "{}" }); await refreshBilling(); } catch (error) { alert(error.message); } };
+      }
+    } catch (error) { target.innerHTML = `<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`; }
+  }
+
 function openContract(id) {
     const contract = contractCache.find(item => item.id === id);
     if (!contract) return;
@@ -360,6 +376,7 @@ function openContract(id) {
     if (id === "inventory") renderInventory();
     if (id === "operations") refreshOperations();
     if (id === "banner-reviews") refreshBannerReviews();
+    if (id === "billing") refreshBilling();
     scrollTo(0, 0);
   }
 
@@ -418,6 +435,7 @@ function openContract(id) {
     installSystemStatus();
     $("#refreshOperations").onclick = refreshOperations;
     $("#refreshBannerReviews").onclick = refreshBannerReviews;
+    $("#refreshBilling").onclick = refreshBilling;
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {

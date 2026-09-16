@@ -143,6 +143,8 @@ async function ensureDatabase(env) {
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS self_service_purchases (id TEXT PRIMARY KEY, order_id TEXT NOT NULL, company_user_id INTEGER NOT NULL, foundation_contract_id TEXT NOT NULL, municipality TEXT NOT NULL, slot_id TEXT NOT NULL, placement_label TEXT NOT NULL, billing_type TEXT NOT NULL, unit_price INTEGER NOT NULL, vat_amount INTEGER NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, contract_version TEXT NOT NULL, billing_status TEXT NOT NULL DEFAULT 'waiting_for_launch', publication_status TEXT NOT NULL DEFAULT 'waiting_for_launch', confirmation_json TEXT NOT NULL, confirmation_hash TEXT NOT NULL, confirmed_at TEXT NOT NULL, spiris_invoice_id TEXT, FOREIGN KEY(order_id) REFERENCES self_service_orders(id))").run();
   await env.DB.prepare("CREATE UNIQUE INDEX IF NOT EXISTS self_service_purchases_order_slot ON self_service_purchases(order_id, municipality, slot_id)").run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS self_service_purchases_company ON self_service_purchases(company_user_id, confirmed_at)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS billing_approvals (order_id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, foundation_contract_id TEXT NOT NULL, basis_json TEXT NOT NULL, basis_hash TEXT NOT NULL, status TEXT NOT NULL, approved_by TEXT NOT NULL, approved_at TEXT NOT NULL, idempotency_key TEXT NOT NULL UNIQUE, spiris_customer_id TEXT, spiris_draft_id TEXT UNIQUE, last_error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, FOREIGN KEY(order_id) REFERENCES self_service_orders(id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS billing_approvals_status ON billing_approvals(status, approved_at)").run();
   await env.DB.prepare("CREATE TRIGGER IF NOT EXISTS prevent_invalid_self_service_purchase BEFORE INSERT ON self_service_purchases BEGIN SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM self_service_orders o JOIN self_service_holds h ON h.order_id=o.id WHERE o.id=NEW.order_id AND o.company_user_id=NEW.company_user_id AND o.foundation_contract_id=NEW.foundation_contract_id AND o.status='confirmed' AND o.confirmed_at=NEW.confirmed_at AND h.company_user_id=NEW.company_user_id AND h.municipality=NEW.municipality AND h.slot_id=NEW.slot_id AND h.status='held' AND h.expires_at>NEW.confirmed_at) THEN RAISE(ABORT, 'ORDER_CONFLICT') END; END").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_daily_stats (" +
@@ -470,7 +472,7 @@ async function reviewBanner(request, env, id) {
   if (banner.published_at) return json(request, { ok: false, error: "En publicerad banner kan inte granskas om." }, 409);
   const now = new Date().toISOString();
   const statements = [env.DB.prepare("UPDATE ad_banners SET approval_status=?, review_comment=?, reviewed_at=?, reviewed_by=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(status, comment, now, String(session.subject_id), now, id)];
-  if (status === 'approved' && banner.purchase_id) statements.push(env.DB.prepare("UPDATE self_service_purchases SET publication_status='active', billing_status='ready_for_invoice' WHERE id=? AND publication_status='waiting_for_launch'").bind(banner.purchase_id));
+  if (status === 'approved' && banner.purchase_id) statements.push(env.DB.prepare("UPDATE self_service_purchases SET publication_status='active' WHERE id=? AND publication_status='waiting_for_launch'").bind(banner.purchase_id));
   await env.DB.batch(statements);
   return json(request, { ok: true, approvalStatus: status, reviewedAt: now });
 }
@@ -1208,7 +1210,7 @@ async function finalizePreapprovedFoundation(request, env, order, contract, name
     const confirmation = stableStringify({ orderId: order.id, companyId: contract.company_user_id, foundationContractId: contract.id, snapshotHash: order.snapshot_hash, confirmedAt: signedAt, customerSignerName: name, customerSignerTitle: title, dinpulsSignatureId: fixed.snapshot.signatureId, dinpulsSignatureHash: fixed.digest, explicitConfirmation: true, channel: "preapproved-fixed-foundation-signature" });
     const confirmationHash = await sha256(confirmation);
     const statements = [env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND status='signing' AND expires_at>?").bind(signedAt, order.id, signedAt)];
-    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), order.id, contract.company_user_id, contract.id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, contract.contract_version, confirmation, confirmationHash, signedAt));
+    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,billing_status,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'awaiting_approval',?,?,?)").bind(crypto.randomUUID(), order.id, contract.company_user_id, contract.id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, contract.contract_version, confirmation, confirmationHash, signedAt));
     statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND status='held' AND expires_at>?").bind(order.id, signedAt));
     statements.push(env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, dinpuls_signer_name='SirElin AB', dinpuls_signer_title='Fast förhandsgodkänd signatur', customer_signature_object_key=?, dinpuls_signature_object_key=?, signed_at=?, signed_pdf_object_key=?, signed_pdf_hash=?, status='Aktivt', updated_at=? WHERE id=? AND company_user_id=? AND status='Utkast' AND signed_at IS NULL AND contract_snapshot_hash=?").bind(name, title, customerKey, `r2:dinpuls-contract-signatures/${FIXED_SIGNATURE_KEY}`, signedAt, pdfKey, pdfHash, signedAt, contract.id, contract.company_user_id, order.snapshot_hash));
     await env.DB.batch(statements);
@@ -1327,11 +1329,11 @@ async function confirmCompanyOrder(request, env, id) {
   const confirmation = { orderId: id, companyId: Number(session.subject_id), foundationContractId: order.foundation_contract_id, snapshotHash: order.snapshot_hash, confirmedAt: now, explicitConfirmation: true, channel: "authenticated-company-portal" };
   const confirmationJson = stableStringify(confirmation), confirmationHash = await sha256(confirmationJson);
   const statements = [env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND company_user_id=? AND status='held' AND expires_at>?").bind(now, id, session.subject_id, now)];
-  for (const line of snapshot.placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), id, session.subject_id, order.foundation_contract_id, line.municipality, line.slotId, line.placementLabel, order.billing_type, line.unitPrice, line.vatAmount, line.startDate, line.endDate, snapshot.contractVersion, confirmationJson, confirmationHash, now));
+  for (const line of snapshot.placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,billing_status,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'awaiting_approval',?,?,?)").bind(crypto.randomUUID(), id, session.subject_id, order.foundation_contract_id, line.municipality, line.slotId, line.placementLabel, order.billing_type, line.unitPrice, line.vatAmount, line.startDate, line.endDate, snapshot.contractVersion, confirmationJson, confirmationHash, now));
   statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND company_user_id=? AND status='held' AND expires_at>?").bind(id, session.subject_id, now));
   try { await env.DB.batch(statements); }
   catch { return json(request, { ok: false, error: "Beställningen kunde inte låsas. Kontrollera reservationen och försök igen." }, 409); }
-  return json(request, { ok: true, orderId: id, status: "confirmed", purchaseCount: snapshot.placements.length, billingStatus: "waiting_for_launch", confirmationHash });
+  return json(request, { ok: true, orderId: id, status: "confirmed", purchaseCount: snapshot.placements.length, billingStatus: "awaiting_approval", confirmationHash });
 }
 
 async function listCompanyPurchases(request, env) {
@@ -1350,8 +1352,8 @@ async function activatePurchaseForPublication(request, env, id) {
   if (purchase.contract_status !== "Aktivt" || !purchase.signed_at) return json(request, { ok: false, error: "Grundavtalet är inte färdigsignerat och aktivt." }, 409);
   if (purchase.publication_status === "active") return json(request, { ok: true, status: "active" });
   if (purchase.publication_status !== "waiting_for_launch") return json(request, { ok: false, error: "Köpet kan inte aktiveras från nuvarande status." }, 409);
-  await env.DB.prepare("UPDATE self_service_purchases SET publication_status='active', billing_status='ready_for_invoice' WHERE id=? AND publication_status='waiting_for_launch'").bind(id).run();
-  return json(request, { ok: true, status: "active", billingStatus: "ready_for_invoice", municipality: purchase.municipality, slotId: purchase.slot_id, spirisEnabled: false });
+  await env.DB.prepare("UPDATE self_service_purchases SET publication_status='active' WHERE id=? AND publication_status='waiting_for_launch'").bind(id).run();
+  return json(request, { ok: true, status: "active", municipality: purchase.municipality, slotId: purchase.slot_id, spirisEnabled: false });
 }
 
 async function readBillingBasis(request, env, url) {
@@ -1364,6 +1366,59 @@ async function readBillingBasis(request, env, url) {
   if (!(rows.results || []).length) return json(request, { ok: true, basis: null, purchaseCount: 0, spirisEnabled: false });
   const basis = buildBillingBasis({ id: user.id, company: user.company, orgNo: user.org_no, address: user.address, postalCode: user.postal_code, city: user.city, contact: user.contact, email: user.email }, rows.results.map(row => ({ id: row.id, municipality: row.municipality, slotId: row.slot_id, placementLabel: row.placement_label, billingType: row.billing_type, unitPriceExVat: row.unit_price, startDate: row.start_date, endDate: row.end_date })));
   return json(request, { ok: true, basis, purchaseCount: rows.results.length, spirisEnabled: false });
+}
+
+async function billingOrder(env, orderId) {
+  const order = await env.DB.prepare("SELECT o.id,o.company_user_id,o.foundation_contract_id,o.confirmed_at,u.company,u.org_no,u.address,u.postal_code,u.city,u.contact,u.email,u.phone,a.status approval_status,a.approved_by,a.approved_at,a.spiris_draft_id FROM self_service_orders o JOIN business_users u ON u.id=o.company_user_id LEFT JOIN billing_approvals a ON a.order_id=o.id WHERE o.id=? AND o.status='confirmed'").bind(orderId).first();
+  if (!order) return null;
+  const result = await env.DB.prepare("SELECT id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,billing_status,confirmation_hash,confirmed_at FROM self_service_purchases WHERE order_id=? ORDER BY municipality,slot_id").bind(orderId).all();
+  const rows = result.results || [];
+  if (!rows.length) return null;
+  const basis = buildBillingBasis({ id: order.company_user_id, company: order.company, orgNo: order.org_no, address: order.address, postalCode: order.postal_code, city: order.city, contact: order.contact, email: order.email }, rows.map(row => ({ id: row.id, municipality: row.municipality, slotId: row.slot_id, placementLabel: row.placement_label, billingType: row.billing_type, unitPriceExVat: row.unit_price, startDate: row.start_date, endDate: row.end_date })));
+  return { order, rows, basis };
+}
+
+async function listBillingOrders(request, env) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const result = await env.DB.prepare("SELECT DISTINCT order_id FROM self_service_purchases WHERE billing_status IN ('waiting_for_launch','ready_for_invoice','awaiting_approval','approved_for_invoice','spiris_draft_created') AND spiris_invoice_id IS NULL ORDER BY confirmed_at DESC").all();
+  const orders = [];
+  for (const row of result.results || []) {
+    const item = await billingOrder(env, row.order_id);
+    if (item) orders.push({ orderId: item.order.id, company: item.order.company, orgNo: item.order.org_no, address: item.order.address, postalCode: item.order.postal_code, city: item.order.city, contact: item.order.contact, email: item.order.email, phone: item.order.phone, purchaseDate: item.order.confirmed_at, contractId: item.order.foundation_contract_id, contractVersion: item.rows[0].contract_version, billingType: item.rows[0].billing_type, status: item.order.approval_status || "awaiting_approval", approvedBy: item.order.approved_by, approvedAt: item.order.approved_at, spirisDraftId: item.order.spiris_draft_id, lines: item.basis.lines, net: item.basis.net, vat: item.basis.vat, total: item.basis.total });
+  }
+  return json(request, { ok: true, orders, spirisEnabled: env.SPIRIS_ENABLED === "true", automaticInvoicing: false });
+}
+
+async function approveBillingOrder(request, env, orderId) {
+  const session = await requireSession(request, env, "admin");
+  if (!session) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const item = await billingOrder(env, orderId);
+  if (!item) return json(request, { ok: false, error: "Fakturaunderlaget finns inte." }, 404);
+  if (item.order.approval_status) return json(request, { ok: true, status: item.order.approval_status, approvedAt: item.order.approved_at, idempotent: true });
+  if (item.rows.some(row => !["waiting_for_launch","ready_for_invoice","awaiting_approval"].includes(row.billing_status))) return json(request, { ok: false, error: "Alla köp i ordern måste vänta på godkännande." }, 409);
+  const now = new Date().toISOString();
+  const audit = { orderId, purchaseIds: item.basis.purchaseIds, companyId: Number(item.order.company_user_id), foundationContractId: item.order.foundation_contract_id, basis: item.basis, contractVersions: [...new Set(item.rows.map(row => row.contract_version))], confirmationHashes: item.rows.map(row => row.confirmation_hash), approvedBy: String(session.subject_id), approvedAt: now };
+  const basisJson = stableStringify(audit), basisHash = await sha256(basisJson), idempotencyKey = await sha256(`spiris-draft|${orderId}|${basisHash}`);
+  try {
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO billing_approvals (order_id,company_user_id,foundation_contract_id,basis_json,basis_hash,status,approved_by,approved_at,idempotency_key,created_at,updated_at) VALUES (?,?,?,?,?,'approved_for_invoice',?,?,?,?,?)").bind(orderId,item.order.company_user_id,item.order.foundation_contract_id,basisJson,basisHash,String(session.subject_id),now,idempotencyKey,now,now),
+      env.DB.prepare("UPDATE self_service_purchases SET billing_status='approved_for_invoice' WHERE order_id=? AND billing_status IN ('waiting_for_launch','ready_for_invoice','awaiting_approval')").bind(orderId)
+    ]);
+  } catch {
+    const existing = await env.DB.prepare("SELECT status,approved_at FROM billing_approvals WHERE order_id=?").bind(orderId).first();
+    if (existing) return json(request,{ok:true,status:existing.status,approvedAt:existing.approved_at,idempotent:true});
+    return json(request,{ok:false,error:"Godkännandet kunde inte låsas."},409);
+  }
+  return json(request, { ok: true, status: "approved_for_invoice", approvedAt: now, basisHash });
+}
+
+async function createSpirisDraft(request, env, orderId) {
+  if (!await requireSession(request, env, "admin")) return json(request, { ok: false, error: "Obehörig." }, 401);
+  const approval = await env.DB.prepare("SELECT status,spiris_draft_id FROM billing_approvals WHERE order_id=?").bind(orderId).first();
+  if (!approval) return json(request, { ok: false, error: "Godkänn först ordern för fakturering." }, 409);
+  if (approval.spiris_draft_id) return json(request, { ok: true, status: "spiris_draft_created", draftId: approval.spiris_draft_id, idempotent: true });
+  if (env.SPIRIS_ENABLED !== "true") return json(request, { ok: false, error: "Spiris är avstängt tills OAuth, artikelkoppling och oskickat utkast har verifierats." }, 503);
+  return json(request, { ok: false, error: "Spiris-produktionskopplingen saknar verifierade credentials och är därför spärrad." }, 503);
 }
 
 async function updateCompanyProfile(request, env) {
@@ -1530,6 +1585,11 @@ export default {
       if (request.method === "GET" && url.pathname === "/portal/company/foundation/current") return currentFoundationOrder(request, env);
       if (request.method === "GET" && url.pathname === "/portal/company/purchases") return listCompanyPurchases(request, env);
       if (request.method === "GET" && url.pathname === "/portal/admin/billing/basis") return readBillingBasis(request, env, url);
+      if (request.method === "GET" && url.pathname === "/portal/admin/billing/orders") return listBillingOrders(request, env);
+      const billingApproveMatch = /^\/portal\/admin\/billing\/orders\/([0-9a-f-]{36})\/approve$/i.exec(url.pathname);
+      if (request.method === "POST" && billingApproveMatch) return approveBillingOrder(request, env, billingApproveMatch[1]);
+      const billingDraftMatch = /^\/portal\/admin\/billing\/orders\/([0-9a-f-]{36})\/spiris-draft$/i.exec(url.pathname);
+      if (request.method === "POST" && billingDraftMatch) return createSpirisDraft(request, env, billingDraftMatch[1]);
       const foundationSignMatch = /^\/portal\/company\/foundation\/orders\/([0-9a-f-]{36})\/sign$/i.exec(url.pathname);
       if (request.method === "POST" && foundationSignMatch) return signFoundationByCompany(request, env, foundationSignMatch[1]);
       const companyOrderMatch = /^\/portal\/company\/orders\/([0-9a-f-]{36})\/confirm$/i.exec(url.pathname);
