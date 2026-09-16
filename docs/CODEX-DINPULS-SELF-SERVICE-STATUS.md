@@ -54,10 +54,10 @@ Kör aldrig ALTER-satserna igen om kolumnerna redan finns.
 `SELF_SERVICE_SIGNUP_ENABLED` och `SELF_SERVICE_PURCHASE_ENABLED` är avstängda
 som standard. Publik registrering och köp öppnas först när verksamhetsägaren
 har granskat signering och tilläggsbekräftelse samt skarp drift är verifierad.
-`SELF_SERVICE_FIXED_SIGNATURE_ENABLED` är också avstängt i skarp drift.
-Nya självservicegrundavtal kräver denna flagga och använder v4.2; v4.1
-ändras inte. Alla tre självserviceflaggor aktiveras först i separat
-slutlig end-to-end-prövning.
+`SELF_SERVICE_FIXED_SIGNATURE_ENABLED` är aktiverat för den nya v4.2-vägen.
+Nya självservicegrundavtal kräver den privata signaturen; v4.1 ändras inte.
+Registrering och köp förblir avstängda tills en separat slutlig
+end-to-end-prövning är klar.
 `SPIRIS_ENABLED` är fortfarande avstängt. Inga skarpa fakturor kan skickas.
 
 v4.2 preciserar grundavtalets låsta underlag i punkt 1, skiljer ytterligare
