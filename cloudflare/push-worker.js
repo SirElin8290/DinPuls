@@ -690,10 +690,10 @@ async function requestPasswordReset(request, env) {
   return json(request, { ok: true, message: "Om adressen finns skickas en återställningslänk." });
 }
 
-function snapshotForContract(input, placements, price) {
+function snapshotForContract(input, placements, price, version = CONTRACT_VERSION, terms = CONTRACT_TERMS) {
   return {
-    document: `DinPuls Annonsavtal v${CONTRACT_VERSION}`,
-    contractVersion: CONTRACT_VERSION,
+    document: `DinPuls Annonsavtal v${version}`,
+    contractVersion: version,
     contractNumber: input.id,
     company: { name: input.company, orgNo: input.orgNo, contact: input.contact, email: input.email, phone: input.phone, address: input.address || "", postalCode: input.postalCode || "", city: input.city || "" },
     municipality: input.municipality,
@@ -701,7 +701,7 @@ function snapshotForContract(input, placements, price) {
     period: { startDate: input.startDate, endDate: input.endDate },
     billing: { ...price, placementCount: placements.length, invoiceVat: Math.round(price.invoiceTotal * 0.25), invoiceInclVat: Math.round(price.invoiceTotal * 1.25), twelveMonthsVat: Math.round(price.annualTotal * 0.25), vatRate: 0.25 },
     specialTerms: input.valueNote || "",
-    terms: CONTRACT_TERMS
+    terms
   };
 }
 
@@ -1132,13 +1132,12 @@ async function prepareFoundationOrder(request, env) {
   const id = `DP-${new Date().getUTCFullYear()}-${String(crypto.getRandomValues(new Uint16Array(1))[0] % 10000).padStart(4, "0")}`;
   const now = new Date().toISOString(), expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString(), orderId = crypto.randomUUID();
   const price = calculateContractPrice(billingType, placements.length), municipality = [...new Set(lines.map(line => line.municipality))].join(", ");
-  const snapshot = snapshotForContract({ id, company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city, municipality, startDate: lines[0].startDate, endDate: lines[0].endDate }, placements, price);
-  if (env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED === "true") {
-    try { snapshot.dinpulsFixedSignature = (await preapprovedSignature(env)).snapshot; }
-    catch { return json(request, { ok: false, error: "Den godkända privata DinPuls-signaturen saknas eller matchar inte originalet." }, 503); }
-  }
+  if (env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED !== "true") return json(request, { ok: false, error: "Den fasta signaturen för v4.2 är inte aktiverad." }, 503);
+  const snapshot = snapshotForContract({ id, company: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city, municipality, startDate: lines[0].startDate, endDate: lines[0].endDate }, placements, price, SELF_SERVICE_CONTRACT_VERSION, SELF_SERVICE_CONTRACT_TERMS);
+  try { snapshot.dinpulsFixedSignature = (await preapprovedSignature(env)).snapshot; }
+  catch { return json(request, { ok: false, error: "Den godkända privata DinPuls-signaturen saknas eller matchar inte originalet." }, 503); }
   const snapshotJson = stableStringify(snapshot), snapshotHash = await sha256(snapshotJson);
-  const statements = [env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, renewal_type, signature_required, start_date, end_date, status, contract_snapshot_json, contract_snapshot_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,'annual-review',1,?,?,'Utkast',?,?,?,?)").bind(id, user.id, CONTRACT_VERSION, municipality, JSON.stringify(placements), price.unitPrice, billingType === "annual" ? price.unitPrice : 0, price.monthlyTotal, price.annualTotal, billingType, lines[0].startDate, lines[0].endDate, snapshotJson, snapshotHash, now, now), env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
+  const statements = [env.DB.prepare("INSERT INTO ad_contracts (id, company_user_id, contract_version, municipality, placements, price, annual_price, monthly_total, annual_total, billing_type, renewal_type, signature_required, start_date, end_date, status, contract_snapshot_json, contract_snapshot_hash, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,'annual-review',1,?,?,'Utkast',?,?,?,?)").bind(id, user.id, SELF_SERVICE_CONTRACT_VERSION, municipality, JSON.stringify(placements), price.unitPrice, billingType === "annual" ? price.unitPrice : 0, price.monthlyTotal, price.annualTotal, billingType, lines[0].startDate, lines[0].endDate, snapshotJson, snapshotHash, now, now), env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
   for (const line of lines) statements.push(env.DB.prepare("INSERT INTO self_service_holds (order_id,company_user_id,municipality,slot_id,start_date,end_date,status,expires_at,created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(orderId, user.id, line.municipality, line.slotId, line.startDate, line.endDate, expiresAt, now));
   try { await env.DB.batch(statements); }
   catch (error) { return json(request, { ok: false, error: String(error).includes("SLOT_PERIOD_OCCUPIED") ? "En plats hann reserveras av någon annan." : "Avtalsutkastet kunde inte skapas. Försök igen." }, 409); }
@@ -1172,7 +1171,7 @@ async function finalizePreapprovedFoundation(request, env, order, contract, name
     const confirmation = stableStringify({ orderId: order.id, companyId: contract.company_user_id, foundationContractId: contract.id, snapshotHash: order.snapshot_hash, confirmedAt: signedAt, customerSignerName: name, customerSignerTitle: title, dinpulsSignatureId: fixed.snapshot.signatureId, dinpulsSignatureHash: fixed.digest, explicitConfirmation: true, channel: "preapproved-fixed-foundation-signature" });
     const confirmationHash = await sha256(confirmation);
     const statements = [env.DB.prepare("UPDATE self_service_orders SET status='confirmed', confirmed_at=? WHERE id=? AND status='signing' AND expires_at>?").bind(signedAt, order.id, signedAt)];
-    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), order.id, contract.company_user_id, contract.id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, CONTRACT_VERSION, confirmation, confirmationHash, signedAt));
+    for (const item of placements) statements.push(env.DB.prepare("INSERT INTO self_service_purchases (id,order_id,company_user_id,foundation_contract_id,municipality,slot_id,placement_label,billing_type,unit_price,vat_amount,start_date,end_date,contract_version,confirmation_json,confirmation_hash,confirmed_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(crypto.randomUUID(), order.id, contract.company_user_id, contract.id, item.municipality, item.slotId, item.location, contract.billing_type, contract.price, Math.round(contract.price * 0.25), item.startDate, item.endDate, contract.contract_version, confirmation, confirmationHash, signedAt));
     statements.push(env.DB.prepare("UPDATE self_service_holds SET status='committed' WHERE order_id=? AND status='held' AND expires_at>?").bind(order.id, signedAt));
     statements.push(env.DB.prepare("UPDATE ad_contracts SET customer_signer_name=?, customer_signer_title=?, dinpuls_signer_name='SirElin AB', dinpuls_signer_title='Fast förhandsgodkänd signatur', customer_signature_object_key=?, dinpuls_signature_object_key=?, signed_at=?, signed_pdf_object_key=?, signed_pdf_hash=?, status='Aktivt', updated_at=? WHERE id=? AND company_user_id=? AND status='Utkast' AND signed_at IS NULL AND contract_snapshot_hash=?").bind(name, title, customerKey, `r2:dinpuls-contract-signatures/${FIXED_SIGNATURE_KEY}`, signedAt, pdfKey, pdfHash, signedAt, contract.id, contract.company_user_id, order.snapshot_hash));
     await env.DB.batch(statements);
@@ -1207,6 +1206,7 @@ async function signFoundationByCompany(request, env, orderId) {
   if (!contract || contract.status !== "Utkast" || contract.customer_signature_object_key || !safeEqual(contract.contract_snapshot_hash, order.snapshot_hash)) return json(request, { ok: false, error: "Avtalet är inte längre oförändrat och signeringsbart." }, 409);
   const snapshot = JSON.parse(order.snapshot_json);
   if (snapshot.dinpulsFixedSignature) {
+    if (contract.contract_version !== snapshot.contractVersion || ![CONTRACT_VERSION, SELF_SERVICE_CONTRACT_VERSION].includes(contract.contract_version)) return json(request, { ok: false, error: "Avtalsversionen matchar inte det låsta grundavtalet." }, 409);
     if (!safeEqual(await sha256(contract.contract_snapshot_json || ""), order.snapshot_hash)) return json(request, { ok: false, error: "Avtalets låsta innehåll matchar inte beställningen." }, 409);
     return finalizePreapprovedFoundation(request, env, order, contract, name, title, bytes, snapshot, now);
   }
@@ -1265,7 +1265,7 @@ async function prepareCompanyOrder(request, env) {
   });
   const id = crypto.randomUUID(), now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString();
-  const snapshot = { orderId: id, companyId: user.id, company: { name: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city }, foundationContractId: foundation.id, contractVersion: foundation.contract_version, billingType, placements, totals: { perInvoiceExVat: price.invoiceTotal, perInvoiceVat: Math.round(price.invoiceTotal * 0.25), perInvoiceInclVat: Math.round(price.invoiceTotal * 1.25), twelveMonthsExVat: price.annualTotal, twelveMonthsVat: Math.round(price.annualTotal * 0.25) }, terms: CONTRACT_TERMS, createdAt: now, expiresAt };
+  const snapshot = { orderId: id, companyId: user.id, company: { name: user.company, orgNo: user.org_no, contact: user.contact, email: user.email, phone: user.phone, address: user.address, postalCode: user.postal_code, city: user.city }, foundationContractId: foundation.id, contractVersion: foundation.contract_version, billingType, placements, totals: { perInvoiceExVat: price.invoiceTotal, perInvoiceVat: Math.round(price.invoiceTotal * 0.25), perInvoiceInclVat: Math.round(price.invoiceTotal * 1.25), twelveMonthsExVat: price.annualTotal, twelveMonthsVat: Math.round(price.annualTotal * 0.25) }, terms: foundation.contract_version === SELF_SERVICE_CONTRACT_VERSION ? SELF_SERVICE_CONTRACT_TERMS : CONTRACT_TERMS, createdAt: now, expiresAt };
   const snapshotJson = stableStringify(snapshot), snapshotHash = await sha256(snapshotJson);
   const statements = [env.DB.prepare("INSERT INTO self_service_orders (id, company_user_id, foundation_contract_id, billing_type, snapshot_json, snapshot_hash, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(id, user.id, foundation.id, billingType, snapshotJson, snapshotHash, expiresAt, now)];
   for (const line of placements) statements.push(env.DB.prepare("INSERT INTO self_service_holds (order_id, company_user_id, municipality, slot_id, start_date, end_date, status, expires_at, created_at) VALUES (?,?,?,?,?,?,'held',?,?)").bind(id, user.id, line.municipality, line.slotId, line.startDate, line.endDate, expiresAt, now));
@@ -1523,6 +1523,7 @@ export default {
 import webpush from "web-push";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { BILLING, CONTRACT_TERMS, CONTRACT_VERSION, calculateContractPrice, stableStringify } from "./contract-v4.js";
+import { CONTRACT_TERMS as SELF_SERVICE_CONTRACT_TERMS, CONTRACT_VERSION as SELF_SERVICE_CONTRACT_VERSION } from "./contract-v4.2.js";
 import municipalityConfig from "../data/municipalities.json";
 import { normalizeSwedishOrgNumber } from "./swedish-org-number.js";
 import { buildBillingBasis } from "./spiris-adapter.js";

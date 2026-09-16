@@ -13,11 +13,12 @@ verifierat konto via engångslänk och lösenord och kan sedan välja platser.
 - Servern visar lediga platser och håller en vald period i D1 under checkout.
   Hållna platser skyddas atomiskt mot andra självserviceorder och äldre
   avtalsreservationer. En första order kan innehålla flera kommuner i ett och
-  samma låsta v4.1-avtalssnapshot med pris, moms, period och platser.
+  samma låsta v4.2-avtalssnapshot med pris, moms, period och platser.
 - Företagets företrädare granskar samma snapshot och ritar sin signatur.
-  Signaturen arkiveras i R2. En DinPuls-företrädare granskar sedan snapshoten
-  i admin och signerar för DinPuls; därefter skapas den signerade PDF:en och
-  beständiga purchaseposter. Ingen DinPuls-signatur simuleras.
+  För nya v4.2-självserviceavtal ingår den förhandsgodkända fasta signaturen
+  före kundens signering. Den autentiserade kundsigneringen låser avtal och
+  PDF utan senare manuell DinPuls-signering. Äldre v4.1-avtal och adminskapade
+  avtal behåller sina låsta villkor och sin tidigare signeringsväg.
 - En separat privat R2-bucket, `dinpuls-contract-signatures`, innehåller
   SirElin AB:s godkända fasta PNG-signatur under
   `approved/sirelin-ab/v1.png`. Bucketen saknar både r2.dev-adress och
@@ -53,25 +54,19 @@ Kör aldrig ALTER-satserna igen om kolumnerna redan finns.
 `SELF_SERVICE_SIGNUP_ENABLED` och `SELF_SERVICE_PURCHASE_ENABLED` är avstängda
 som standard. Publik registrering och köp öppnas först när verksamhetsägaren
 har granskat signering och tilläggsbekräftelse samt skarp drift är verifierad.
-`SELF_SERVICE_FIXED_SIGNATURE_ENABLED` är också avstängt tills v4.1:s
-signeringsformulering har godkänts för en förhandsgodkänd fast signatur.
+`SELF_SERVICE_FIXED_SIGNATURE_ENABLED` är också avstängt i skarp drift.
+Nya självservicegrundavtal kräver denna flagga och använder v4.2; v4.1
+ändras inte. Alla tre självserviceflaggor aktiveras först i separat
+slutlig end-to-end-prövning.
 `SPIRIS_ENABLED` är fortfarande avstängt. Inga skarpa fakturor kan skickas.
 
-Den nuvarande v4.1-texten ger två frågor som inte ska besvaras genom en tyst
-avtalsändring: punkt 1 begränsar grundavtalet till angivna platser, period och
-villkor; punkt 6 säger att ändrat antal platser ska dokumenteras i nytt avtal
-eller ny skriftlig överenskommelse; punkt 7 kräver båda parters godkännande av
-väsentliga ändringar och skriftlig dokumentation. Verksamhetsägaren behöver
-granska om den autentiserade tilläggsordern och DinPuls acceptans uppfyller
-detta, eller om separat tilläggsavtal behövs. Punkt 8 säger i dag att båda
-parter undertecknar elektroniskt, att respektive part genom underskriften
-bekräftar att den har tagit del av det aktuella avtalet, och att avtalet blir
-bindande när båda parter undertecknat det. En signatur som godkänts innan ett
-individuellt avtal finns behöver därför uttryckligen beskrivas som SirElin
-AB:s förhandsgodkännande för just denna självserviceprocess och avtalet
-behöver säga när kundens underskrift gör avtalet bindande. Ingen sådan
-juridisk ändring har gjorts i v4.1. Därför är automatisk motpartssignering
-tekniskt testad men inte aktiverad live; manuellt steg kvarstår i skarp drift.
+v4.2 preciserar grundavtalets låsta underlag i punkt 1, skiljer ytterligare
+annonsplatser från övriga ändringar i punkt 6, dokumenterar autentiserade
+tilläggsbeställningar i punkt 7 och anger i punkt 8 att SirElin AB:s fasta
+förhandsgodkännande ingår före kundsignering. Kundens autentiserade signering
+gör då det låsta grundavtalet bindande för båda parter utan efterföljande
+manuell motpartssignering. Tilläggens låsta snapshot och hashade elektroniska
+bekräftelser fortsätter bevaras under samma grundavtal.
 
 Registreringens tekniska ordning är aktiveringsmejl och lösenord före
 beställning och signering. Det gör företrädarens e-post verifierbar innan en

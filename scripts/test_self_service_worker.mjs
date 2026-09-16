@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { normalizeSwedishOrgNumber } from "../cloudflare/swedish-org-number.js";
+import { CONTRACT_TERMS as V41_TERMS, CONTRACT_VERSION as V41_VERSION } from "../cloudflare/contract-v4.js";
+import { CONTRACT_TERMS as V42_TERMS, CONTRACT_VERSION as V42_VERSION } from "../cloudflare/contract-v4.2.js";
 
 const bundle = await build({
   entryPoints: [fileURLToPath(new URL("../cloudflare/push-worker.js", import.meta.url))],
@@ -55,6 +57,11 @@ const orgNo = validOrg("556123456");
 const signup = { orgNo, company: "Testföretag AB", address: "Storgatan 1", postalCode: "662 30",
   city: "Åmål", contact: "Anna Test", phone: "0701234567", email: "anna@example.invalid" };
 try {
+  assert.equal(V41_VERSION, "4.1");
+  assert.equal(V42_VERSION, "4.2");
+  assert.equal(V41_TERMS[7].paragraphs[8], "Avtalet blir bindande när både företaget och DinPuls har undertecknat det.");
+  assert.ok(V42_TERMS[7].paragraphs.some(text => text.includes("Ingen efterföljande manuell motpartssignatur")));
+  assert.ok(V42_TERMS[6].paragraphs.some(text => text.includes("dokumenterad tilläggsbeställning")));
   const health = await read("/health");
   assert.equal(health.selfServiceSignupEnabled, true);
   assert.equal(health.selfServicePurchaseEnabled, true);
@@ -76,7 +83,10 @@ try {
   assert.equal(me.profile.city, signup.city);
   assert.equal(me.contract, null);
   await read("/portal/company/register", "POST", { ...signup, email: "other@example.invalid" }, null, 409);
-  const start = "2026-09-15", end = "2027-09-14";
+  const startDate = new Date();
+  const start = startDate.toISOString().slice(0, 10);
+  const endDate = new Date(startDate); endDate.setUTCFullYear(endDate.getUTCFullYear() + 1); endDate.setUTCDate(endDate.getUTCDate() - 1);
+  const end = endDate.toISOString().slice(0, 10);
   const slots = await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, session.token);
   assert.ok(slots.slots.some(slot => slot.id === "P1-04" && /Övre annonsblocket.*Plats 4 av 10/.test(slot.displayLabel)));
   assert.equal(slots.pricing.monthlyExVat, 500);
@@ -85,11 +95,12 @@ try {
   await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, null, 401);
   const admin = await read("/portal/auth/admin", "POST", { username: "localadmin", password: "LocalAdmin-Test-2026" });
   const contractId = "DP-2026-9911";
-  await read("/portal/admin/contracts", "POST", { id: contractId, company: "Adminföretag AB", orgNo: "000000-0000",
+  const adminDraft = await read("/portal/admin/contracts", "POST", { id: contractId, company: "Adminföretag AB", orgNo: "000000-0000",
     contact: "Admin test", email: "admin@example.invalid", phone: "0700000000", municipality: "Åmål",
     placements: [{ slotId: "P1-04", module: "Startsida", group: "premium-ad-1", label: "Plats 4", location: "Övre annonsblocket", page: "index.html" }],
     startDate: start, endDate: end, billingType: "annual", renewalType: "annual-review", termsReviewed: true
   }, admin.token, 201);
+  assert.equal(adminDraft.snapshot.contractVersion, "4.1", "Administrativt skapade v4.1-avtal får inte byta version");
   await read(`/portal/admin/contracts/${contractId}/sign`, "POST", { customerSignerName: "Kund Test", customerSignerTitle: "Företrädare",
     dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature
   }, admin.token);
@@ -103,12 +114,22 @@ try {
   const orderLines = [{ municipality: "Åmål", slotId: "P1-05", startDate: start, endDate: end }, { municipality: "Säffle", slotId: "P2-11", startDate: start, endDate: end }];
   const reserved = await read("/portal/company/orders", "POST", { placements: orderLines, billingType: "annual" }, buyer.token, 201);
   assert.equal(reserved.snapshot.placements.length, 2);
+  assert.equal(reserved.snapshot.contractVersion, "4.1");
+  assert.deepEqual(reserved.snapshot.terms, V41_TERMS);
   assert.equal(reserved.snapshot.totals.perInvoiceExVat, 10000);
   assert.equal(reserved.snapshot.totals.perInvoiceVat, 2500);
   assert.equal(reserved.snapshot.totals.perInvoiceInclVat, 12500);
   await read(`/portal/company/orders/${reserved.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: "wrong" }, buyer.token, 400);
   const confirmed = await read(`/portal/company/orders/${reserved.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: reserved.snapshotHash }, buyer.token);
   assert.equal(confirmed.purchaseCount, 2);
+  const oldDb = await worker.getD1Database("DB");
+  const oldOrder = await oldDb.prepare("SELECT snapshot_json, snapshot_hash, status FROM self_service_orders WHERE id=?").bind(reserved.orderId).first();
+  assert.equal(oldOrder.status, "confirmed");
+  assert.deepEqual(JSON.parse(oldOrder.snapshot_json), reserved.snapshot);
+  assert.equal(createHash("sha256").update(oldOrder.snapshot_json).digest("hex"), reserved.snapshotHash);
+  const oldConfirmation = await oldDb.prepare("SELECT confirmation_json, confirmation_hash FROM self_service_purchases WHERE order_id=? LIMIT 1").bind(reserved.orderId).first();
+  assert.equal(createHash("sha256").update(oldConfirmation.confirmation_json).digest("hex"), oldConfirmation.confirmation_hash);
+  assert.equal(JSON.parse(oldConfirmation.confirmation_json).snapshotHash, reserved.snapshotHash);
   await read(`/portal/company/orders/${reserved.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: reserved.snapshotHash }, buyer.token);
   const purchases = await read("/portal/company/purchases", "GET", null, buyer.token);
   assert.equal(purchases.purchases.length, 2);
@@ -126,7 +147,8 @@ try {
     { municipality: "Åmål", slotId: "P3-21", startDate: start, endDate: end },
     { municipality: "Säffle", slotId: "P3-21", startDate: start, endDate: end }
   ], billingType: "annual" }, session.token, 201);
-  assert.equal(first.snapshot.contractVersion, "4.1");
+  assert.equal(first.snapshot.contractVersion, "4.2");
+  assert.deepEqual(first.snapshot.terms, V42_TERMS);
   assert.equal(first.snapshot.dinpulsFixedSignature.mode, "preapproved-fixed");
   assert.equal(first.snapshot.dinpulsFixedSignature.signer, "SirElin AB");
   assert.equal(first.snapshot.dinpulsFixedSignature.sha256, fixedHash);
@@ -144,6 +166,17 @@ try {
   const customerSigned = await read(`/portal/company/foundation/orders/${first.orderId}/sign`, "POST", { customerSignerName: "Anna Test", customerSignerTitle: "Företrädare", customerSignature: signature, snapshotHash: first.snapshotHash, explicitConfirmation: true }, session.token);
   assert.equal(customerSigned.status, "Aktivt");
   assert.equal(customerSigned.signatureMode, "preapproved-fixed");
+  const signedDb = await worker.getD1Database("DB");
+  const lockedOrder = await signedDb.prepare("SELECT snapshot_json, snapshot_hash, status FROM self_service_orders WHERE id=?").bind(first.orderId).first();
+  const lockedContract = await signedDb.prepare("SELECT contract_version, contract_snapshot_json, contract_snapshot_hash, signed_at, status FROM ad_contracts WHERE id=?").bind(first.contractId).first();
+  assert.equal(lockedOrder.status, "confirmed");
+  assert.equal(lockedContract.contract_version, "4.2");
+  assert.equal(lockedContract.status, "Aktivt");
+  assert.ok(lockedContract.signed_at);
+  assert.equal(lockedOrder.snapshot_json, lockedContract.contract_snapshot_json);
+  assert.equal(lockedOrder.snapshot_hash, first.snapshotHash);
+  assert.equal(lockedContract.contract_snapshot_hash, first.snapshotHash);
+  assert.equal(createHash("sha256").update(lockedOrder.snapshot_json).digest("hex"), first.snapshotHash);
   await read(`/portal/admin/contracts/${first.contractId}/sign`, "POST", { dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", dinpulsSignature: signature, snapshotHash: first.snapshotHash }, admin.token, 409);
   const signedCopy = await send(`/portal/company/contracts/${first.contractId}/pdf`, "GET", null, session.token);
   assert.equal(signedCopy.status, 200);
@@ -180,6 +213,15 @@ try {
   assert.equal((await read("/ads/current/P3-21?municipality=S%C3%A4ffle")).banner, null, "Kommunernas banners får inte blandas ihop");
   const firstMe = await read("/portal/company/me", "GET", null, session.token);
   assert.equal(firstMe.contract?.id, first.contractId);
+  const extra = await read("/portal/company/orders", "POST", { placements: [{ municipality: "Säffle", slotId: "P3-22", startDate: start, endDate: end }], billingType: "monthly" }, session.token, 201);
+  assert.equal(extra.snapshot.contractVersion, "4.2");
+  assert.deepEqual(extra.snapshot.terms, V42_TERMS);
+  assert.equal(extra.snapshot.placements[0].vatAmount, 125);
+  await read(`/portal/company/orders/${extra.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: extra.snapshotHash }, session.token);
+  const extraRecord = await signedDb.prepare("SELECT confirmation_json, confirmation_hash FROM self_service_purchases WHERE order_id=? LIMIT 1").bind(extra.orderId).first();
+  assert.equal(JSON.parse(extraRecord.confirmation_json).snapshotHash, extra.snapshotHash);
+  assert.equal(createHash("sha256").update(extraRecord.confirmation_json).digest("hex"), extraRecord.confirmation_hash);
+  assert.equal((await signedDb.prepare("SELECT COUNT(*) count FROM ad_contracts WHERE company_user_id=(SELECT company_user_id FROM self_service_orders WHERE id=?)").bind(first.orderId).first()).count, 1, "Tilläggsköp får inte skapa nytt grundavtal");
   await read("/portal/company/foundation/orders", "POST", { placements: [{ municipality: "Åmål", slotId: "P3-22", startDate: start, endDate: end }], billingType: "annual" }, session.token, 409);
   const raceLine = [{ municipality: "Åmål", slotId: "P1-07", startDate: start, endDate: end }];
   const buyerHold = await read("/portal/company/orders", "POST", { placements: raceLine, billingType: "annual" }, buyer.token, 201);

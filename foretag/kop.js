@@ -28,7 +28,7 @@ async function displayOrder(data) {
   preparedOrder = data;
   const snapshot = data.snapshot;
   const foundation = !hasFoundation;
-  const lines = snapshot.placements.map(line => `<li><strong>${escapeHtml(line.placementLabel || line.location)}</strong><br>${escapeHtml(line.startDate)} – ${escapeHtml(line.endDate)} · Plats-ID ${escapeHtml(line.slotId)} · ${escapeHtml(snapshot.billingType || snapshot.billing.cadence) === "monthly" ? "Månadsvis" : "Årsvis"}</li>`).join("");
+  const lines = snapshot.placements.map(line => `<li><strong>${escapeHtml(line.municipality || snapshot.municipality)} · ${escapeHtml(line.placementLabel || line.location)}</strong><br>${escapeHtml(line.startDate)} – ${escapeHtml(line.endDate)} · Plats-ID ${escapeHtml(line.slotId)} · ${escapeHtml(snapshot.billingType || snapshot.billing.cadence) === "monthly" ? "Månadsvis" : "Årsvis"} · ${Number(line.unitPrice ?? snapshot.billing.unitPrice).toLocaleString("sv-SE")} kr per plats exkl. moms</li>`).join("");
   const net = foundation ? snapshot.billing.invoiceTotal : snapshot.totals.perInvoiceExVat;
   const vat = foundation ? snapshot.billing.invoiceVat : snapshot.totals.perInvoiceVat;
   const total = foundation ? snapshot.billing.invoiceInclVat : snapshot.totals.perInvoiceInclVat;
