@@ -64,11 +64,8 @@
   }
 
   async function enhanceStrategicSlot(slot) {
-    const key = CATEGORY_KEYS[slot.dataset.strategicAd];
-    const position = Number(slot.dataset.adPosition || 1);
-    if (!key || !position) return;
-    const banner = await getCurrentBanner(`${key}-${String(position).padStart(2, "0")}`);
-    if (banner) showBanner(slot, banner, "Företagsannons");
+    if (!slot) return;
+    slot.hidden = true;
   }
 
   async function refreshStrategicAds() {
@@ -80,7 +77,8 @@
     slots.forEach(slot => {
       const position = Number(slot.dataset.adPosition || 1);
       const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/månad + moms</small></a>`;
+      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 800 kr/månad + moms</small></a>`;
+      slot.hidden = true;
     });
     const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3" && !slot.dataset.dynamicAd);
     const list = document.querySelector(listSelector);
@@ -101,14 +99,7 @@
     const main = document.querySelector("body > main");
     if (!main) return;
     const ads = ["premium-ad-1", "premium-ad-2", "premium-ad-3"].map(name => main.querySelector(`:scope > [data-component="${name}"]`)).filter(Boolean);
-    if (ads.length !== 3) return;
-    const candidates = [...main.children].filter(child => !ads.includes(child) && child.getBoundingClientRect().height > 1 && !child.hidden);
-    if (candidates.length < 3) return;
-    const ratios = [0.22, 0.52, 0.82];
-    const indexes = ratios.map(ratio => Math.round((candidates.length - 1) * ratio));
-    for (let index = 1; index < indexes.length; index++) indexes[index] = Math.max(indexes[index], indexes[index - 1] + 1);
-    for (let index = indexes.length - 1; index >= 0; index--) indexes[index] = Math.min(indexes[index], candidates.length - (indexes.length - index));
-    ads.forEach((ad, index) => candidates[indexes[index]].after(ad));
+    ads.forEach(ad => { ad.hidden = true; });
   }
 
   function initializeHomepageAdRedistribution() {
