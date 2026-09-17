@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-17T08:08:23+02:00
+Genererad: 2026-09-17T13:44:05+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -16,27 +16,27 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 GREEN | 26 | 40 | 27 | 61 / 61 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
-| Årjäng | 🟢 GREEN | 33 | 12 | 73 | 57 / 57 färska | 8 / 5 kat | 11 / 4 kat | 7 | 39 | 29 |
-| Bengtsfors | 🟢 GREEN | 19 | 40 | 4 | 50 / 50 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 18 |
-| Mellerud | 🟢 GREEN | 30 | 14 | 28 | 37 / 37 färska | 7 / 4 kat | 15 / 4 kat | 5 | 45 | 16 |
-| Arvika | 🟢 GREEN | 56 | 5 | 59 | 78 / 78 färska | 30 / 8 kat | 21 / 11 kat | 8 | 132 | 77 |
-| Grums | 🟢 GREEN | 12 | 20 | 20 | 44 / 44 färska | 12 / 6 kat | 11 / 7 kat | 10 | 37 | 30 |
-| Säffle | 🟢 GREEN | 27 | 55 | 5 | 73 / 73 färska | 17 / 7 kat | 16 / 4 kat | 10 | 37 | 29 |
+| Åmål | 🟢 GREEN | 26 | 40 | 27 | 55 / 55 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
+| Årjäng | 🟢 GREEN | 33 | 12 | 73 | 59 / 59 färska | 8 / 5 kat | 11 / 4 kat | 7 | 39 | 29 |
+| Bengtsfors | 🟢 GREEN | 19 | 40 | 4 | 46 / 46 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 18 |
+| Mellerud | 🟢 GREEN | 30 | 14 | 28 | 35 / 35 färska | 7 / 4 kat | 15 / 4 kat | 5 | 45 | 16 |
+| Arvika | 🟢 GREEN | 56 | 5 | 59 | 73 / 73 färska | 30 / 8 kat | 21 / 11 kat | 8 | 132 | 77 |
+| Grums | 🟢 GREEN | 12 | 20 | 20 | 48 / 48 färska | 12 / 6 kat | 11 / 7 kat | 10 | 37 | 30 |
+| Säffle | 🟢 GREEN | 27 | 55 | 5 | 71 / 71 färska | 17 / 7 kat | 16 / 4 kat | 10 | 37 | 29 |
 | Dals-Ed | 🟢 GREEN | 6 | 23 | 32 | 31 / 31 färska | 9 / 7 kat | 12 / 8 kat | 6 | 12 | 2 |
-| Eda | 🟢 GREEN | 35 | 29 | 16 | 54 / 54 färska | 13 / 7 kat | 12 / 7 kat | 5 | 21 | 24 |
-| Filipstad | 🟢 GREEN | 10 | 47 | 22 | 71 / 71 färska | 8 / 5 kat | 14 / 8 kat | 5 | 9 | 6 |
-| Forshaga | 🟢 GREEN | 19 | 1 | 76 | 47 / 47 färska | 11 / 6 kat | 13 / 13 kat | 8 | 25 | 20 |
-| Färgelanda | 🟢 GREEN | 8 | 9 | 5 | 43 / 43 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
+| Eda | 🟢 GREEN | 35 | 29 | 16 | 58 / 58 färska | 13 / 7 kat | 12 / 7 kat | 5 | 21 | 24 |
+| Filipstad | 🟢 GREEN | 10 | 47 | 22 | 68 / 68 färska | 8 / 5 kat | 14 / 8 kat | 5 | 9 | 6 |
+| Forshaga | 🟢 GREEN | 19 | 1 | 76 | 49 / 49 färska | 11 / 6 kat | 13 / 13 kat | 8 | 25 | 20 |
+| Färgelanda | 🟢 GREEN | 8 | 9 | 5 | 44 / 44 färska | 9 / 8 kat | 8 / 5 kat | 4 | 10 | 16 |
 | Hagfors | 🟢 GREEN | 22 | 23 | 56 | 51 / 51 färska | 14 / 9 kat | 12 / 7 kat | 8 | 14 | 22 |
-| Hammarö | 🟢 GREEN | 13 | 2 | 53 | 57 / 57 färska | 10 / 7 kat | 8 / 5 kat | 5 | 8 | 11 |
+| Hammarö | 🟢 GREEN | 13 | 2 | 53 | 54 / 54 färska | 10 / 7 kat | 8 / 5 kat | 5 | 8 | 11 |
 | Karlstad | 🟢 GREEN | 90 | 59 | 64 | 83 / 83 färska | 36 / 10 kat | 13 / 6 kat | 10 | 9 | 4 |
 | Kil | 🟢 GREEN | 15 | 2 | 3 | 44 / 44 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 18 |
-| Kristinehamn | 🟢 GREEN | 52 | 11 | 62 | 63 / 63 färska | 6 / 4 kat | 9 / 6 kat | 4 | 7 | 23 |
-| Munkfors | 🟢 GREEN | 6 | 1 | 46 | 28 / 28 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
-| Storfors | 🟢 GREEN | 3 | 3 | 5 | 59 / 59 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
-| Sunne | 🟢 GREEN | 27 | 5 | 22 | 64 / 64 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
-| Torsby | 🟢 GREEN | 24 | 14 | 65 | 53 / 53 färska | 7 / 6 kat | 9 / 5 kat | 4 | 7 | 21 |
+| Kristinehamn | 🟢 GREEN | 52 | 11 | 62 | 58 / 58 färska | 6 / 4 kat | 9 / 6 kat | 4 | 7 | 23 |
+| Munkfors | 🟢 GREEN | 6 | 1 | 46 | 26 / 26 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 22 |
+| Storfors | 🟢 GREEN | 3 | 3 | 5 | 58 / 58 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
+| Sunne | 🟢 GREEN | 27 | 5 | 22 | 62 / 62 färska | 16 / 6 kat | 16 / 5 kat | 4 | 6 | 6 |
+| Torsby | 🟢 GREEN | 24 | 14 | 65 | 45 / 45 färska | 7 / 6 kat | 9 / 5 kat | 3 | 7 | 21 |
 
 ## Blockerare per kommun
 
