@@ -72,6 +72,14 @@
     <button type="button" id="weather-retry">Försök igen</button>
   </div>
 </article>
+  <article class="card school-family-home" id="skola-familj" aria-live="polite">
+    <div class="card-title"><span class="title-icon school-soft"><i data-lucide="graduation-cap"></i></span><div><h2>Skola &amp; familj</h2><small data-municipality-name>Åmål</small></div></div>
+    <div class="school-family-home-grid">
+      <section aria-labelledby="school-home-title"><span class="school-family-label">SKOLA</span><h3 id="school-home-title">Aktuellt från skolan</h3><div id="school-home-content" class="school-home-state"><span class="loading-spinner" aria-hidden="true"></span><p>Hämtar verifierad skolinformation…</p></div></section>
+      <section class="family-reserved" aria-labelledby="family-home-title"><span class="school-family-label">FAMILJ</span><h3 id="family-home-title">Familjedelen kommer senare</h3><p>Strukturen är förberedd. Inget provisoriskt innehåll visas.</p></section>
+    </div>
+    <a class="card-link" id="school-family-page-link" href="skola-familj.html">Öppna Skola &amp; familj <i data-lucide="arrow-right"></i></a>
+  </article>
   <article class="card traffic-card" id="trafik">
     <div class="card-title"><span class="title-icon green-soft"><i data-lucide="car-front"></i></span><div><h2>Trafik</h2><small data-municipality-name>Åmål</small></div><span class="traffic-live" id="traffic-status">Hämtar…</span></div>
     <div class="traffic-summary"><strong id="traffic-total">–</strong><span>aktuella vägmeddelanden inom 35 km</span></div>
@@ -81,6 +89,6 @@
 </section>
 
 <style id="dinpuls-primary-two">
-  .primary-service-grid{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}
+  .primary-service-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   @media(max-width:980px){.primary-service-grid{grid-template-columns:1fr}}
 </style>

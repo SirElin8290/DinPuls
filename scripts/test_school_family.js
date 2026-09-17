@@ -1,0 +1,12 @@
+const assert=require("assert"),fs=require("fs"),path=require("path"),root=path.resolve(__dirname,"..");
+const index=fs.readFileSync(path.join(root,"index.html"),"utf8"),component=fs.readFileSync(path.join(root,"components/primary-cards.html"),"utf8"),page=fs.readFileSync(path.join(root,"skola-familj.html"),"utf8"),engine=fs.readFileSync(path.join(root,"school-family-engine.js"),"utf8"),data=JSON.parse(fs.readFileSync(path.join(root,"data/school-family.json"),"utf8"));
+assert(index.includes("school-family-engine.js")&&component.includes('id="skola-familj"'),"Startsidans Skola & familj-modul saknas");
+assert(component.indexOf('id="vader"')<component.indexOf('id="skola-familj"')&&component.indexOf('id="skola-familj"')<component.indexOf('id="trafik"'),"Väder, Skola & familj och efterföljande modul ligger i fel ordning");
+for(const name of ["getSchoolMeals","getSchoolCalendar","getSchools","getSchoolServices"])assert(engine.includes(`function ${name}`),`${name} saknas`);
+const amal=data.municipalities["Åmål"];assert(amal&&amal.meals.length&&amal.calendar.length&&amal.schools.length&&amal.services.length,"Åmåls verifierade skoldata saknas");
+assert(amal.meals.every(item=>item.schoolGroup&&/^\d{4}-\d{2}-\d{2}$/.test(item.date)&&item.options.length),"Skolmåltidsmodellen är ofullständig");
+assert(amal.calendar.every(item=>item.eventType&&item.title&&item.startDate&&item.endDate),"Kalendermodellen är ofullständig");
+for(let i=1;i<=4;i++)assert(page.includes(`SKOLA-FAMILJ-0${i}`),`Annonsplats 0${i} saknas`);
+assert(page.indexOf("SKOLA-FAMILJ-01")<page.indexOf('id="school-section"')&&page.indexOf("SKOLA-FAMILJ-02")<page.indexOf('class="family-future"'),"Annonsplats 01 eller 02 ligger fel");
+assert(page.includes("hidden></div>")&&page.includes("Inget familjeinnehåll publiceras i detta steg"),"Tomma annonser eller Familj-reservation följer inte kontraktet");
+console.log("✓ Skola & familj: Åmål-data, gemensam motor, modulordning och fyra kollapsade annonsplatser verifierade");

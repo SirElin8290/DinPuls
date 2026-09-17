@@ -23,7 +23,8 @@
     { key: "TRAF", module: "Trafik", page: "trafik.html", count: 4, locations: ["Efter introduktionen", "Efter trafikfiltren", "I trafikflödet", "Efter officiella trafikkällor"] },
     { key: "VARD", module: "Vård & hälsa", page: "vard.html", count: 4, locations: ["Efter akuta vårdkontakter", "Efter vårdfiltren", "Mellan offentlig vård och lokala mottagningar", "Efter lokala mottagningar"] },
     { key: "SPORT", module: "Idrott & motion", page: "sport.html", count: 4, locations: ["Efter sportöversikten", "Efter första tredjedelen av sporterna", "Efter andra tredjedelen av sporterna", "Efter sportflödet"] },
-    { key: "FRIT", module: "Fritid & föreningsliv", page: "fritid.html", count: 4, locations: ["Efter sök- och kommunfiltret", "Efter första delen av fritidskategorierna", "Efter andra delen av fritidskategorierna", "Efter fritidsflödet"] }
+    { key: "FRIT", module: "Fritid & föreningsliv", page: "fritid.html", count: 4, locations: ["Efter sök- och kommunfiltret", "Efter första delen av fritidskategorierna", "Efter andra delen av fritidskategorierna", "Efter fritidsflödet"] },
+    { key: "SKOLA-FAMILJ", module: "Skola & familj", page: "skola-familj.html", count: 4, locations: ["Högst upp på sidan", "Mellan Skola och Familj", "Mitt i framtida Familj-delen", "Efter framtida Familj-delen"] }
   ];
 
   const subpageSlots = subpages.flatMap(page => Array.from({ length: page.count }, (_, index) => {
