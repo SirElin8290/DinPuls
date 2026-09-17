@@ -7,8 +7,9 @@
     slot.dataset.strategicAd = category;
     slot.dataset.adPosition = String(position);
     slot.dataset.dynamicAd = "true";
+    slot.hidden = true;
     const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 500 kr/månad + moms</small></a>`;
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 800 kr/månad + moms</small></a>`;
     return slot;
   }
 
@@ -103,12 +104,14 @@
     topRow.className = "leisure-ad-row leisure-ad-row-top";
     topRow.dataset.dynamicAdRow = "fritid";
     topRow.setAttribute("aria-label", "Annonsplatser");
+    topRow.hidden = true;
     topRow.append(slots[0], slots[1]);
 
     const bottomRow = document.createElement("section");
     bottomRow.className = "leisure-ad-row leisure-ad-row-bottom";
     bottomRow.dataset.dynamicAdRow = "fritid";
     bottomRow.setAttribute("aria-label", "Annonsplatser");
+    bottomRow.hidden = true;
     bottomRow.append(slots[2], slots[3]);
 
     crosslink.after(topRow);
