@@ -7,98 +7,84 @@
   <meta name="theme-color" content="#082653">
   <title>DinPuls för företag</title>
   <link rel="icon" href="../assets/favicon-32x32.png">
-  <link rel="stylesheet" href="valkommen.css?v=1">
+  <link rel="preload" as="image" href="../assets/business-entry-autumn.webp" fetchpriority="high">
+  <link rel="stylesheet" href="valkommen.css?v=2">
 </head>
 <body>
-  <header class="business-header">
-    <a class="business-brand" href="../" aria-label="DinPuls startsida">
-      <picture>
-        <source media="(max-width: 620px)" srcset="../assets/logo-mobile.svg?version=0.23.4">
-        <img src="../assets/logo.svg?version=0.23.4" alt="DinPuls.se – din lokala startsida" width="620" height="150">
-      </picture>
-    </a>
-    <nav aria-label="Företagsingång">
-      <a class="back-link" href="../">Tillbaka till DinPuls</a>
-      <a class="button button-primary header-login" href="start.html">Logga in</a>
-    </nav>
-  </header>
-
   <main>
     <section class="hero" aria-labelledby="hero-title">
-      <div class="content hero-content">
-        <p class="eyebrow">DINPULS FÖR FÖRETAG</p>
-        <h1 id="hero-title">Syns där din kommun redan är</h1>
-        <p class="lead">DinPuls är en lokal startsida som samlar sådant människor behöver, söker efter och använder i sin vardag.</p>
-        <p>Nyheter, evenemang, jobb, bostäder, trafik, lunch, föreningsliv, kommunal service, skola och familj och mycket mer samlas på samma plats – anpassat efter den kommun användaren själv har valt.</p>
-        <p>Tanken är enkel: det ska vara lättare att hitta det som händer, finns och behövs där man bor.</p>
+      <img class="hero-image" src="../assets/business-entry-autumn.webp" alt="Höstkväll i en levande svensk småstad med lokala butiker, café och en laptop med DinPuls" fetchpriority="high">
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-shell">
+        <header class="business-header">
+          <a class="business-brand" href="../" aria-label="DinPuls startsida">
+            <picture><source media="(max-width:620px)" srcset="../assets/logo-mobile.svg?version=0.23.4"><img src="../assets/logo.svg?version=0.23.4" alt="DinPuls.se – din lokala startsida" width="620" height="150"></picture>
+          </a>
+          <nav aria-label="Företagsingång"><a href="../">Tillbaka till DinPuls</a><a class="header-login" href="start.html">Logga in</a></nav>
+        </header>
+        <div class="hero-copy">
+          <p class="eyebrow">DINPULS FÖR FÖRETAG</p>
+          <h1 id="hero-title">Syns där din <em>kommun</em> redan är</h1>
+          <p>DinPuls är en lokal startsida som samlar det människor behöver, söker efter och använder i sin vardag. Här får du som lokalt företag möjlighet att synas för människor som aktivt använder DinPuls i den kommun du väljer.</p>
+        </div>
       </div>
     </section>
 
-    <section class="section content prose" aria-labelledby="local-title">
-      <p class="section-label">LOKALT NÄRINGSLIV</p>
-      <h2 id="local-title">Lokala företag är en del av den nyttan</h2>
-      <p>DinPuls bygger inte bara på information från kommuner, myndigheter och föreningsliv. Det lokala näringslivet är också en viktig del av en levande kommun.</p>
-      <p>Här finns butikerna vi handlar i, restaurangerna vi äter på, hantverkarna vi behöver, arbetsplatserna vi går till och företagen som bidrar till att människor kan bo, arbeta och leva lokalt.</p>
-      <p>Därför är lokal annonsering en naturlig del av DinPuls.</p>
-      <p>Vi vill inte fylla DinPuls med opersonlig reklam från hela internet. I stället får du som lokal företagare möjlighet att synas för människor som aktivt använder DinPuls i den kommun du väljer.</p>
-    </section>
+    <section class="information" aria-label="Om DinPuls för företag">
+      <div class="content intro-grid">
+        <article>
+          <h2>En lokal startsida för hela kommunen</h2>
+          <p>DinPuls samlar nyheter, evenemang, jobb, bostäder, trafik, lunch, föreningsliv, kommunal service, skola och familj – allt på samma plats, anpassat efter den kommun du väljer.</p>
+          <p>Tanken är enkel: det ska vara lättare att hitta det som händer, finns och behövs där man bor.</p>
+        </article>
+        <article>
+          <h2>Lokala företag är en del av nyttan</h2>
+          <p>Det lokala näringslivet är en viktig del av en levande kommun. Här finns butikerna vi handlar i, restaurangerna vi äter på, hantverkarna vi behöver, arbetsplatserna vi går till och företagen som bidrar till att människor kan bo, arbeta och leva lokalt.</p>
+          <p>Vi vill inte fylla DinPuls med opersonlig reklam från hela internet. I stället får du som lokal företagare möjlighet att synas för människor som aktivt använder DinPuls i den kommun du väljer.</p>
+        </article>
+      </div>
 
-    <section class="section section-tinted" aria-labelledby="placement-title">
-      <div class="content split">
-        <div>
-          <p class="section-label">PLACERING</p>
-          <h2 id="placement-title">Välj själv var du vill synas</h2>
-        </div>
-        <div class="prose compact">
-          <p>Som annonsör väljer du själv kommun och ledig annonsplats.</p>
+      <div class="content benefits" aria-label="Fördelar med DinPuls">
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="13" r="7"/><path d="M10 38v-4c0-7 6-12 14-12s14 5 14 12v4M4 35v-3c0-5 4-9 9-9M44 35v-3c0-5-4-9-9-9"/></svg><h3>Rätt personer</h3><p>Nå människor som bor och verkar i din kommun.</p></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 44S10 29 10 18a14 14 0 1 1 28 0c0 11-14 26-14 26Z"/><circle cx="24" cy="18" r="5"/></svg><h3>Du väljer själv</h3><p>Välj kommun och ledig annonsplats.</p></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 40h8V27H7Zm13 0h8V18h-8Zm13 0h8V8h-8Z"/></svg><h3>Enkel och tydlig</h3><p>Fast pris och digitalt avtal. Inga krångliga processer.</p></article>
+        <article><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 42S5 31 5 17C5 9 15 5 24 15 33 5 43 9 43 17c0 14-19 25-19 25Z"/></svg><h3>Stärker kommunen</h3><p>Du syns lokalt och bidrar samtidigt till en levande kommun.</p></article>
+      </div>
+
+      <div class="content offer-grid">
+        <article class="advertising">
+          <h2>Så fungerar annonseringen</h2>
           <p>På DinPuls startsida finns fyra annonsområden med ett begränsat antal annonsörer. På våra olika undersidor finns fasta annonsplatser i direkt anslutning till innehållet.</p>
-          <p>Du kan alltså välja en placering som passar just ditt företag – och se vilka platser som fortfarande är lediga innan du bestämmer dig.</p>
+          <p>Du kan välja en placering som passar just ditt företag – och se vilka platser som fortfarande är lediga innan du bestämmer dig.</p>
           <p>När en placering är upptagen är den inte längre tillgänglig för en ny annonsör under samma period.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section content" aria-labelledby="price-title">
-      <p class="section-label">TYDLIGT OCH ENKELT</p>
-      <h2 id="price-title">Pris</h2>
-      <div class="price-grid">
-        <article class="price-card featured">
-          <p class="price-name">Årsbetalning</p>
-          <p class="price"><strong>8 000 kr</strong><span>+ moms</span></p>
-          <p class="price-period">för 12 månader</p>
-          <p>Betalas årsvis i förskott.</p>
         </article>
-        <article class="price-card">
-          <p class="price-name">Månadsbetalning</p>
-          <p class="price"><strong>800 kr</strong><span>+ moms per månad</span></p>
-          <p class="price-period">12 månaders avtalstid</p>
+        <article class="pricing" aria-labelledby="price-title">
+          <h2 id="price-title">Pris</h2>
+          <div class="price-grid">
+            <div class="price-card annual"><span class="best">BÄST VÄRDE</span><p class="price"><strong>8 000 kr</strong> + moms</p><b>för 12 månader</b><p>Betalas årsvis i förskott.</p><hr><strong class="saving">Du sparar 1 600 kr</strong><small>jämfört med månadsbetalning.</small></div>
+            <div class="price-card monthly"><p class="price"><strong>800 kr</strong> + moms</p><b>per månad</b><p>12 månaders avtalstid.</p></div>
+          </div>
+          <p class="included"><span aria-hidden="true">✓</span>I båda alternativen ingår samma annonsplacering och möjlighet att byta bannermaterial upp till 48 gånger under året.</p>
         </article>
       </div>
-      <div class="price-note">
-        <p><strong>Med årsbetalning sparar du 1 600 kronor under avtalsperioden.</strong></p>
-        <p>I båda alternativen ingår samma annonsplacering och möjlighet att byta bannermaterial upp till 48 gånger under året.</p>
-      </div>
-    </section>
 
-    <section class="section section-dark" aria-labelledby="steps-title">
-      <div class="content">
-        <p class="section-label">FRÅN KONTO TILL PUBLICERING</p>
+      <section class="content process" aria-labelledby="steps-title">
         <h2 id="steps-title">Så går det till</h2>
-        <ol class="steps">
-          <li><span>1</span><div><h3>Skapa företagskonto</h3><p>Du skapar först ett företagskonto hos DinPuls.</p><p>Att skapa ett företagskonto kostar ingenting och innebär inte att du förbinder dig att köpa annonsering.</p></div></li>
-          <li><span>2</span><div><h3>Välj kommun och annonsplats</h3><p>Se tillgängliga annonsplatser och välj den placering som passar ditt företag.</p></div></li>
-          <li><span>3</span><div><h3>Kontrollera och teckna avtal</h3><p>Innan något avtal ingås får du se placering, avtalsperiod, pris och villkor.</p></div></li>
-          <li><span>4</span><div><h3>Publicera din annons</h3><p>När avtalet är klart kan företaget använda det befintliga banner-/publiceringsflödet.</p></div></li>
+        <ol>
+          <li><span>1</span><div><h3>Skapa företagskonto</h3><p>Det är kostnadsfritt och innebär inte att du förbinder dig att köpa annonsering.</p></div></li>
+          <li><span>2</span><div><h3>Välj kommun och plats</h3><p>Se tillgängliga annonsplatser och välj den som passar ditt företag.</p></div></li>
+          <li><span>3</span><div><h3>Bekräfta avtal</h3><p>Du får se placering, avtalsperiod, pris och villkor innan du slutför avtalet.</p></div></li>
+          <li><span>4</span><div><h3>Publicera din annons</h3><p>Vi hjälper dig att komma igång och du kan enkelt byta bannermaterial under året.</p></div></li>
         </ol>
-      </div>
+      </section>
     </section>
 
     <section class="final-cta" aria-labelledby="cta-title">
-      <div class="content">
-        <h2 id="cta-title">Redo att synas i din kommun?</h2>
-        <a class="button button-primary primary-action" href="registrera.html">Skapa företagskonto och se lediga platser</a>
-        <p>Har du redan ett konto? <a href="start.html">Logga in</a></p>
-        <a class="final-back" href="../">Tillbaka till DinPuls</a>
+      <img src="../assets/heroes/shared/autumn-city-park.webp" alt="Höstlig stadsmiljö med park, vatten och broar" loading="lazy">
+      <div class="final-shade" aria-hidden="true"></div>
+      <div class="content final-layout">
+        <div><h2 id="cta-title">Lokala företag.<br>Starkare kommuner.</h2><p>Tillsammans.</p></div>
+        <div class="cta-actions"><a class="primary-action" href="registrera.html">Skapa företagskonto och se lediga platser <span aria-hidden="true">›</span></a><a class="login-action" href="start.html">Har du redan ett konto? Logga in</a><a class="back-action" href="../">Tillbaka till DinPuls</a></div>
       </div>
     </section>
   </main>
