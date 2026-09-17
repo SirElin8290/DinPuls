@@ -5,6 +5,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const admin = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 const company = fs.readFileSync(path.join(root, "foretag/foretag.js"), "utf8");
+const companyHtml = fs.readFileSync(path.join(root, "foretag/index.html"), "utf8");
 const account = fs.readFileSync(path.join(root, "foretag/konto.js"), "utf8");
 const worker = fs.readFileSync(path.join(root, "cloudflare/push-worker.js"), "utf8");
 const contractV4 = fs.readFileSync(path.join(root, "cloudflare/contract-v4.js"), "utf8");
@@ -37,7 +38,8 @@ assert(worker.includes("Välkommen till DinPuls – ert signerade annonsavtal") 
 assert(worker.includes("resendSignedContractEmail") && worker.includes("contractEmailMatch") && admin.includes("Skicka avtalskopia igen"), "Admin måste kunna skicka om den signerade avtalskopian utan att ändra avtalet");
 assert(worker.includes("isTwelveMonthContract") && worker.includes("Avtalsperioden måste vara exakt 12 månader"), "Backend måste validera exakt 12 månaders avtalsperiod");
 assert(!admin.includes("temporaryPassword") && !fs.readFileSync(path.join(root, "admin/index.html"), "utf8").includes("temporaryPassword"), "Admin ska inte tilldela företagslösenord");
-assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes('href="konto.html"') && account.includes('/portal/account/reset/request'), "Glömt lösenord ska använda det riktiga återställningsflödet");
+assert(companyHtml.includes('href="konto.html"') && account.includes('/portal/account/reset/request'), "Glömt lösenord ska använda det riktiga återställningsflödet");
+assert(/id="loginView"[^>]*hidden/.test(companyHtml), "Portalens gamla loginvy ska vara dold tills auth-kontrollen visar att session saknas eller är ogiltig");
 assert(admin.includes('Aktivera utan signatur'), "Admin måste kunna aktivera avtal som inte kräver signatur");
 assert(company.includes('Kostnadsfri annonsplats'), "Företagsportalen måste visa kostnadsfria avtal korrekt");
 assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_banners"), "Bannerplanering måste lagras centralt i D1");
@@ -46,7 +48,7 @@ assert(worker.includes('/portal/company/banners') && worker.includes('currentBan
 assert(worker.includes("CREATE TABLE IF NOT EXISTS ad_daily_stats") && worker.includes('/portal/company/stats') && worker.includes('/ads/events'), "Daglig annonsstatistik måste lagras centralt och visas för företaget");
 assert(company.includes('/pdf') && company.includes('Avtalet förnyas inte automatiskt'), "Företaget måste kunna hämta den signerade PDF-kopian");
 for (const id of [...company.matchAll(/\$\("#([A-Za-z][\w-]*)"\)/g)].map(match => match[1])) {
-  assert(fs.readFileSync(path.join(root, "foretag/index.html"), "utf8").includes(`id="${id}"`), `Företagsportalen hänvisar till ett HTML-fält som saknas: ${id}`);
+  assert(companyHtml.includes(`id="${id}"`), `Företagsportalen hänvisar till ett HTML-fält som saknas: ${id}`);
 }
 assert(company.includes('X-Banner-Start') && company.includes('Europe/Stockholm'), "Företagsportalen måste schemalägga och visa svensk tid");
 assert(worker.includes('BANNER_CHANGE_LIMIT'), "Högst fyra verkliga bannerbyten ska tillåtas per annonsplats och period");
