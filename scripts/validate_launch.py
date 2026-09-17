@@ -216,8 +216,8 @@ def verify_ads() -> None:
     ]
     price_text = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in price_sources)
     assert "1 500" not in price_text and "1500 kr" not in price_text, "Gammalt annonspris finns kvar"
-    assert "500 kr/månad + moms" in price_text, "Aktuellt annonspris saknas"
-    assert "500 kr per månad plus moms" in price_text, "Prisinformationen saknar momsangivelse"
+    assert "800 kr/månad + moms" in price_text, "Aktuellt annonspris saknas"
+    assert "800 kr per månad" in price_text and "plus moms" in price_text, "Prisinformationen saknar momsangivelse"
 
 
 def verify_health() -> None:

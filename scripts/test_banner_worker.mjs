@@ -110,7 +110,7 @@ try {
   await responseJson(await jsonRequest(`/portal/admin/contracts/${conflictingId}/sign`, "POST", { customerSignerName: "Krock", customerSignerTitle: "VD", dinpulsSignerName: "DinPuls Test", dinpulsSignerTitle: "Företrädare", customerSignature: signature, dinpulsSignature: signature }, admin.token), 409);
   const database = await worker.getD1Database("DB");
   const serverPriced = await database.prepare("SELECT price, monthly_total, annual_total, status FROM ad_contracts WHERE id=?").bind(conflictingId).first();
-  assert.deepEqual([Number(serverPriced.price), Number(serverPriced.monthly_total), Number(serverPriced.annual_total), serverPriced.status], [500, 500, 6000, "Utkast"], "Månadspris och totalsummor ska räknas på servern och krockande avtal får inte aktiveras");
+  assert.deepEqual([Number(serverPriced.price), Number(serverPriced.monthly_total), Number(serverPriced.annual_total), serverPriced.status], [800, 800, 9600, "Utkast"], "Månadspris och totalsummor ska räknas på servern och krockande avtal får inte aktiveras");
   const user = await database.prepare("SELECT id, active FROM business_users WHERE email = ?").bind("banner-test@example.invalid").first();
   assert.equal(Number(user.active), 0, "Nya konton ska inte vara aktiva innan lösenordet valts");
   const tokenCount = await database.prepare("SELECT COUNT(*) AS count FROM portal_activation_tokens WHERE company_user_id = ? AND purpose = 'activate-account' AND used_at IS NULL").bind(user.id).first();

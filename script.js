@@ -2977,7 +2977,7 @@ function initializeRotatingAds() {
         return `<a class="ad-face" data-ad-face href="mailto:annons@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
           <span class="ad-slot">PREMIUM ${slot}</span>
           <strong>Din verksamhet kan synas här</strong>
-          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 500 kr/månad + moms</small>
+          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 800 kr/månad + moms</small>
           <b>Boka plats <i data-lucide="arrow-right"></i></b>
         </a>`;
       }).join("")}

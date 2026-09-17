@@ -399,7 +399,7 @@ function openContract(id) {
   function installContractTermsFields() {
     const grid = $("#contractForm .grid2");
     if (!grid || grid.querySelector('[name="billingType"]')) return;
-    grid.insertAdjacentHTML("beforeend", `<label>Betalningsform<select name="billingType" required><option value="monthly">Månadsvis – 500 kr/plats/månad</option><option value="annual">Årsvis – 5 000 kr/plats/12 månader</option><option value="complimentary">Kostnadsfri</option></select></label><label>Förnyelse<select name="renewalType"><option value="annual-review">Ingen automatisk förnyelse</option><option value="none">Ingen uppföljning</option></select></label><label>Avtalsnotering<input name="valueNote" maxlength="240" placeholder="Eventuella särskilda individuella villkor"></label>`);
+    grid.insertAdjacentHTML("beforeend", `<label>Betalningsform<select name="billingType" required><option value="monthly">Månadsvis – 800 kr/plats/månad</option><option value="annual">Årsvis – 8 000 kr/plats/12 månader</option><option value="complimentary">Kostnadsfri</option></select></label><label>Förnyelse<select name="renewalType"><option value="annual-review">Ingen automatisk förnyelse</option><option value="none">Ingen uppföljning</option></select></label><label>Avtalsnotering<input name="valueNote" maxlength="240" placeholder="Eventuella särskilda individuella villkor"></label>`);
   }
 
   async function downloadPdf(id) {

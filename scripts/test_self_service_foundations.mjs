@@ -2,6 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { normalizeSwedishOrgNumber, verifyCompanyRegistration } from "../cloudflare/swedish-org-number.js";
 import { SPIRIS_ENABLED, buildBillingBasis, requestSpirisInvoice } from "../cloudflare/spiris-adapter.js";
+import { BILLING, calculateContractPrice } from "../cloudflare/contract-v4.2.js";
+
+const monthlyPrice = calculateContractPrice("monthly", 1);
+const annualPrice = calculateContractPrice("annual", 1);
+assert.deepEqual([BILLING.monthly.unitPrice, BILLING.annual.unitPrice, monthlyPrice.annualTotal], [800, 8000, 9600]);
+assert.deepEqual([monthlyPrice.invoiceTotal, Math.round(monthlyPrice.invoiceTotal * 0.25), Math.round(monthlyPrice.invoiceTotal * 1.25)], [800, 200, 1000]);
+assert.deepEqual([annualPrice.invoiceTotal, Math.round(annualPrice.invoiceTotal * 0.25), Math.round(annualPrice.invoiceTotal * 1.25)], [8000, 2000, 10000]);
+assert.equal(monthlyPrice.annualTotal - annualPrice.annualTotal, 1600);
 
 function withCheckDigit(nine) {
   for (let digit = 0; digit < 10; digit++) {

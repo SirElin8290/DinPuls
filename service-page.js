@@ -165,7 +165,7 @@ function renderServiceAds() {
       return;
     }
     const subject = encodeURIComponent(`Annonsplats Service & hantverk ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Service &amp; hantverk · 500 kr/månad + moms</small></a>`;
+    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Service &amp; hantverk · 800 kr/månad + moms</small></a>`;
   });
 }
 

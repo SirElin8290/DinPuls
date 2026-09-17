@@ -98,8 +98,8 @@ try {
   const end = endDate.toISOString().slice(0, 10);
   const slots = await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, session.token);
   assert.ok(slots.slots.some(slot => slot.id === "P1-04" && /Övre annonsblocket.*Plats 4 av 10/.test(slot.displayLabel)));
-  assert.equal(slots.pricing.monthlyExVat, 500);
-  assert.equal(slots.pricing.annualExVat, 5000);
+  assert.equal(slots.pricing.monthlyExVat, 800);
+  assert.equal(slots.pricing.annualExVat, 8000);
   await read(`/portal/company/available-slots?municipality=S%C3%A4ffle&startDate=${start}&endDate=${end}`, "GET", null, session.token);
   await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, null, 401);
   const admin = await read("/portal/auth/admin", "POST", { username: "localadmin", password: "LocalAdmin-Test-2026" });
@@ -145,9 +145,9 @@ try {
   assert.equal(reserved.snapshot.placements.length, 2);
   assert.equal(reserved.snapshot.contractVersion, "4.1");
   assert.deepEqual(reserved.snapshot.terms, V41_TERMS);
-  assert.equal(reserved.snapshot.totals.perInvoiceExVat, 10000);
-  assert.equal(reserved.snapshot.totals.perInvoiceVat, 2500);
-  assert.equal(reserved.snapshot.totals.perInvoiceInclVat, 12500);
+  assert.equal(reserved.snapshot.totals.perInvoiceExVat, 16000);
+  assert.equal(reserved.snapshot.totals.perInvoiceVat, 4000);
+  assert.equal(reserved.snapshot.totals.perInvoiceInclVat, 20000);
   await read(`/portal/company/orders/${reserved.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: "wrong" }, buyer.token, 400);
   const confirmed = await read(`/portal/company/orders/${reserved.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: reserved.snapshotHash }, buyer.token);
   assert.equal(confirmed.purchaseCount, 2);
@@ -168,9 +168,9 @@ try {
   const noLongerFree = await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, buyer.token);
   assert.ok(!noLongerFree.slots.some(slot => slot.id === "P1-05"));
   const monthly = await read("/portal/company/orders", "POST", { placements: [{ municipality: "Åmål", slotId: "P1-06", startDate: start, endDate: end }], billingType: "monthly" }, buyer.token, 201);
-  assert.equal(monthly.snapshot.totals.perInvoiceExVat, 500);
-  assert.equal(monthly.snapshot.totals.perInvoiceVat, 125);
-  assert.equal(monthly.snapshot.totals.twelveMonthsExVat, 6000);
+  assert.equal(monthly.snapshot.totals.perInvoiceExVat, 800);
+  assert.equal(monthly.snapshot.totals.perInvoiceVat, 200);
+  assert.equal(monthly.snapshot.totals.twelveMonthsExVat, 9600);
   assert.equal(mail.length, mailBeforePurchases, "Spiris och extra e-post får inte anropas av tilläggsköp");
   const first = await read("/portal/company/foundation/orders", "POST", { placements: [
     { municipality: "Åmål", slotId: "P3-21", startDate: start, endDate: end },
@@ -183,7 +183,7 @@ try {
   assert.equal(first.snapshot.dinpulsFixedSignature.sha256, fixedHash);
   assert.equal(first.snapshot.placements.length, 2);
   assert.equal(first.snapshot.company.address, signup.address);
-  assert.equal(first.snapshot.billing.invoiceVat, 2500);
+  assert.equal(first.snapshot.billing.invoiceVat, 4000);
   assert.equal((await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`)).status, 401, "Originalet får inte läcka utan autentisering");
   assert.equal((await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`, "GET", null, buyer.token)).status, 404, "En annan kund får inte se signaturen i detta avtal");
   const preview = await send(`/portal/company/foundation/orders/${first.orderId}/dinpuls-signature`, "GET", null, session.token);
@@ -238,7 +238,7 @@ try {
   const firstBilling = billing.orders.find(item => item.orderId === first.orderId);
   assert.equal(firstBilling.status, "awaiting_approval");
   assert.equal(firstBilling.lines.length, 2);
-  assert.deepEqual([firstBilling.net, firstBilling.vat, firstBilling.total], [10000, 2500, 12500]);
+  assert.deepEqual([firstBilling.net, firstBilling.vat, firstBilling.total], [16000, 4000, 20000]);
   assert.equal(billing.spirisEnabled, false);
   assert.equal(billing.automaticInvoicing, false);
   assert.equal((await send(`/portal/admin/billing/orders/${first.orderId}/approve`, "POST", {})).status, 401, "Endast admin får godkänna fakturering");
@@ -259,7 +259,7 @@ try {
   const extra = await read("/portal/company/orders", "POST", { placements: [{ municipality: "Säffle", slotId: "P3-22", startDate: start, endDate: end }], billingType: "monthly" }, session.token, 201);
   assert.equal(extra.snapshot.contractVersion, "4.2");
   assert.deepEqual(extra.snapshot.terms, V42_TERMS);
-  assert.equal(extra.snapshot.placements[0].vatAmount, 125);
+  assert.equal(extra.snapshot.placements[0].vatAmount, 200);
   await read(`/portal/company/orders/${extra.orderId}/confirm`, "POST", { explicitConfirmation: true, snapshotHash: extra.snapshotHash }, session.token);
   const extraRecord = await signedDb.prepare("SELECT confirmation_json, confirmation_hash FROM self_service_purchases WHERE order_id=? LIMIT 1").bind(extra.orderId).first();
   assert.equal(JSON.parse(extraRecord.confirmation_json).snapshotHash, extra.snapshotHash);
