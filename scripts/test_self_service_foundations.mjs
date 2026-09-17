@@ -20,11 +20,11 @@ assert.deepEqual(await verifyCompanyRegistration(valid), { status: "not_configur
 assert.deepEqual(await verifyCompanyRegistration("1234567890"), { status: "invalid", orgNo: null });
 
 const basis = buildBillingBasis({ id: 7, orgNo: valid, company: "Exempel AB", address: "Storgatan 1", postalCode: "66230", city: "Åmål", contact: "Anna", email: "anna@example.se" }, [
-  { id: "order-1", municipality: "Åmål", slotId: "P1-04", placementLabel: "Startsidan – övre annonsblocket – plats 4", billingType: "annual", unitPriceExVat: 5000, startDate: "2026-09-15", endDate: "2027-09-14" },
-  { id: "order-2", municipality: "Säffle", slotId: "BOST-02", placementLabel: "Bostäder – plats 2", billingType: "monthly", unitPriceExVat: 500, startDate: "2026-10-01", endDate: "2027-09-30" }
+  { id: "order-1", municipality: "Åmål", slotId: "P1-04", placementLabel: "Startsidan – övre annonsblocket – plats 4", billingType: "annual", unitPriceExVat: 8000, startDate: "2026-09-15", endDate: "2027-09-14" },
+  { id: "order-2", municipality: "Säffle", slotId: "BOST-02", placementLabel: "Bostäder – plats 2", billingType: "monthly", unitPriceExVat: 800, startDate: "2026-10-01", endDate: "2027-09-30" }
 ]);
 assert.equal(basis.lines.length, 2);
-assert.deepEqual([basis.net, basis.vat, basis.total], [5500, 1375, 6875]);
+assert.deepEqual([basis.net, basis.vat, basis.total], [8800, 2200, 11000]);
 assert.deepEqual(basis.purchaseIds, ["order-1", "order-2"]);
 assert.throws(() => buildBillingBasis({ id: 7, orgNo: valid, company: "Exempel AB" }, [{ id: "same" }, { id: "same" }]));
 assert.equal(SPIRIS_ENABLED, false);
