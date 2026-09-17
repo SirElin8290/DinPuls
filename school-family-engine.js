@@ -1,7 +1,7 @@
 (function(){"use strict";
 const DATA_URL="data/school-family.json",SCHOOL_KEY="dinpuls-school-group";let dataPromise;
 const esc=value=>String(value??"").replace(/[&<>"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char]));
-const municipality=()=>window.DinPulsMunicipality?.getName?.()||window.DinPulsMunicipalityState?.getInitial?.()||new URLSearchParams(location.search).get("kommun")||"Åmål";
+const municipality=()=>new URLSearchParams(location.search).get("kommun")||window.DinPulsMunicipality?.getName?.()||window.DinPulsMunicipalityState?.getInitial?.()||"Åmål";
 const dateKey=(date=new Date())=>new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
 const load=()=>dataPromise||(dataPromise=fetch(DATA_URL,{cache:"no-cache"}).then(response=>{if(!response.ok)throw new Error("Skoldata kunde inte hämtas");return response.json()}));
 async function record(name=municipality()){const payload=await load();return payload.municipalities?.[name]||null}

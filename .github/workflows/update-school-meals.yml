@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pypdf==6.10.0
+      - run: python scripts/build_school_coverage.py
       - run: python scripts/update_school_meals.py
       - name: Spara ändrad skolmat
         run: |
