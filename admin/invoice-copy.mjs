@@ -5,7 +5,7 @@ export function formatInvoiceBasis(contract) {
   const placements = Array.isArray(contract.placements) ? contract.placements : [];
   const cadence = contract.billingType;
   const billingLabel = cadence === "complimentary" ? "Kostnadsfri" : cadence === "annual" ? "Årsvis i förskott" : "Månadsvis";
-  const unitPrice = cadence === "complimentary" ? 0 : Number(contract.price || (cadence === "annual" ? 5000 : 500));
+  const unitPrice = cadence === "complimentary" ? 0 : Number(contract.price || (cadence === "annual" ? 8000 : 800));
   const invoiceAmount = cadence === "monthly" ? Number(contract.monthlyTotal || 0) : Number(contract.annualTotal || 0);
   const placementLines = placements.length ? placements.map(item => `${clean(item.slotId)} – ${clean(item.label || item.location)}`).join("\n") : "–";
   return [
