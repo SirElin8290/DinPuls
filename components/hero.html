@@ -6,11 +6,21 @@
     <h1>Allt du behöver veta<br>där du bor.</h1>
     <p>Lokalt, snabbt och samlat för <span data-municipality-name>Åmål</span>.</p>
   </div>
-  <aside class="important">
-    <div class="heading"><h2>Dagens viktigaste</h2><span id="important-status">Hämtar…</span></div>
-    <div id="important-list" class="important-list" aria-live="polite">
-      <article class="important-loading"><i class="status-icon info" data-lucide="loader-circle"></i><div><strong>Kontrollerar aktuella händelser</strong><small>Kommunen, Krisinformation, SMHI, Polisen och Trafikverket</small></div></article>
+  <aside class="important" id="important-card">
+    <div class="important-flip-inner">
+      <section class="important-face important-front" aria-label="Dagens viktigaste">
+        <div class="heading"><h2>Dagens viktigaste</h2><span id="important-status">Hämtar…</span></div>
+        <div id="important-list" class="important-list" aria-live="polite">
+          <article class="important-loading"><i class="status-icon info" data-lucide="loader-circle"></i><div><strong>Kontrollerar aktuella händelser</strong><small>Kommunen, Krisinformation, SMHI, Polisen och Trafikverket</small></div></article>
+        </div>
+        <button class="deviation-open" id="deviation-open" type="button" aria-controls="deviation-panel" aria-expanded="false" hidden>Avvikande i Åmål · 0 <i data-lucide="arrow-right"></i></button>
+        <a class="center" id="municipality-website" href="https://www.amal.se/" target="_blank" rel="noopener noreferrer">Besök Åmål kommun <i data-lucide="arrow-up-right"></i></a>
+      </section>
+      <section class="important-face important-back" id="deviation-panel" aria-hidden="true" aria-label="Lokala avvikelser">
+        <div class="heading"><h2 id="deviation-title">Avvikande i Åmål</h2><span id="deviation-status"></span></div>
+        <div id="deviation-list" class="deviation-list" aria-live="polite"></div>
+        <button class="deviation-back" id="deviation-back" type="button"><i data-lucide="arrow-left"></i>Dagens viktigaste</button>
+      </section>
     </div>
-    <a class="center" id="municipality-website" href="https://www.amal.se/" target="_blank" rel="noopener noreferrer">Besök Åmål kommun <i data-lucide="arrow-up-right"></i></a>
   </aside>
 </section>

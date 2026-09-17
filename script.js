@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.24.8";
+const DINPULS_VERSION = "0.24.9";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -229,7 +229,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
-    await Promise.all([initializeImportant(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeLeisure(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
+    await Promise.all([initializeImportant(), initializeLocalDeviations(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeLeisure(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
       DinPulsMunicipality.getName(),
@@ -1943,6 +1943,79 @@ function renderImportantItem(item, municipality) {
   return detailUrl
     ? `<article class="important-item">${body}<a href="${escapeAttribute(safeHref(detailUrl))}"${opensNewTab ? ' target="_blank" rel="noopener noreferrer"' : ""} aria-label="${roadEventId ? "Visa trafikhändelsen" : `Läs mer hos ${escapeAttribute(source)}`}"><i data-lucide="arrow-up-right"></i></a></article>`
     : `<article class="important-item">${body}</article>`;
+}
+
+/* =========================================================
+   LOKALA AVVIKELSER – GENERELL KOMMUNMOTOR
+========================================================= */
+let localDeviationData = null;
+
+async function initializeLocalDeviations() {
+  DinPulsMunicipality.subscribe("local-deviations", renderLocalDeviations);
+  try {
+    const response = await fetch("data/deviations.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    localDeviationData = await response.json();
+  } catch (error) {
+    console.error("Lokala avvikelser kunde inte laddas:", error);
+    localDeviationData = null;
+  }
+  initializeDeviationCardControls();
+}
+
+function initializeDeviationCardControls() {
+  const card = document.querySelector("#important-card");
+  const open = document.querySelector("#deviation-open");
+  const back = document.querySelector("#deviation-back");
+  if (!card || !open || !back || open.dataset.ready) return;
+  open.dataset.ready = "true";
+  open.addEventListener("click", () => setDeviationCardSide(true));
+  back.addEventListener("click", () => setDeviationCardSide(false));
+}
+
+function setDeviationCardSide(showDeviations) {
+  const card = document.querySelector("#important-card");
+  const open = document.querySelector("#deviation-open");
+  const panel = document.querySelector("#deviation-panel");
+  const front = document.querySelector(".important-front");
+  if (!card || !open || !panel || !front) return;
+  card.classList.toggle("is-flipped", showDeviations);
+  open.setAttribute("aria-expanded", String(showDeviations));
+  front.setAttribute("aria-hidden", String(showDeviations));
+  panel.setAttribute("aria-hidden", String(!showDeviations));
+  if (showDeviations) document.querySelector("#deviation-back")?.focus({ preventScroll: true });
+}
+
+function renderLocalDeviations(config = DinPulsMunicipality.getConfig()) {
+  const open = document.querySelector("#deviation-open");
+  const list = document.querySelector("#deviation-list");
+  const title = document.querySelector("#deviation-title");
+  const status = document.querySelector("#deviation-status");
+  if (!open || !list || !title || !status || !config) return;
+
+  initializeDeviationCardControls();
+  setDeviationCardSide(false);
+  const municipality = localDeviationData?.municipalities?.[config.code] || localDeviationData?.municipalities?.[config.name];
+  const engine = window.DinPulsDeviationEngine;
+  const items = engine?.activeItems(municipality?.items, new Date(), localDeviationData?.leadTimeDays || 14) || [];
+  open.hidden = items.length === 0;
+  open.innerHTML = `Avvikande i ${escapeHtml(config.name)} · ${items.length} <i data-lucide="arrow-right"></i>`;
+  title.textContent = `Avvikande i ${config.name}`;
+  status.textContent = `${items.length} aktuell${items.length === 1 ? "" : "a"}`;
+  list.innerHTML = items.map(renderLocalDeviationItem).join("");
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderLocalDeviationItem(item) {
+  const scope = item.scope === "specific" ? escapeHtml(item.affectedEntity || "Specifik verksamhet") : "Generell information";
+  const dateOnly = String(item.validUntil || "").slice(0, 10);
+  const until = new Date(`${dateOnly}T12:00:00Z`);
+  const dateText = Number.isNaN(until.getTime()) ? "" : `Gäller till ${until.toLocaleDateString("sv-SE", { timeZone: "UTC", day: "numeric", month: "short" })}`;
+  const sourceUrl = safeExternalUrl(item.sourceUrl || item.source_url || "");
+  return `<article class="deviation-item deviation-${escapeAttribute(item.scope)}">
+    <div><span>${scope}</span><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.description || "")}</p><small>${escapeHtml(dateText)}</small></div>
+    ${sourceUrl ? `<a href="${escapeAttribute(sourceUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Öppna källan ${escapeAttribute(item.source || "")}">${escapeHtml(item.source || "Källa")}<i data-lucide="arrow-up-right"></i></a>` : ""}
+  </article>`;
 }
 
 /* =========================================================

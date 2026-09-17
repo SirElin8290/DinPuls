@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "leadTimeDays": 14,
+  "municipalities": {
+    "1492": {
+      "name": "Åmål",
+      "sources": [
+        {
+          "id": "amal-handel-hours",
+          "adapter": "amal_trade_recommended_hours",
+          "name": "Åmål Handel",
+          "url": "https://www.amalhandel.se/oppettider",
+          "scope": "general"
+        },
+        {
+          "id": "amal-simhall-hours",
+          "adapter": "amal_simhall_closures",
+          "name": "Åmåls kommun",
+          "url": "https://amal.se/uppleva-och-gora/idrott-friluftsliv-och-lek/simhall/oppettider?open.12_4b2099d3183113ac8361673=true",
+          "scope": "specific",
+          "affectedEntity": "Åmåls simhall"
+        }
+      ]
+    }
+  }
+}

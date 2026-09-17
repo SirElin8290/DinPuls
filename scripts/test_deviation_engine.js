@@ -1,0 +1,11 @@
+const assert = require("assert");
+const { activeItems } = require("../deviation-engine.js");
+const now = new Date("2026-09-17T12:00:00Z");
+const item = (title, from, until, scope = "general", priority = 50) => ({ title, validFrom: from, validUntil: until, scope, priority });
+assert.deepStrictEqual(activeItems([], now), []);
+assert.strictEqual(activeItems([item("Nu", "2026-09-17T00:00:00Z", "2026-09-17T23:59:59Z")], now).length, 1);
+assert.strictEqual(activeItems([item("Utgången", "2026-09-01T00:00:00Z", "2026-09-16T23:59:59Z"), item("Inom framförhållning", "2026-09-25T00:00:00Z", "2026-09-25T23:59:59Z", "specific"), item("För långt fram", "2026-10-10T00:00:00Z", "2026-10-10T23:59:59Z")], now, 14).length, 1);
+const many = activeItems([item("Generell", "2026-09-17T00:00:00Z", "2026-09-18T00:00:00Z", "general", 40), item("Specifik", "2026-09-17T00:00:00Z", "2026-09-18T00:00:00Z", "specific", 70)], now);
+assert.deepStrictEqual(many.map(value => value.title), ["Specifik", "Generell"]);
+assert.strictEqual(activeItems([item("Ogiltig", "bad", "bad")], now).length, 0);
+console.log("deviation engine: ok");
