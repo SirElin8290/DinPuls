@@ -16,7 +16,7 @@ function endDate(start) {
 
 function renderCart() {
   const billingType = document.querySelector('input[name="billing"]:checked').value;
-  const unit = billingType === "annual" ? 5000 : 500;
+  const unit = billingType === "annual" ? 8000 : 800;
   $("#buyCart").innerHTML = cart.size ? [...cart.values()].map(item => `<div class="cart-line"><span><strong>${escapeHtml(item.displayLabel)}</strong><br><small>${escapeHtml(item.startDate)} – ${escapeHtml(item.endDate)} · ${escapeHtml(item.id)}</small></span><button type="button" data-remove="${escapeHtml(item.municipality)}|${escapeHtml(item.id)}">Ta bort</button></div>`).join("") : "<p>Varukorgen är tom.</p>";
   const net = cart.size * unit, vat = Math.round(net * 0.25);
   $("#buyTotals").innerHTML = `<p><strong>${cart.size} plats(er)</strong> · ${unit.toLocaleString("sv-SE")} kr/plats ${billingType === "annual" ? "per 12 månader" : "per månad"} exkl. moms</p><p>Pris exkl. moms: ${net.toLocaleString("sv-SE")} kr · Moms 25 %: ${vat.toLocaleString("sv-SE")} kr · <strong>Totalt: ${(net + vat).toLocaleString("sv-SE")} kr</strong></p>`;
