@@ -139,26 +139,38 @@ def parse_filipstad_html(content:bytes,url:str)->list[dict]:
             meals.append(meal_record("Filipstad",pending[1],pending[0],line,url));pending=None
     return meals
 def main()->None:
-    payload=json.loads(OUTPUT.read_text(encoding="utf-8")); markup=fetch(LANDING).decode("utf-8","replace"); links=menu_links(markup); meals=[]
-    for group,url in links.items():meals.extend(parse_pdf(fetch(url),group,url))
-    if len(meals)<15:raise RuntimeError(f"Orimligt få menydagar: {len(meals)}")
-    amal=payload["municipalities"]["Åmål"]; amal["meals"]=sorted(meals,key=lambda item:(item["date"],item["schoolGroup"])); amal["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); amal["mealSource"]["documents"]=links
+    payload=json.loads(OUTPUT.read_text(encoding="utf-8")); meals=[]
+    try:
+        markup=fetch(LANDING).decode("utf-8","replace"); links=menu_links(markup)
+        for group,url in links.items():meals.extend(parse_pdf(fetch(url),group,url))
+        if len(meals)<15:raise RuntimeError(f"Orimligt få menydagar: {len(meals)}")
+        amal=payload["municipalities"]["Åmål"]; amal["meals"]=sorted(meals,key=lambda item:(item["date"],item["schoolGroup"])); amal["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); amal["mealSource"]["documents"]=links
+    except Exception as error:
+        print(f"VARNING Åmål: behåller senast verifierade data ({error})")
     for municipality,feed in MATILDA_FEEDS.items():
-        target=payload["municipalities"].get(municipality); current=parse_matilda_rss(fetch(feed),municipality,"alla",feed)
+        target=payload["municipalities"].get(municipality)
+        try:current=parse_matilda_rss(fetch(feed),municipality,"alla",feed)
+        except Exception as error:
+            print(f"VARNING {municipality}: behåller senast verifierade data ({error})");continue
         if len(current)<5:
             target["mealSource"]["status"]="BLOCKED"; target["mealSource"]["reason"]=f"Källan gav {len(current)} giltiga menydagar"; continue
         target["meals"]=current; target["mealSource"]["status"]="PASS"; target["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); target["mealSource"]["feed"]=feed
     for municipality,feed in SKOLMATEN_FEEDS.items():
-        target=payload["municipalities"].get(municipality); current=parse_skolmaten_rss(fetch(feed),municipality,"alla",feed)
+        target=payload["municipalities"].get(municipality)
+        try:current=parse_skolmaten_rss(fetch(feed),municipality,"alla",feed)
+        except Exception as error:
+            print(f"VARNING {municipality}: behåller senast verifierade data ({error})");continue
         if len(current)<5:
             target["mealSource"]["status"]="BLOCKED"; target["mealSource"]["reason"]=f"Källan gav {len(current)} giltiga menydagar"; continue
         target["meals"]=current; target["mealSource"]["status"]="PASS"; target["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); target["mealSource"]["feed"]=feed
     for municipality,url in HTML_MENUS.items():
         target=payload["municipalities"].get(municipality)
-        current=(parse_eda_html if municipality=="Eda" else parse_filipstad_html)(fetch(url),url)
+        try:current=(parse_eda_html if municipality=="Eda" else parse_filipstad_html)(fetch(url),url)
+        except Exception as error:
+            print(f"VARNING {municipality}: behåller senast verifierade data ({error})");continue
         if len(current)<5:
             target["mealSource"]["status"]="BLOCKED"; target["mealSource"]["reason"]=f"Officiella sidan gav {len(current)} giltiga menydagar"; continue
         target["meals"]=current; target["mealSource"]["status"]="PASS"; target["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); target["mealSource"]["page"]=url
     payload["generatedAt"]=datetime.now().astimezone().isoformat(timespec="seconds")
-    OUTPUT.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(f"Åmål: {len(meals)} verifierade menydagar från {len(links)} officiella PDF:er")
+    OUTPUT.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(f"Åmål: {len(meals)} nya verifierade menydagar")
 if __name__=="__main__":main()
