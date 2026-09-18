@@ -1126,7 +1126,7 @@ function applyMunicipality(config) {
 }
 
 function updateMunicipalityLinks(municipality) {
-  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "bio.html", "sport.html", "fritid.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html"]);
+  const municipalPages = new Set(["jobb.html", "bostader.html", "lunch.html", "evenemang.html", "bio.html", "sport.html", "fritid.html", "matkasse.html", "trafik.html", "vard.html", "myndigheter.html", "service.html", "skola-familj.html"]);
   document.querySelectorAll("a[href]").forEach(link => {
     const raw = link.getAttribute("href");
     if (!raw || raw.startsWith("#") || raw.startsWith("mailto:") || raw.startsWith("tel:") || raw.startsWith("javascript:")) return;
