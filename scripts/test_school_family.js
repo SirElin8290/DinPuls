@@ -7,6 +7,6 @@ const amal=data.municipalities["Åmål"];assert(amal&&amal.meals.length&&amal.ca
 assert(amal.meals.every(item=>item.schoolGroup&&/^\d{4}-\d{2}-\d{2}$/.test(item.date)&&item.options.length),"Skolmåltidsmodellen är ofullständig");
 assert(amal.calendar.every(item=>item.eventType&&item.title&&item.startDate&&item.endDate),"Kalendermodellen är ofullständig");
 for(let i=1;i<=4;i++)assert(page.includes(`SKOLA-FAMILJ-0${i}`),`Annonsplats 0${i} saknas`);
-assert(page.indexOf("SKOLA-FAMILJ-01")<page.indexOf('id="school-section"')&&page.indexOf("SKOLA-FAMILJ-02")<page.indexOf('class="family-future"'),"Annonsplats 01 eller 02 ligger fel");
-assert(page.includes("hidden></div>")&&page.includes("Inget familjeinnehåll publiceras i detta steg"),"Tomma annonser eller Familj-reservation följer inte kontraktet");
-console.log("✓ Skola & familj: Åmål-data, gemensam motor, modulordning och fyra kollapsade annonsplatser verifierade");
+assert(page.indexOf("SKOLA-FAMILJ-01")<page.indexOf('id="school-section"')&&page.indexOf("SKOLA-FAMILJ-02")<page.indexOf('id="family-section"'),"Annonsplats 01 eller 02 ligger fel");
+assert(page.includes("hidden></div>")&&page.includes('id="family-section"'),"Tomma annonser eller Familj-sektionen följer inte kontraktet");
+console.log("✓ Skola & familj: Åmål-data, gemensam motor, modulordning och fyra kollapsade annonsplatser och Familj-sektion verifierade");
