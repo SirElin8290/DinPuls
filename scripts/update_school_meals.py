@@ -12,11 +12,11 @@ ROOT=Path(__file__).resolve().parents[1]; OUTPUT=ROOT/"data"/"school-family.json
 LANDING="https://amal.se/barn-och-utbildning/skolmatsedel"
 GROUPS={"grundskola":"Grundskolan","hogstadiet":"Högstadiet","gymnasiet":"Gymnasiet"}
 UA="DinPuls.se school-meals/1.0 kontakt@dinpuls.se"
-SKOLMATEN_FEEDS={"Sunne":"https://skolmaten.se/api/4/rss/week/fryxellska-skolan?locale=sv","Forshaga":"https://skolmaten.se/api/4/rss/week/skolrestaurangen?locale=sv","Munkfors":"https://skolmaten.se/api/4/rss/week/forsnasskolan?locale=sv","Kil":"https://skolmaten.se/api/4/rss/week/bodaskolan?locale=sv","Torsby":"https://skolmaten.se/api/4/rss/week/frykenskolan?locale=sv"}
+SKOLMATEN_FEEDS={"Sunne":"https://skolmaten.se/api/4/rss/week/fryxellska-skolan?locale=sv","Forshaga":"https://skolmaten.se/api/4/rss/week/skolrestaurangen?locale=sv","Munkfors":"https://skolmaten.se/api/4/rss/week/forsnasskolan?locale=sv","Kil":"https://skolmaten.se/api/4/rss/week/bodaskolan?locale=sv","Torsby":"https://skolmaten.se/api/4/rss/week/frykenskolan?locale=sv","Filipstad":"https://skolmaten.se/api/4/rss/week/ferlinskolan?locale=sv"}
 MATILDA_FEEDS={"Grums":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697a13a9e2d237d90a0ef1c2&lang=sv","Säffle":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c4dea58e3e60c0252ff&lang=sv","Bengtsfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e5697dea58e3e60c01eb09&lang=sv","Dals-Ed":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67c6fbe101a159adbb34f493&lang=sv","Mellerud":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6903135ebf545da84ec65723&lang=sv","Karlstad":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=66b5f62340606243475f1ee4&lang=sv","Kristinehamn":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6973315ae2d237d90a0e78f9&lang=sv","Storfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6915ba8d47724ef16fb9805a&lang=sv","Årjäng":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=689e013846b8c35286d63ebc&lang=sv","Färgelanda":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c6dea58e3e60c0259e8&lang=sv"}
 HTML_MENUS={
     "Eda": "https://eda.se/skolmat/matsedel-f%C3%B6r-edas-skolrestauranger__685",
-    "Filipstad": "https://www.filipstad.se/toppmeny/barnochutbildning/matsedelinomskolan.645.html",
+
 }
 DAY_RE=re.compile(r"^(Måndag|Tisdag|Onsdag|Torsdag|Fredag)\s+(\d{1,2})/(\d{1,2})$")
 STOP={"Lunch","Green","Classic","Enjoy"}

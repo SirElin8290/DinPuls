@@ -29,7 +29,7 @@ working_meals={
 'Kristinehamn':'Öppet Matilda RSS-flöde',
 'Mellerud':'Öppet Matilda RSS-flöde',
 'Säffle':'Öppet Matilda RSS-flöde',
-'Filipstad':'Officiell kommunal veckomeny',
+'Filipstad':'Öppet Skolmaten RSS-flöde',
 'Dals-Ed':'Öppet Matilda RSS-flöde',
 'Eda':'Officiell kommunal veckomeny',
 'Årjäng':'Öppet Matilda RSS-flöde',
