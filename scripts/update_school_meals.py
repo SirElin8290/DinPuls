@@ -12,8 +12,9 @@ ROOT=Path(__file__).resolve().parents[1]; OUTPUT=ROOT/"data"/"school-family.json
 LANDING="https://amal.se/barn-och-utbildning/skolmatsedel"
 GROUPS={"grundskola":"Grundskolan","hogstadiet":"Högstadiet","gymnasiet":"Gymnasiet"}
 UA="DinPuls.se school-meals/1.0 kontakt@dinpuls.se"
-SKOLMATEN_FEEDS={"Sunne":"https://skolmaten.se/api/4/rss/week/fryxellska-skolan?locale=sv","Forshaga":"https://skolmaten.se/api/4/rss/week/skolrestaurangen?locale=sv","Munkfors":"https://skolmaten.se/api/4/rss/week/forsnasskolan?locale=sv","Kil":"https://skolmaten.se/api/4/rss/week/bodaskolan?locale=sv","Torsby":"https://skolmaten.se/api/4/rss/week/frykenskolan?locale=sv","Filipstad":"https://skolmaten.se/api/4/rss/week/ferlinskolan?locale=sv"}
-MATILDA_FEEDS={"Grums":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697a13a9e2d237d90a0ef1c2&lang=sv","Säffle":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c4dea58e3e60c0252ff&lang=sv","Bengtsfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e5697dea58e3e60c01eb09&lang=sv","Dals-Ed":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67c6fbe101a159adbb34f493&lang=sv","Mellerud":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6903135ebf545da84ec65723&lang=sv","Karlstad":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=66b5f62340606243475f1ee4&lang=sv","Kristinehamn":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6973315ae2d237d90a0e78f9&lang=sv","Storfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6915ba8d47724ef16fb9805a&lang=sv","Årjäng":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=689e013846b8c35286d63ebc&lang=sv","Färgelanda":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c6dea58e3e60c0259e8&lang=sv"}
+SKOLMATEN_FEEDS={"Sunne":"https://skolmaten.se/api/4/rss/week/fryxellska-skolan?locale=sv","Forshaga":"https://skolmaten.se/api/4/rss/week/skolrestaurangen?locale=sv","Munkfors":"https://skolmaten.se/api/4/rss/week/forsnasskolan?locale=sv","Torsby":"https://skolmaten.se/api/4/rss/week/frykenskolan?locale=sv","Filipstad":"https://skolmaten.se/api/4/rss/week/ferlinskolan?locale=sv"}
+MATILDA_FEEDS={"Arvika":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=670e2b946dc2aff36a97ea13&lang=sv","Grums":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697a13a9e2d237d90a0ef1c2&lang=sv","Säffle":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c4dea58e3e60c0252ff&lang=sv","Bengtsfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e5697dea58e3e60c01eb09&lang=sv","Dals-Ed":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67c6fbe101a159adbb34f493&lang=sv","Mellerud":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6903135ebf545da84ec65723&lang=sv","Karlstad":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=66b5f62340606243475f1ee4&lang=sv","Kristinehamn":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6973315ae2d237d90a0e78f9&lang=sv","Storfors":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6915ba8d47724ef16fb9805a&lang=sv","Årjäng":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=689e013846b8c35286d63ebc&lang=sv","Färgelanda":"https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=67e56c6dea58e3e60c0259e8&lang=sv"}
+SKOLMAT_INFO_FEEDS={"Kil":"https://www.skolmat.info/api/public/matsedlar/F943DCD2-B218-47EF-8BC9-C683010685A0/rss?limit=7"}
 HTML_MENUS={
     "Eda": "https://eda.se/skolmat/matsedel-f%C3%B6r-edas-skolrestauranger__685",
 
@@ -84,7 +85,9 @@ def parse_matilda_rss(content:bytes,municipality:str,group:str,url:str)->list[di
             cleaned=clean_meal_text(meal)
             if cleaned and not label.casefold().startswith("symboler"): options.append({"label":clean_meal_text(label),"meal":cleaned})
         if not options:
-            options=[{"label":f"Alternativ {index+1}","meal":clean_meal_text(part)} for index,part in enumerate(re.split(r"\n\s*\n",description)) if clean_meal_text(part)]
+            parts=[clean_meal_text(part) for part in re.split(r"\n\s*\n",description)]
+            parts=[part for part in parts if part and part.casefold()!="lunch"]
+            options=[{"label":f"Alternativ {index+1}","meal":part} for index,part in enumerate(parts)]
         if options: meals.append({"municipality":municipality,"schoolGroup":group,"date":f"{year:04d}-{month:02d}-{day:02d}","options":options,"notes":[],"source":url,"updatedAt":datetime.now().astimezone().isoformat(timespec="seconds")})
     return meals
 def parse_skolmaten_rss(content:bytes,municipality:str,group:str,url:str)->list[dict]:
@@ -95,6 +98,20 @@ def parse_skolmaten_rss(content:bytes,municipality:str,group:str,url:str)->list[
         raw=node.findtext("description",""); parts=[clean_meal_text(part) for part in re.split(r"\n+|<br\s*/?>",raw,flags=re.I)]
         options=[{"label":f"Alternativ {index+1}","meal":part} for index,part in enumerate(filter(None,parts))]
         if options: meals.append({"municipality":municipality,"schoolGroup":group,"date":date,"options":options,"notes":[],"source":url,"updatedAt":datetime.now().astimezone().isoformat(timespec="seconds")})
+    return meals
+
+def parse_skolmat_info_rss(content:bytes,municipality:str,group:str,url:str)->list[dict]:
+    months={"januari":1,"februari":2,"mars":3,"april":4,"maj":5,"juni":6,"juli":7,"augusti":8,"september":9,"oktober":10,"november":11,"december":12}
+    meals=[]
+    for node in ET.fromstring(content).findall("./channel/item"):
+        title=node.findtext("title",""); match=re.search(r"(\d{1,2})\s+([a-zåäö]+)\s+(20\d{2})",title,re.I)
+        if not match: continue
+        day,month,year=int(match.group(1)),months.get(match.group(2).casefold()),int(match.group(3))
+        if not month: continue
+        parts=[re.sub(r"^\d+\.\s*","",clean_meal_text(part)) for part in node.findtext("description","").splitlines()]
+        parts=[part for part in parts if part and part.casefold()!="ingen meny publicerad."]
+        options=[{"label":f"Alternativ {index+1}","meal":part} for index,part in enumerate(parts)]
+        if options: meals.append({"municipality":municipality,"schoolGroup":group,"date":f"{year:04d}-{month:02d}-{day:02d}","options":options,"notes":[],"source":url,"updatedAt":datetime.now().astimezone().isoformat(timespec="seconds")})
     return meals
 
 class TextLines(HTMLParser):
@@ -158,6 +175,14 @@ def main()->None:
     for municipality,feed in SKOLMATEN_FEEDS.items():
         target=payload["municipalities"].get(municipality)
         try:current=parse_skolmaten_rss(fetch(feed),municipality,"alla",feed)
+        except Exception as error:
+            print(f"VARNING {municipality}: behåller senast verifierade data ({error})");continue
+        if len(current)<5:
+            target["mealSource"]["status"]="BLOCKED"; target["mealSource"]["reason"]=f"Källan gav {len(current)} giltiga menydagar"; continue
+        target["meals"]=current; target["mealSource"]["status"]="PASS"; target["mealSource"]["verifiedAt"]=datetime.now().date().isoformat(); target["mealSource"]["feed"]=feed
+    for municipality,feed in SKOLMAT_INFO_FEEDS.items():
+        target=payload["municipalities"].get(municipality)
+        try:current=parse_skolmat_info_rss(fetch(feed),municipality,"alla",feed)
         except Exception as error:
             print(f"VARNING {municipality}: behåller senast verifierade data ({error})");continue
         if len(current)<5:
