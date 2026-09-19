@@ -14,7 +14,7 @@ const publicPages = [
   'index.html', 'bostader.html', 'jobb.html', 'vard.html', 'service.html',
   'fritid.html', 'sport.html', 'evenemang.html', 'bio.html', 'lunch.html',
   'trafik.html', 'drivmedel.html', 'matkasse.html', 'myndigheter.html',
-  'nyheter.html', 'information.html', 'foretag/index.html', 'admin/index.html'
+  'nyheter.html', 'information.html', 'praktiskt.html', 'foretag/index.html', 'admin/index.html'
 ];
 
 for (const file of publicPages) {

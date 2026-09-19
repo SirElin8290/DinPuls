@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
-const pages = ["bio", "bostader", "drivmedel", "evenemang", "fritid", "jobb", "lunch", "matkasse", "myndigheter", "nyheter", "service", "sport", "trafik", "vard", "information"];
+const pages = ["bio", "bostader", "drivmedel", "evenemang", "fritid", "jobb", "lunch", "matkasse", "myndigheter", "nyheter", "service", "sport", "trafik", "vard", "information", "praktiskt"];
 const css = fs.readFileSync("portal-pages.css", "utf8");
 const brandRule = css.match(/\.portal-brand img\{([^}]*)\}/)?.[1] || "";
 assert(!/filter\s*:/.test(brandRule), "Portalens logotyp får inte färgfiltreras");
