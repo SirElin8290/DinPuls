@@ -10,7 +10,7 @@ const css = fs.readFileSync("practical.css", "utf8");
 assert(home.includes('id="praktiskt"') && home.includes('id="practical-page-link"'));
 assert(index.includes("practical-engine.js"));
 assert(engine.includes("encodeURIComponent(name)"));
-assert.equal(Object.keys(data.municipalities).length, 1);
+assert(Object.keys(data.municipalities).length >= 4);
 assert(data.municipalities.Åmål);
 assert.equal(data.municipalities.Säffle, undefined);
 const amal = data.municipalities.Åmål;
@@ -25,4 +25,15 @@ assert(ui.includes('p.categories.includes(category.id)') && ui.includes('p.settl
 assert(ui.includes('if(c.presentationType!=="information")renderMap(c)'));
 assert(ui.includes("if(!record)") && ui.includes("Vi visar aldrig information från en annan kommun"));
 assert(css.includes("prefers-reduced-motion:reduce") && css.includes("@media(max-width:760px)"));
-console.log(`Praktiskt verifierat: ${amal.categories.length} kategorier, ${amal.places.length} platser, ${amal.information.length} informationsposter.`);
+for (const [name, record] of Object.entries(data.municipalities)) {
+  assert(record.settlements[0]?.id === "all", `${name}: Hela kommunen saknas`);
+  assert(record.categories.length >= 1, `${name}: kategorier saknas`);
+  assert(record.places.every(x => x.primaryUrl && x.source && x.verifiedAt && x.coordinates.length === 2), `${name}: ogiltig plats`);
+  assert(record.information.every(x => x.externalUrl && x.source && x.verifiedAt), `${name}: ogiltig information`);
+  assert.equal(new Set(record.places.map(x => x.id)).size, record.places.length, `${name}: duplicerade plats-ID`);
+}
+assert(data.municipalities.Bengtsfors.categories.length >= 7, "Bengtsfors: för smal kategoritäckning");
+assert(data.municipalities.Bengtsfors.places.length >= 9, "Bengtsfors: verifierade kartplatser saknas");
+assert(data.municipalities.Mellerud.categories.length >= 9, "Mellerud: för smal kategoritäckning");
+assert(data.municipalities.Mellerud.information.length >= 9, "Mellerud: informationsposter saknas");
+console.log(`Praktiskt verifierat för ${Object.keys(data.municipalities).length} kommuner.`);
