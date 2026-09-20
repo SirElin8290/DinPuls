@@ -34,6 +34,7 @@ const componentNames = [
   "lunch-strip",
   "hero",
   "missing-people",
+  "emergency-home",
   "premium-ad-1",
   "primary-cards",
   "transport",
