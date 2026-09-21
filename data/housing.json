@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T15:23:55+00:00",
+  "generatedAt": "2026-09-21T15:25:17+00:00",
   "municipalities": {
     "Åmål": {
       "total": 41,
@@ -469,7 +469,7 @@
       "updatedAt": "2026-09-17T13:45:22+00:00"
     },
     "Säffle": {
-      "total": 52,
+      "total": 51,
       "listings": [
         {
           "id": "jpq47QbTT7VDPXB6HyrvbvYg",
@@ -1048,18 +1048,6 @@
           "municipality": "Säffle"
         },
         {
-          "id": "690daa01-618f-4aaa-a2a3-f7e8f78fd2f3",
-          "address": "Sundsborgsgatan 17",
-          "area": "Säffle",
-          "rooms": 4,
-          "size": 91,
-          "rent": 8637,
-          "available": "2026-09-01T00:00:00",
-          "url": "https://minasidor.alber.se/ledigt/detalj/id/12081021",
-          "provider": "Albèr Fastigheter",
-          "municipality": "Säffle"
-        },
-        {
           "id": "0d74dc2e-93f5-4cb8-9006-cc80bdbf7103",
           "address": "Sundsgatan 12 B",
           "area": "Säffle",
@@ -1108,28 +1096,30 @@
           "official": true
         }
       ],
-      "errors": [],
+      "errors": [
+        "Säfflebostäder: kunde inte nå källan: timed out"
+      ],
       "stale": false,
-      "checkedAt": "2026-09-21T05:26:53+00:00",
-      "updatedAt": "2026-09-18T22:49:30+00:00",
+      "checkedAt": "2026-09-21T15:24:39+00:00",
+      "updatedAt": "2026-09-21T15:24:39+00:00",
       "sourceHealth": [
         {
           "provider": "Säfflebostäder",
           "url": "https://minasidor.safflebostader.se/market/residential",
-          "status": "ok",
-          "checkedAt": "2026-09-21T05:26:53+00:00",
-          "lastSuccessfulFetch": "2026-09-21T05:26:53+00:00",
-          "rawCount": 43,
-          "error": null,
-          "stale": false
+          "status": "error",
+          "checkedAt": "2026-09-21T15:24:39+00:00",
+          "lastSuccessfulFetch": null,
+          "rawCount": null,
+          "error": "kunde inte nå källan: timed out",
+          "stale": true
         },
         {
           "provider": "Albèr Fastigheter",
           "url": "https://minasidor.alber.se/ledigt/lagenhet",
           "status": "ok",
-          "checkedAt": "2026-09-21T05:26:53+00:00",
-          "lastSuccessfulFetch": "2026-09-21T05:26:53+00:00",
-          "rawCount": 9,
+          "checkedAt": "2026-09-21T15:24:39+00:00",
+          "lastSuccessfulFetch": "2026-09-21T15:24:39+00:00",
+          "rawCount": 8,
           "error": null,
           "stale": false
         }
@@ -4770,7 +4760,7 @@
       "availabilityMode": "automatic"
     },
     "Munkfors": {
-      "total": 3,
+      "total": 2,
       "listings": [
         {
           "id": "sunnmans-v-g-37-l-genhet-1102",
@@ -4795,18 +4785,6 @@
           "url": "https://www.munkfors.se/kommun-och-politik/kommunala-bolag/munkforsbostader-ab/lediga-lagenheter/",
           "provider": "Munkforsbostäder AB",
           "municipality": "Munkfors"
-        },
-        {
-          "id": "munkfors-smedsgatan-5b-1102-20260908",
-          "address": "Smedsgatan 5B, lägenhet 1102",
-          "area": "Munkfors",
-          "rooms": 2,
-          "size": 51.5,
-          "rent": 5011,
-          "available": "Ledig",
-          "url": "https://www.munkfors.se/kommun-och-politik/kommunala-bolag/munkforsbostader-ab/lediga-lagenheter/",
-          "provider": "Munkforsbostäder AB",
-          "verificationUrl": "https://www.munkfors.se/kommun-och-politik/kommunala-bolag/munkforsbostader-ab/lediga-lagenheter/"
         }
       ],
       "providers": [
@@ -4818,15 +4796,15 @@
       ],
       "errors": [],
       "stale": false,
-      "checkedAt": "2026-09-08T09:00:00+02:00",
-      "updatedAt": "2026-09-08T09:00:00+02:00",
+      "checkedAt": "2026-09-21T15:25:15+00:00",
+      "updatedAt": "2026-09-21T15:25:15+00:00",
       "sourceHealth": [
         {
           "provider": "Munkforsbostäder AB",
           "url": "https://www.munkfors.se/kommun-och-politik/kommunala-bolag/munkforsbostader-ab/lediga-lagenheter/",
           "status": "ok",
-          "checkedAt": "2026-09-21T05:26:55+00:00",
-          "lastSuccessfulFetch": "2026-09-21T05:26:55+00:00",
+          "checkedAt": "2026-09-21T15:25:15+00:00",
+          "lastSuccessfulFetch": "2026-09-21T15:25:15+00:00",
           "rawCount": 2,
           "error": null,
           "stale": false
@@ -4835,8 +4813,80 @@
       "availabilityMode": "automatic"
     },
     "Torsby": {
-      "total": 16,
+      "total": 22,
       "listings": [
+        {
+          "id": "4e324822-ec28-40e5-be01-14f85c25e298",
+          "address": "Alstigen 29 F",
+          "area": "Alstigen",
+          "rooms": 2,
+          "size": 50,
+          "rent": 5670,
+          "available": "2027-01-01T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/105192",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
+        {
+          "id": "39443a45-3b38-4849-b8f8-090695a2e6c5",
+          "address": "Altarvägen 8 B",
+          "area": "Centrum",
+          "rooms": 2,
+          "size": 52,
+          "rent": 5364,
+          "available": "2027-01-01T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/128104",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
+        {
+          "id": "49554909-ad53-4b31-8ea4-3538b2ccbe51",
+          "address": "Björklundavägen 10 B",
+          "area": "Kilåsen",
+          "rooms": 3,
+          "size": 76,
+          "rent": 7896,
+          "available": "2026-07-01T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/115343",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
+        {
+          "id": "0c95d37a-cedc-4a0c-8bdf-ff9403012550",
+          "address": "Lingonvägen 9 D",
+          "area": "Kilåsen",
+          "rooms": 3,
+          "size": 85,
+          "rent": 8232,
+          "available": "2026-11-01T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/115340",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
+        {
+          "id": "ef7f1df8-c57e-4857-af45-36a583bd54ad",
+          "address": "Mellanvägen 10",
+          "area": "Kilåsen",
+          "rooms": 3,
+          "size": 81,
+          "rent": 8137,
+          "available": "2026-09-02T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/110105",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
+        {
+          "id": "83ff0590-204b-4b43-8678-0afcd86796d0",
+          "address": "Tingshusgatan 5 C",
+          "area": "Centrum",
+          "rooms": 3,
+          "size": 79,
+          "rent": 8532,
+          "available": "2027-01-01T00:00:00",
+          "url": "https://www.torsbybostader.se/ledigt/detalj/id/101122",
+          "provider": "Torsby Bostäder",
+          "municipality": "Torsby"
+        },
         {
           "id": "c364ddc0-831e-4b6a-acaa-92272eceab77",
           "address": "Valbergsvägen 23 A",
@@ -5044,16 +5094,16 @@
       ],
       "errors": [],
       "stale": false,
-      "checkedAt": "2026-09-21T05:26:57+00:00",
-      "updatedAt": "2026-09-18T13:09:22+00:00",
+      "checkedAt": "2026-09-21T15:25:17+00:00",
+      "updatedAt": "2026-09-21T15:25:17+00:00",
       "sourceHealth": [
         {
           "provider": "Torsby Bostäder",
           "url": "https://www.torsbybostader.se/ledigt/lagenhet",
           "status": "ok",
-          "checkedAt": "2026-09-21T05:26:57+00:00",
-          "lastSuccessfulFetch": "2026-09-21T05:26:57+00:00",
-          "rawCount": 9,
+          "checkedAt": "2026-09-21T15:25:17+00:00",
+          "lastSuccessfulFetch": "2026-09-21T15:25:17+00:00",
+          "rawCount": 15,
           "error": null,
           "stale": false
         },
@@ -5061,8 +5111,8 @@
           "provider": "Torsby kommuns bostadsförmedling",
           "url": "https://torsby.se/byggabomiljo/bostaderochoffentligalokaler/hittabostad/bostadsformedling/ledigalagenheterhoskommunen.4.7ef75b0c158cf4fe5018d66c.html",
           "status": "ok",
-          "checkedAt": "2026-09-21T05:26:57+00:00",
-          "lastSuccessfulFetch": "2026-09-21T05:26:57+00:00",
+          "checkedAt": "2026-09-21T15:25:17+00:00",
+          "lastSuccessfulFetch": "2026-09-21T15:25:17+00:00",
           "rawCount": 8,
           "error": null,
           "stale": false
