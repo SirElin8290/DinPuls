@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="sv" data-portal="associations">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Hitta föreningar, idrott, kultur och gemenskap i din kommun.">
+<title>Föreningsliv – DinPuls</title>
+<link rel="stylesheet" href="styles.css?version=0.26.0">
+<link rel="stylesheet" href="portal-pages.css?version=0.26.1">
+<link rel="stylesheet" href="foreningsliv.css?version=1.0.0">
+<link rel="icon" href="favicon.ico" sizes="any">
+</head>
+<body>
+<header class="portal-header"><a href="index.html" class="portal-brand"><img src="assets/logo.svg" alt="DinPuls" width="620" height="150"></a><a href="index.html">← Till startsidan</a></header>
+<main class="portal-main association-hub">
+<section class="association-hero"><span class="section-kicker">Hitta rätt förening</span><h1>Föreningsliv i <span id="association-place">Åmål</span></h1><p>Idrott, kultur, friluftsliv och lokal gemenskap på ett ställe.</p></section>
+<section class="association-search-panel"><label for="association-search"><strong>Vad letar du efter?</strong><span>Sök exempelvis fotboll, barn, kör, senior, se match, scouter eller motion.</span></label><div class="association-searchbox"><i data-lucide="search"></i><input id="association-search" type="search" autocomplete="off" placeholder="Sök förening eller aktivitet…"><button id="association-clear" type="button" aria-label="Rensa"><i data-lucide="x"></i></button></div><p id="association-status" aria-live="polite"></p></section>
+<section class="association-ad" id="association-list-ad" hidden aria-label="Annons"></section>
+<section><div id="association-results" class="association-grid"><p>Hämtar föreningar…</p></div></section>
+</main>
+<footer class="portal-footer"><span>© 2026 DinPuls.se</span><nav><a href="index.html">Startsidan</a><a href="information.html#kontakt">Kontakt</a></nav></footer>
+<script src="assets/vendor/lucide.min.js"></script><script src="dp-safety.js"></script><script src="municipality-engine.js"></script><script src="sport-data-engine.js"></script><script src="foreningsliv.js?version=1.0.0"></script>
+</body></html>
