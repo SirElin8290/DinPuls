@@ -47,6 +47,31 @@ def payload_time(payload):
     return None
 
 
+def municipality_time(module, payload, municipality):
+    """Returnera den färskaste relevanta kontrolltiden för en kommun/modul."""
+    if module == "cinema":
+        row = (payload.get("municipalities") or {}).get(municipality, [])
+        checked = [
+            parse_time(item.get("programCheckedAt"))
+            for item in row
+            if isinstance(item, dict) and item.get("programCheckedAt")
+        ]
+        checked = [value for value in checked if value]
+        if checked:
+            return max(checked)
+    if module == "events":
+        row = (payload.get("municipalities") or {}).get(municipality, {})
+        checked = [
+            parse_time(item.get("checkedAt"))
+            for item in (row.get("sourceHealth") or [])
+            if isinstance(item, dict) and item.get("checkedAt")
+        ] if isinstance(row, dict) else []
+        checked = [value for value in checked if value]
+        if checked:
+            return max(checked)
+    return payload_time(payload)
+
+
 def count_for(module, payload, municipality):
     municipalities = payload.get("municipalities") or {}
     row = municipalities.get(municipality, {})
@@ -130,7 +155,7 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
                 payloads = loaded[module]
                 payload = payloads[0]
                 count = sum(count_for(module, item, municipality) for item in payloads)
-                checked = payload_time(payload)
+                checked = municipality_time(module, payload, municipality)
                 age_hours = (now - checked).total_seconds() / 3600 if checked else None
                 if count == 0 and not verified_zero(module, payload, municipality):
                     status, reason = "critical", "zero_records"
