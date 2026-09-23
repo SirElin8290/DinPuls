@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-23T01:26:29+00:00",
+  "generatedAt": "2026-09-23T01:41:31+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -589,7 +589,7 @@
           "name": "Arvika",
           "alerts": [],
           "lookupTime": "2026-09-22T21:56+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-22T23:56+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -604,8 +604,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D",
-              "stale": true
+              "platform": "D"
             },
             {
               "mode": "bus",
@@ -1556,7 +1555,11 @@
         {
           "id": "740098025",
           "name": "Karlstad",
-          "alerts": [],
+          "alerts": [
+            "Linje 500 och 501,  Rönndungen Karlstad indragen",
+            "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november",
+            "Linje 501: Hållplats Kronoparkskyrkan stängs från 22 september till och med 23 september"
+          ],
           "lookupTime": "2026-09-23T00:25+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-23T02:25+02:00",
@@ -1621,8 +1624,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -1634,8 +1636,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2082,11 +2083,23 @@
           "name": "Forshaga centrum",
           "alerts": [],
           "lookupTime": "2026-09-22T22:40+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-23T00:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-23T04:29:00+02:00",
+              "realtime": "2026-09-23T04:29:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "602",
@@ -2900,18 +2913,6 @@
               "line": "202",
               "direction": "Lysvik Sunne",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-23T03:35:00+02:00",
-              "realtime": "2026-09-23T03:35:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "D"
-            },
-            {
-              "mode": "bus",
-              "line": "202",
-              "direction": "Lysvik Sunne",
-              "operator": "Värmlandstrafik",
               "scheduled": "2026-09-23T04:20:00+02:00",
               "realtime": "2026-09-23T04:20:00+02:00",
               "delayMinutes": 0,
@@ -2929,8 +2930,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
