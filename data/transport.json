@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-23T00:26:34+00:00",
+  "generatedAt": "2026-09-23T00:41:36+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -2105,23 +2105,11 @@
           "name": "Kristinehamn station",
           "alerts": [],
           "lookupTime": "2026-09-22T22:10+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-23T00:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "850",
-              "direction": "Stockholm Cityterminalen",
-              "operator": "Vy bus4you",
-              "scheduled": "2026-09-23T02:35:00+02:00",
-              "realtime": "2026-09-23T02:35:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": ""
-            },
             {
               "mode": "bus",
               "line": "500",
@@ -2824,9 +2812,11 @@
         {
           "id": "740000274",
           "name": "Torsby station",
-          "alerts": [],
+          "alerts": [
+            "Linje 202: Ny tidtabell och omlagd körväg från 16 september"
+          ],
           "lookupTime": "2026-09-22T18:40+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-22T20:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2841,8 +2831,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D",
-              "stale": true
+              "platform": "D"
             },
             {
               "mode": "bus",
