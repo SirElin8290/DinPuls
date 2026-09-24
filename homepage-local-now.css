@@ -12,7 +12,8 @@
 
 .local-now-layout > *{min-width:0}
 .local-now-layout > [data-component="missing-people"]{display:flex;min-width:0}
-.local-now-layout > [data-component="primary-cards"]{min-width:0}
+.local-now-layout > [data-component="emergency-home"]{grid-column:2}
+.local-now-layout > [data-component="primary-cards"]{grid-column:1/-1;min-width:0}
 
 .local-now-layout .missing-people-home{
   width:100%;
@@ -104,6 +105,9 @@
 @media(max-width:980px){
   .local-now-layout{
     grid-template-columns:1fr;
+  }
+  .local-now-layout > [data-component="emergency-home"]{
+    grid-column:auto;
   }
   .local-now-layout .primary-service-grid{
     grid-template-columns:1fr 1fr;
