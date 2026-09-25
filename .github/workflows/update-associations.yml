@@ -105,6 +105,9 @@ jobs:
       - name: Kontrollera Dals-Eds föreningskvalitet
         run: python scripts/association_quality.py --municipality Dals-Ed
 
+      - name: Kontrollera Eda föreningskvalitet
+        run: python scripts/association_quality.py --municipality Eda
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
