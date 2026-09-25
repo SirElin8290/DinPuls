@@ -117,6 +117,9 @@ jobs:
       - name: Kontrollera Färgelandas föreningskvalitet
         run: python scripts/association_quality.py --municipality Färgelanda
 
+      - name: Kontrollera Grums föreningskvalitet
+        run: python scripts/association_quality.py --municipality Grums
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
