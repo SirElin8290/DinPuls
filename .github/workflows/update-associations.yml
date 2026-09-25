@@ -123,6 +123,9 @@ jobs:
       - name: Kontrollera Hagfors föreningskvalitet
         run: python scripts/association_quality.py --municipality Hagfors
 
+      - name: Kontrollera Hammarös föreningskvalitet
+        run: python scripts/association_quality.py --municipality Hammarö
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
