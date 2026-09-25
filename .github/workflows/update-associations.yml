@@ -102,6 +102,9 @@ jobs:
       - name: Kontrollera Bengtsfors föreningskvalitet
         run: python scripts/association_quality.py --municipality Bengtsfors
 
+      - name: Kontrollera Dals-Eds föreningskvalitet
+        run: python scripts/association_quality.py --municipality Dals-Ed
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
