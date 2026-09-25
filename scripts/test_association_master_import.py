@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def norm(value):
     value = unicodedata.normalize("NFKD", value or "").encode("ascii", "ignore").decode().lower()
-    return re.sub(r"[^a-z0-9]+", "", value)
+    return re.sub(r"[^a-z0-9]+", "", value).replace("brukshundsklubb", "brukshundklubb")
 
 
 outcomes = json.loads((ROOT / "data/association-master-outcomes.json").read_text(encoding="utf-8"))["items"]

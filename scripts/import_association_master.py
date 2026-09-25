@@ -43,10 +43,15 @@ ALIASES = {
     "klassbolssportklubb": "klassbolssk",
 }
 
+MASTER_EXCLUSIONS = {
+    "Färgelanda:84": ("DUPLICATE", "Samma förening som Färgelanda:7, Färgelanda Brukshundsklubb"),
+}
+
 
 def norm(value: str) -> str:
     value = unicodedata.normalize("NFKD", value or "").encode("ascii", "ignore").decode().lower()
     key = re.sub(r"[^a-z0-9]+", "", value)
+    key = key.replace("brukshundsklubb", "brukshundklubb")
     return ALIASES.get(key, key)
 
 
@@ -105,6 +110,13 @@ def main() -> None:
                 "masterSourceKind": source_kind,
                 "masterBaselineStatus": baseline,
             }
+
+            master_id = record["masterId"]
+            if master_id in MASTER_EXCLUSIONS:
+                result, reason = MASTER_EXCLUSIONS[master_id]
+                record.update(outcome="C", result=result, reason=reason)
+                outcomes.append(record)
+                continue
 
             if key in existing:
                 dataset, item = existing[key]
