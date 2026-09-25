@@ -114,6 +114,9 @@ jobs:
       - name: Kontrollera Forshagas föreningskvalitet
         run: python scripts/association_quality.py --municipality Forshaga
 
+      - name: Kontrollera Färgelandas föreningskvalitet
+        run: python scripts/association_quality.py --municipality Färgelanda
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
