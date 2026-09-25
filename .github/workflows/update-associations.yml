@@ -99,6 +99,9 @@ jobs:
       - name: Kontrollera Arvikas föreningskvalitet
         run: python scripts/association_quality.py --municipality Arvika
 
+      - name: Kontrollera Bengtsfors föreningskvalitet
+        run: python scripts/association_quality.py --municipality Bengtsfors
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
