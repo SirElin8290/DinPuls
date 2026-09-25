@@ -31,6 +31,10 @@ on:
       - "scripts/apply_hammaro_associations.py"
       - "scripts/apply_leisure_enrichment.py"
       - "scripts/normalize_association_boundaries.py"
+      - "scripts/apply_association_enrichment.py"
+      - "scripts/association_quality.py"
+      - "scripts/test_association_enrichment.py"
+      - "data/association-enrichment.json"
       - "scripts/apply_karlstad_strict.py"
       - ".github/workflows/update-associations.yml"
   schedule:
@@ -88,6 +92,15 @@ jobs:
 
       - name: Normalisera fritidsposternas schema
         run: python scripts/normalize_leisure_schema.py
+
+      - name: Applicera verifierad föreningsberikning
+        run: python scripts/apply_association_enrichment.py
+
+      - name: Kontrollera Arvikas föreningskvalitet
+        run: python scripts/association_quality.py --municipality Arvika
+
+      - name: Testa föreningsberikningen
+        run: python scripts/test_association_enrichment.py
 
       - name: Verifiera alla kommuner
         run: |
