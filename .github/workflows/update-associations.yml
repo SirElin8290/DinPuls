@@ -120,6 +120,9 @@ jobs:
       - name: Kontrollera Grums föreningskvalitet
         run: python scripts/association_quality.py --municipality Grums
 
+      - name: Kontrollera Hagfors föreningskvalitet
+        run: python scripts/association_quality.py --municipality Hagfors
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
