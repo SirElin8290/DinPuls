@@ -280,9 +280,18 @@ def dedupe(items: list[dict], manual: list[dict], municipality: str) -> list[dic
             "spfseniorergrumsbyggden":"spfseniorernagrumsbygden",
         }
         return aliases.get(key, key)
+    master_path = ROOT / "data" / "association-master-outcomes.json"
+    master_names = set()
+    if master_path.exists():
+        master = json.loads(master_path.read_text(encoding="utf-8"))
+        master_names = {
+            key_for(item.get("canonicalName") or item["masterName"])
+            for item in master.get("items", [])
+            if item.get("municipality") == municipality and item.get("outcome") != "C"
+        }
     merged = {key_for(item["name"]): item for item in items if not should_skip(item["name"], "")}
     for item in manual:
-        if should_skip(item["name"], ""):
+        if should_skip(item["name"], "") and key_for(item["name"]) not in master_names:
             continue
         key = key_for(item["name"])
         if key in merged:
