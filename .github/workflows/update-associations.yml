@@ -111,6 +111,9 @@ jobs:
       - name: Kontrollera Filipstads föreningskvalitet
         run: python scripts/association_quality.py --municipality Filipstad
 
+      - name: Kontrollera Forshagas föreningskvalitet
+        run: python scripts/association_quality.py --municipality Forshaga
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
