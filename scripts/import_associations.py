@@ -274,6 +274,8 @@ def dedupe(items: list[dict], manual: list[dict], municipality: str) -> list[dic
             "eritreanskakulturföreningen":"eritreanskakulturförening",
             "eritreanskkulturföreningiarvika":"eritreanskakulturföreningiarvika",
             "bygdegårdsföreningenvärmskog":"bygdegårdsföreningvärmskog",
+            "jösseforsidrottsklubb":"jösseforsik",
+            "klässbolssportklubb":"klässbolssk",
             "segmomshembygdsförening":"segmonshembygdsförening",
             "spfseniorergrumsbyggden":"spfseniorernagrumsbygden",
         }

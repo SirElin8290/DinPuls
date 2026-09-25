@@ -45,9 +45,13 @@ Arvika är pågående kommun.
 | Årjäng | 298 |
 | **Totalt** | **4 196** |
 
-## Publicerad datamängd efter denna arbetsomgång
+## Publicerad datamängd efter senaste arbetsomgång
 
-Den kombinerade Föreningsliv-motorn innehåller lokalt 1 579 unika sidor. Arvika innehåller 303 unika sidor efter de två säkra dubblettsammanslagningarna.
+Den kombinerade Föreningsliv-motorn innehåller lokalt 2 011 unika sidor. Arvika innehåller 307 unika sidor efter de två säkra dubblettsammanslagningarna och en ny officiell registerimport.
+
+Den befintliga IBGO-importen har utökats med de officiella registren för Hammarö, Kristinehamn, Sunne och Torsby. Det ökade den verifierade lokala datamängden med 432 unika sidor. Den manuellt berikade datan har samtidigt flyttats till de varaktiga curated-filer som importworkflowet bygger från, så att den inte skrivs över vid nästa körning.
+
+Frontend filtrerar nu bort poster markerade som `inactive`, `duplicate` eller `not_association`. Endast poster utan exkluderande status eller med aktiv verifieringsstatus publiceras.
 
 Fokuserade tester som ska köras efter varje batch:
 
