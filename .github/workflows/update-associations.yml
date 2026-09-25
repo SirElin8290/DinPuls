@@ -108,6 +108,9 @@ jobs:
       - name: Kontrollera Eda föreningskvalitet
         run: python scripts/association_quality.py --municipality Eda
 
+      - name: Kontrollera Filipstads föreningskvalitet
+        run: python scripts/association_quality.py --municipality Filipstad
+
       - name: Testa föreningsberikningen
         run: python scripts/test_association_enrichment.py
 
