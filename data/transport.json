@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-26T00:41:32+00:00",
+  "generatedAt": "2026-09-26T00:56:51+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -633,7 +633,9 @@
         {
           "id": "740000217",
           "name": "Grums station",
-          "alerts": [],
+          "alerts": [
+            "Försening på linje 860 mot Edsvalla Vålberg Grums Segmon"
+          ],
           "lookupTime": "2026-09-25T23:25+02:00",
           "retained": false,
           "nextSearchAfter": "2026-09-26T01:25+02:00",
@@ -646,8 +648,8 @@
               "direction": "Segmon",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-26T02:45:00+02:00",
-              "realtime": "2026-09-26T02:57:56+02:00",
-              "delayMinutes": 13,
+              "realtime": "2026-09-26T03:00:21+02:00",
+              "delayMinutes": 15,
               "isRealtime": true,
               "canceled": false,
               "platform": "D"
@@ -769,8 +771,8 @@
               "direction": "Karlstad",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-26T02:40:00+02:00",
-              "realtime": "2026-09-26T02:51:02+02:00",
-              "delayMinutes": 11,
+              "realtime": "2026-09-26T02:55:25+02:00",
+              "delayMinutes": 15,
               "isRealtime": true,
               "canceled": false,
               "platform": "C"
@@ -1081,11 +1083,7 @@
           "name": "Karlstad",
           "alerts": [
             "Linje 1: Hållplats Kavaljersvägen stängs från 24 augusti",
-            "Försening på linje 1 mot Henstad",
-            "Linje 3: Hållplats Gunnern stängs från 21 september till och med 23 oktober",
-            "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
-            "Linje 4: Hållplatserna 4H-gården, Strågatan och Gräsdalen stängs dagtid under vecka 40 och 41",
-            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 september"
+            "Linje 3: Hållplats Gunnern stängs från 21 september till och med 23 oktober"
           ],
           "lookupTime": "2026-09-25T00:25+02:00",
           "retained": false,
@@ -1093,66 +1091,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "1",
-              "direction": "Henstad via Våxnäs",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:37:00+02:00",
-              "realtime": "2026-09-26T02:43:19+02:00",
-              "delayMinutes": 6,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Edsgatan via Norra Kroppkärr",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:45:00+02:00",
-              "realtime": "2026-09-26T02:45:37+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Gruvlyckan, Oskarslund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:48:00+02:00",
-              "realtime": "2026-09-26T02:47:43+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "3",
-              "direction": "Ruds bytespunkt",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:44:00+02:00",
-              "realtime": "2026-09-26T02:48:21+02:00",
-              "delayMinutes": 4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "7",
-              "direction": "Stora Torget via Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:53:00+02:00",
-              "realtime": "2026-09-26T02:53:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "O"
-            },
             {
               "mode": "bus",
               "line": "S",
@@ -1163,7 +1101,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "O"
+              "platform": "O",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1195,9 +1134,9 @@
               "direction": "Campus via Universitetet",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-09-26T03:09:00+02:00",
-              "realtime": "2026-09-26T03:09:00+02:00",
+              "realtime": "2026-09-26T03:09:26+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "O"
             },
@@ -1331,24 +1270,12 @@
           "id": "740000375",
           "name": "Forshaga centrum",
           "alerts": [],
-          "lookupTime": "2026-09-26T00:40+02:00",
+          "lookupTime": "2026-09-26T02:55+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-09-26T02:40+02:00",
+          "nextSearchAfter": "2026-09-26T03:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "660",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-09-26T02:43:00+02:00",
-              "realtime": "2026-09-26T02:47:36+02:00",
-              "delayMinutes": 5,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "601",
@@ -1359,8 +1286,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -1372,8 +1298,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2065,23 +1990,11 @@
           "name": "Färgelanda centrum",
           "alerts": [],
           "lookupTime": "2026-09-26T00:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-09-26T02:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "730",
-              "direction": "Bäckefors via Stigen",
-              "operator": "Västtrafik",
-              "scheduled": "2026-09-26T02:50:00+02:00",
-              "realtime": "2026-09-26T02:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "730",
