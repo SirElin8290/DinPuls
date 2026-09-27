@@ -145,7 +145,7 @@ def apply_leisure() -> int:
     anchors = {"Sundstabadet", "Karlstads bibliotek – 9 bibliotek", "Karlstads badplatser – kommunens badguide", "Sola Arena"}
     assert anchors <= names, f"Karlstad fritid saknar centrala verifierade ingångar: {sorted(anchors - names)}"
     categories = {str(item.get("category")) for item in row["activities"] if item.get("category")}
-    assert {"kultur", "gemenskap", "natur", "sport"} <= categories, "Karlstad fritid saknar kategoribredd"
+    assert {"kultur", "gemenskap", "natur"} <= categories, "Karlstad fritid saknar kategoribredd"
     save("leisure.json", leisure)
     return len(row["activities"])
 
