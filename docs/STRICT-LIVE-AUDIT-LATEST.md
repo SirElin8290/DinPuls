@@ -1,38 +1,38 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-27T23:13:04+02:00
+Genererad: 2026-09-28T00:04:40+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
 Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 19 GREEN / 2 YELLOW / 0 RED
+## Resultat: 18 GREEN / 3 YELLOW / 0 RED
 
-**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Kil, Kristinehamn, Munkfors, Storfors, Sunne
+**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Kil, Munkfors, Storfors, Sunne
 
-**YELLOW:** Karlstad, Torsby
+**YELLOW:** Karlstad, Kristinehamn, Torsby
 
 **RED:** inga
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 GREEN | 19 | 53 | 19 | 51 / 51 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
+| Åmål | 🟢 GREEN | 19 | 53 | 18 | 51 / 51 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
 | Årjäng | 🟢 GREEN | 39 | 15 | 44 | 39 / 39 färska | 8 / 5 kat | 11 / 4 kat | 7 | 39 | 29 |
-| Bengtsfors | 🟢 GREEN | 17 | 43 | 2 | 43 / 43 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 19 |
+| Bengtsfors | 🟢 GREEN | 17 | 43 | 1 | 43 / 43 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 19 |
 | Mellerud | 🟢 GREEN | 25 | 13 | 21 | 42 / 42 färska | 7 / 4 kat | 15 / 4 kat | 5 | 46 | 17 |
 | Arvika | 🟢 GREEN | 53 | 2 | 1 | 75 / 75 färska | 30 / 8 kat | 21 / 11 kat | 8 | 146 | 76 |
 | Grums | 🟢 GREEN | 9 | 16 | 13 | 61 / 61 färska | 12 / 6 kat | 11 / 7 kat | 10 | 38 | 30 |
 | Säffle | 🟢 GREEN | 17 | 61 | 2 | 71 / 71 färska | 17 / 7 kat | 16 / 4 kat | 10 | 37 | 28 |
-| Dals-Ed | 🟢 GREEN | 8 | 23 | 19 | 21 / 21 färska | 9 / 7 kat | 12 / 8 kat | 6 | 13 | 3 |
+| Dals-Ed | 🟢 GREEN | 8 | 23 | 18 | 21 / 21 färska | 9 / 7 kat | 12 / 8 kat | 6 | 13 | 3 |
 | Eda | 🟢 GREEN | 35 | 49 | 2 | 52 / 52 färska | 13 / 7 kat | 12 / 7 kat | 5 | 21 | 24 |
-| Filipstad | 🟢 GREEN | 6 | 53 | 9 | 55 / 55 färska | 8 / 5 kat | 14 / 8 kat | 5 | 10 | 7 |
-| Forshaga | 🟢 GREEN | 20 | 8 | 50 | 45 / 45 färska | 11 / 6 kat | 13 / 13 kat | 8 | 26 | 21 |
+| Filipstad | 🟢 GREEN | 6 | 53 | 7 | 55 / 55 färska | 8 / 5 kat | 14 / 8 kat | 5 | 10 | 7 |
+| Forshaga | 🟢 GREEN | 20 | 8 | 45 | 45 / 45 färska | 11 / 6 kat | 13 / 13 kat | 8 | 26 | 21 |
 | Färgelanda | 🟢 GREEN | 9 | 8 | 4 | 28 / 28 färska | 9 / 8 kat | 8 / 5 kat | 4 | 11 | 17 |
-| Hagfors | 🟢 GREEN | 22 | 20 | 43 | 42 / 42 färska | 14 / 9 kat | 12 / 7 kat | 8 | 15 | 22 |
-| Hammarö | 🟢 GREEN | 14 | 3 | 43 | 46 / 46 färska | 10 / 7 kat | 8 / 5 kat | 5 | 42 | 23 |
+| Hagfors | 🟢 GREEN | 22 | 20 | 42 | 42 / 42 färska | 14 / 9 kat | 12 / 7 kat | 8 | 15 | 22 |
+| Hammarö | 🟢 GREEN | 14 | 3 | 42 | 46 / 46 färska | 10 / 7 kat | 8 / 5 kat | 5 | 42 | 23 |
 | Karlstad | 🟡 YELLOW | 92 | 62 | 0 | 89 / 89 färska | 36 / 10 kat | 13 / 6 kat | 10 | 146 | 43 |
 | Kil | 🟢 GREEN | 17 | 3 | 2 | 40 / 40 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 19 |
-| Kristinehamn | 🟢 GREEN | 53 | 9 | 3 | 65 / 65 färska | 6 / 4 kat | 9 / 6 kat | 4 | 56 | 41 |
+| Kristinehamn | 🟡 YELLOW | 53 | 9 | 0 | 65 / 65 färska | 6 / 4 kat | 9 / 6 kat | 4 | 56 | 32 |
 | Munkfors | 🟢 GREEN | 8 | 3 | 33 | 33 / 33 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 23 |
 | Storfors | 🟢 GREEN | 6 | 5 | 3 | 40 / 40 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
 | Sunne | 🟢 GREEN | 34 | 6 | 16 | 56 / 56 färska | 16 / 6 kat | 16 / 5 kat | 4 | 7 | 10 |
@@ -88,8 +88,8 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 ### Kil — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Kristinehamn — 🟢 GREEN
-Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
+### Kristinehamn — 🟡 YELLOW
+- **Evenemang:** 🟡 — inga aktuella/framtida evenemang och inget verifierat nolläge (0)
 
 ### Munkfors — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
