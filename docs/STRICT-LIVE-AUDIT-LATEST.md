@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-27T22:32:52+02:00
+Genererad: 2026-09-27T22:51:58+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -30,13 +30,13 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Färgelanda | 🟢 GREEN | 9 | 8 | 4 | 28 / 28 färska | 9 / 8 kat | 8 / 5 kat | 4 | 11 | 17 |
 | Hagfors | 🟢 GREEN | 22 | 20 | 43 | 42 / 42 färska | 14 / 9 kat | 12 / 7 kat | 8 | 15 | 22 |
 | Hammarö | 🟢 GREEN | 14 | 3 | 43 | 46 / 46 färska | 10 / 7 kat | 8 / 5 kat | 5 | 42 | 23 |
-| Karlstad | 🟡 YELLOW | 92 | 62 | 0 | 89 / 89 färska | 36 / 10 kat | 13 / 6 kat | 10 | 10 | 4 |
+| Karlstad | 🟡 YELLOW | 92 | 62 | 0 | 89 / 89 färska | 36 / 10 kat | 13 / 6 kat | 10 | 146 | 43 |
 | Kil | 🟢 GREEN | 17 | 3 | 2 | 40 / 40 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 19 |
 | Kristinehamn | 🟢 GREEN | 53 | 9 | 3 | 65 / 65 färska | 6 / 4 kat | 9 / 6 kat | 4 | 56 | 41 |
-| Munkfors | 🟢 GREEN | 8 | 2 | 33 | 33 / 33 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 23 |
+| Munkfors | 🟢 GREEN | 8 | 3 | 33 | 33 / 33 färska | 7 / 6 kat | 7 / 5 kat | 4 | 5 | 23 |
 | Storfors | 🟢 GREEN | 6 | 5 | 3 | 40 / 40 färska | 5 / 5 kat | 8 / 6 kat | 2 / 2 verifierat faktiskt utbud | 17 | 3 |
 | Sunne | 🟢 GREEN | 34 | 6 | 16 | 56 / 56 färska | 16 / 6 kat | 16 / 5 kat | 4 | 7 | 10 |
-| Torsby | 🟡 YELLOW | 28 | 26 | 0 | 29 / 29 färska | 7 / 6 kat | 9 / 5 kat | 4 | 15 | 26 |
+| Torsby | 🟡 YELLOW | 28 | 26 | 0 | 29 / 29 färska | 7 / 6 kat | 9 / 5 kat | 3 | 15 | 26 |
 
 ## Blockerare per kommun
 
