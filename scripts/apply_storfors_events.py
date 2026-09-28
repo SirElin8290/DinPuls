@@ -26,8 +26,10 @@ def main() -> int:
     retained.sort(key=lambda item: (item.get("startDate") or "9999-12-31", item.get("title") or ""))
     municipality_data["events"] = retained
     EVENTS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    if len(supplement_events) < 5:
-        raise SystemExit(f"Storfors: bara {len(supplement_events)} framtida verifierade evenemang")
+    if not supplement_events:
+        raise SystemExit("Storfors: inga framtida verifierade evenemang")
+    if any(not item.get("url") or not item.get("startDate") for item in supplement_events):
+        raise SystemExit("Storfors: evenemang saknar verifierbar källa eller datum")
     print(f"Storfors: {len(supplement_events)} verifierade supplement-evenemang, totalt {len(retained)} poster")
     return 0
 
