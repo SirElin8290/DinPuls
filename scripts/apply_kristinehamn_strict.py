@@ -75,13 +75,23 @@ def apply(modules):
     if 'leisure' in modules:
         data = load('leisure.json')
         entry = data.setdefault('municipalities', {}).setdefault('Kristinehamn', {})
-        entry['activities'] = merge(entry.get('activities') or [], SRC['leisure'])
+        additions = []
+        for raw in SRC['leisure']:
+            item = dict(raw)
+            item.setdefault('tags', [str(item.get('category') or 'fritid'), 'Kristinehamn'])
+            additions.append(item)
+        entry['activities'] = merge(entry.get('activities') or [], additions)
         save('leisure.json', data)
 
     if 'sports' in modules:
         data = load('sports.json')
         entry = data.setdefault('municipalities', {}).setdefault('Kristinehamn', {})
-        entry['clubs'] = merge(entry.get('clubs') or [], SRC['sports'])
+        additions = []
+        for raw in SRC['sports']:
+            item = dict(raw)
+            item.setdefault('url', 'https://kristinehamn.ibgo.se/AssociationRegister')
+            additions.append(item)
+        entry['clubs'] = merge(entry.get('clubs') or [], additions)
         save('sports.json', data)
 
 

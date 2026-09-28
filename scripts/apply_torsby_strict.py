@@ -47,7 +47,16 @@ save('cinemas.json',c)
 # Fritid och föreningar: aktiva basfiler.
 l=load('leisure.json')
 lr=l.setdefault('municipalities',{}).setdefault('Torsby',{})
-lr['activities']=merge_named(lr.get('activities') or [],SRC['leisure'])
+normalized_leisure=[]
+for raw in SRC['leisure']:
+    item=dict(raw)
+    item.setdefault('tags',[str(item.get('categoryLabel') or item.get('category') or 'fritid'),'Torsby'])
+    if item.get('category') not in {'djur','gemenskap','kultur','musik','natur','skapande','spel'}:
+        item['category']='natur'
+    item.setdefault('status','not_association')
+    item.setdefault('exclusionReason','Kommunal verksamhet, aktivitet eller anläggning; inte en förening eller medlemsorganisation.')
+    normalized_leisure.append(item)
+lr['activities']=merge_named(lr.get('activities') or [],normalized_leisure)
 save('leisure.json',l)
 
 sp=load('sports.json')
