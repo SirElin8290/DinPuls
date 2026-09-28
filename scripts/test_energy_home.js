@@ -1,0 +1,12 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const page = fs.readFileSync("index.html", "utf8");
+const script = fs.readFileSync("script.js", "utf8");
+const component = fs.readFileSync("components/energy.html", "utf8");
+assert(page.includes('data-component="energy"'));
+assert(!page.includes('data-component="service"'), "Service-modulen ska vara borttagen från startsidan");
+assert(!page.includes('data-home-module="service"'), "Service ska inte ligga kvar som valbar startsidemodul");
+assert(script.includes('DinPulsMunicipality.subscribe("energy"'));
+assert(!/\n\s*"service",/.test(script), "Service-komponenten ska inte laddas på startsidan");
+for (const text of ["Elpriset just nu", "spotpris", "elnätsavgift", "energiskatt", "moms", "Källa:"]) assert(component.includes(text), `Saknad energitext: ${text}`);
+console.log("Energy home + service removal: PASS");

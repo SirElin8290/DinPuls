@@ -1,0 +1,49 @@
+name: Uppdatera elpriser
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+  push:
+    paths:
+      - ".github/workflows/update-energy.yml"
+      - "scripts/update_energy.py"
+      - "scripts/test_update_energy.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinpuls-energy
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Testa och hämta verifierade priser
+        run: |
+          PYTHONPATH=scripts python -m unittest scripts/test_update_energy.py
+          python scripts/update_energy.py
+      - name: Publicera cachefil konfliktsäkert
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/update_energy.py
+            git add data/energy.json
+            git diff --cached --quiet && exit 0
+            git commit -m "Uppdatera elpriser"
+            git push origin HEAD:main && exit 0
+            [ "$attempt" -lt 4 ] && sleep $((attempt * 2))
+          done
+          exit 1

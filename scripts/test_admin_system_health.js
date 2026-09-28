@@ -13,6 +13,6 @@ assert.match(script, /Aktiva problem/);
 assert.match(css, /@media\(max-width:430px\)/);
 assert.match(css, /municipality-health-grid/);
 assert.equal(Object.keys(health.municipalities).length, 21);
-assert.equal(Object.values(health.summary).reduce((sum, count) => sum + count, 0), 231);
+assert([231, 252].includes(Object.values(health.summary).reduce((sum, count) => sum + count, 0)), "Driftfilen ska innehålla 11 eller 12 moduler per kommun under energiutrullningen");
 
 console.log("Admin kan läsa 21 kommuners driftstatus och har mobilanpassade kort");

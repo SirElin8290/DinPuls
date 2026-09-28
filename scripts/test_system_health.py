@@ -21,6 +21,8 @@ def payloads(empty_module=None, verified_zero=False):
     for module, (filenames, _) in health.MODULES.items():
         for file_index, filename in enumerate(filenames):
             value = json.loads(json.dumps(common))
+            if module == "energy" and filename == "energy.json": value["areas"] = {"SE3": {"periods": [{}]}}
+            if module == "energy" and filename == "electricity-areas.json": value["municipalities"] = {item: "SE3" for item in names}
             for name in names:
                 row = value["municipalities"][name]
                 if file_index:
@@ -30,6 +32,7 @@ def payloads(empty_module=None, verified_zero=False):
                 elif module == "housing": row["listings"] = [{}]
                 elif module == "events": row["events"] = [{}]
                 elif module == "weather": row["nowcast"] = {"current": {"time": now}}
+                elif module == "energy": pass
                 elif module == "lunch": row["restaurants"] = [{}]
                 elif module == "health": value.setdefault("providers", []).append({"municipality": name})
                 elif module == "service": value.setdefault("businesses", []).append({"municipality": name})
@@ -64,7 +67,7 @@ class SystemHealthTests(unittest.TestCase):
         data = payloads()
         result = health.build_health("https://example.test/data", self.now, opener_for(data))
         self.assertEqual(len(result["municipalities"]), 21)
-        self.assertEqual(result["summary"], {"green": 231, "warning": 0, "critical": 0})
+        self.assertEqual(result["summary"], {"green": 252, "warning": 0, "critical": 0})
 
     def test_404_is_critical(self):
         data = payloads()

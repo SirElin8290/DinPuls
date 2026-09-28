@@ -14,6 +14,7 @@
 .local-now-layout > [data-component="missing-people"]{display:flex;min-width:0}
 .local-now-layout > [data-component="emergency-home"]{grid-column:2}
 .local-now-layout > [data-component="primary-cards"]{grid-column:1/-1;min-width:0}
+.local-now-layout > [data-component="energy"]{grid-column:1/-1;min-width:0}
 
 .local-now-layout .missing-people-home{
   width:100%;
@@ -93,6 +94,11 @@
 
 .local-now-layout .primary-service-grid > .card{height:100%;min-width:0}
 
+.energy-home{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1.5fr);gap:16px;align-items:center;margin:0;padding:18px 20px}
+.energy-home .card-title{margin:0}.energy-soft{color:#8a5a00;background:#fff2c9}.energy-status{margin-left:auto;padding:5px 9px;color:#735000;background:#fff2c9;border-radius:999px;font-size:9px;font-weight:800;text-transform:uppercase}.energy-status.is-live{color:#176b38;background:#e4f7ea}
+.energy-loading{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:11px}.energy-content{display:grid;grid-template-columns:minmax(160px,.55fr) minmax(260px,1fr);gap:12px 18px;align-items:center}.energy-content[hidden],.energy-loading[hidden],.energy-error[hidden]{display:none}.energy-current{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:0 7px}.energy-current strong{font-size:34px;line-height:1;color:var(--blue900)}.energy-current>span{font-size:12px;font-weight:800}.energy-current small{grid-column:1/-1;margin-top:5px;color:var(--muted);font-size:9px}.energy-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}.energy-facts div{padding:9px 10px;background:#f4f7fb;border-radius:9px}.energy-facts dt{color:var(--muted);font-size:8px}.energy-facts dd{margin:3px 0 0;font-size:10px;font-weight:800}.energy-explanation{grid-column:1/-1;margin:0;color:var(--muted);font-size:9px;line-height:1.5}.energy-footer{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid var(--border);color:var(--muted);font-size:8px}.energy-footer a{color:var(--blue700);font-weight:700}.energy-error{display:flex;align-items:center;gap:12px;padding:12px;color:#7a3d22;background:#fff3ed;border-radius:10px}.energy-error svg{width:22px}.energy-error div{display:grid;gap:3px}.energy-error small{font-size:9px}
+[data-theme="dark"] .energy-facts div{background:#132943}[data-theme="dark"] .energy-current strong{color:#f4f8ff}[data-theme="dark"] .energy-soft{background:#493b18;color:#ffd86a}
+
 @media(max-width:1180px){
   .local-now-layout{
     grid-template-columns:minmax(240px,.8fr) minmax(0,2.2fr);
@@ -136,4 +142,5 @@
   .local-now-layout .primary-service-grid{
     grid-template-columns:1fr;
   }
+  .energy-home{display:block;margin-top:12px;padding:16px}.energy-home .card-title{margin-bottom:14px}.energy-content{grid-template-columns:1fr}.energy-current strong{font-size:32px}.energy-facts{grid-template-columns:1fr 1fr 1fr}.energy-footer{align-items:flex-start;flex-direction:column}
 }

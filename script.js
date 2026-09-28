@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.26.0";
+const DINPULS_VERSION = "0.26.1";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -37,12 +37,12 @@ const componentNames = [
   "emergency-home",
   "premium-ad-1",
   "primary-cards",
+  "energy",
   "transport",
   "sport",
   "leisure",
   "health",
   "authorities",
-  "service",
   "cinema",
   "secondary-cards",
   "premium-ad-2",
@@ -230,6 +230,7 @@ async function startDinPuls() {
     initializeRotatingAds();
     initializeMunicipality();
     initializeWeather();
+    initializeEnergy();
     await Promise.all([initializeImportant(), initializeLocalDeviations(), initializeMissingPeople(), initializeTraffic(), initializeNews(), initializeTransport(), initializeSports(), initializeLeisure(), initializeJobs(), initializeHousing(), initializeEvents(), initializeLunch(), initializeCinemaHome()]);
     initializeNotifications();
     await DinPulsMunicipality.setMunicipality(
@@ -318,7 +319,6 @@ const HOME_OPTIONAL_MODULES = Object.freeze({
   leisure: [".leisure-home"],
   cinema: [".cinema-home"],
   health: [".health-home"],
-  service: [".service-home"],
   authorities: [".authorities-home"]
 });
 
@@ -1219,6 +1219,75 @@ function selectHeroImageForVisit(config) {
   }
 
   return images[state.index];
+}
+
+let energyCache = null;
+const ENERGY_CACHE_MAX_AGE = 15 * 60 * 1000;
+
+function initializeEnergy() {
+  DinPulsMunicipality.subscribe("energy", renderEnergy);
+  window.setInterval(() => {
+    if (!document.hidden) renderEnergy(DinPulsMunicipality.getConfig());
+  }, 60 * 1000);
+}
+
+async function loadEnergyFiles() {
+  if (energyCache && Date.now() - energyCache.loadedAt < ENERGY_CACHE_MAX_AGE) return energyCache;
+  const [dataResponse, mappingResponse] = await Promise.all([
+    fetch("data/energy.json", { cache: "no-cache" }),
+    fetch("data/electricity-areas.json", { cache: "no-cache" })
+  ]);
+  if (!dataResponse.ok || !mappingResponse.ok) throw new Error("Elprisdata saknas");
+  const [data, mapping] = await Promise.all([dataResponse.json(), mappingResponse.json()]);
+  energyCache = { data, mapping, loadedAt: Date.now() };
+  return energyCache;
+}
+
+function setEnergyPanel(panel) {
+  ["loading", "content", "error"].forEach(name => {
+    const element = document.querySelector(`#energy-${name}`);
+    if (element) element.hidden = name !== panel;
+  });
+}
+
+function formatEnergyPrice(value) {
+  return Number(value).toLocaleString("sv-SE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function formatEnergyPeriod(period) {
+  const options = { timeZone: STOCKHOLM_TIME_ZONE, hour: "2-digit", minute: "2-digit" };
+  return `${new Date(period.start).toLocaleTimeString("sv-SE", options)}–${new Date(period.end).toLocaleTimeString("sv-SE", options)}`;
+}
+
+async function renderEnergy(config) {
+  const municipality = config?.name || DinPulsMunicipality.getName();
+  setText("#energy-municipality", municipality);
+  setEnergyPanel("loading");
+  try {
+    const { data, mapping } = await loadEnergyFiles();
+    const area = window.DinPulsEnergy?.areaForMunicipality(mapping, municipality);
+    const summary = area && window.DinPulsEnergy?.summarize(data?.areas?.[area], new Date());
+    if (!area || !summary || data?.unit !== "öre/kWh") throw new Error("Aktuell verifierad period saknas");
+    setText("#energy-area", area);
+    setText("#energy-current-price", formatEnergyPrice(summary.current.orePerKwh));
+    setText("#energy-current-period", `Gäller ${formatEnergyPeriod(summary.current)}`);
+    setText("#energy-minimum", `${formatEnergyPrice(summary.minimum)} öre/kWh`);
+    setText("#energy-maximum", `${formatEnergyPrice(summary.maximum)} öre/kWh`);
+    setText("#energy-cheapest", formatEnergyPeriod(summary.cheapest));
+    setText("#energy-updated", `Prisdata ${new Date(data.generatedAt).toLocaleString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, dateStyle: "short", timeStyle: "short" })}`);
+    const source = document.querySelector("#energy-source");
+    if (source) source.href = safeExternalUrl(data?.source?.url) || "https://www.elprisetjustnu.se/";
+    const status = document.querySelector("#energy-status");
+    if (status) { status.textContent = "Aktuellt"; status.className = "energy-status is-live"; }
+    setEnergyPanel("content");
+  } catch (error) {
+    console.error("Elpriset kunde inte visas:", error);
+    const status = document.querySelector("#energy-status");
+    if (status) { status.textContent = "Ej tillgängligt"; status.className = "energy-status"; }
+    setText("#energy-area", "–");
+    setEnergyPanel("error");
+  }
+  window.lucide?.createIcons();
 }
 
 function initializeWeather() {

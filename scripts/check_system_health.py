@@ -18,6 +18,7 @@ MODULES = {
     "housing": (["housing.json", "housing-fargelanda-supplement.json"], 12),
     "events": (["events.json", "events-fargelanda-supplement.json"], 12),
     "weather": (["weather-live.json"], 6),
+    "energy": (["energy.json", "electricity-areas.json"], 30),
     "lunch": (["lunch.json"], 48),
     "health": (["health.json", "health-private.json", "health-private-supplement.json", "health-local-supplement.json", "health-karlstad-private-supplement.json", "health-fargelanda-supplement.json", "health-eda-supplement.json"], 24 * 45),
     "service": (["service.json", "service-private-supplement.json", "service-launch-supplement.json", "service-local-supplement.json"], 24 * 45),
@@ -63,6 +64,8 @@ def count_for(module, payload, municipality):
     if module == "weather":
         current = ((row.get("nowcast") or {}).get("current") or {}) if isinstance(row, dict) else {}
         return 1 if current.get("time") else 0
+    if module == "energy":
+        return 0
     if module == "lunch":
         return len(row.get("restaurants") or []) if isinstance(row, dict) else 0
     if module == "health":
@@ -129,7 +132,12 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
             else:
                 payloads = loaded[module]
                 payload = payloads[0]
-                count = sum(count_for(module, item, municipality) for item in payloads)
+                if module == "energy":
+                    area = (payloads[1].get("municipalities") or {}).get(municipality)
+                    periods = ((payloads[0].get("areas") or {}).get(area, {}) or {}).get("periods") if isinstance(area, str) else None
+                    count = 1 if area in {"SE1", "SE2", "SE3", "SE4"} and periods else 0
+                else:
+                    count = sum(count_for(module, item, municipality) for item in payloads)
                 checked = payload_time(payload)
                 age_hours = (now - checked).total_seconds() / 3600 if checked else None
                 if count == 0 and not verified_zero(module, payload, municipality):
