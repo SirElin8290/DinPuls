@@ -21,6 +21,7 @@ const checks = [
   [account.includes('id="showAssociationRegistration"') && account.includes('id="showAssociationLogin"'), "account card exposes both login and registration directions"],
   [accountStyles.includes(".auth-page{height:100vh") && accountStyles.includes(".card-face{overflow:hidden"), "account page and card faces stay within one non-scrollable frame"],
   [account.includes('account-brand-name">DinPuls.se') && accountStyles.includes(".auth-page .account-brand-name{color:#0b5ed7"), "account header renders the blue DinPuls wordmark"],
+  [account.includes('assets/foreningskonto-auth-hero.webp') && accountStyles.includes('url("assets/foreningskonto-auth-hero.webp")'), "approved account hero is preloaded and fills the page background"],
   [accountScript.includes('params.get("mode")==="register"') && accountScript.includes("showRegister") && accountScript.includes("showLogin"), "query mode and both flip directions are wired"],
   [accountScript.includes('p.set("kommun",municipality)') && accountScript.includes('p.set("forening",association)'), "municipality and association context are preserved"]
 ];
