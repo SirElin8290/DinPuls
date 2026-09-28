@@ -87,6 +87,16 @@
     } catch (error) { target.innerHTML = `<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`; }
   }
 
+  async function refreshAssociationMedia() {
+    const target=$("#associationMediaList");if(!target)return;target.innerHTML='<div class="panel"><p>Läser media…</p></div>';
+    try{const data=await api("/portal/admin/associations/media");target.innerHTML=data.media.length?data.media.map(item=>`<article class="panel billing-card" data-media-id="${escapeHtml(item.id)}"><div class="panel-heading"><div><span class="badge">${escapeHtml(item.status)}</span><h2>${escapeHtml(item.municipality)} · ${escapeHtml(item.associationSlug)}</h2><p>${escapeHtml(item.mediaType)} · ${escapeHtml(item.fileName)} · ${escapeHtml(item.uploader||"")}</p></div></div><img class="banner-review-preview" src="${escapeHtml(apiBase+item.previewUrl)}" alt="Förhandsvisning"><label>Kommentar<input class="media-comment"></label><div class="actions"><button class="primary media-review" data-status="approved">Godkänn</button><button class="secondary media-review" data-status="rejected">Avvisa</button></div></article>`).join(""):'<div class="panel"><p>Ingen föreningsmedia väntar på granskning.</p></div>';$$('.media-review').forEach(button=>button.onclick=async()=>{const card=button.closest('[data-media-id]');try{await api(`/portal/admin/associations/media/${card.dataset.mediaId}/review`,{method:'PATCH',body:JSON.stringify({status:button.dataset.status,comment:card.querySelector('.media-comment').value})});await refreshAssociationMedia()}catch(error){alert(error.message)}})}catch(error){target.innerHTML=`<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`}}
+
+  async function refreshAssociationLedger(){const target=$("#associationLedgerList");if(!target)return;try{const data=await api('/portal/admin/associations/ledger');target.innerHTML=data.associations.length?data.associations.map(item=>`<article class="panel billing-card"><h2>${escapeHtml(item.municipality)} · ${escapeHtml(item.association_slug)}</h2><div class="billing-details"><p><b>Intjänat</b><br>${money(Number(item.earned_ore)/100)}</p><p><b>Utbetalt</b><br>${money(Number(item.paid_ore)/100)}</p><p><b>Kvar</b><br>${money(Number(item.balance_ore)/100)}</p></div><form class="association-payout" data-municipality="${escapeHtml(item.municipality)}" data-slug="${escapeHtml(item.association_slug)}"><label>Belopp i kronor<input name="amount" type="number" min="1" step="0.01" required></label><label>Datum/tid<input name="occurredAt" type="datetime-local" required></label><label>Referens/notering<input name="reference" required></label><button class="primary">Registrera utbetalning</button></form></article>`).join(''):'<div class="panel"><p>Inga ekonomiska föreningshändelser.</p></div>';$$('.association-payout').forEach(form=>form.onsubmit=async event=>{event.preventDefault();const values=Object.fromEntries(new FormData(form));try{await api('/portal/admin/associations/payouts',{method:'POST',body:JSON.stringify({municipality:form.dataset.municipality,associationSlug:form.dataset.slug,amountOre:Math.round(Number(values.amount)*100),occurredAt:new Date(values.occurredAt).toISOString(),reference:values.reference})});await refreshAssociationLedger()}catch(error){alert(error.message)}})}catch(error){target.innerHTML=`<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`}}
+
+  async function refreshAssociationAudit(){const target=$("#associationAuditList");if(!target)return;try{const data=await api('/portal/admin/associations/audit');target.innerHTML=data.entries.length?data.entries.map(item=>`<article class="panel"><b>${escapeHtml(item.municipality)} · ${escapeHtml(item.association_slug)}</b><p>${escapeHtml(item.operation)} · ${escapeHtml(item.field_name)} · ${escapeHtml(new Date(item.created_at).toLocaleString('sv-SE'))}</p><small>${escapeHtml(item.old_value)} → ${escapeHtml(item.new_value)}</small></article>`).join(''):'<div class="panel"><p>Ingen ändringshistorik ännu.</p></div>'}catch(error){target.innerHTML=`<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`}}
+
+  const associationRevenueForm=$("#associationRevenueForm");if(associationRevenueForm)associationRevenueForm.onsubmit=async event=>{event.preventDefault();const form=event.currentTarget,values=Object.fromEntries(new FormData(form)),message=form.querySelector('.form-message');try{const result=await api('/portal/admin/associations/revenue',{method:'POST',body:JSON.stringify({municipality:values.municipality,associationSlug:values.associationSlug,revenueOre:Math.round(Number(values.amount)*100),sourceId:values.sourceId,occurredAt:new Date(values.occurredAt).toISOString(),reference:values.reference})});message.textContent=result.idempotent?'Händelsen var redan registrerad.':'Intäkten och föreningens 15 % är registrerade.';await refreshAssociationLedger()}catch(error){message.textContent=error.message}};
+
   async function refreshSystemStatus() {
     const target = $("#systemStatus");
     if (!target || !apiBase) return;
@@ -397,6 +407,9 @@ function openContract(id) {
     if (id === "banner-reviews") refreshBannerReviews();
     if (id === "billing") refreshBilling();
     if (id === "association-claims") refreshAssociationClaims();
+    if (id === "association-media") refreshAssociationMedia();
+    if (id === "association-ledger") refreshAssociationLedger();
+    if (id === "association-audit") refreshAssociationAudit();
     scrollTo(0, 0);
   }
 
@@ -457,6 +470,9 @@ function openContract(id) {
     $("#refreshBannerReviews").onclick = refreshBannerReviews;
     $("#refreshBilling").onclick = refreshBilling;
     $("#refreshAssociationClaims").onclick = refreshAssociationClaims;
+    $("#refreshAssociationMedia").onclick = refreshAssociationMedia;
+    $("#refreshAssociationLedger").onclick = refreshAssociationLedger;
+    $("#refreshAssociationAudit").onclick = refreshAssociationAudit;
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {

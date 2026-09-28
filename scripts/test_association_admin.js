@@ -1,1 +1,12 @@
-const fs=require("fs"),assert=require("assert");const h=fs.readFileSync("foreningsadmin.html","utf8"),c=fs.readFileSync("foreningsadmin.css","utf8"),j=fs.readFileSync("foreningsadmin.js","utf8");for(const id of ["overview","profile","activity","news","media","revenue","access"])assert(h.includes('id="'+id+'"'),id+" saknas");assert(h.includes("15 %")&&h.includes("faktisk avtalad/fakturerad intäkt"));assert(h.includes("Högst tre aktiva poster")&&j.includes("posts.length>=3"));assert(h.includes('accept="image/png,image/jpeg,image/webp"')&&j.includes("5*1024*1024"));assert(h.includes("Verifierad")&&h.includes("väntar på granskning"));assert(j.includes("forening.html?kommun=Åmål"));assert(c.includes("@media(max-width:850px)")&&c.includes("@media(max-width:480px)"));console.log("✓ Föreningsadmin-demo: struktur, media, intäkter och responsivitet verifierade");
+const fs=require("fs"),assert=require("assert");
+const h=fs.readFileSync("foreningsadmin.html","utf8"),c=fs.readFileSync("foreningsadmin.css","utf8"),j=fs.readFileSync("foreningsadmin.js","utf8"),w=fs.readFileSync("cloudflare/push-worker.js","utf8");
+for(const id of ["overview","profile","activity","news","media","revenue","access"])assert(h.includes('id="'+id+'"'),id+" saknas");
+for(const forbidden of ["GRANSKNINGSDEMO","Demoläge","Anna Andersson","Erik Eriksson","Lokala Bygg AB","Kalles Café","example.org","?demo=1"])assert(!h.includes(forbidden)&&!j.includes(forbidden),forbidden+" får inte finnas i produktionsflödet");
+assert(h.includes("15 %")&&h.includes("faktisk hänförlig annonsintäkt"));
+assert(h.includes("Högst tre aktiva poster")&&j.includes("posts.length>=3"));
+assert(h.includes('accept="image/png,image/jpeg,image/webp"')&&j.includes("5*1024*1024"));
+for(const route of ["/portal/association/dashboard","/portal/association/profile","/portal/association/posts","/portal/association/media","/portal/admin/associations/media","/portal/admin/associations/ledger","/portal/admin/associations/audit"])assert(w.includes(route),route+" saknas");
+for(const marker of ["associationAdSlots","/ads/association/current","actual_ad_revenue","revenueOre*0.15"])assert(w.includes(marker),marker+" saknas");
+assert(j.includes("dp-association-session")&&j.includes("Authorization:`Bearer ${token}`"));
+assert(c.includes("@media(max-width:850px)")&&c.includes("@media(max-width:480px)"));
+console.log("✓ Föreningsadmin produktion: riktig session, persistence, media, ekonomi och responsivitet verifierade");

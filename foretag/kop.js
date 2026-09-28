@@ -2,6 +2,7 @@ const $ = selector => document.querySelector(selector);
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
 const cart = new Map();
 let apiBase = "", slots = [];
+let associationData = null;
 let preparedOrder = null;
 let hasFoundation = false, signatureDrawn = false;
 let fixedSignatureImageUrl = null;
@@ -128,6 +129,7 @@ async function findSlots() {
   $("#slotMessage").textContent = "Kontrollerar lediga platser…";
   try {
     const query = new URLSearchParams({ municipality, startDate: start, endDate: endDate(start) });
+    if($("#buyPlacement").value==="association"){const associationSlug=$("#buyAssociation").value;if(!associationSlug)throw new Error("Välj förening.");query.set("associationSlug",associationSlug)}
     const response = await fetch(`${apiBase}/portal/company/available-slots?${query}`, { headers: { Authorization: `Bearer ${token()}` }, cache: "no-store" });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Platserna kunde inte hämtas.");
@@ -147,8 +149,14 @@ try {
   if (!meResponse.ok) throw new Error("Logga in i företagsportalen på nytt.");
   const me = await meResponse.json();
   hasFoundation = Boolean(me.contract?.signedAt);
-  const data = await fetch("../data/municipalities.json", { cache: "no-store" }).then(response => response.json());
+  const [data,sports,leisure] = await Promise.all([fetch("../data/municipalities.json", { cache: "no-store" }).then(response => response.json()),fetch("../data/sports.json",{cache:"no-store"}).then(response=>response.json()),fetch("../data/leisure.json",{cache:"no-store"}).then(response=>response.json())]);
+  associationData={sports,leisure};
   $("#buyMunicipality").replaceChildren(...data.municipalities.map(item => new Option(item.name, item.name)));
+  const slug=value=>String(value||"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const renderAssociations=()=>{const municipality=$("#buyMunicipality").value,all=[...(associationData.sports?.municipalities?.[municipality]?.clubs||[]),...(associationData.leisure?.municipalities?.[municipality]?.activities||[])],seen=new Map;for(const item of all){const name=item.name||item.club,key=slug(name);if(name&&key&&!seen.has(key))seen.set(key,name)}$("#buyAssociation").replaceChildren(new Option("Välj förening",""),...[...seen].sort((a,b)=>a[1].localeCompare(b[1],"sv")).map(([key,name])=>new Option(name,key)))};
+  renderAssociations();
+  $("#buyMunicipality").onchange=()=>{renderAssociations();slots=[];renderSlots()};
+  $("#buyPlacement").onchange=()=>{$("#buyAssociationWrap").hidden=$("#buyPlacement").value!=="association";slots=[];renderSlots()};
   $("#buyStart").value = new Date().toISOString().slice(0, 10);
   $("#buyStatus").hidden = true; $("#buyApp").hidden = false;
   renderCart();
