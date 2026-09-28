@@ -179,6 +179,49 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(working["status"],"current")
         self.assertEqual(working["days"]["monday"],["Ny rätt"])
 
+    def test_lunchsidan_skeppet_maps_current_week_and_only_right_restaurant(self):
+        page = """<h1>Restaurant Skeppet – lunchmeny och dagens lunch</h1><a>Fler lunchmenyer i Arvika</a>
+        <h2>Restaurant Skeppet</h2><p>Strandvägen 2, 671 51 Arvika</p><p>Uppdaterad: 28 sep 2026 (vecka 40)</p>
+        <div>Måndag Köttbullar med potatismos</div><div>Tisdag Fisk med kokt potatis</div>
+        <div>Onsdag Pannbiff med gräddsås</div><div>Torsdag Idag öppnar vi i ny regi! Varmt välkomna till Restaurang Skeppet by Smak &amp; co Vår hemgjorda pannbiff</div>
+        <p>Kålsoppa med nybakt bröd</p><div>Fredag Oxfilé med kantarellsås</div><p>Dessert</p>
+        <h2>Hitta hit</h2><p>Öppna i Google Maps</p><h2>En annan restaurang</h2><p>Måndag Fel rätt</p>"""
+        week,days=update_lunch.parse_lunchsidan_restaurant(page,r"Restaurant Skeppet","Strandvägen 2, 671 51 Arvika",[r"Idag öppnar vi i ny regi! Varmt välkomna till Restaurang Skeppet by Smak & co"])
+        self.assertEqual(week,40)
+        self.assertEqual(days["monday"],["Köttbullar med potatismos"])
+        self.assertEqual(days["tuesday"],["Fisk med kokt potatis"])
+        self.assertEqual(days["wednesday"],["Pannbiff med gräddsås"])
+        self.assertEqual(days["thursday"],["Vår hemgjorda pannbiff","Kålsoppa med nybakt bröd"])
+        self.assertEqual(days["friday"],["Oxfilé med kantarellsås"])
+        self.assertNotIn("Fel rätt",str(days))
+
+    def test_lunchsidan_wrong_identity_and_missing_week_are_rejected(self):
+        with self.assertRaisesRegex(RuntimeError,"fel restaurang"):
+            update_lunch.parse_lunchsidan_restaurant("<h1>Annat Skepp</h1><p>Strandvägen 2, 671 51 Arvika</p>",r"Restaurant Skeppet","Strandvägen 2, 671 51 Arvika")
+        with self.assertRaisesRegex(RuntimeError,"veckonummer saknas"):
+            update_lunch.parse_lunchsidan_restaurant("<h1>Restaurant Skeppet</h1><p>Strandvägen 2, 671 51 Arvika</p><p>Måndag Rätt</p>",r"Restaurant Skeppet","Strandvägen 2, 671 51 Arvika")
+
+    def test_lunchsidan_old_week_never_becomes_current(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"]=[{"id":"skeppet","name":"Skeppet","url":"https://official.test","dataUrl":"https://menu.test","parser":"lunchsidan-restaurant","expectedNamePattern":"Restaurant Skeppet","expectedAddress":"Strandvägen 2, 671 51 Arvika"}]
+        page="<h1>Restaurant Skeppet</h1><p>Strandvägen 2, 671 51 Arvika</p><p>Uppdaterad: 21 sep 2026 (vecka 39)</p><p>Måndag Gammal rätt</p>"
+        item=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")),fetcher=lambda _url:page)["municipalities"]["Arvika"]["restaurants"][0]
+        self.assertEqual(item["status"],"outdated")
+        self.assertEqual(item["days"],{})
+
+    def test_lunchsidan_empty_and_timeout_do_not_affect_other_restaurant(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"]=[
+            {"id":"skeppet","name":"Skeppet","url":"https://official.test","dataUrl":"https://skeppet.test","parser":"lunchsidan-restaurant","expectedNamePattern":"Restaurant Skeppet","expectedAddress":"Strandvägen 2, 671 51 Arvika"},
+            {"id":"other","name":"Other","url":"https://other.test","parser":"weekday-headings"},
+        ]
+        def fetcher(url):
+            if "skeppet" in url: raise RuntimeError("timeout")
+            return "<h2>Vecka 40</h2><h3>Måndag</h3><p>Fungerande rätt</p>"
+        rows=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")),fetcher=fetcher)["municipalities"]["Arvika"]["restaurants"]
+        self.assertEqual(rows[0]["status"],"unavailable")
+        self.assertEqual(rows[1]["status"],"current")
+
 
 if __name__ == "__main__":
     unittest.main()

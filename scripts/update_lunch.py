@@ -26,7 +26,7 @@ USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
 EXPECTED_MUNICIPALITIES = {item["name"] for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]}
 DAYS = {"måndag":"monday","mandag":"monday","tisdag":"tuesday","onsdag":"wednesday","torsdag":"thursday","fredag":"friday","lördag":"saturday","lordag":"saturday","söndag":"sunday","sondag":"sunday"}
 STOP_MARKERS = ("veckans vegetariska","sallader","lunchpriser","öppettider","kontakt","pris ","priser","barn ","utkörningsservice","ta kontakt","catering","ring oss","galleri","adress","bordsbokning","öppet för","veckans meny","inkl.","sommarerbjudanden","ladda ner","med goda drycker","övrigt","lördagslunch","veckans burgare","veckans pasta","ta en titt på vår meny","kunden har alltid rätt","det här tycker våra kunder")
-NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","måltidsdryck","kaffe & kaka"}
+NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","måltidsdryck","kaffe & kaka","dessert"}
 
 class TextExtractor(HTMLParser):
     def __init__(self): super().__init__(); self.lines=[]; self.blocked=0
@@ -132,6 +132,25 @@ def parse_dated_weekday_menu(page, today):
     _unused,days=parse_weekday_menu("\n".join(lines[index:end]))
     return start_date.isocalendar().week,days
 
+def parse_lunchsidan_restaurant(page, expected_name, expected_address, remove_prefixes=None):
+    """Tolkar en restaurangsida hos Lunchsidan efter hård identitets- och veckokontroll."""
+    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
+    if not any(re.search(expected_name,line,re.I) for line in lines[:8]): raise RuntimeError("Lunchsidan: fel restaurang")
+    if not any(expected_address.casefold() in line.casefold() for line in lines[:10]): raise RuntimeError("Lunchsidan: fel adress")
+    updated=next((line for line in lines if line.lower().startswith("uppdaterad:")),None)
+    week=extract_week([updated]) if updated else None
+    if week is None: raise RuntimeError("Lunchsidan: veckonummer saknas")
+    menu={key:[] for key in DAYS.values()}; active=None; started=False
+    for line in lines:
+        inline=re.match(r"^(måndag|tisdag|onsdag|torsdag|fredag|lördag|söndag)\s+(.+)$",line,re.I)
+        if inline:
+            active=DAYS[inline.group(1).lower()]; started=True; line=inline.group(2).strip()
+        elif started and (line.lower() in {"hitta hit","saknar du en restaurang?"} or line.lower().startswith("öppna i google maps")): break
+        elif not started: continue
+        for prefix in remove_prefixes or []: line=re.sub(rf"^{prefix}\s*", "", line, flags=re.I)
+        if active and useful_dish(line) and len(menu[active])<5: menu[active].append(line)
+    return week,menu
+
 def parse_all_days_menu(page):
     parser=TextExtractor(); parser.feed(page); lines=parser.text_lines(); dishes=[]; active=False
     for line in lines:
@@ -179,7 +198,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant"}:
                 try:
                     page=fetch_source(source,fetcher)
                     if parser_name=="all-days-heading":
@@ -187,6 +206,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                         if any(days.values()): week=current_week
                     elif parser_name=="scoped-weekday-headings": week,days=parse_scoped_weekday_menu(page,source["headingPattern"],current_week)
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
+                    elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     else: week,days=parse_weekday_menu(page)
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and any(days.values()) else "outdated"; item["mode"]="automatic"

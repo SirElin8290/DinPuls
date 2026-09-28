@@ -1,6 +1,6 @@
 {
   "version": "0.21.4",
-  "generatedAt": "2026-09-28T23:45:36+02:00",
+  "generatedAt": "2026-09-28T23:59:06+02:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 40,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
@@ -626,7 +626,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -669,7 +669,7 @@
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -713,7 +713,7 @@
           "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -742,16 +742,42 @@
           "id": "skeppet",
           "name": "Restaurang Skeppet",
           "url": "https://aanc.se/i-huset/restaurang-skeppet.html",
-          "address": "Arvika Näringslivscentrum",
+          "dataUrl": "https://www.lunchsidan.se/restaurang/restaurant-skeppet/4741910591",
+          "address": "Strandvägen 2, Arvika",
           "hours": "Vardagar 10.30–14.00",
-          "parser": "source-only",
+          "parser": "lunchsidan-restaurant",
+          "expectedNamePattern": "Restaurant Skeppet",
+          "expectedAddress": "Strandvägen 2, 671 51 Arvika",
+          "removePrefixes": [
+            "Idag öppnar vi i ny regi! Varmt välkomna till Restaurang Skeppet by Smak & co"
+          ],
           "nameAfter": "Restaurang Skeppet by Smak & Co",
           "nameAfterDate": "2026-10-01",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
+          "checkedAt": "2026-09-28T23:59:06+02:00",
+          "weekNumber": 40,
+          "days": {
+            "monday": [
+              "Skeppet byter kapten – men innan dess ska lagret länsas! Vi serverar lunchbuffé Välj själv bland olika varmrätter tillsammans med vårt stora salladsbord!"
+            ],
+            "tuesday": [
+              "Skeppet byter kapten – men innan dess ska lagret länsas! Vi serverar lunchbuffé Välj själv bland olika varmrätter tillsammans med vårt stora salladsbord!"
+            ],
+            "wednesday": [
+              "Skeppet byter kapten – men innan dess ska lagret länsas! Vi serverar lunchbuffé Välj själv bland olika varmrätter tillsammans med vårt stora salladsbord!"
+            ],
+            "thursday": [
+              "Vår hemgjorda pannbiff med stekt lök, gräddsås & rårörda lingon",
+              "Kålsoppa serveras med nybakt bröd, smör & ost"
+            ],
+            "friday": [
+              "Helstekt oxfilé med kantarellsås & västerbottenpuré",
+              "Kålsoppa serveras med nybakt bröd, smör & ost"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "elins-bakgard",
@@ -760,7 +786,7 @@
           "address": "Magasinsgatan 4, Arvika",
           "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
           "parser": "dated-weekday-headings",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [],
@@ -797,7 +823,7 @@
           "hours": "Vardagar 11.00–14.00",
           "parser": "scoped-weekday-headings",
           "headingPattern": "Café Gnistan lunchmeny",
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -838,7 +864,7 @@
             9,
             10
           ],
-          "checkedAt": "2026-09-28T23:45:36+02:00",
+          "checkedAt": "2026-09-28T23:59:06+02:00",
           "weekNumber": null,
           "days": {},
           "status": "active",
