@@ -30,6 +30,32 @@ def merge(existing, adds):
     return list(out.values())
 
 
+def association_enrichment(dataset):
+    payload = load('association-enrichment.json')
+    return {
+        key(item): item
+        for item in payload.get('entries', [])
+        if item.get('municipality') == 'Munkfors' and item.get('dataset') == dataset
+    }
+
+
+def restore_association_enrichment(items, dataset):
+    """Återlägg Munkfors verifierade data efter att STRICT-källan har slagits ihop."""
+    patches = association_enrichment(dataset)
+    restored = []
+    for item in items:
+        patch = patches.get(key(item))
+        if not patch:
+            restored.append(item)
+            continue
+        merged = {**item, **{k: v for k, v in patch.items() if k not in {'municipality', 'dataset'}}}
+        for nested in ('contact', 'social'):
+            if item.get(nested) or patch.get(nested):
+                merged[nested] = {**(item.get(nested) or {}), **(patch.get(nested) or {})}
+        restored.append(merged)
+    return restored
+
+
 def selected_modules():
     parser = argparse.ArgumentParser()
     parser.add_argument('--only', action='append', choices=sorted(ALL))
@@ -85,13 +111,17 @@ def apply(modules):
     if 'leisure' in modules:
         data = load('leisure.json')
         entry = data.setdefault('municipalities', {}).setdefault('Munkfors', {})
-        entry['activities'] = merge(entry.get('activities') or [], SRC['leisure'])
+        entry['activities'] = restore_association_enrichment(
+            merge(entry.get('activities') or [], SRC['leisure']), 'leisure'
+        )
         save('leisure.json', data)
 
     if 'sports' in modules:
         data = load('sports.json')
         entry = data.setdefault('municipalities', {}).setdefault('Munkfors', {})
-        entry['clubs'] = merge(entry.get('clubs') or [], SRC['sports'])
+        entry['clubs'] = restore_association_enrichment(
+            merge(entry.get('clubs') or [], SRC['sports']), 'sport'
+        )
         save('sports.json', data)
 
 
