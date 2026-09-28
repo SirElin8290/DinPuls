@@ -111,6 +111,11 @@ async function ensureDatabase(env) {
     "FOREIGN KEY(company_user_id) REFERENCES business_users(id))"
   ).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS portal_tokens_user_purpose ON portal_activation_tokens (company_user_id, purpose, used_at, expires_at)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS association_users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, password_salt TEXT NOT NULL, password_hash TEXT NOT NULL, contact_name TEXT NOT NULL, phone TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 0, activated_at TEXT, welcome_sent_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS association_memberships (id TEXT PRIMARY KEY, association_user_id TEXT NOT NULL, municipality TEXT NOT NULL, association_slug TEXT NOT NULL, association_name TEXT NOT NULL, stated_role TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', reviewed_by TEXT, reviewed_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE(association_user_id, municipality, association_slug), FOREIGN KEY(association_user_id) REFERENCES association_users(id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS association_memberships_review ON association_memberships(status, created_at)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS association_activation_tokens (id TEXT PRIMARY KEY, association_user_id TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, purpose TEXT NOT NULL, expires_at TEXT NOT NULL, used_at TEXT, created_at TEXT NOT NULL, FOREIGN KEY(association_user_id) REFERENCES association_users(id))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS association_tokens_user ON association_activation_tokens(association_user_id, purpose, used_at, expires_at)").run();
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS ad_banners (" +
     "id TEXT PRIMARY KEY, company_user_id INTEGER NOT NULL, contract_id TEXT NOT NULL, slot_id TEXT NOT NULL, " +
@@ -163,6 +168,7 @@ const SESSION_HOURS = 8;
 const ACCOUNT_TOKEN_HOURS = 48;
 const TOKEN_PURPOSES = new Set(["activate-account", "reset-password"]);
 const PUBLIC_PORTAL_URL = "https://dinpuls.se/foretag/konto.html";
+const ASSOCIATION_PORTAL_URL = "https://dinpuls.se/foreningskonto.html";
 
 function bytesToHex(bytes) {
   return [...bytes].map(value => value.toString(16).padStart(2, "0")).join("");
@@ -805,6 +811,49 @@ async function requestPasswordReset(request, env) {
   }
   return json(request, { ok: true, message: "Om adressen finns skickas en återställningslänk." });
 }
+
+async function sendAssociationEmail(env, user, kind, token = "") {
+  if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM) throw new Error("E-posttjänsten är inte konfigurerad.");
+  const activation = kind === "activate";
+  const link = activation ? `${ASSOCIATION_PORTAL_URL}#token=${encodeURIComponent(token)}&purpose=activate-association` : `${ASSOCIATION_PORTAL_URL}`;
+  const subject = activation ? "DinPuls Föreningar – skapa ditt lösenord" : "Välkommen till DinPuls Föreningar";
+  const intro = activation ? `Din ansökan om att administrera ${htmlEscape(user.association_name)} är registrerad. Skapa ditt personliga lösenord via länken nedan. DinPuls verifierar behörigheten separat.` : `Ditt föreningskonto är aktiverat. Din ansökan för ${htmlEscape(user.association_name)} väntar på verifiering innan föreningens uppgifter kan publiceras.`;
+  const button = activation ? "Skapa lösenord" : "Gå till föreningskontot";
+  const response = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: env.PORTAL_EMAIL_FROM, to: [user.email], subject, html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#17364d"><h1>${subject}</h1><p>Hej ${htmlEscape(user.contact_name)},</p><p>${intro}</p><p style="margin:30px 0"><a href="${link}" style="background:#0b5ed7;color:#fff;text-decoration:none;padding:14px 22px;border-radius:8px;font-weight:700">${button}</a></p><p>${activation ? "Länken gäller i 48 timmar och kan bara användas en gång." : "Du får ett separat besked när föreningsbehörigheten har verifierats."}</p></div>`, text: `Hej ${user.contact_name},\n\n${activation ? `Din ansökan för ${user.association_name} är registrerad. Skapa lösenord: ${link}` : `Välkommen till DinPuls Föreningar. Din ansökan för ${user.association_name} väntar på verifiering.`}\n\nDinPuls` }) });
+  if (!response.ok) throw new Error(`E-postleverantören svarade ${response.status}.`);
+}
+
+async function createAssociationToken(env, userId) {
+  const token = bytesToHex(crypto.getRandomValues(new Uint8Array(32))), now = new Date(), expiresAt = new Date(now.getTime() + ACCOUNT_TOKEN_HOURS * 3600000).toISOString();
+  await env.DB.prepare("UPDATE association_activation_tokens SET used_at=? WHERE association_user_id=? AND purpose='activate-association' AND used_at IS NULL").bind(now.toISOString(), userId).run();
+  await env.DB.prepare("INSERT INTO association_activation_tokens(id,association_user_id,token_hash,purpose,expires_at,used_at,created_at) VALUES(?,?,?,'activate-association',?,NULL,?)").bind(crypto.randomUUID(), userId, await sha256(token), expiresAt, now.toISOString()).run();
+  return token;
+}
+
+async function registerAssociation(request, env) {
+  if (env.ASSOCIATION_SIGNUP_ENABLED !== "true") return json(request, { ok:false, error:"Registrering av föreningskonton är inte aktiverad." }, 503);
+  if (!env.RESEND_API_KEY || !env.PORTAL_EMAIL_FROM || !env.PORTAL_PASSWORD_PEPPER) return json(request, { ok:false, error:"Kontotjänsten är inte konfigurerad." }, 503);
+  const body=await readBody(request), email=cleanText(body?.email,254).toLowerCase(), municipality=cleanText(body?.municipality,80), associationSlug=cleanText(body?.associationSlug,160), associationName=cleanText(body?.associationName,180), contactName=cleanText(body?.contactName,160), statedRole=cleanText(body?.statedRole,120), phone=cleanText(body?.phone,40);
+  const limit=await checkLoginLimit(request,env,email,"association-registration"); if(!limit.allowed)return json(request,{ok:false,error:"För många registreringsförsök. Försök igen senare."},429); await recordLoginFailure(env,limit.key);
+  if(!validEmail(email)||!isSupportedMunicipality(municipality)||!associationSlug||!associationName||!contactName||!statedRole||!phone)return json(request,{ok:false,error:"Fyll i förening, kommun och samtliga kontaktuppgifter."},400);
+  const existing=await env.DB.prepare("SELECT id,active FROM association_users WHERE email=?").bind(email).first(); if(existing)return json(request,{ok:false,error:"E-postadressen har redan ett föreningskonto. Använd inloggning eller lösenordsåterställning."},409);
+  const id=crypto.randomUUID(),membershipId=crypto.randomUUID(),now=new Date().toISOString(),salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),unusable=await sha256(bytesToHex(crypto.getRandomValues(new Uint8Array(32))));
+  await env.DB.batch([env.DB.prepare("INSERT INTO association_users(id,email,password_salt,password_hash,contact_name,phone,active,created_at,updated_at) VALUES(?,?,?,?,?,?,0,?,?)").bind(id,email,salt,unusable,contactName,phone,now,now),env.DB.prepare("INSERT INTO association_memberships(id,association_user_id,municipality,association_slug,association_name,stated_role,status,created_at,updated_at) VALUES(?,?,?,?,?,?,'pending',?,?)").bind(membershipId,id,municipality,associationSlug,associationName,statedRole,now,now)]);
+  try{const token=await createAssociationToken(env,id);await sendAssociationEmail(env,{email,contact_name:contactName,association_name:associationName},"activate",token)}catch(error){console.error("DinPuls föreningsregistrering:",error);return json(request,{ok:false,error:"Kontot är skapat men aktiveringsmejlet kunde inte skickas. Kontakta DinPuls."},502)}
+  return json(request,{ok:true,message:"Ansökan är registrerad. Kontrollera mejlen och skapa ditt lösenord via aktiveringslänken."},201);
+}
+
+async function verifyAssociationToken(request, env) { const body=await readBody(request),token=String(body?.token||"");if(!/^[0-9a-f]{64}$/i.test(token))return json(request,{ok:false,state:"invalid",error:"Länken är ogiltig."},400);const row=await env.DB.prepare("SELECT t.expires_at,t.used_at,m.association_name FROM association_activation_tokens t JOIN association_memberships m ON m.association_user_id=t.association_user_id WHERE t.token_hash=? AND t.purpose='activate-association' LIMIT 1").bind(await sha256(token)).first();if(!row)return json(request,{ok:false,state:"invalid",error:"Länken är ogiltig."},404);if(row.used_at)return json(request,{ok:false,state:"used",error:"Länken har redan använts."},409);if(Date.parse(row.expires_at)<=Date.now())return json(request,{ok:false,state:"expired",error:"Länken har gått ut."},410);return json(request,{ok:true,state:"valid",associationName:row.association_name,expiresAt:row.expires_at}); }
+
+async function completeAssociationPassword(request, env) { if(!env.PORTAL_PASSWORD_PEPPER)return json(request,{ok:false,error:"Kontotjänsten är inte konfigurerad."},503);const body=await readBody(request),token=String(body?.token||""),password=String(body?.password||""),confirmation=String(body?.passwordConfirmation||"");if(!/^[0-9a-f]{64}$/i.test(token)||password!==confirmation||!validPassword(password))return json(request,{ok:false,error:password!==confirmation?"Lösenorden är inte likadana.":"Lösenordet måste ha minst 12 tecken samt innehålla stor bokstav, liten bokstav och siffra."},400);const hash=await sha256(token),row=await env.DB.prepare("SELECT t.id,t.association_user_id,t.expires_at,t.used_at,u.email,u.contact_name,m.association_name FROM association_activation_tokens t JOIN association_users u ON u.id=t.association_user_id JOIN association_memberships m ON m.association_user_id=u.id WHERE t.token_hash=? AND t.purpose='activate-association' LIMIT 1").bind(hash).first();if(!row||row.used_at||Date.parse(row.expires_at)<=Date.now())return json(request,{ok:false,error:"Länken är ogiltig, använd eller utgången."},409);const now=new Date().toISOString(),claimed=await env.DB.prepare("UPDATE association_activation_tokens SET used_at=? WHERE id=? AND used_at IS NULL AND expires_at>?").bind(now,row.id,now).run();if(!claimed.meta.changes)return json(request,{ok:false,error:"Länken har redan använts."},409);const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16)));await env.DB.prepare("UPDATE association_users SET password_salt=?,password_hash=?,active=1,activated_at=COALESCE(activated_at,?),updated_at=? WHERE id=?").bind(salt,await hashPassword(password,salt,env.PORTAL_PASSWORD_PEPPER),now,now,row.association_user_id).run();let welcome="sent";try{await sendAssociationEmail(env,row,"welcome");await env.DB.prepare("UPDATE association_users SET welcome_sent_at=? WHERE id=?").bind(now,row.association_user_id).run()}catch(error){welcome="failed";console.error("DinPuls föreningsvälkomstmejl:",error)}return json(request,{ok:true,state:"complete",welcome,message:"Lösenordet är skapat. Du kan nu logga in; föreningsbehörigheten väntar på verifiering."}); }
+
+async function associationLogin(request, env) { if(!env.PORTAL_PASSWORD_PEPPER)return json(request,{ok:false,error:"Kontotjänsten är inte konfigurerad."},503);const body=await readBody(request),email=cleanText(body?.email,254).toLowerCase(),password=String(body?.password||""),limit=await checkLoginLimit(request,env,email,"association");if(!limit.allowed)return json(request,{ok:false,error:"För många inloggningsförsök. Försök igen om 15 minuter."},429);const user=validEmail(email)?await env.DB.prepare("SELECT id,password_salt,password_hash,active FROM association_users WHERE email=?").bind(email).first():null,candidate=user?await hashPassword(password,user.password_salt,env.PORTAL_PASSWORD_PEPPER):await hashPassword(password,"00".repeat(16),env.PORTAL_PASSWORD_PEPPER);if(!user||!Number(user.active)||!safeEqual(candidate,user.password_hash)){await recordLoginFailure(env,limit.key);return json(request,{ok:false,error:"Fel e-post eller lösenord."},401)}await clearLoginFailures(env,limit.key);return json(request,{ok:true,...await createSession(env,"association",user.id)}); }
+
+async function associationAccount(request, env) { const session=await requireSession(request,env,"association");if(!session)return json(request,{ok:false,error:"Obehörig."},401);const user=await env.DB.prepare("SELECT id,email,contact_name,phone FROM association_users WHERE id=? AND active=1").bind(session.subject_id).first();const memberships=await env.DB.prepare("SELECT id,municipality,association_slug,association_name,stated_role,status FROM association_memberships WHERE association_user_id=? ORDER BY created_at").bind(session.subject_id).all();return json(request,{ok:true,account:user,memberships:memberships.results||[]}); }
+
+async function listAssociationClaims(request, env) { const session=await requireSession(request,env,"admin");if(!session)return json(request,{ok:false,error:"Obehörig."},401);const result=await env.DB.prepare("SELECT m.id,m.municipality,m.association_slug,m.association_name,m.stated_role,m.status,m.reviewed_by,m.reviewed_at,m.created_at,u.email,u.contact_name,u.phone,u.active FROM association_memberships m JOIN association_users u ON u.id=m.association_user_id ORDER BY CASE m.status WHEN 'pending' THEN 0 WHEN 'more_information' THEN 1 ELSE 2 END,m.created_at DESC").all();return json(request,{ok:true,claims:result.results||[]}); }
+
+async function reviewAssociationClaim(request, env, claimId) { const session=await requireSession(request,env,"admin");if(!session)return json(request,{ok:false,error:"Obehörig."},401);const body=await readBody(request),status=cleanText(body?.status,40);if(!["verified","rejected","more_information"].includes(status))return json(request,{ok:false,error:"Ogiltig granskningsstatus."},400);const now=new Date().toISOString(),result=await env.DB.prepare("UPDATE association_memberships SET status=?,reviewed_by=?,reviewed_at=?,updated_at=? WHERE id=?").bind(status,String(session.subject_id),now,now,claimId).run();if(!result.meta.changes)return json(request,{ok:false,error:"Ansökan finns inte."},404);return json(request,{ok:true,status,reviewedAt:now}); }
 
 function snapshotForContract(input, placements, price, version = CONTRACT_VERSION, terms = CONTRACT_TERMS) {
   return {
@@ -1680,6 +1729,7 @@ export default {
           selfServiceSignupEnabled: env.SELF_SERVICE_SIGNUP_ENABLED === "true",
           selfServicePurchaseEnabled: env.SELF_SERVICE_PURCHASE_ENABLED === "true",
           selfServiceFixedSignatureEnabled: env.SELF_SERVICE_FIXED_SIGNATURE_ENABLED === "true",
+          associationSignupEnabled: env.ASSOCIATION_SIGNUP_ENABLED === "true",
           spirisEnabled: false
         });
       }
@@ -1691,6 +1741,14 @@ export default {
       }
       if (request.method === "POST" && url.pathname === "/portal/auth/admin") return adminLogin(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/company") return companyLogin(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/auth/association") return associationLogin(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/association/register") return registerAssociation(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/association/token/verify") return verifyAssociationToken(request, env);
+      if (request.method === "POST" && url.pathname === "/portal/association/password") return completeAssociationPassword(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/association/me") return associationAccount(request, env);
+      if (request.method === "GET" && url.pathname === "/portal/admin/associations/claims") return listAssociationClaims(request, env);
+      const associationClaimMatch = /^\/portal\/admin\/associations\/claims\/([0-9a-f-]{36})$/i.exec(url.pathname);
+      if (request.method === "PATCH" && associationClaimMatch) return reviewAssociationClaim(request, env, associationClaimMatch[1]);
       if (request.method === "POST" && url.pathname === "/portal/company/register") return registerCompany(request, env);
       if (request.method === "POST" && url.pathname === "/portal/auth/logout") return logoutPortal(request, env);
       if (request.method === "POST" && url.pathname === "/portal/account/token/verify") return verifyAccountToken(request, env);

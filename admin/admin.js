@@ -71,6 +71,22 @@
     $("#refreshSystemStatus").onclick = refreshSystemStatus;
   }
 
+  async function refreshAssociationClaims() {
+    const target = $("#associationClaimList");
+    if (!target) return;
+    target.innerHTML = '<div class="panel"><p class="muted">Läser ansökningar…</p></div>';
+    try {
+      const data = await api("/portal/admin/associations/claims");
+      const labels = { pending: "Väntar på verifiering", verified: "Verifierad", rejected: "Avvisad", more_information: "Behöver kompletteras" };
+      target.innerHTML = data.claims.length ? data.claims.map(claim => `<article class="panel billing-card" data-association-claim="${escapeHtml(claim.id)}"><div class="panel-heading"><div><span class="badge">${escapeHtml(labels[claim.status] || claim.status)}</span><h2>${escapeHtml(claim.association_name)}</h2><p>${escapeHtml(claim.municipality)} · ${escapeHtml(claim.association_slug)}</p></div></div><div class="billing-details"><p><b>Sökande</b><br>${escapeHtml(claim.contact_name)}<br>${escapeHtml(claim.email)}</p><p><b>Telefon</b><br>${escapeHtml(claim.phone)}</p><p><b>Uppgiven roll</b><br>${escapeHtml(claim.stated_role)}</p><p><b>Registrerad</b><br>${escapeHtml(new Date(claim.created_at).toLocaleString("sv-SE"))}</p></div><div class="actions"><button class="primary association-review" data-status="verified" type="button">Godkänn</button><button class="secondary association-review" data-status="more_information" type="button">Begär komplettering</button><button class="secondary association-review" data-status="rejected" type="button">Avvisa</button></div></article>`).join("") : '<div class="panel"><p class="muted">Inga föreningsansökningar.</p></div>';
+      $$(".association-review").forEach(button => button.onclick = async () => {
+        const card = button.closest("[data-association-claim]");
+        try { await api(`/portal/admin/associations/claims/${encodeURIComponent(card.dataset.associationClaim)}`, { method: "PATCH", body: JSON.stringify({ status: button.dataset.status }) }); await refreshAssociationClaims(); }
+        catch (error) { alert(error.message); }
+      });
+    } catch (error) { target.innerHTML = `<div class="panel"><p class="error">${escapeHtml(error.message)}</p></div>`; }
+  }
+
   async function refreshSystemStatus() {
     const target = $("#systemStatus");
     if (!target || !apiBase) return;
@@ -380,6 +396,7 @@ function openContract(id) {
     if (id === "operations") refreshOperations();
     if (id === "banner-reviews") refreshBannerReviews();
     if (id === "billing") refreshBilling();
+    if (id === "association-claims") refreshAssociationClaims();
     scrollTo(0, 0);
   }
 
@@ -439,6 +456,7 @@ function openContract(id) {
     $("#refreshOperations").onclick = refreshOperations;
     $("#refreshBannerReviews").onclick = refreshBannerReviews;
     $("#refreshBilling").onclick = refreshBilling;
+    $("#refreshAssociationClaims").onclick = refreshAssociationClaims;
     $("#loginForm").onsubmit = async event => {
       event.preventDefault();
       try {
