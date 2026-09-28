@@ -78,21 +78,16 @@ jobs:
           dals_ed = (events.get('municipalities') or {}).get('Dals-Ed') or {}
           if not any(source.get('status') == 'ok' and source.get('mode') == 'automatic' for source in dals_ed.get('sourceHealth', [])):
               raise SystemExit('Dals-Ed saknar verifierad kalenderstatus')
-          kil = (events.get('municipalities') or {}).get('Kil') or {}
-          if len(kil.get('events') or []) < 5:
-              raise SystemExit(f'Kil har för få aktuella evenemang efter supplement: {len(kil.get("events") or [])}')
-          saffle = (events.get('municipalities') or {}).get('Säffle') or {}
-          if len(saffle.get('events') or []) < 5:
-              raise SystemExit(f'Säffle har för få aktuella evenemang efter supplement: {len(saffle.get("events") or [])}')
-          fargelanda = (events.get('municipalities') or {}).get('Färgelanda') or {}
-          if len(fargelanda.get('events') or []) < 5:
-              raise SystemExit(f'Färgelanda har för få aktuella evenemang efter supplement: {len(fargelanda.get("events") or [])}')
-          storfors = (events.get('municipalities') or {}).get('Storfors') or {}
-          storfors_events = storfors.get('events') or []
-          if not storfors_events:
-              raise SystemExit('Storfors saknar aktuella verifierade evenemang efter supplement')
-          if any(not item.get('url') or not item.get('startDate') for item in storfors_events):
-              raise SystemExit('Storfors har evenemang utan verifierbar källa eller datum')
+          checked = {}
+          for municipality in ('Kil', 'Säffle', 'Färgelanda', 'Storfors'):
+              municipality_events = ((events.get('municipalities') or {}).get(municipality) or {}).get('events') or []
+              if not municipality_events:
+                  raise SystemExit(f'{municipality} saknar aktuella verifierade evenemang efter supplement')
+              if any(not item.get('url') or not item.get('startDate') for item in municipality_events):
+                  raise SystemExit(f'{municipality} har evenemang utan verifierbar källa eller datum')
+              checked[municipality] = municipality_events
+          kil, saffle = {'events': checked['Kil']}, {'events': checked['Säffle']}
+          fargelanda, storfors = {'events': checked['Färgelanda']}, {'events': checked['Storfors']}
           print(f'Evenemangsdata innehåller alla {len(expected)} kommuner; Dals-Ed har {len(dals_ed["events"])} poster; Kil har {len(kil["events"])} poster; Säffle har {len(saffle["events"])} poster; Färgelanda har {len(fargelanda["events"])} poster; Storfors har {len(storfors["events"])} poster')
           PY
       - name: Spara evenemangsdata konfliktsäkert
