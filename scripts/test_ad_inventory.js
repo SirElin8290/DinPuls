@@ -45,6 +45,10 @@ assert(publicAdsSource.includes('slot.hidden = false'), "En godkänd aktiv banne
 assert(publicAdsSource.includes('window.setInterval(show, 30000)'), "Flera aktiva startsidesannonser ska rotera var 30:e sekund");
 assert(!publicAdsSource.includes("Ditt företag här"), "Publik annonsmotor får inte skapa bokningsplatshållare");
 assert(!dynamicSource.includes("Ditt företag här"), "Dynamiska portaler får inte skapa bokningsplatshållare");
+for (const file of ["health-page.js", "myndigheter-page.js", "news-page.js", "service-page.js", "script.js"]) {
+  const source = fs.readFileSync(path.join(root, file), "utf8");
+  assert(!source.includes("Ditt företag här") && !source.includes("ANNONSPLATS"), `${file}: publik platshållare får inte finnas kvar`);
+}
 
 const staticPagesWithAds = fs.readdirSync(root)
   .filter(file => file.endsWith(".html"))

@@ -89,10 +89,7 @@ function renderNewsPageSources() {
 }
 
 function renderNewsAds() {
-  document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
-    const position = slot.dataset.adPosition;
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=Annonsplats%20nyheter%20${position}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls nyhetssida · 800 kr/månad + moms</small></a>`;
-  });
+  window.renderStrategicAds?.("nyheter", "Nyheter", "#news-page-list");
 }
 
 initializeNewsPage().catch(error => {

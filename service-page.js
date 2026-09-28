@@ -5,17 +5,6 @@ let serviceSupplement;
 let serviceLaunchSupplement;
 let serviceLocalSupplement;
 
-const serviceAdvertisers = {
-  "Årjäng": {
-    1: {
-      name: "Åslanda Handelsträdgård",
-      image: "assets/ads/aslanda-handelstradgard.webp",
-      url: "https://www.facebook.com/profile.php?id=61576659453588",
-      alt: "Åslanda Handelsträdgård – höstväxter och pumpor, öppet måndag till fredag 09–18 från 31 augusti"
-    }
-  }
-};
-
 const escapeService = window.DinPulsSecurity.escapeHtml;
 const safeServiceUrl = window.DinPulsSecurity.safeExternalUrl;
 const safeServiceIcon = window.DinPulsSecurity.safeIconName;
@@ -153,20 +142,7 @@ function renderServicePage() {
 }
 
 function renderServiceAds() {
-  document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
-    const position = Number(slot.dataset.adPosition || 1);
-    const advertiser = serviceAdvertisers[serviceMunicipality]?.[position];
-    if (advertiser) {
-      slot.innerHTML = `
-        <a class="secondary-ad strategic-ad strategic-image-ad" href="${escapeService(safeServiceUrl(advertiser.url))}" target="_blank" rel="noopener noreferrer" aria-label="Annons: ${escapeService(advertiser.name)} – öppna Facebooksidan i en ny flik">
-          <span class="strategic-image-ad-label">Annons</span>
-          <img src="${escapeService(advertiser.image)}" alt="${escapeService(advertiser.alt)}" width="1536" height="1024">
-        </a>`;
-      return;
-    }
-    const subject = encodeURIComponent(`Annonsplats Service & hantverk ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls Service &amp; hantverk · 800 kr/månad + moms</small></a>`;
-  });
+  window.renderStrategicAds?.("service", "Service & hantverk", "#service-category-grid");
 }
 
 async function initializeServicePage() {

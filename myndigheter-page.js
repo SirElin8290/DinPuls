@@ -45,11 +45,7 @@ function renderAuthorities() {
 }
 
 function renderAuthorityAds() {
-  document.querySelectorAll("[data-strategic-ad]").forEach(slot => {
-    const position = Number(slot.dataset.adPosition || 1);
-    const subject = encodeURIComponent(`Annonsplats Myndigheter & samhällsservice ${position}`);
-    slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>Tydligt avskild från myndighetsinformationen · 800 kr/månad + moms</small></a>`;
-  });
+  window.renderStrategicAds?.("myndigheter", "Myndigheter & samhällsservice", "#authority-grid");
 }
 
 function mergeAuthoritySupplement(supplement) {
