@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-09-28T00:56:31+00:00",
+  "generatedAt": "2026-09-28T01:11:37+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -242,11 +242,23 @@
           "name": "Bengtsfors",
           "alerts": [],
           "lookupTime": "2026-09-27T20:25+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-27T22:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-09-28T04:09:00+02:00",
+              "realtime": "2026-09-28T04:09:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "bus",
               "line": "730",
@@ -350,11 +362,23 @@
           "name": "Mellerud",
           "alerts": [],
           "lookupTime": "2026-09-27T20:25+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-27T22:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "710",
+              "direction": "Trollhättan via Vänersborg",
+              "operator": "Västtrafik",
+              "scheduled": "2026-09-28T04:07:00+02:00",
+              "realtime": "2026-09-28T04:07:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "bus",
               "line": "700",
@@ -1646,18 +1670,6 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "850",
-              "direction": "Arlanda flygplats",
-              "operator": "Vy bus4you",
-              "scheduled": "2026-09-28T03:05:00+02:00",
-              "realtime": "2026-09-28T03:05:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": ""
-            },
-            {
-              "mode": "bus",
               "line": "601",
               "direction": "Forshaga Tjärnheden Deje",
               "operator": "Värmlandstrafik",
@@ -1670,6 +1682,30 @@
             },
             {
               "mode": "bus",
+              "line": "801",
+              "direction": "Vålberg Grums",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-09-28T04:00:00+02:00",
+              "realtime": "2026-09-28T04:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Arlanda flygplats",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-09-28T04:00:00+02:00",
+              "realtime": "2026-09-28T04:00:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
               "line": "850",
               "direction": "Oslo bussterminal",
               "operator": "Vy bus4you",
@@ -1678,8 +1714,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "",
-              "stale": true
+              "platform": ""
             },
             {
               "mode": "bus",
@@ -2167,9 +2202,12 @@
         {
           "id": "740000222",
           "name": "Kristinehamn station",
-          "alerts": [],
+          "alerts": [
+            "Linje 500 och 501,  Rönndungen Karlstad indragen",
+            "Linje 500: Hållplats Kronoparkskyrkan stängs från och med måndag 7 september till och med söndag 18 oktober"
+          ],
           "lookupTime": "2026-09-27T23:40+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-09-28T01:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2184,8 +2222,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D",
-              "stale": true
+              "platform": "D"
             },
             {
               "mode": "bus",
