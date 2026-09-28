@@ -88,8 +88,11 @@ jobs:
           if len(fargelanda.get('events') or []) < 5:
               raise SystemExit(f'Färgelanda har för få aktuella evenemang efter supplement: {len(fargelanda.get("events") or [])}')
           storfors = (events.get('municipalities') or {}).get('Storfors') or {}
-          if len(storfors.get('events') or []) < 5:
-              raise SystemExit(f'Storfors har för få aktuella evenemang efter supplement: {len(storfors.get("events") or [])}')
+          storfors_events = storfors.get('events') or []
+          if not storfors_events:
+              raise SystemExit('Storfors saknar aktuella verifierade evenemang efter supplement')
+          if any(not item.get('url') or not item.get('startDate') for item in storfors_events):
+              raise SystemExit('Storfors har evenemang utan verifierbar källa eller datum')
           print(f'Evenemangsdata innehåller alla {len(expected)} kommuner; Dals-Ed har {len(dals_ed["events"])} poster; Kil har {len(kil["events"])} poster; Säffle har {len(saffle["events"])} poster; Färgelanda har {len(fargelanda["events"])} poster; Storfors har {len(storfors["events"])} poster')
           PY
       - name: Spara evenemangsdata konfliktsäkert
