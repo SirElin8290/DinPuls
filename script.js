@@ -3,7 +3,7 @@
    Central kommunmotor, komponenter och datamoduler
 ========================================================= */
 
-const DINPULS_VERSION = "0.24.9";
+const DINPULS_VERSION = "0.26.0";
 const HERO_VISIT_GAP = 30 * 60 * 1000;
 const DEFAULT_MUNICIPALITY = window.DinPulsMunicipalityState?.DEFAULT_NAME || "Åmål";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
@@ -2970,79 +2970,7 @@ function renderLunchTicker(municipality) {
    DINPULS v0.10.0 – TRE ROTERANDE PREMIUMANNONSGRUPPER
 ========================================================= */
 function initializeRotatingAds() {
-  document.querySelectorAll("[data-ad-dice]").forEach((module, moduleIndex) => {
-    const startNumber = moduleIndex * 10 + 1;
-    module.innerHTML = `<span class="ad-dice-label">Annonsgrupp ${moduleIndex + 1}</span>
-      ${Array.from({ length: 10 }, (_, faceIndex) => {
-        const slot = startNumber + faceIndex;
-        return `<a class="ad-face" data-ad-face href="mailto:annons@dinpuls.se?subject=Annonsplats%20${slot}" ${faceIndex ? "hidden" : ""}>
-          <span class="ad-slot">PREMIUM ${slot}</span>
-          <strong>Din verksamhet kan synas här</strong>
-          <small>Lokalt i <span data-municipality-name>${escapeHtml(DinPulsMunicipality.getName())}</span> · 800 kr/månad + moms</small>
-          <b>Boka plats <i data-lucide="arrow-right"></i></b>
-        </a>`;
-      }).join("")}
-      <div class="ad-navigation">
-        <button type="button" data-ad-previous aria-label="Föregående annons"><i data-lucide="chevron-left"></i></button>
-        <div class="ad-dots" aria-hidden="true">${Array.from({ length: 10 }, (_, index) => `<span data-ad-dot class="${index === moduleIndex ? "active" : ""}"></span>`).join("")}</div>
-        <button type="button" data-ad-next aria-label="Nästa annons"><i data-lucide="chevron-right"></i></button>
-      </div>`;
-    const faces = [...module.querySelectorAll("[data-ad-face]")];
-    const dots = [...module.querySelectorAll("[data-ad-dot]")];
-    if (!faces.length) return;
-    faces.forEach(face => { face.dataset.fallbackHtml = face.innerHTML; face.dataset.fallbackHref = face.getAttribute("href") || ""; });
-    const refreshScheduledFaces = async () => {
-      if (!window.DinPulsAds) return;
-      await Promise.all(faces.map(async (face, faceIndex) => {
-        const banner = await window.DinPulsAds.getCurrentBanner(`P${moduleIndex + 1}-${String(startNumber + faceIndex).padStart(2, "0")}`, DinPulsMunicipality.getName());
-        if (!banner) {
-          if (face.dataset.scheduledBanner) { face.innerHTML = face.dataset.fallbackHtml; face.href = face.dataset.fallbackHref; face.removeAttribute("target"); face.removeAttribute("rel"); face.classList.remove("scheduled-homepage-ad"); delete face.dataset.scheduledBanner; }
-          return;
-        }
-        face.classList.add("scheduled-homepage-ad");
-        face.href = banner.targetUrl || "mailto:annons@dinpuls.se";
-        if (banner.targetUrl) { face.target = "_blank"; face.rel = "noopener noreferrer sponsored"; }
-        face.innerHTML = `<img src="${escapeAttribute(banner.imageUrl)}" alt="Företagsannons" loading="lazy">`;
-        face.dataset.scheduledBanner = banner.id;
-      }));
-    };
-    refreshScheduledFaces();
-    document.addEventListener("dinpuls:municipalitychange", refreshScheduledFaces);
-    let current = moduleIndex % faces.length;
-
-    const show = (index) => {
-      current = (index + faces.length) % faces.length;
-      faces.forEach((face, faceIndex) => face.hidden = faceIndex !== current);
-      dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === current));
-      module.dataset.activeAd = String(current + 1);
-    };
-
-    show(current);
-    let timer = window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
-    const restart = () => {
-      window.clearInterval(timer);
-      timer = window.setInterval(() => show(current + 1), 6000 + moduleIndex * 700);
-    };
-    const pause = () => window.clearInterval(timer);
-    module.querySelector("[data-ad-previous]")?.addEventListener("click", () => {
-      show(current - 1);
-      restart();
-    });
-    module.querySelector("[data-ad-next]")?.addEventListener("click", () => {
-      show(current + 1);
-      restart();
-    });
-    module.addEventListener("mouseenter", pause);
-    module.addEventListener("mouseleave", restart);
-    module.addEventListener("focusin", pause);
-    module.addEventListener("focusout", (event) => {
-      if (!module.contains(event.relatedTarget)) restart();
-    });
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) pause();
-      else restart();
-    });
-  });
+  window.DinPulsAds?.refreshHomepageAds?.();
 }
 
 /* =========================================================

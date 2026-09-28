@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { Miniflare } from "miniflare";
 
@@ -190,6 +190,15 @@ try {
   const afterSwitch = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
   assert.equal(afterSwitch.banner.id, second.banner.id, "Den nya bannern ska visas efter bytestiden");
   assert.equal(afterSwitch.banner.targetUrl, "https://example.com/ny");
+  const wrongMunicipality = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85m%C3%A5l"), 200);
+  assert.equal(wrongMunicipality.banner, null, "En banner får aldrig läcka till en annan kommun");
+  const municipalities = JSON.parse(await readFile(new URL("../data/municipalities.json", import.meta.url), "utf8"));
+  for (const item of municipalities.municipalities || municipalities) {
+    const name = item.name || item;
+    if (name === "Årjäng") continue;
+    const isolated = await responseJson(await request(`/ads/current/SERV-01?municipality=${encodeURIComponent(name)}`), 200);
+    assert.equal(isolated.banner, null, `Årjängs banner får inte visas i ${name}`);
+  }
 
   const third = await upload("tre.png", new Date(Date.now() - 900).toISOString(), "https://example.com/tre");
   const fourth = await upload("fyra.png", new Date(Date.now() - 800).toISOString(), "https://example.com/fyra");
@@ -218,6 +227,10 @@ try {
   assert.equal(stats.impressions, 1);
   assert.equal(stats.clicks, 1);
   assert.equal(stats.ctr, 100);
+
+  await database.prepare("UPDATE ad_contracts SET end_date='2000-01-01' WHERE id=?").bind(contractId).run();
+  const afterExpiry = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200);
+  assert.equal(afterExpiry.banner, null, "En banner ska försvinna automatiskt när avtalet löpt ut");
 
   console.log("Onboarding och bannerkedja godkända: engångstoken, aktivering, återställning, inloggning, R2, schemabyte och statistik.");
 } finally {

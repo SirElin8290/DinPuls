@@ -1,11 +1,25 @@
 (function () {
   "use strict";
   const CATEGORY_KEYS = Object.freeze({ bio: "BIO", "bostäder": "BOST", drivmedel: "DRIV", evenemang: "EVEN", jobb: "JOBB", lunch: "LUNCH", matkasse: "MAT", authorities: "MYND", myndigheter: "MYND", nyheter: "NYH", service: "SERV", trafik: "TRAF", vard: "VARD", sport: "SPORT", fritid: "FRIT", "skola-familj": "SKOLA-FAMILJ" });
-  let apiBasePromise;
+  const homepageTimers = new Map();
   const measuredImpressions = new Set();
+  let apiBasePromise;
+  let inventoryPromise;
 
   function municipality() {
     return window.DinPulsMunicipality?.getName?.() || window.DinPulsMunicipalityState?.getInitial?.() || new URLSearchParams(location.search).get("kommun") || "Åmål";
+  }
+
+  function inventory() {
+    if (Array.isArray(window.DINPULS_AD_INVENTORY)) return Promise.resolve(window.DINPULS_AD_INVENTORY);
+    if (!inventoryPromise) inventoryPromise = new Promise(resolve => {
+      const script = document.createElement("script");
+      script.src = "admin/ad-inventory.js?version=0.26.0";
+      script.onload = () => resolve(window.DINPULS_AD_INVENTORY || []);
+      script.onerror = () => resolve([]);
+      document.head.append(script);
+    });
+    return inventoryPromise;
   }
 
   async function apiBase() {
@@ -32,17 +46,18 @@
     if (!slot || !banner) return;
     const link = document.createElement("a");
     link.className = "secondary-ad strategic-ad scheduled-public-ad";
-    link.href = banner.targetUrl || "mailto:annons@dinpuls.se";
-    if (banner.targetUrl) { link.target = "_blank"; link.rel = "noopener noreferrer sponsored"; }
-    link.setAttribute("aria-label", `${label} – öppna annons`);
+    if (banner.targetUrl) { link.href = banner.targetUrl; link.target = "_blank"; link.rel = "noopener noreferrer sponsored"; }
+    else { link.removeAttribute("href"); link.setAttribute("role", "img"); }
+    link.setAttribute("aria-label", banner.targetUrl ? `${label} – öppna annons` : label);
     const image = document.createElement("img");
     image.src = banner.imageUrl;
     image.alt = label;
     image.loading = "lazy";
     link.append(image);
-    link.addEventListener("click", () => recordEvent(banner.id, "click"), { passive: true });
+    if (banner.targetUrl) link.addEventListener("click", () => recordEvent(banner.id, "click"), { passive: true });
     slot.replaceChildren(link);
     slot.dataset.scheduledBanner = banner.id;
+    slot.hidden = false;
     measureImpression(slot, banner.id);
   }
 
@@ -54,6 +69,7 @@
 
   function measureImpression(slot, bannerId) {
     if (measuredImpressions.has(bannerId)) return;
+    if (!("IntersectionObserver" in window)) { measuredImpressions.add(bannerId); recordEvent(bannerId, "impression"); return; }
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.5)) return;
       measuredImpressions.add(bannerId);
@@ -63,9 +79,30 @@
     observer.observe(slot);
   }
 
+  async function resolveSlotId(slot) {
+    const catalog = await inventory();
+    const explicit = String(slot?.dataset?.slotId || "").toUpperCase();
+    const category = String(slot?.dataset?.strategicAd || "").toLocaleLowerCase("sv-SE");
+    const prefix = CATEGORY_KEYS[category];
+    const position = Number(slot?.dataset?.adPosition || 0);
+    const candidate = explicit || (prefix && position > 0 ? `${prefix}-${String(position).padStart(2, "0")}` : "");
+    return catalog.some(item => item.id === candidate) ? candidate : "";
+  }
+
+  function updateDynamicRow(slot) {
+    const row = slot.closest("[data-dynamic-ad-row]");
+    if (row) row.hidden = ![...row.querySelectorAll("[data-strategic-ad]")].some(item => !item.hidden);
+  }
+
   async function enhanceStrategicSlot(slot) {
     if (!slot) return;
     slot.hidden = true;
+    slot.replaceChildren();
+    delete slot.dataset.scheduledBanner;
+    const slotId = await resolveSlotId(slot);
+    const banner = slotId ? await getCurrentBanner(slotId) : null;
+    if (banner) showBanner(slot, banner, `Annons i ${municipality()}`);
+    updateDynamicRow(slot);
   }
 
   async function refreshStrategicAds() {
@@ -74,12 +111,7 @@
 
   function renderStrategicAds(category, pageLabel, listSelector) {
     const slots = [...document.querySelectorAll("[data-strategic-ad]")];
-    slots.forEach(slot => {
-      const position = Number(slot.dataset.adPosition || 1);
-      const subject = encodeURIComponent(`Annonsplats ${category} ${position}`);
-      slot.innerHTML = `<a class="secondary-ad strategic-ad" href="mailto:annons@dinpuls.se?subject=${subject}"><b>ANNONSPLATS ${position}</b><strong>Ditt företag här</strong><small>På DinPuls ${pageLabel} · 800 kr/månad + moms</small></a>`;
-      slot.hidden = true;
-    });
+    slots.forEach(slot => { slot.hidden = true; slot.replaceChildren(); });
     const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3" && !slot.dataset.dynamicAd);
     const list = document.querySelector(listSelector);
     if (inlineSlot && list) {
@@ -95,35 +127,57 @@
     queueMicrotask(refreshStrategicAds);
   }
 
-  function redistributeHomepageAds() {
-    const main = document.querySelector("body > main");
-    if (!main) return;
-    const ads = ["premium-ad-1", "premium-ad-2", "premium-ad-3"].map(name => main.querySelector(`:scope > [data-component="${name}"]`)).filter(Boolean);
-    ads.forEach(ad => { ad.hidden = true; });
+  function clearHomepageGroup(group) {
+    const timer = homepageTimers.get(group);
+    if (timer) window.clearInterval(timer);
+    homepageTimers.delete(group);
+    const host = document.querySelector(`[data-component="premium-ad-${group}"]`);
+    const section = host?.querySelector(".premium-ads");
+    const module = host?.querySelector("[data-ad-dice]");
+    if (module) module.replaceChildren();
+    if (section) section.hidden = true;
+    if (host) host.hidden = true;
+    return { host, section, module };
   }
 
-  function initializeHomepageAdRedistribution() {
-    const main = document.querySelector("body > main");
-    if (!main || !document.querySelector('[data-component="premium-ad-1"]')) return;
-    let scheduled = false;
-    const schedule = () => {
-      if (scheduled) return;
-      scheduled = true;
-      requestAnimationFrame(() => requestAnimationFrame(() => { scheduled = false; redistributeHomepageAds(); }));
+  async function refreshHomepageGroup(group) {
+    const { host, section, module } = clearHomepageGroup(group);
+    if (!host || !section || !module) return;
+    const catalog = await inventory();
+    const groupName = `premium-ad-${group}`;
+    const slots = catalog.filter(item => item.group === groupName).sort((a, b) => a.position - b.position);
+    const active = (await Promise.all(slots.map(async slot => ({ slot, banner: await getCurrentBanner(slot.id) })))).filter(item => item.banner);
+    const banners = [...new Map(active.map(item => [item.banner.id, item])).values()];
+    if (!banners.length) return;
+    const frame = document.createElement("div");
+    frame.className = "homepage-live-ad";
+    module.append(frame);
+    let index = banners.length > 1 ? Math.floor(Math.random() * banners.length) : 0;
+    const show = () => {
+      const item = banners[index];
+      showBanner(frame, item.banner, `Annons från lokalt företag i ${municipality()}`);
+      index = (index + 1) % banners.length;
     };
-    const observer = new MutationObserver(mutations => {
-      if (mutations.some(mutation => mutation.type === "attributes" && mutation.attributeName === "hidden")) schedule();
-    });
-    observer.observe(main, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
-    document.addEventListener("dinpuls:components-loaded", schedule);
-    document.addEventListener("dinpuls:municipalitychange", schedule);
-    window.addEventListener("resize", schedule, { passive: true });
-    window.setTimeout(schedule, 100);
+    host.hidden = false;
+    section.hidden = false;
+    show();
+    if (banners.length > 1) homepageTimers.set(group, window.setInterval(show, 30000));
   }
 
-  window.DinPulsAds = Object.freeze({ renderStrategicAds, getCurrentBanner, showBanner, refreshStrategicAds });
+  async function refreshHomepageAds() {
+    await Promise.all([1, 2, 3].map(refreshHomepageGroup));
+  }
+
+  function initializeHomepageAds() {
+    if (!document.querySelector('[data-component="premium-ad-1"]')) return;
+    document.addEventListener("dinpuls:components-loaded", refreshHomepageAds);
+    window.setTimeout(refreshHomepageAds, 100);
+  }
+
+  window.DinPulsAds = Object.freeze({ renderStrategicAds, getCurrentBanner, showBanner, refreshStrategicAds, refreshHomepageAds, resolveSlotId, enhanceStrategicSlot });
   window.renderStrategicAds = renderStrategicAds;
-  const start = () => { queueMicrotask(refreshStrategicAds); initializeHomepageAdRedistribution(); };
+  const start = () => { inventory().then(refreshStrategicAds); initializeHomepageAds(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
-  document.addEventListener("dinpuls:municipalitychange", () => window.setTimeout(refreshStrategicAds, 0));
+  document.addEventListener("dinpuls:municipalitychange", () => window.setTimeout(() => { refreshStrategicAds(); refreshHomepageAds(); }, 0));
+  window.addEventListener("pagehide", () => homepageTimers.forEach(timer => window.clearInterval(timer)), { once: true });
 })();

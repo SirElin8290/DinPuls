@@ -34,9 +34,17 @@ assert.strictEqual(byPage.get("sport.html")?.length, 4, "Idrott & motion ska ha 
 assert.strictEqual(byPage.get("fritid.html")?.length, 4, "Fritid ska ha fyra säljbara annonsplatser");
 assert.strictEqual(byPage.get("skola-familj.html")?.length, 4, "Skola & familj ska ha fyra fasta annonsplatser");
 const dynamicSource = fs.readFileSync(path.join(root, "dynamic-portal-ads.js"), "utf8");
-assert(dynamicSource.includes("const expectedSlots = isSingleSport ? 3 : 4"), "Sportlayouten ska skilja tre sportspecifika platser från fyra hubplatser");
-assert(dynamicSource.includes("length: 3"), "Varje enskild sportsida ska skapa tre sportspecifika platser");
-assert(dynamicSource.includes("length: 4"), "Idrottshubben och fritidslayouten ska skapa fyra platser");
+assert(dynamicSource.includes("const expectedSlots = 4"), "Alla sportvyer ska använda de fyra centralt säljbara sportplatserna");
+assert(!dynamicSource.includes("`sport-${sportAdKey(sport)}`"), "Sportspecifika vyer får inte skapa plats-ID:n utanför inventeringen");
+assert(dynamicSource.includes('makeSlot("sport", index + 1'), "Sportvyer ska mappa till SPORT-01–SPORT-04");
+assert(dynamicSource.includes("length: 4"), "Idrotts- och fritidslayouten ska skapa fyra centrala platser");
+
+const publicAdsSource = fs.readFileSync(path.join(root, "portal-ads.js"), "utf8");
+assert(publicAdsSource.includes('admin/ad-inventory.js'), "Publik annonsmotor ska läsa det centrala annonsregistret");
+assert(publicAdsSource.includes('slot.hidden = false'), "En godkänd aktiv banner ska göras synlig publikt");
+assert(publicAdsSource.includes('window.setInterval(show, 30000)'), "Flera aktiva startsidesannonser ska rotera var 30:e sekund");
+assert(!publicAdsSource.includes("Ditt företag här"), "Publik annonsmotor får inte skapa bokningsplatshållare");
+assert(!dynamicSource.includes("Ditt företag här"), "Dynamiska portaler får inte skapa bokningsplatshållare");
 
 const staticPagesWithAds = fs.readdirSync(root)
   .filter(file => file.endsWith(".html"))
@@ -47,4 +55,4 @@ const adminSource = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 assert(adminSource.includes("data/municipalities.json"), "Admin ska läsa aktiva kommuner centralt");
 assert(!adminSource.includes("Dals-Ed") && !adminSource.includes("Karlstad"), "Admin får inte ha en parallell kommunlista");
 
-console.log(`✓ Annonsregistret matchar 93 basplatser och ${byPage.size} undersidor; sportspecifika vyer har tre dynamiska platser`);
+console.log(`✓ Annonsregistret matchar 93 basplatser och ${byPage.size} undersidor; alla sportvyer använder fyra centrala platser`);
