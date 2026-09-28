@@ -11,3 +11,25 @@
 
 .info-page .association-hero{background-image:linear-gradient(90deg,rgba(5,29,49,.9) 0%,rgba(5,35,52,.74) 38%,rgba(5,42,53,.22) 72%,rgba(5,42,53,.08) 100%),url("assets/foreningskonto-hero.webp");background-size:cover;background-position:center 52%;background-repeat:no-repeat}
 @media(max-width:760px){.info-page .association-hero{background-image:linear-gradient(90deg,rgba(5,29,49,.88),rgba(5,35,52,.66)),url("assets/foreningskonto-hero.webp");background-position:58% center}}
+
+/* Föreningskontot hålls i en enda vy. Bildlagret läggs till här när den godkända herobilden finns. */
+.auth-page{height:100vh;display:grid;grid-template-rows:68px minmax(0,1fr) 36px;overflow:hidden;background-color:#0a304e;background-image:linear-gradient(90deg,rgba(5,29,49,.94),rgba(12,79,89,.82));background-size:cover;background-position:center}
+.auth-page .account-header{height:68px;background:rgba(255,255,255,.97)}
+.auth-page .account-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.auth-page .account-brand-symbol{display:block;width:42px;height:46px;overflow:hidden;flex:0 0 42px}
+.auth-page .account-brand-symbol img{display:block;width:129px;height:46px;max-width:none;max-height:none}
+.auth-page .account-brand-name{color:#0b5ed7;font-size:25px;font-weight:850;letter-spacing:-.035em}
+.auth-page .auth-shell{width:100%;max-width:1120px;height:100%;min-height:0;margin:auto;padding:24px;grid-template-columns:1fr minmax(360px,430px);gap:56px;align-items:center}
+.auth-page .auth-shell>div:first-child{align-self:start;margin-top:24px}
+.auth-page .auth-card,.auth-page .auth-card.is-flipped{height:min(680px,100%);min-height:0}
+.auth-page .card-face{overflow:hidden;padding:20px 26px}
+.auth-page .card-face h2{margin:2px 0 10px;font-size:30px;line-height:1}
+.auth-page .card-face label{margin:6px 0 3px;font-size:12px}
+.auth-page .card-face input{height:35px;padding:7px 10px}
+.auth-page .card-face form>.button{min-height:42px;margin-top:5px;padding-block:8px}
+.auth-page .switch-area{gap:8px;margin-top:18px;padding-top:16px}
+.auth-page .back-button{min-height:44px;margin:6px auto 0;padding:8px 14px}
+.auth-page .find-help{margin:3px 0;font-size:12px}
+.auth-page .form-message{margin:6px 0 0;padding:8px}
+.auth-page .account-footer{padding:9px 24px;font-size:12px}
+@media(max-width:760px){.auth-page{grid-template-rows:60px minmax(0,1fr)}.auth-page .account-header{height:60px}.auth-page .account-brand-symbol{width:34px;height:38px;flex-basis:34px}.auth-page .account-brand-symbol img{width:105px;height:38px}.auth-page .account-brand-name{font-size:20px}.auth-page .account-footer{display:none}.auth-page .auth-shell{min-height:0;padding:10px 12px 12px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:8px}.auth-page .auth-shell>div:first-child{margin:0}.auth-page .auth-shell>div:first-child>p:last-child{display:none}.auth-page .auth-shell h1{margin:0;font-size:30px}.auth-page .auth-shell .eyebrow{margin-bottom:4px;font-size:10px}.auth-page .auth-card,.auth-page .auth-card.is-flipped{height:100%;max-height:660px}.auth-page .card-face{padding:14px 16px;border-radius:16px}.auth-page .card-face h2{font-size:26px}.auth-page .card-face label{margin-top:4px}.auth-page .card-face input{height:33px}.auth-page .switch-area{margin-top:12px;padding-top:10px}}

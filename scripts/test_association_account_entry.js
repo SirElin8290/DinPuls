@@ -18,6 +18,9 @@ const checks = [
   [info.includes("15 %") && info.includes("verifierad förening"), "information page explains the verified 15 percent model"],
   [account.indexOf('id="associationLogin"') < account.indexOf('id="associationRegistration"'), "login is the default card face"],
   [account.includes('id="associationSearch"') && account.includes("Bekräfta lösenord"), "registration layout contains the requested fields"],
+  [account.includes('id="showAssociationRegistration"') && account.includes('id="showAssociationLogin"'), "account card exposes both login and registration directions"],
+  [accountStyles.includes(".auth-page{height:100vh") && accountStyles.includes(".card-face{overflow:hidden"), "account page and card faces stay within one non-scrollable frame"],
+  [account.includes('account-brand-name">DinPuls.se') && accountStyles.includes(".auth-page .account-brand-name{color:#0b5ed7"), "account header renders the blue DinPuls wordmark"],
   [accountScript.includes('params.get("mode")==="register"') && accountScript.includes("showRegister") && accountScript.includes("showLogin"), "query mode and both flip directions are wired"],
   [accountScript.includes('p.set("kommun",municipality)') && accountScript.includes('p.set("forening",association)'), "municipality and association context are preserved"]
 ];
