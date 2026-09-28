@@ -374,7 +374,7 @@ async function uploadCompanyBanner(request, env) {
   if (!env.AD_ASSETS) return json(request, { ok: false, error: "Bannerlagringen är inte aktiverad." }, 503);
   const size = Number(request.headers.get("Content-Length") || 0);
   const contentType = cleanText(request.headers.get("Content-Type"), 80).split(";")[0].toLowerCase();
-  const slotId = cleanText(request.headers.get("X-Banner-Slot"), 40);
+  const slotId = cleanText(request.headers.get("X-Banner-Slot"), 120);
   let selectedMunicipality;
   try { selectedMunicipality = cleanText(decodeURIComponent(request.headers.get("X-Banner-Municipality") || ""), 80); }
   catch { return json(request, { ok: false, error: "Kommunen kunde inte läsas." }, 400); }
