@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-28T11:54:23+02:00
+Genererad: 2026-09-28T11:57:00+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -17,7 +17,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Åmål | 🟢 GREEN | 19 | 53 | 18 | 45 / 45 färska | 19 / 8 kat | 17 / 5 kat | 4 | 27 | 27 |
-| Årjäng | 🟢 GREEN | 37 | 15 | 44 | 38 / 38 färska | 8 / 5 kat | 11 / 4 kat | 7 | 39 | 29 |
+| Årjäng | 🟢 GREEN | 37 | 15 | 44 | 38 / 38 färska | 8 / 5 kat | 11 / 4 kat | 7 | 37 | 31 |
 | Bengtsfors | 🟢 GREEN | 17 | 43 | 1 | 38 / 38 färska | 16 / 10 kat | 16 / 10 kat | 7 | 28 | 19 |
 | Mellerud | 🟢 GREEN | 23 | 13 | 21 | 35 / 35 färska | 7 / 4 kat | 15 / 4 kat | 5 | 46 | 17 |
 | Arvika | 🟢 GREEN | 53 | 2 | 1 | 77 / 77 färska | 30 / 8 kat | 21 / 11 kat | 8 | 146 | 76 |
