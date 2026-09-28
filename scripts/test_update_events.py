@@ -61,6 +61,32 @@ class EventUpdateTests(unittest.TestCase):
         self.assertEqual(merged[0]["time"], "11:00")
         self.assertTrue(merged[0]["verified"])
 
+    def test_tickster_list_extracts_public_events(self):
+        markup = '''
+        <div class="c-tile" data-requestcode="ABC">
+          <a href="/se/sv/events/abc/2099-11-05/testkvall" class="c-tile__head">
+            <h2 class="c-tile__title">Testkväll i Åmål</h2>
+          </a>
+          <div class="c-tile__body"><span class="c-tile__label">5 nov 2099, Stadshotellet Åmål, ÅMÅL</span></div>
+        </div>
+        </section>'''
+        source = {"name":"Tickster Åmål", "url":"https://www.tickster.com/se/sv/events/in/%C3%85m%C3%A5l"}
+        events = update_events.tickster_events(markup, "Åmål", source)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["startDate"], "2099-11-05")
+        self.assertEqual(events[0]["venue"], "Stadshotellet Åmål")
+
+    def test_contiguous_festival_days_become_one_date_range(self):
+        events = [
+            {"title":"Fotofest", "startDate":"2099-05-01", "endDate":"2099-05-01", "url":"https://example.com/foto"},
+            {"title":"Fotofest", "startDate":"2099-05-02", "endDate":"2099-05-02", "url":"https://example.com/foto"},
+            {"title":"Annan dag", "startDate":"2099-05-02", "endDate":"2099-05-02", "url":"https://example.com/annan"},
+        ]
+        collapsed = update_events.collapse_contiguous_events(events)
+        self.assertEqual(len(collapsed), 2)
+        festival = next(item for item in collapsed if item["title"] == "Fotofest")
+        self.assertEqual(festival["endDate"], "2099-05-02")
+
 
 if __name__ == "__main__":
     unittest.main()

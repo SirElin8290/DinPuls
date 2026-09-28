@@ -7,7 +7,7 @@ import html
 import json
 import re
 import urllib.request
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode, urljoin, urlsplit
 from zoneinfo import ZoneInfo
@@ -338,6 +338,76 @@ def events_from_filter_api(markup: str, municipality: str, source: dict) -> list
     return results
 
 
+SWEDISH_MONTHS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "maj": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "okt": 10, "nov": 11, "dec": 12,
+}
+
+
+def tickster_events(markup: str, municipality: str, source: dict) -> list[dict]:
+    """Läser Ticksters publika kommunlista utan att gå via biljettköpsflödet."""
+    blocks = re.findall(
+        r'<div class="c-tile"[^>]*>(.*?)(?=<div class="c-tile"|</section>)',
+        markup,
+        re.I | re.S,
+    )
+    today = date.today().isoformat()
+    results = []
+    for block in blocks:
+        link = re.search(r'<a[^>]+href="([^"]+)"[^>]*class="c-tile__head"', block, re.I)
+        heading = re.search(r'<h2[^>]*class="c-tile__title"[^>]*>(.*?)</h2>', block, re.I | re.S)
+        label = re.search(r'<span[^>]*class="c-tile__label"[^>]*>(.*?)</span>', block, re.I | re.S)
+        if not link or not heading or not label:
+            continue
+        title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(heading.group(1)))).strip()
+        label_text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(label.group(1)))).strip()
+        date_match = re.match(r"(\d{1,2})\s+([a-zåäö]{3})\s+(\d{4})(?:,\s*(.*))?", label_text, re.I)
+        if not title or not date_match:
+            continue
+        month = SWEDISH_MONTHS.get(date_match.group(2).casefold().rstrip("."))
+        if not month:
+            continue
+        start = date(int(date_match.group(3)), month, int(date_match.group(1))).isoformat()
+        if start < today:
+            continue
+        venue = (date_match.group(4) or municipality).split(",")[0].strip() or municipality
+        item_url = urljoin(source["url"], html.unescape(link.group(1)))
+        event_category, category_label = category(title)
+        identifier = hashlib.sha1(f"{municipality}|{title}|{start}|{item_url}".encode()).hexdigest()[:16]
+        results.append({
+            "id": f"event-{identifier}", "title": title,
+            "startDate": start, "endDate": start, "time": "Se källan",
+            "venue": venue, "category": event_category,
+            "categoryLabel": category_label, "sourceName": source["name"],
+            "url": item_url,
+        })
+    return results
+
+
+def collapse_contiguous_events(items: list[dict]) -> list[dict]:
+    """Visar en sammanhängande flerdagarsaktivitet som ett evenemang med datumintervall."""
+    collapsed = []
+    latest_by_key = {}
+    for item in sorted(items, key=lambda row: (row.get("startDate") or "", row.get("title") or "")):
+        title_key = re.sub(r"\W+", "", str(item.get("title", "")).casefold())
+        url_key = str(item.get("url") or "")
+        group_key = (title_key, url_key)
+        previous = latest_by_key.get(group_key)
+        if previous:
+            previous_end = iso_date(previous.get("endDate") or previous.get("startDate"))
+            current_start = iso_date(item.get("startDate"))
+            contiguous = False
+            if previous_end and current_start:
+                contiguous = date.fromisoformat(current_start) <= date.fromisoformat(previous_end) + timedelta(days=1)
+            if contiguous:
+                previous["endDate"] = max(previous_end, iso_date(item.get("endDate") or current_start))
+                continue
+        copy = dict(item)
+        collapsed.append(copy)
+        latest_by_key[group_key] = copy
+    return collapsed
+
+
 def merge_event_rows(existing: list[dict], collected: list[dict]) -> list[dict]:
     """Slår ihop event så färsk automatdata ersätter cache, medan verifierat vinner."""
     unique = {}
@@ -394,6 +464,8 @@ def main() -> int:
                 rows.extend(events_from_filter_api(markup, municipality, source))
                 if "visitvarmland.com" in source["url"]:
                     rows.extend(fetch_visit_varmland_events(municipality))
+                if "tickster.com" in source["url"]:
+                    rows.extend(tickster_events(markup, municipality, source))
                 collected.extend(rows)
                 health.append({
                     "name": source["name"],
@@ -410,7 +482,7 @@ def main() -> int:
                 print(f"VARNING {municipality}: {source['name']} – {error}")
 
         ordered = sorted(
-            merge_event_rows(existing, collected),
+            collapse_contiguous_events(merge_event_rows(existing, collected)),
             key=lambda item: (item.get("startDate") or "", item.get("title") or ""),
         )
         selected = ordered[:80]

@@ -2574,10 +2574,13 @@ function renderEventPreview(item) {
   const ongoing = start < stockholmDateKey() && end >= stockholmDateKey();
   const date = new Date(item.startDate);
   const month = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, month: "short" }).replace(".", "");
+  const year = Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, year: "numeric" }).format(date);
+  const currentYear = stockholmDateKey().slice(0, 4);
+  const monthLabel = year && year !== currentYear ? `${month} ${year}` : month;
   const day = Number.isNaN(date.getTime()) ? "–" : new Intl.DateTimeFormat("sv-SE", { timeZone: STOCKHOLM_TIME_ZONE, day: "numeric" }).format(date);
   const dateBox = ongoing
     ? `<time><b>Nu</b>${escapeHtml(`till ${formatEventDate(item.endDate || item.startDate)}`)}</time>`
-    : `<time><b>${day}</b>${escapeHtml(month)}</time>`;
+    : `<time><b>${day}</b>${escapeHtml(monthLabel)}</time>`;
   return `<li>${dateBox}<span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml([item.time, item.venue, item.sourceName].filter(Boolean).join(" · "))}</small></span></li>`;
 }
 
