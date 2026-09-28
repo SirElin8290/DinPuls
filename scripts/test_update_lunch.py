@@ -121,6 +121,64 @@ class LunchUpdateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             update_lunch.validate_config({"municipalities": municipalities})
 
+    def test_scoped_parser_selects_named_restaurant_and_current_week(self):
+        page = """<h2>Sjukhuset Karlstad</h2><h4>Solsidans matsedel vecka 40</h4><h4>Måndag</h4><p>Fel restaurang</p>
+        <h2>Sjukhuset Arvika</h2><h4>Café Gnistan lunchmeny vecka 39</h4><h4>Måndag</h4><p>Gammal rätt</p>
+        <h4>Café Gnistan lunchmeny vecka 40</h4><h4>Måndag</h4><p>Sprödbakad fisk med kokt potatis</p><h2>Sjukhuset Torsby</h2>"""
+        week, days = update_lunch.parse_scoped_weekday_menu(page, r"Café Gnistan lunchmeny", 40)
+        self.assertEqual(week, 40)
+        self.assertEqual(days["monday"], ["Sprödbakad fisk med kokt potatis"])
+
+    def test_dated_parser_rejects_stale_menu_and_accepts_current_period(self):
+        page = """<h3>Lunchmeny 1 sept-5 sept</h3><h4>Måndag</h4><p>Gammal rätt</p>
+        <h3>Lunchmeny 28 sept-2 okt</h3><h4>Måndag</h4><p>Stängt</p><h4>Tisdag</h4><p>Potatissoppa</p>"""
+        week, days = update_lunch.parse_dated_weekday_menu(page, datetime(2026, 9, 29).date())
+        self.assertEqual(week, 40)
+        self.assertEqual(days["tuesday"], ["Potatissoppa"])
+        stale_week, stale_days = update_lunch.parse_dated_weekday_menu(page, datetime(2026, 10, 12).date())
+        self.assertIsNone(stale_week)
+        self.assertFalse(any(stale_days.values()))
+
+    def test_inactive_restaurant_is_not_published(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"] = [{"id":"closed","name":"Closed","url":"https://example.test","parser":"source-only","active":False}]
+        output = update_lunch.build_output({"municipalities":municipalities}, datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        self.assertEqual(output["municipalities"]["Arvika"]["restaurants"], [])
+
+    def test_seasonal_source_has_explicit_status(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"] = [{"id":"golf","name":"Golf","url":"https://example.test","parser":"source-only","seasonal":True,"seasonMonths":[4,5,6,7,8,9,10]}]
+        active = update_lunch.build_output({"municipalities":municipalities}, datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        closed = update_lunch.build_output({"municipalities":municipalities}, datetime(2026,12,1,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        self.assertEqual(active["municipalities"]["Arvika"]["restaurants"][0]["status"], "active")
+        self.assertEqual(closed["municipalities"]["Arvika"]["restaurants"][0]["status"], "seasonally_closed")
+
+    def test_skeppet_name_changes_only_on_effective_date(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"] = [{"id":"skeppet","name":"Restaurang Skeppet","nameAfter":"Restaurang Skeppet by Smak & Co","nameAfterDate":"2026-10-01","url":"https://example.test","parser":"source-only"}]
+        before = update_lunch.build_output({"municipalities":municipalities}, datetime(2026,9,30,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        after = update_lunch.build_output({"municipalities":municipalities}, datetime(2026,10,1,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        self.assertEqual(before["municipalities"]["Arvika"]["restaurants"][0]["name"], "Restaurang Skeppet")
+        self.assertEqual(after["municipalities"]["Arvika"]["restaurants"][0]["name"], "Restaurang Skeppet by Smak & Co")
+
+    def test_parser_failure_is_isolated_and_previous_menu_is_history_only(self):
+        municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Arvika"] = [
+            {"id":"broken","name":"Broken","url":"https://broken.test","parser":"weekday-headings"},
+            {"id":"working","name":"Working","url":"https://working.test","parser":"weekday-headings"},
+        ]
+        previous={"municipalities":{"Arvika":{"restaurants":[{"id":"broken","status":"current","weekNumber":39,"checkedAt":"2026-09-21T08:00:00+02:00","days":{"monday":["Historisk rätt"]}}]}}}
+        def fetcher(url):
+            if "broken" in url: raise RuntimeError("timeout")
+            return "<h2>Vecka 40</h2><h3>Måndag</h3><p>Ny rätt</p>"
+        output=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")),fetcher,previous)
+        broken,working=output["municipalities"]["Arvika"]["restaurants"]
+        self.assertEqual(broken["status"],"unavailable")
+        self.assertEqual(broken["days"],{})
+        self.assertEqual(broken["lastSuccessfulMenu"]["days"]["monday"],["Historisk rätt"])
+        self.assertEqual(working["status"],"current")
+        self.assertEqual(working["days"]["monday"],["Ny rätt"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3006,8 +3006,10 @@ function renderLunchTicker(municipality) {
   const markup = (tickerRestaurants.length ? tickerRestaurants : fallback).map((restaurant) => {
     const detail = restaurant.todayDishes.length
       ? restaurant.todayDishes.slice(0, 3).join(" · ")
-      : restaurant.seasonal
-        ? "Säsongsöppet – kontrollera aktuell meny och öppettid"
+      : restaurant.status === "seasonally_closed"
+        ? "Säsongsstängt – se originalkällan för nästa öppning"
+        : restaurant.seasonal
+          ? "Säsongsöppet – kontrollera aktuell meny och öppettid"
         : isWeekend
           ? "Se restaurangens helgmeny och aktuella öppettider"
           : "Veckomenyn finns hos restaurangen – öppna och kontrollera dagens rätter";

@@ -20,6 +20,7 @@ on:
       - "scripts/test_update_lunch.py"
       - ".github/workflows/update-lunch.yml"
   schedule:
+    - cron: "35 18 * * 0"
     - cron: "35 4,7,9 * * 1-5"
     - cron: "35 7 * * 0,6"
 

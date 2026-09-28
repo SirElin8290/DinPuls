@@ -1,6 +1,6 @@
 {
   "version": "0.21.4",
-  "generatedAt": "2026-09-28T13:11:30+02:00",
+  "generatedAt": "2026-09-28T23:42:37+02:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 40,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
@@ -626,7 +626,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -669,7 +669,7 @@
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -713,7 +713,7 @@
           "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -745,7 +745,9 @@
           "address": "Arvika Näringslivscentrum",
           "hours": "Vardagar 10.30–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
+          "nameAfter": "Restaurang Skeppet by Smak & Co",
+          "nameAfterDate": "2026-10-01",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -755,53 +757,91 @@
           "id": "elins-bakgard",
           "name": "Elins Bakgård",
           "url": "https://elinsbakgard.se/meny.html",
-          "address": "Arvika",
+          "address": "Magasinsgatan 4, Arvika",
           "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
-          "parser": "source-only",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
+          "parser": "dated-weekday-headings",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
+          "weekNumber": 40,
+          "days": {
+            "monday": [],
+            "tuesday": [
+              "Potatis & purjolöksoppa.",
+              "Dagens lunch: Sötsur gryta på svensk karré, bambuskott, ris & broccoli."
+            ],
+            "wednesday": [
+              "Broccolisoppa med frömix.",
+              "Dagens lunch: Sötsur gryta på svensk karré, bambuskott, ris & broccoli."
+            ],
+            "thursday": [
+              "Indisk lins & potatissoppa toppas med myntayoghurt.",
+              "Dagens lunch: Kycklingfilé, currysås, stekt potatis & broccoli."
+            ],
+            "friday": [
+              "Kålsoppa med kålkorv. Vegetarisk soppa.",
+              "Dagens lunch: Kycklingfilé, currysås, stekt potatis & broccoli."
+            ],
+            "saturday": [
+              "Kålsoppa med frikadeller & kålkorv. Vegetarisk kålsoppa.",
+              "Helg lunch: Viltskavsgryta med svensk älg, hjort & viltsvin, potatis, brysselkål & lingonsylt."
+            ],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "cafe-gnistan-arvika",
           "name": "Café Gnistan",
-          "url": "https://www.facebook.com/cafegnistan/",
+          "url": "https://www.regionvarmland.se/regionvarmland/halsa--vard/mat-och-restaurang",
           "address": "Arvika sjukhus, Rackstavägen",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "tolo-arvika",
-          "name": "Tolo Restaurang & Pub",
-          "url": "https://www.facebook.com/ToloRestaurangArvika/",
-          "address": "Arvika",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-09-28T13:11:30+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
+          "hours": "Vardagar 11.00–14.00",
+          "parser": "scoped-weekday-headings",
+          "headingPattern": "Café Gnistan lunchmeny",
+          "checkedAt": "2026-09-28T23:42:37+02:00",
+          "weekNumber": 40,
+          "days": {
+            "monday": [
+              "Sprödbakad fisk med kokt potatis och dillcrème"
+            ],
+            "tuesday": [
+              "Stekt fläsk med kokt potatis och bruna bönor eller löksås"
+            ],
+            "wednesday": [
+              "Kycklingtacos"
+            ],
+            "thursday": [
+              "Gratinerad falukorv med senapssås och kokt potatis"
+            ],
+            "friday": [
+              "Thaigryta med strimlat fläskkött med bambuskott och basmatiris"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "arvika-golfrestaurang",
-          "name": "Arvika Golfrestaurang",
-          "url": "https://www.arvikagk.com/",
+          "name": "Arvika Golfkrog",
+          "url": "https://arvikagk.com/gaster/restaurang/",
           "address": "Arvika Golfklubb",
-          "hours": "Säsongsöppet, se dagens lunch",
+          "hours": "Säsongsöppet 09.00–18.00",
           "parser": "source-only",
           "seasonal": true,
-          "checkedAt": "2026-09-28T13:11:30+02:00",
+          "seasonMonths": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "checkedAt": "2026-09-28T23:42:37+02:00",
           "weekNumber": null,
           "days": {},
-          "status": "reference",
+          "status": "active",
           "mode": "reference"
         }
       ],

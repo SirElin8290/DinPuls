@@ -78,7 +78,7 @@ function renderLunchPage(){
 
 function renderLunchCard(item,day,isSelected=false){
   const dishes=item.status==="current"?(item.days?.[day]||[]):[];
-  const status=dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":item.seasonal?"Säsongsöppet lunchställe":"Lunch serveras – kontrollera dagens utbud";
+  const status=dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":item.status==="seasonally_closed"?"Säsongsstängt":item.status==="active"?"Öppet för säsongen – kontrollera dagens rätt":item.seasonal?"Säsongsöppet lunchställe":"Lunch serveras – kontrollera dagens utbud";
   const menu=dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna originalkällan för dagens utbud och eventuella ändringar.</p>`;
   return `<article class="portal-card lunch-card ${isSelected?"selected":""}" id="lunch-${escapeLunch(item.id)}">
     <span class="portal-card-icon lunch"><i data-lucide="utensils"></i></span>
