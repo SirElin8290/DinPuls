@@ -2236,3 +2236,58 @@ html,body{max-width:100%;overflow-x:clip}
   .departure-row:has(.departure-mode.flight) .departure-time{grid-column:3;grid-row:1/3}
   .departure-row:has(.departure-mode.flight) .departure-status{grid-column:2/4}
 }
+
+/* Startsida V1: sammanhållen desktopbredd och konsekvent sektionsrytm. */
+@media(min-width:761px){
+  :root{
+    --max:1240px;
+    --homepage-gutter:20px;
+    --homepage-section-gap:24px;
+  }
+
+  .header-inner{
+    grid-template-columns:minmax(230px,280px) minmax(300px,1fr) auto;
+    gap:16px;
+    padding-left:20px;
+    padding-right:20px;
+  }
+  .brand-logo{width:min(280px,100%)}
+  .header-actions{min-width:0;gap:10px}
+  .header-utility-actions{gap:8px}
+
+  .quick-strip,
+  .lunch-airport-strip{
+    max-width:calc(var(--max) - (2 * var(--homepage-gutter)));
+  }
+  .main-nav{padding-left:var(--homepage-gutter);padding-right:var(--homepage-gutter)}
+  main{width:100%;max-width:var(--max)}
+
+  .local-now-layout{
+    gap:20px;
+    padding:var(--homepage-section-gap) var(--homepage-gutter) 0;
+  }
+  .grid{
+    gap:20px;
+    padding:var(--homepage-section-gap) var(--homepage-gutter) 0;
+  }
+  .transport-section,
+  .sport-home,
+  .health-home,
+  .cinema-home,
+  .service-home,
+  .authorities-home,
+  .news-sources-section,
+  .leisure-home,
+  .premium-ads{
+    margin:var(--homepage-section-gap) var(--homepage-gutter) 0;
+  }
+
+  footer{max-width:var(--max);margin-left:auto;margin-right:auto}
+
+  /* Sidoytan ska vara neutral tills en eventuell bakgrund beslutas separat. */
+  body::before,
+  body::after{
+    opacity:0!important;
+    background:none!important;
+  }
+}
