@@ -12,6 +12,7 @@ const checks = [
   [associations.includes('foreningar-konto.html?kommun=') && associations.includes('&forening='), "association CTA opens the shared information page with context"],
   [info.includes('id="loginCta"') && info.includes('id="registerCta"'), "information page exposes both account routes"],
   [!info.includes('id="loginBottom"') && !info.includes('id="registerBottom"'), "information page contains only one CTA set"],
+  [!info.includes('class="hero-placeholder"'), "the full hero section is reserved for the future image"],
   [info.includes("15 %") && info.includes("verifierad förening"), "information page explains the verified 15 percent model"],
   [account.indexOf('id="associationLogin"') < account.indexOf('id="associationRegistration"'), "login is the default card face"],
   [account.includes('id="associationSearch"') && account.includes("Bekräfta lösenord"), "registration layout contains the requested fields"],
