@@ -2553,7 +2553,7 @@ function renderEvents() {
   const data = eventsData.municipalities?.[municipality] || { events: [], sources: [] };
   const today = stockholmDateKey();
   const events = (data.events || []).filter(item => String(item.endDate || item.startDate).slice(0,10) >= today).sort((a,b) => String(a.startDate).localeCompare(String(b.startDate)));
-  const visible = events.slice(0, 4);
+  const visible = events.slice(0, 9);
   const list = document.querySelector("#events-list");
   const loading = document.querySelector("#events-loading");
   const empty = document.querySelector("#events-empty");
