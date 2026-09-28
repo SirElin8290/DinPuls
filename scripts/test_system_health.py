@@ -86,6 +86,26 @@ class SystemHealthTests(unittest.TestCase):
         result = health.build_health("https://example.test/data", self.now, opener_for(data))
         self.assertEqual(result["municipalities"]["Storfors"]["lunch"]["status"], "green")
 
+    def test_events_use_municipality_source_check_time(self):
+        data = payloads()
+        events = data[health.MODULES["events"][0][0]]
+        events["generatedAt"] = "2026-09-01T00:00:00+00:00"
+        events["municipalities"]["Storfors"]["sourceHealth"] = [
+            {"status": "ok", "checkedAt": "2026-09-10T11:30:00+00:00"}
+        ]
+        result = health.build_health("https://example.test/data", self.now, opener_for(data))
+        self.assertEqual(result["municipalities"]["Storfors"]["events"]["status"], "green")
+
+    def test_cinema_uses_program_check_time(self):
+        data = payloads()
+        cinema = data[health.MODULES["cinema"][0][0]]
+        cinema["generatedAt"] = "2026-08-01T00:00:00+00:00"
+        cinema["municipalities"]["Storfors"] = [
+            {"programCheckedAt": "2026-09-10T11:00:00+00:00"}
+        ]
+        result = health.build_health("https://example.test/data", self.now, opener_for(data))
+        self.assertEqual(result["municipalities"]["Storfors"]["cinema"]["status"], "green")
+
 
 if __name__ == "__main__":
     unittest.main()
