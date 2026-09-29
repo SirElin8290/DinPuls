@@ -340,10 +340,13 @@
       {
         "id": "eds-bowlinghall",
         "name": "Eds Bowlinghall",
-        "url": "https://www.vastsverige.com/dalsed/produkter/eds-bowlinghall-dals-ed/",
+        "url": "https://www.edsbowlinghall.com/maten",
         "address": "Jordbrovägen 15, Ed",
-        "hours": "Dagens lunch och restaurang – se aktuell meny hos anläggningen",
-        "parser": "source-only"
+        "hours": "Lunchbuffé måndag–fredag 11.00–14.00",
+        "parser": "weekday-headings",
+        "stopAfterPattern": "^Crispy chicken burger",
+        "dishSplitPattern": "(?<=\\.)\\s+(?=Pannkakor)",
+        "fallbackMode": "reference"
       },
       {
         "id": "local-idiot-ed",
@@ -384,6 +387,25 @@
         "address": "Ed",
         "hours": "Thairestaurang i centrala Ed – se aktuell lunchinformation",
         "parser": "source-only"
+      },
+      {
+        "id": "gasthuset-tjuren-ed",
+        "name": "Gästhuset Tjuren",
+        "url": "https://www.vastsverige.com/dalsed/produkter/restaurang-tjuren/",
+        "address": "Jordbrovägen 8, Ed",
+        "hours": "Två dagens rätter, varav en fiskrätt – se aktuell publicering",
+        "parser": "source-only"
+      },
+      {
+        "id": "nossemarks-camping-cafe",
+        "name": "Nössemarks Camping & Café",
+        "url": "https://www.nossemarkscamping.com/",
+        "address": "Nössemark Strand 640, Ed",
+        "hours": "Säsongsöppet café, restaurang och foodtruck",
+        "parser": "source-only",
+        "seasonal": true,
+        "seasonStart": "05-01",
+        "seasonEnd": "09-15"
       }
     ],
     "Färgelanda": [

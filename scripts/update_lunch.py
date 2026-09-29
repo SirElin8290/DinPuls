@@ -84,13 +84,17 @@ def useful_dish(line):
     if re.fullmatch(r"(meny|hem|lunchmeny|dagens lunch|veckans lunchbuffé)",lowered): return False
     return True
 
-def parse_weekday_menu(page):
+def parse_weekday_menu(page, stop_after_pattern=None):
     parser=TextExtractor(); parser.feed(page); lines=parser.text_lines(); menu={key:[] for key in DAYS.values()}; active=None; seen_days=set()
     for line in lines:
-        day=weekday_key(line)
+        if stop_after_pattern and re.search(stop_after_pattern,line,re.I): break
+        inline=re.match(r"^(måndag|mandag|tisdag|onsdag|torsdag|fredag|lördag|lordag|söndag|sondag)\s*(?:\d{1,2}(?:[/.]\d{1,2})?)?\s*:\s*(.+)$",line,re.I)
+        day=DAYS[inline.group(1).lower()] if inline else weekday_key(line)
         if day:
             if day in seen_days: break
-            seen_days.add(day); active=day; continue
+            seen_days.add(day); active=day
+            if not inline: continue
+            line=inline.group(2).strip()
         if active and any(line.lower().startswith(marker) for marker in STOP_MARKERS): active=None; continue
         if active and useful_dish(line) and len(menu[active])<5: menu[active].append(line)
     return extract_week(lines),menu
@@ -222,7 +226,9 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    else: week,days=parse_weekday_menu(page)
+                    else: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    if source.get("dishSplitPattern"):
+                        days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and any(days.values()) else "outdated"; item["mode"]="automatic"
                 except RuntimeError as error:
@@ -230,7 +236,11 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             if source.get("seasonal"):
                 item["seasonal"]=True
                 season_months=source.get("seasonMonths") or []
-                if parser_name=="source-only": item["status"]="active" if now.month in season_months else "seasonally_closed"
+                season_start=source.get("seasonStart"); season_end=source.get("seasonEnd")
+                if parser_name=="source-only" and season_start and season_end:
+                    current_mmdd=now.strftime("%m-%d")
+                    item["status"]="active" if season_start <= current_mmdd <= season_end else "seasonally_closed"
+                elif parser_name=="source-only": item["status"]="active" if now.month in season_months else "seasonally_closed"
             previous=previous_by_id.get(source.get("id"))
             if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}

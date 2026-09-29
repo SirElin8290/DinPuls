@@ -86,6 +86,20 @@ class LunchUpdateTests(unittest.TestCase):
         _week, days = update_lunch.parse_weekday_menu(page)
         self.assertEqual(days["friday"], ["Fredagsrätt"])
 
+    def test_eds_bowlinghall_current_week_stops_before_a_la_carte(self):
+        page="""<p>Måndag - Fredag 11:00 - 14:00</p><h2>Lunchen vecka 40</h2><p>Lunchbuffé 139:-</p>
+        <p>Måndag: Köttbullar med gräddsås serveras med mos</p>
+        <p>Tisdag: Korvstroganoff serveras med ris</p>
+        <p>Onsdag: Gulaschsoppa på köttfärs. Pannkakor med grädde &amp; sylt</p>
+        <p>Torsdag: Baconröra serveras med pasta</p>
+        <p>Fredag: Kycklingfilé i rosépepparsås serveras med råstekt potatis</p>
+        <h3>Crispy chicken burger med pommes 169kr</h3><p>Bowlingburgare 169kr</p>"""
+        week,days=update_lunch.parse_weekday_menu(page,r"^Crispy chicken burger")
+        self.assertEqual(week,40)
+        self.assertEqual(days["monday"],["Köttbullar med gräddsås serveras med mos"])
+        self.assertEqual(days["wednesday"],["Gulaschsoppa på köttfärs. Pannkakor med grädde & sylt"])
+        self.assertEqual(days["friday"],["Kycklingfilé i rosépepparsås serveras med råstekt potatis"])
+
     def test_mickans_price_metadata_is_not_exposed_as_a_dish(self):
         municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
         municipalities["Åmål"] = [{
@@ -112,6 +126,14 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertGreaterEqual(len(sources), 5)
         self.assertTrue(any(source.get("id") == "abbes-golfkrog-hammaro" for source in sources))
         self.assertTrue(merged["referenceSources"].get("Hammarö"))
+
+    def test_source_only_season_uses_exact_date_window(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Dals-Ed"]=[{"id":"seasonal","name":"Seasonal","url":"https://example.test","parser":"source-only","seasonal":True,"seasonStart":"05-01","seasonEnd":"09-15"}]
+        before=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,14,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        after=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,29,8,tzinfo=ZoneInfo("Europe/Stockholm")))
+        self.assertEqual(before["municipalities"]["Dals-Ed"]["restaurants"][0]["status"],"active")
+        self.assertEqual(after["municipalities"]["Dals-Ed"]["restaurants"][0]["status"],"seasonally_closed")
 
     def test_duplicate_ids_are_rejected(self):
         municipalities = {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES}
