@@ -131,7 +131,37 @@
         "parser": "source-only"
       }
     ],
-    "Hammarö": [],
+    "Hammarö": [
+      {
+        "id": "skoghalls-folkets-hus-restaurang",
+        "name": "Restaurangen på Skoghalls Folkets Hus",
+        "url": "https://skoghallsfolketshus.se/",
+        "dataUrl": "https://www.lunchsidan.se/restaurang/restaurant-at-skoghalls-folkets-hus/11203315438",
+        "address": "Skogåsvägen 3, Skoghall",
+        "hours": "Lunch måndag–fredag 11.00–14.00",
+        "parser": "lunchsidan-restaurant",
+        "expectedNamePattern": "Restaurant at Skoghalls Folkets Hus",
+        "expectedAddress": "Skogåsvägen 3, 663 30 Skoghall",
+        "fallbackMode": "reference"
+      },
+      {
+        "id": "glg-lysasen",
+        "name": "GLG Lysåsen",
+        "url": "https://glg.se/",
+        "address": "Lysåsen, Skoghall",
+        "hours": "Lunch måndag–fredag 11.00–14.00",
+        "parser": "source-only"
+      },
+      {
+        "id": "ica-supermarket-skoghall",
+        "name": "ICA Supermarket Skoghall",
+        "url": "https://www.ica.se/butiker/supermarket/hammaro/ica-supermarket-skoghall-1003506/tjanster/lunch/",
+        "address": "Björkhagsgatan 9, Skoghall",
+        "hours": "Varm lunch måndag–fredag 11.00–14.00",
+        "parser": "weekday-headings",
+        "fallbackMode": "reference"
+      }
+    ],
     "Forshaga": [
       {
         "id": "luna-lucet-forshaga",
@@ -325,14 +355,6 @@
         "url": "https://www.visitvarmland.com/hagfors/kultur-historia/hus-kulturmiljoer/platser-37/hagfors-hembygdsgard",
         "address": "Krokvägen 11, Hagfors",
         "hours": "Enklare lunch vardagar 10.30–15.30 och husmanskost torsdagar",
-        "parser": "source-only"
-      },
-      {
-        "id": "ayasofya-eksharad",
-        "name": "Restaurang Ayasofya",
-        "url": "https://www.visitvarmland.com/hagfors/mat-dryck/restaurang/restaurang-ayasofya",
-        "address": "Klarälvsvägen 25, Ekshärad",
-        "hours": "Lunchbuffé vardagar 11.00–15.00",
         "parser": "source-only"
       }
     ],
