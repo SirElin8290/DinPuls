@@ -229,10 +229,12 @@
       {
         "id": "cafe-huset-filipstad",
         "name": "Café Huset",
-        "url": "https://cafehusets-konditori.se/",
-        "address": "Stora Torget 4B, Filipstad",
-        "hours": "Dagens lunch 11.00–14.30",
-        "parser": "source-only"
+        "url": "https://cafehuset.se/",
+        "address": "Stora Torget 4A, Filipstad",
+        "hours": "Dagens lunch måndag–fredag 11.00–14.30",
+        "parser": "weekday-headings",
+        "stopAfterPattern": "^Smaklig måltid",
+        "fallbackMode": "reference"
       },
       {
         "id": "hennickehammars-herrgard",
@@ -245,7 +247,7 @@
       {
         "id": "big-hill-lodge-filipstad",
         "name": "Big Hill Lodge",
-        "url": "https://bighilllodge.se/meny/",
+        "url": "https://bighilllodge.se/lunchmeny",
         "address": "Storhöjden 1, Filipstad",
         "hours": "Lunch måndag–fredag, köket 11.00–15.30",
         "parser": "source-only"
