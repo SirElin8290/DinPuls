@@ -222,6 +222,37 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(rows[0]["status"],"unavailable")
         self.assertEqual(rows[1]["status"],"current")
 
+    def test_lunchsidan_place_parser_isolates_rosellmagasinet(self):
+        page="""
+        <h2>Annat lunchställe</h2><p>Uppdaterad: 28 sep 2026 (vecka 40)</p>
+        <p>Måndag Fel restaurangs rätt</p>
+        <h2>Restaurang Rosellmagasinet</h2><p>Karlsbergsvägen 5, Bengtsfors</p>
+        <p>Uppdaterad: 28 sep 2026 (vecka 40)</p>
+        <p>Måndag Fisk i dillsås</p><p>Köttfärslimpa med gräddsås</p>
+        <p>Tisdag Stekt fläsk med löksås</p>
+        <p>Onsdag Pocherad fisk med smörsås</p>
+        <p>Torsdag Fisksoppa</p><p>Piccata med tomatsås</p>
+        <p>Fredag Fisk i ugn</p><p>Fläskfilé med pepparsås</p>
+        <h2>Nästa restaurang</h2><p>Uppdaterad: 28 sep 2026 (vecka 40)</p>
+        <p>Fredag Ska inte läcka in</p>
+        """
+        week,days=update_lunch.parse_lunchsidan_place_restaurant(page,r"Restaurang Rosellmagasinet","Karlsbergsvägen 5, Bengtsfors")
+        self.assertEqual(week,40)
+        self.assertEqual(days["monday"],["Fisk i dillsås","Köttfärslimpa med gräddsås"])
+        self.assertEqual(days["friday"],["Fisk i ugn","Fläskfilé med pepparsås"])
+        self.assertNotIn("Ska inte läcka in",sum(days.values(),[]))
+
+    def test_lunchsidan_place_parser_rejects_wrong_address_and_stale_week(self):
+        wrong="<h2>Restaurang Rosellmagasinet</h2><p>Fel adress</p><p>Uppdaterad: 28 sep 2026 (vecka 40)</p><p>Måndag Rätt</p>"
+        with self.assertRaisesRegex(RuntimeError,"fel adress"):
+            update_lunch.parse_lunchsidan_place_restaurant(wrong,r"Restaurang Rosellmagasinet","Karlsbergsvägen 5, Bengtsfors")
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Bengtsfors"]=[{"id":"rosellmagasinet","name":"Restaurang Rosellmagasinet","url":"https://official.test","dataUrl":"https://menu.test","parser":"lunchsidan-place-restaurant","expectedNamePattern":"Restaurang Rosellmagasinet","expectedAddress":"Karlsbergsvägen 5, Bengtsfors"}]
+        stale="<h2>Restaurang Rosellmagasinet</h2><p>Karlsbergsvägen 5, Bengtsfors</p><p>Uppdaterad: 21 sep 2026 (vecka 39)</p><p>Måndag Gammal rätt</p>"
+        item=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")),fetcher=lambda _url:stale)["municipalities"]["Bengtsfors"]["restaurants"][0]
+        self.assertEqual(item["status"],"outdated")
+        self.assertEqual(item["days"],{})
+
 
 if __name__ == "__main__":
     unittest.main()
