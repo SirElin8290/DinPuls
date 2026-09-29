@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-09-29T10:25:50+02:00
+Genererad: 2026-09-29T10:28:59+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -29,7 +29,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Forshaga | 🟢 GREEN | 18 | 3 | 80 | 46 / 46 färska | 11 / 6 kat | 13 / 13 kat | 8 | 26 | 21 |
 | Färgelanda | 🟢 GREEN | 9 | 7 | 4 | 28 / 28 färska | 9 / 8 kat | 8 / 5 kat | 4 | 11 | 17 |
 | Hagfors | 🟢 GREEN | 23 | 20 | 70 | 50 / 50 färska | 14 / 9 kat | 12 / 7 kat | 8 | 15 | 22 |
-| Hammarö | 🟢 GREEN | 12 | 2 | 53 | 49 / 49 färska | 10 / 7 kat | 8 / 5 kat | 5 | 42 | 23 |
+| Hammarö | 🟢 GREEN | 12 | 2 | 53 | 49 / 49 färska | 10 / 7 kat | 8 / 5 kat | 7 | 42 | 23 |
 | Karlstad | 🟢 GREEN | 92 | 47 | 75 | 90 / 90 färska | 36 / 10 kat | 13 / 6 kat | 10 | 146 | 43 |
 | Kil | 🟢 GREEN | 16 | 5 | 3 | 37 / 37 färska | 10 / 4 kat | 18 / 5 kat | 5 | 21 | 19 |
 | Kristinehamn | 🟢 GREEN | 51 | 9 | 78 | 62 / 62 färska | 6 / 4 kat | 9 / 6 kat | 4 | 56 | 20 |
