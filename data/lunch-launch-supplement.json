@@ -82,25 +82,28 @@
       {
         "id": "kallmans-konditori",
         "name": "Källmans Konditori",
-        "url": "https://www.visitvarmland.com/eda/mat-dryck/kafe-bageri/kallmans-konditori",
+        "url": "https://xn--kllmans-5wa.se/lunch/",
         "address": "Storgatan 14, Charlottenberg",
-        "hours": "Varm mat, à la carte och buffé – se aktuell servering",
-        "parser": "source-only"
+        "hours": "Husmanslunch måndag–fredag",
+        "parser": "weekday-headings",
+        "stopAfterPattern": "^10 pack",
+        "fallbackMode": "reference"
       },
       {
         "id": "hotell-charlottenberg",
         "name": "Hotell Charlottenberg",
-        "url": "https://www.visitvarmland.com/eda/boende/hotell-pensionat/hotell-charlottenberg/",
+        "url": "https://hotellcharlottenberg.se/ata/lunch/",
         "address": "Charlottenbergsvägen 2, Charlottenberg",
         "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
-        "parser": "source-only"
+        "parser": "weekday-headings",
+        "fallbackMode": "reference"
       },
       {
         "id": "food-corner-charlottenberg",
         "name": "Food Corner",
-        "url": "https://www.visitvarmland.com/eda/mat-dryck/food-corner",
-        "address": "Morastgatan 1, Charlottenberg",
-        "hours": "Buffé serveras dagligen från 10.30",
+        "url": "https://charlottenbergsshopping.se/butiker/food-corner/",
+        "address": "Helga Görlins gata 1, Charlottenberg",
+        "hours": "Pizza-, taco- och asiatisk buffé dagligen 11.00–20.00",
         "parser": "source-only"
       },
       {
@@ -117,6 +120,14 @@
         "url": "https://www.visitvarmland.com/eda/mat-dryck/restaurang/la-delal-pizzeria",
         "address": "Koppomsvägen 102, Koppom",
         "hours": "Dagens lunch 11.00–14.00",
+        "parser": "source-only"
+      },
+      {
+        "id": "asian-town-charlottenberg",
+        "name": "Asian Town Charlottenberg",
+        "url": "https://asiantown.se/charlottenberg/",
+        "address": "Helga Görlins gata 1, Charlottenberg",
+        "hours": "Buffé och dagens lunch – se aktuellt utbud",
         "parser": "source-only"
       }
     ],

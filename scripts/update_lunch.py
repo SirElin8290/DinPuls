@@ -26,7 +26,7 @@ USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
 EXPECTED_MUNICIPALITIES = {item["name"] for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]}
 DAYS = {"måndag":"monday","mandag":"monday","tisdag":"tuesday","onsdag":"wednesday","torsdag":"thursday","fredag":"friday","lördag":"saturday","lordag":"saturday","söndag":"sunday","sondag":"sunday"}
 STOP_MARKERS = ("veckans vegetariska","sallader","lunchpriser","öppettider","kontakt","pris ","priser","barn ","utkörningsservice","ta kontakt","catering","ring oss","galleri","adress","bordsbokning","öppet för","veckans meny","inkl.","sommarerbjudanden","ladda ner","med goda drycker","övrigt","lördagslunch","veckans burgare","veckans pasta","ta en titt på vår meny","kunden har alltid rätt","det här tycker våra kunder")
-NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","måltidsdryck","kaffe & kaka","dessert"}
+NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","måltidsdryck","kaffe & kaka","dessert","ingen dagens","ingen dagens."}
 
 class TextExtractor(HTMLParser):
     def __init__(self): super().__init__(); self.lines=[]; self.blocked=0
