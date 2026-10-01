@@ -64,9 +64,6 @@ jobs:
           set -euo pipefail
           python scripts/test_update_lunch.py
           python scripts/update_lunch.py
-          python scripts/apply_fargelanda_lunch.py
-          python scripts/apply_storfors_lunch.py
-          python scripts/apply_karlstad_strict.py --modules lunch
 
       - name: Verifiera att alla kommuner finns med och att lanseringskommunerna har matkälla
         run: |
