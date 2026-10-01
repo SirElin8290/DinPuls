@@ -1,9 +1,14 @@
 {
-  "version": "0.22.0",
-  "generatedAt": "2026-10-01T23:32:46+02:00",
+  "version": "0.22.1",
+  "generatedAt": "2026-10-01T23:50:16+02:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 40,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
+  "curation": {
+    "menuCandidates": 56,
+    "excludedWithoutVerifiableMenu": 72,
+    "exclusionSource": "data/lunch-exclusions.json"
+  },
   "municipalities": {
     "Åmål": {
       "restaurants": [
@@ -14,7 +19,7 @@
           "address": "Åmål",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -47,7 +52,7 @@
           "address": "Stora Berga 501",
           "hours": "Vardagar 11.30–14.00",
           "parser": "all-days-heading",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -96,20 +101,7 @@
           "address": "Industrigatan 12",
           "hours": "Vardagar 11.30–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "amal-stadshotell",
-          "name": "Åmåls Stadshotell",
-          "url": "https://www.amalsstadshotell.se/restaurang",
-          "address": "Kungsgatan 9",
-          "hours": "Tisdag–fredag 11.30–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -132,7 +124,7 @@
           "address": "Norrlandsvägen 39",
           "hours": "Vardagar 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -168,7 +160,7 @@
           "address": "Säffle",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -181,33 +173,7 @@
           "address": "Sundsgatan 30",
           "hours": "Se aktuell lunchmeny",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "first-royal",
-          "name": "First Royal",
-          "url": "https://royal.se/restaurang/",
-          "address": "Olov Trätäljagatan 2",
-          "hours": "Se aktuell lunchbuffé",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "bella-rosa-saffle",
-          "name": "Bella Rosa",
-          "url": "https://www.facebook.com/BellaRosaSaffle/",
-          "address": "Säffle",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -221,49 +187,10 @@
           "hours": "Se dagens lunch",
           "parser": "source-only",
           "seasonal": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "seasonally_closed",
-          "mode": "reference"
-        },
-        {
-          "id": "kvarnen-saffle",
-          "name": "Kvarnen",
-          "url": "https://www.facebook.com/p/Kvarnen-100093486871958/",
-          "address": "Säffle",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "cafe-gladjen-saffle",
-          "name": "Café Glädjen",
-          "url": "https://www.facebook.com/p/Cafe-Gl%C3%A4djen-S%C3%A4ffle-100063689974961/",
-          "address": "Säffle",
-          "hours": "Lunch och sopplunch, se aktuell information",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "svanskog-pizzeria",
-          "name": "Svanskog Pizzeria",
-          "url": "https://www.facebook.com/SvanskogPizzeria/",
-          "address": "Svanskog",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
           "mode": "reference"
         },
         {
@@ -274,7 +201,7 @@
           "hours": "Säsongsöppet, se lunchmeny",
           "parser": "source-only",
           "seasonal": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "seasonally_closed",
@@ -296,7 +223,7 @@
           "expectedNamePattern": "Restaurang Rosellmagasinet",
           "expectedAddress": "Karlsbergsvägen 5, Bengtsfors",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -324,84 +251,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "jnj-bodega",
-          "name": "JnJ Bodegan",
-          "url": "https://www.facebook.com/jnjbodega/",
-          "address": "Storgatan 14",
-          "hours": "Vardagar 11.30–15.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "bengtsfors-grill",
-          "name": "Bengtsfors Grill",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/bengtsfors-grill-44090225",
-          "address": "Storgatan 6, Bengtsfors",
-          "hours": "Måndag–fredag 10.00–20.00, lördag–söndag 12.00–20.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "thai-kitchen-bengtsfors",
-          "name": "Thai Kitchen",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/thai-kitchen-43262150",
-          "address": "Berglunds gränd 3, Bengtsfors",
-          "hours": "Måndag–fredag från 11.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "pizzeria-adria-bengtsfors",
-          "name": "Pizzeria Adria",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/pizzeria-adria-43262152",
-          "address": "Storgatan 18, Bengtsfors",
-          "hours": "Söndag–torsdag 11.00–20.00, fredag–lördag 11.00–21.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "pizzeria-sicilia-bengtsfors",
-          "name": "Pizzeria Sicilia",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/pizzeria-sicilia-43298559",
-          "address": "Storgatan 38, Bengtsfors",
-          "hours": "Måndag–söndag 11.00–21.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "kickis-cafe-bengtsfors",
-          "name": "Kickis Café",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/kickis-caf%C3%A9-43233635",
-          "address": "Storgatan 7, Bengtsfors",
-          "hours": "Café med pajer och varma smörgåsar – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -420,7 +269,7 @@
           "address": "Sunnanå Kullen 2",
           "hours": "Vardagar 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -433,7 +282,7 @@
           "address": "Sjögatan 1",
           "hours": "Dagens lunch",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -446,7 +295,7 @@
           "address": "Mellerud",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -479,32 +328,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "nya-vagen-mellerud",
-          "name": "Nya Vågen Restaurang",
-          "url": "https://www.facebook.com/profile.php?id=61574961930176",
-          "address": "Mellerud",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "borsen-mellerud",
-          "name": "Restaurang Börsen",
-          "url": "https://www.facebook.com/RestaurangBorsen/",
-          "address": "Mellerud",
-          "hours": "Se aktuell lunchmeny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -523,7 +346,7 @@
           "address": "Marknadsvägen 24, Årjäng",
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -566,25 +389,12 @@
           "address": "Storgatan 53, Årjäng",
           "hours": "Vardagar 11.30–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
           "mode": "automatic",
           "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'krogeriet.se'. (_ssl.c:1010)"
-        },
-        {
-          "id": "hotell-arjang",
-          "name": "Hotell Årjäng",
-          "url": "https://hotellarjang.com/ata/lunch/",
-          "address": "Claras Torg 1, Årjäng",
-          "hours": "Se aktuell lunchstatus",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         },
         {
           "id": "waterside",
@@ -593,46 +403,7 @@
           "address": "Bögatan 1, Töcksfors",
           "hours": "Dagens lunch, se aktuell tid",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "asian-town-tocksfors",
-          "name": "Asian Town Töcksfors",
-          "url": "https://asiantown.se/tocksfors/",
-          "address": "Töcksfors Shoppingcenter",
-          "hours": "Buffé dagligen från 11.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "curry-punjabi-arjang",
-          "name": "Curry Punjabi",
-          "url": "https://www.facebook.com/currypunjabi1/",
-          "address": "Årjäng",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "hornet-arjang",
-          "name": "Hörnet",
-          "url": "https://www.facebook.com/p/H%C3%B6rnet-61559522264272/",
-          "address": "Årjäng",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -655,7 +426,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -698,7 +469,7 @@
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -742,7 +513,7 @@
           "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -782,7 +553,7 @@
           ],
           "nameAfter": "Restaurang Skeppet by Smak & Co",
           "nameAfterDate": "2026-10-01",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -821,7 +592,7 @@
           "address": "Magasinsgatan 4, Arvika",
           "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
           "parser": "dated-weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [],
@@ -858,7 +629,7 @@
           "hours": "Vardagar 11.00–14.00",
           "parser": "scoped-weekday-headings",
           "headingPattern": "Café Gnistan lunchmeny",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -881,29 +652,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "arvika-golfrestaurang",
-          "name": "Arvika Golfkrog",
-          "url": "https://arvikagk.com/gaster/restaurang/",
-          "address": "Arvika Golfklubb",
-          "hours": "Säsongsöppet 09.00–18.00",
-          "parser": "source-only",
-          "seasonal": true,
-          "seasonMonths": [
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10
-          ],
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "active",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -916,26 +664,13 @@
     "Grums": {
       "restaurants": [
         {
-          "id": "anderssons",
-          "name": "Anderssons Restaurang & Catering",
-          "url": "https://www.facebook.com/anderssonsrestaurangochcatering/",
-          "address": "Sveagatan 142",
-          "hours": "Se veckans lunchbuffé",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "rasta-grums",
           "name": "Rasta Grums",
           "url": "https://www.rasta.se/grums/dagens-ratt/",
           "address": "Nyängsgatan 1",
           "hours": "Dagens rätt 11.00–19.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -976,104 +711,13 @@
           "mode": "automatic"
         },
         {
-          "id": "pizzeria-97an-grums",
-          "name": "Pizzeria 97:an",
-          "url": "https://www.facebook.com/p/Pizzeria97an-100090669815751/",
-          "address": "Sveagatan 98, Grums",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "restaurang-kina-grums",
-          "name": "Restaurang Kina",
-          "url": "https://www.facebook.com/Kinaigrums/",
-          "address": "Sveagatan 48, Grums",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "indian-street-kitchen-grums",
           "name": "Indian Street Kitchen",
           "url": "https://www.visitvarmland.com/grums/mat-dryck/lunch/indian-street-kitchen",
           "address": "Sveagatan 94, Grums",
           "hours": "Dagens lunch – se aktuell meny",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "restaurang-asien-grums",
-          "name": "Restaurang Asien",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck/lunch/restaurang-asien",
-          "address": "Sveagatan 118, Grums",
-          "hours": "Lunch och kvällsmeny – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "grums-pizzeria",
-          "name": "Grums Pizzeria",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck/restaurang/grums-pizzeria",
-          "address": "Hammarstenallén 2, Grums",
-          "hours": "Dagens rätt – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "susannes-lilla-xtra-grums",
-          "name": "Susannes Lilla X-tra",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck/lunch/susannes-lilla-x-tra",
-          "address": "Industrigatan 4, Grums",
-          "hours": "Lunch, sallader och catering – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "viltkoket-grums",
-          "name": "Viltköket",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck/lunch/viltkoket",
-          "address": "Åsbäcksvägen 3, Grums",
-          "hours": "Lunch och konferensmåltider – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "kafe-sagtorp-grums",
-          "name": "Kafé Sågtorp",
-          "url": "https://www.visitvarmland.com/grums/",
-          "address": "Sågtorp 1, Segmon",
-          "hours": "Hemlagad lunch, matiga pajer och hembakat – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1096,24 +740,11 @@
           "address": "Skärningsberg 125",
           "hours": "Lunch 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
           "mode": "automatic"
-        },
-        {
-          "id": "kils-hotell",
-          "name": "Kils Hotell & Restaurang",
-          "url": "https://www.kilshotell.com/",
-          "address": "Storgatan 16",
-          "hours": "Vardagslunch 11.00–14.30",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         },
         {
           "id": "jarnvagscafet-kil",
@@ -1122,33 +753,7 @@
           "address": "Stationsplan, Kil",
           "hours": "Lunch 11.00–14.00 – se aktuell information",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "restaurang-kil-ros",
-          "name": "Restaurang Kil Ros",
-          "url": "https://www.visitvarmland.com/kil/mat-dryck/lunch/restaurang-kil-ros",
-          "address": "Storgatan 31, Kil",
-          "hours": "Asiatisk lunchbuffé – se aktuell information",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "frykenbaden-kil",
-          "name": "Frykenbaden Pub & Restaurang",
-          "url": "https://www.visitvarmland.com/kil/mat-dryck/lunch/frykenbaden-pub-and-restaurang",
-          "address": "Stubberud, Kil",
-          "hours": "Lunch och restaurangservering – se aktuell information",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1175,7 +780,7 @@
           "address": "Nils Holgerssons väg 1",
           "hours": "Lunch dagligen 11.00–16.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -1188,7 +793,7 @@
           "address": "Storgatan 36",
           "hours": "Lunch måndag–lördag 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -1201,7 +806,7 @@
           "address": "Brårudsallén 7",
           "hours": "Lunch måndag–fredag 11.30–14.30",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1214,7 +819,7 @@
           "address": "Sundsbergsvägen 3, Sunne",
           "hours": "Lunch à la carte; vardagar 11.30–14.00, helger 12.00–14.00 – se aktuella öppettider",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1243,7 +848,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^10 pack",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -1275,7 +880,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -1308,26 +913,13 @@
           "mode": "automatic"
         },
         {
-          "id": "food-corner-charlottenberg",
-          "name": "Food Corner",
-          "url": "https://charlottenbergsshopping.se/butiker/food-corner/",
-          "address": "Helga Görlins gata 1, Charlottenberg",
-          "hours": "Pizza-, taco- och asiatisk buffé dagligen 11.00–20.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "amotfors-pizzeria",
           "name": "Åmotfors Pizzeria",
           "url": "https://www.visitvarmland.com/eda/mat-dryck/restaurang/amotfors-pizzeria",
           "address": "Strandvägen 5, Åmotfors",
           "hours": "Dagens lunch vardagar – se aktuell matsedel",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1340,20 +932,7 @@
           "address": "Koppomsvägen 102, Koppom",
           "hours": "Dagens lunch 11.00–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "asian-town-charlottenberg",
-          "name": "Asian Town Charlottenberg",
-          "url": "https://asiantown.se/charlottenberg/",
-          "address": "Helga Görlins gata 1, Charlottenberg",
-          "hours": "Buffé och dagens lunch – se aktuellt utbud",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -1384,7 +963,7 @@
           "address": "Bromsgatan 8, Karlstad",
           "hours": "Lunch måndag–fredag 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -1428,9 +1007,9 @@
           "name": "Joan's Karlstad",
           "url": "https://joans.se/lunch/lunch-karlstad/",
           "address": "Kungsgatan 16, Karlstad",
-          "hours": "Lunch vardagar",
+          "hours": "Lunch vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -1441,9 +1020,9 @@
           "name": "Nöjesfabriken",
           "url": "https://www.nojesfabriken.se/mat/lunch/",
           "address": "Karlagatan 42, Karlstad",
-          "hours": "Lunch vardagar",
+          "hours": "Lunchbuffé tisdag–fredag 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [],
@@ -1466,88 +1045,12 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "spitiko-karlstad",
-          "name": "Spitiko",
-          "url": "https://www.karlstad.com/restauranger",
-          "address": "Johan Banérs väg 6, Karlstad",
-          "hours": "Lunch – se aktuell guide",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "scandic-city-karlstad",
-          "name": "Scandic City Restaurang",
-          "url": "https://www.noje.se/karlstad/restauranger",
-          "address": "Drottninggatan 4, Karlstad",
-          "hours": "Lunch – se aktuell restauranginformation",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "scandic-klaralven-karlstad",
-          "name": "Scandic Klarälven Restaurang",
-          "url": "https://www.noje.se/karlstad/restauranger",
-          "address": "Sandbäcksgatan 6, Karlstad",
-          "hours": "Lunch – se aktuell restauranginformation",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "scandic-winn-karlstad",
-          "name": "Scandic Winn Restaurang",
-          "url": "https://www.visitvarmland.com/karlstad/en/food-drinks/restaurant/scandic-winn-restaurant",
-          "address": "Norra Strandgatan 9–11, Karlstad",
-          "hours": "Frukost, lunch och à la carte",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "skare-pizzeria-karlstad",
-          "name": "Skåre Pizzeria & Restaurang",
-          "url": "https://www.noje.se/karlstad/restauranger",
-          "address": "Granlidsvägen 4, Karlstad",
-          "hours": "Lunch – se aktuell guide",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "solsidan-karlstad",
-          "name": "Solsidan",
-          "url": "https://www.noje.se/karlstad/restauranger",
-          "address": "Rosenborgsgatan 1, Karlstad",
-          "hours": "Lunch – se aktuell guide",
-          "checkedAt": "2026-10-01T23:33:33+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
         {
           "name": "Karlstad – restauranger och lunch",
           "url": "https://www.karlstad.com/restauranger"
-        },
-        {
-          "name": "Visit Karlstad – mat och dryck",
-          "url": "https://visitkarlstad.se/visit-karlstad/mat-och-dryck"
         }
       ]
     },
@@ -1564,7 +1067,7 @@
           "expectedNamePattern": "Restaurant at Skoghalls Folkets Hus",
           "expectedAddress": "Skogåsvägen 3, 663 30 Skoghall",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -1609,19 +1112,6 @@
           "mode": "automatic"
         },
         {
-          "id": "glg-lysasen",
-          "name": "GLG Lysåsen",
-          "url": "https://glg.se/",
-          "address": "Lysåsen, Skoghall",
-          "hours": "Lunch måndag–fredag 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "ica-supermarket-skoghall",
           "name": "ICA Supermarket Skoghall",
           "url": "https://www.ica.se/butiker/supermarket/hammaro/ica-supermarket-skoghall-1003506/tjanster/lunch/",
@@ -1629,64 +1119,11 @@
           "hours": "Varm lunch måndag–fredag 11.00–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
           "mode": "automatic"
-        },
-        {
-          "id": "abbes-golfkrog-hammaro",
-          "name": "Abbes Golfkrog",
-          "url": "https://www.hammarogk.se/restaurang/",
-          "address": "Barrstigen 103, Hammarö",
-          "hours": "Restaurang öppen dagligen; veckomeny publiceras på originalkällan",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "skargardsudden-hammaro",
-          "name": "Restaurang Udden vid Mörudden",
-          "url": "https://www.visitvarmland.com/hammaro/om-hammaro/",
-          "address": "Mörudden, Hammarö",
-          "hours": "Lunch och à la carte – se aktuell servering",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "lillangshamnens-fiskrokeri",
-          "name": "Lillängshamnens Fiskrökeri & Restaurang",
-          "url": "https://www.visitvarmland.com/tips-och-guider/restauranger-i-varmland-2/",
-          "address": "Lillängshamnen, Skoghall",
-          "hours": "Restaurang med fisk- och skaldjursrätter; säsongsöppet – se aktuell information",
-          "parser": "source-only",
-          "seasonal": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "seasonally_closed",
-          "mode": "reference"
-        },
-        {
-          "id": "marguerites-hammaro",
-          "name": "Marguerite's",
-          "url": "https://www.visitvarmland.com/hammaro/mat-dryck/kafe-bageri/platser-86/marguerites",
-          "address": "Hamnvägen 2J, Skoghall",
-          "hours": "Deli och café med servering – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -1701,112 +1138,7 @@
       ]
     },
     "Forshaga": {
-      "restaurants": [
-        {
-          "id": "luna-lucet-forshaga",
-          "name": "Ristorante Luna Lucet",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck",
-          "address": "Esplanaden 2, Forshaga",
-          "hours": "Dagens lunch på vardagar – se aktuell meny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "varmlands-pizza-forshaga",
-          "name": "Värmlands Pizza",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck",
-          "address": "Bruksgatan 22, Forshaga",
-          "hours": "Restaurang och pizzeria – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "pizzeria-ramo-forshaga",
-          "name": "Pizzeria Ramo",
-          "url": "https://www.pizzeriaramo.se/index.php/contact/",
-          "address": "Storgatan 2, Forshaga",
-          "hours": "Lunchpaket vardagar 11.00–14.00; se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "la-pineta-forshaga",
-          "name": "La Pineta",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck/restaurang/la-pineta",
-          "address": "Bruksgatan 10, Forshaga",
-          "hours": "Vedugnspizzeria och restaurang – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "petruskiosken-forshaga",
-          "name": "Petruskiosken",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck/petruskiosken",
-          "address": "Skivstagatan 2, Forshaga",
-          "hours": "Gatukök öppet året runt – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "mons-gatukok-deje",
-          "name": "Mons Gatukök & Pizzeria",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck",
-          "address": "Deje",
-          "hours": "Gatukök och pizzeria – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "dejefors-pizzeria",
-          "name": "Dejefors Pizzeria",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck",
-          "address": "Deje",
-          "hours": "Pizzeria – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "domle-herrgard",
-          "name": "Dömle Herrgård Spa & Resort",
-          "url": "https://www.visitvarmland.com/forshaga/mat-dryck",
-          "address": "Dömle, Deje",
-          "hours": "Restaurang – se aktuell lunch- och restauranginformation",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        }
-      ],
+      "restaurants": [],
       "referenceSources": [
         {
           "name": "Visit Värmland Forshaga – mat & dryck",
@@ -1817,13 +1149,26 @@
     "Kristinehamn": {
       "restaurants": [
         {
+          "id": "cafe-paus-kristinehamn",
+          "name": "Café Paus",
+          "url": "https://www.visitvarmland.com/kristinehamn/de/products/food-drinks/lunch/cafe-paus",
+          "address": "Kristinehamn",
+          "hours": "Dagens lunch – se aktuell meny",
+          "parser": "source-only",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
+        },
+        {
           "id": "brassie-bistro-kristinehamn",
           "name": "Brassie Bistro",
           "url": "https://www.brassie.se/lunchmeny",
           "address": "Ämbetsägorna 1, Kristinehamn",
           "hours": "Dagens lunch måndag–fredag 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [],
@@ -1840,39 +1185,17 @@
           "mode": "automatic"
         },
         {
-          "id": "mat-i-din-vardag",
-          "name": "Restaurang Mat i din Vardag",
-          "url": "https://restaurangvardag.se/",
-          "address": "Västerlånggatan 21, Kristinehamn",
-          "hours": "Lunchbuffé – se aktuell lunchmeny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "uranus-kristinehamn",
           "name": "Öppna matsalen Uranus",
           "url": "https://www.kristinehamn.se/stod-och-omsorg/aldreomsorg/mat-och-maltider/mat-i-oppna-matsalen-uranus/",
           "address": "Kristinehamn",
           "hours": "Besökare 12.15–13.30",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
-        },
-        {
-          "id": "cafe-paus-kristinehamn",
-          "municipality": "Kristinehamn",
-          "name": "Café Paus",
-          "address": "Södra torget 3, Kristinehamn",
-          "url": "https://www.visitvarmland.com/kristinehamn/de/products/food-drinks/lunch/cafe-paus",
-          "hours": "Dagens lunch – se aktuell information hos källan",
-          "parser": "source-only"
         }
       ],
       "referenceSources": [
@@ -1883,55 +1206,13 @@
       ]
     },
     "Storfors": {
-      "restaurants": [
-        {
-          "id": "folkets-hus-restaurang-storfors",
-          "name": "Folkets Hus Restaurang & Pizzeria",
-          "url": "https://www.visitvarmland.com/storfors/mat-dryck/restaurang/takeaway-97/folkets-hus-restaurang-och-pizzeria",
-          "address": "Centrumplan 1, Storfors",
-          "hours": "Lunch måndag–fredag 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "taverna-storfors",
-          "name": "Taverna Restaurang & Pizzeria",
-          "url": "https://www.visitvarmland.com/storfors/mat-dryck/restaurang/takeaway-97/taverna-restaurang-pizzeria",
-          "address": "Stationsgatan 74, Storfors",
-          "hours": "Lunch måndag–fredag 11.00–14.00",
-          "parser": "source-only",
-          "verified": true
-        },
-        {
-          "id": "folkets-hus-pizzeria-storfors",
-          "name": "Restaurang Pizzeria Folkets Hus",
-          "url": "https://www.visitvarmland.com/storfors/en/food-drinks/restaurant/folkets-hus-restaurang-och-pizzeria",
-          "address": "Centrumplan 1, Storfors",
-          "hours": "Lunch måndag–fredag 11.00–14.00",
-          "parser": "source-only",
-          "verified": true
-        }
-      ],
+      "restaurants": [],
       "referenceSources": [
         {
-          "name": "Storfors kommun – Äta, fika",
-          "url": "https://www.storfors.se/upplevaochgora/atafika.4.55cd3a5d147583335eb1926.html",
-          "note": "Kommunens aktuella översikt över matställen och caféer."
-        },
-        {
-          "name": "Visit Värmland – Mat & dryck i Storfors",
-          "url": "https://www.visitvarmland.com/storfors/no/mat-dryck",
-          "note": "Aktuell destinationsöversikt. Taverna och Folkets Hus är de två verksamheter som uttryckligen anges som lunch/restaurang; övrigt aktuellt utbud är café eller säsongsservering."
+          "name": "Visit Värmland Storfors – mat & dryck",
+          "url": "https://www.visitvarmland.com/storfors/mat-dryck"
         }
-      ],
-      "sourceChecked": "2026-09-08",
-      "actualLocalLunchSupply": 2,
-      "actualSupplyVerified": true,
-      "actualSupplyBasis": "Storfors kommuns aktuella matguide och Visit Värmlands aktuella Storfors-utbud visar två ordinarie lokala verksamheter som uttryckligen serverar lunch. Övriga aktuella matställen är caféer eller säsongsserveringar och räknas inte som ordinarie lunchställen den 8 september 2026."
+      ]
     },
     "Filipstad": {
       "restaurants": [
@@ -1944,7 +1225,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^Smaklig måltid",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -1980,46 +1261,7 @@
           "address": "Hennickehammar, Filipstad",
           "hours": "Lunchbuffé måndag–söndag 12.00–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "big-hill-lodge-filipstad",
-          "name": "Big Hill Lodge",
-          "url": "https://bighilllodge.se/lunchmeny",
-          "address": "Storhöjden 1, Filipstad",
-          "hours": "Lunch måndag–fredag, köket 11.00–15.30",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "la-strada-filipstad",
-          "name": "Pizzeria La Strada",
-          "url": "https://www.visitvarmland.com/filipstad/en/food-drinks/restaurant/la-strada",
-          "address": "Tegnergatan 1C, Filipstad",
-          "hours": "Dagens lunch vardagar 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "palermo-filipstad",
-          "name": "Pizzeria Palermo",
-          "url": "https://www.visitvarmland.com/filipstad/en/food-drinks/restaurant/pizzeria-palermo",
-          "address": "Scheelegatan 2, Filipstad",
-          "hours": "Dagens lunch 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2047,7 +1289,7 @@
           "hours": "Dagens lunch vardagar 11.00–14.00",
           "parser": "source-only",
           "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2061,7 +1303,7 @@
           "hours": "Dagens lunch vardagar 11.00–15.30",
           "parser": "source-only",
           "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2075,21 +1317,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.00–14.30",
           "parser": "source-only",
           "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "tesnim-hagfors",
-          "name": "Tesnim Mat och Café",
-          "url": "https://www.visitvarmland.com/hagfors/mat-dryck/lunch/tesnim-mat-och-cafe",
-          "address": "Sjukhusvägen 22, Hagfors",
-          "hours": "Lunch vardagar 11.00–14.00",
-          "parser": "source-only",
-          "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2106,57 +1334,12 @@
           "expectedTextPattern": "Ferrum|Veckans\\s+meny|Dagens\\s+lunch",
           "fallbackMode": "reference",
           "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
           "mode": "reference",
-          "sourceAsset": "https://s3.eu-west-1.amazonaws.com/storage.quickbutik.com/stores/67760N/files/6D329028-23B4-485F-BE98-A33263620914.png",
-          "extraction": "ocr",
-          "error": "OCR kunde inte verifiera aktuell vecka"
-        },
-        {
-          "id": "einar-rada",
-          "name": "Restaurang Einar",
-          "url": "https://www.visitvarmland.com/hagfors/mat-dryck/lunch/restaurang-einar",
-          "address": "Uddeholms GK, Risäter 20, Råda",
-          "hours": "Lunch under golfsäsong – kontrollera aktuell servering",
-          "parser": "source-only",
-          "seasonal": true,
-          "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "seasonally_closed",
-          "mode": "reference"
-        },
-        {
-          "id": "hagfors-hembygdsgard-lunch",
-          "name": "Hagfors Hembygdsgård",
-          "url": "https://www.visitvarmland.com/hagfors/kultur-historia/hus-kulturmiljoer/platser-37/hagfors-hembygdsgard",
-          "address": "Krokvägen 11, Hagfors",
-          "hours": "Enklare lunch vardagar 10.30–15.30 och husmanskost torsdagar",
-          "parser": "source-only",
-          "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "ayasofya-eksharad",
-          "name": "Restaurang Ayasofya",
-          "url": "https://www.visitvarmland.com/hagfors/mat-dryck/restaurang/restaurang-ayasofya",
-          "address": "Klarälvsvägen 25, Ekshärad",
-          "hours": "Lunchbuffé vardagar 11.00–15.00",
-          "parser": "source-only",
-          "verified": true,
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
+          "error": "OCR-motorn Tesseract saknas"
         }
       ],
       "referenceSources": [
@@ -2169,44 +1352,30 @@
     "Munkfors": {
       "restaurants": [
         {
-          "id": "mfkc-munkfors",
-          "name": "Munkfors Förenings- och Konferenscenter",
-          "url": "https://www.mfkc.se/restaurang",
+          "id": "master-falling-munkfors",
+          "name": "Mäster Fälling",
+          "url": "https://www.visitvarmland.com/munkfors/mat-dryck/lunch/master-falling",
           "address": "Munkfors",
-          "hours": "Lunch – se aktuell information",
+          "hours": "Dagens lunch – se aktuell meny",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         },
         {
-          "id": "pa-enns-munkfors",
-          "municipality": "Munkfors",
-          "name": "Pa Enns Restaurang Munkfors",
-          "address": "Munkerudsvägen 13, Munkfors",
-          "url": "https://paennsthai.se/munkfors/",
-          "hours": "Lunchbuffé måndag-fredag 11:30-14:30",
-          "parser": "source-only"
-        },
-        {
-          "id": "master-falling-munkfors",
-          "municipality": "Munkfors",
-          "name": "Mäster Fälling",
-          "address": "Tallåsvägen 12, Munkfors",
-          "url": "https://www.visitvarmland.com/munkfors/mat-dryck/lunch/master-falling",
-          "hours": "Dagens lunch 11:00-14:30",
-          "parser": "source-only"
-        },
-        {
           "id": "munkfors-steakhouse",
-          "municipality": "Munkfors",
           "name": "Munkfors Steakhouse & Pizzeria",
-          "address": "Torget 1, Munkfors",
           "url": "https://www.visitvarmland.com/munkfors/food-drinks/restaurant/munkfors-steakhouse-pizzeria",
-          "hours": "Dagens lunch – se aktuell information hos källan",
-          "parser": "source-only"
+          "address": "Munkfors",
+          "hours": "Dagens lunch – se aktuell meny",
+          "parser": "source-only",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
+          "weekNumber": null,
+          "days": {},
+          "status": "reference",
+          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -2225,7 +1394,7 @@
           "address": "Sjukhuset Torsby, Lasarettsvägen 8, Torsby",
           "hours": "Lunch måndag–fredag 11.30–13.30",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2238,20 +1407,7 @@
           "address": "Valbergsvägen 12, 685 33 Torsby",
           "hours": "Daglig lunch 11.30–14.30",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "sahlstromsgarden-torsby",
-          "name": "Restaurang Sahlströmsgården",
-          "url": "https://sahlstromsgarden.se/restaurang/",
-          "address": "Utterbyn 20, 685 92 Torsby",
-          "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2277,7 +1433,7 @@
           "stopAfterPattern": "^Crispy chicken burger",
           "dishSplitPattern": "(?<=\\.)\\s+(?=Pannkakor)",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": 40,
           "days": {
             "monday": [
@@ -2303,97 +1459,16 @@
           "mode": "automatic"
         },
         {
-          "id": "local-idiot-ed",
-          "name": "Local Idiot",
-          "url": "https://localidiot.se/",
-          "address": "Magasingatan 1, Ed",
-          "hours": "Lunch 11.00–14.00 när lunch serveras – kontrollera aktuell dag på restaurangens sida/Facebook",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "v8-garagebar-ed",
-          "name": "V8 Garagebar",
-          "url": "https://www.vastsverige.com/dalsed/produkter/v8/",
-          "address": "Jordbrovägen 14, Ed",
-          "hours": "Lunch serveras – se aktuell meny och öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "eds-restaurang",
-          "name": "Ed's Restaurang",
-          "url": "https://www.vastsverige.com/dalsed/produkter/eds-restaurang/",
-          "address": "Hantverkaregatan 10, Ed",
-          "hours": "Restaurang, husmanskost och pizza – se aktuell lunchinformation",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "smor-socker-ed",
-          "name": "Smör & Socker",
-          "url": "https://dalslandskanal.se/langs-kanalen/ed/",
-          "address": "Torget, Ed",
-          "hours": "Café med enklare lunch och fika – se aktuella öppettider",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "kanyas-thai-ed",
-          "name": "Kanyas Thairestaurang",
-          "url": "https://dalslandskanal.se/langs-kanalen/ed/",
-          "address": "Ed",
-          "hours": "Thairestaurang i centrala Ed – se aktuell lunchinformation",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "gasthuset-tjuren-ed",
           "name": "Gästhuset Tjuren",
           "url": "https://www.vastsverige.com/dalsed/produkter/restaurang-tjuren/",
           "address": "Jordbrovägen 8, Ed",
           "hours": "Två dagens rätter, varav en fiskrätt – se aktuell publicering",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "nossemarks-camping-cafe",
-          "name": "Nössemarks Camping & Café",
-          "url": "https://www.nossemarkscamping.com/",
-          "address": "Nössemark Strand 640, Ed",
-          "hours": "Säsongsöppet café, restaurang och foodtruck",
-          "parser": "source-only",
-          "seasonal": true,
-          "seasonStart": "05-01",
-          "seasonEnd": "09-15",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "seasonally_closed",
           "mode": "reference"
         }
       ],
@@ -2411,26 +1486,26 @@
     "Färgelanda": {
       "restaurants": [
         {
-          "id": "172ans-fargelanda",
-          "name": "172:ans Restaurang & Pizzeria",
-          "url": "https://172an.se/",
-          "address": "Håvestensvägen 2, 458 32 Färgelanda",
-          "hours": "Dagens lunch måndag–fredag 11.00–14.00",
+          "id": "hogsater-restaurang",
+          "name": "Högsäter Restaurang",
+          "url": "https://www.vastsverige.com/fargelanda/produkter/hogsater-restaurang/",
+          "address": "Högsäter",
+          "hours": "Lunchmeny – se aktuell meny",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
           "mode": "reference"
         },
         {
-          "id": "dalslands-pizzeria-fargelanda",
-          "name": "Dalslands Pizzeria",
-          "url": "https://dalslandspizzeria.se/",
-          "address": "Centrumvägen 3, Färgelanda",
-          "hours": "Restaurang och pizzeria – se aktuell meny och öppettider",
+          "id": "172ans-fargelanda",
+          "name": "172:ans Restaurang & Pizzeria",
+          "url": "https://172an.se/",
+          "address": "Håvestensvägen 2, 458 32 Färgelanda",
+          "hours": "Dagens lunch måndag–fredag 11.00–14.00",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2443,20 +1518,7 @@
           "address": "Färgelanda",
           "hours": "Lunch – se aktuell matsedel",
           "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "hogsater-restaurang",
-          "name": "Högsäter Restaurang",
-          "url": "https://www.vastsverige.com/fargelanda/produkter/hogsater-restaurang/",
-          "address": "Genavägen 28, 458 70 Färgelanda",
-          "hours": "Lunchmeny på vardagar – se aktuell information",
-          "parser": "source-only",
-          "checkedAt": "2026-10-01T23:32:46+02:00",
+          "checkedAt": "2026-10-01T23:50:16+02:00",
           "weekNumber": null,
           "days": {},
           "status": "reference",
@@ -2471,10 +1533,6 @@
         {
           "name": "Visit Dalsland – Färgelanda mat & dryck",
           "url": "https://www.vastsverige.com/dalsland/fargelanda/ata/"
-        },
-        {
-          "name": "Visit Dalsland – Högsäter Restaurang",
-          "url": "https://www.vastsverige.com/fargelanda/produkter/hogsater-restaurang/"
         }
       ]
     }

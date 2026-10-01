@@ -24,6 +24,7 @@ HAGFORS_SUPPLEMENT = ROOT / "data" / "lunch-hagfors-supplement.json"
 TORSBY_SUPPLEMENT = ROOT / "data" / "lunch-torsby-supplement.json"
 OUTPUT = ROOT / "data" / "lunch.json"
 REVIEW_OUTPUT = ROOT / "data" / "lunch-review.json"
+EXCLUSIONS = ROOT / "data" / "lunch-exclusions.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
 EXPECTED_MUNICIPALITIES = {item["name"] for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]}
@@ -240,6 +241,11 @@ def merge_config(config):
                 else: by_id[source_id]=len(current); current.append(item)
         for name,sources in (supplement.get("referenceSources") or {}).items():
             current=references.setdefault(name,[]); seen={str(item.get("url")) for item in current if isinstance(item,dict)}; current.extend(item for item in sources if isinstance(item,dict) and str(item.get("url")) not in seen)
+    if EXCLUSIONS.exists():
+        exclusion_data=json.loads(EXCLUSIONS.read_text(encoding="utf-8"))
+        excluded_ids={str(item.get("id")) for item in exclusion_data.get("excludedRestaurants",[]) if isinstance(item,dict)}
+        for name,sources in municipalities.items():
+            municipalities[name]=[item for item in sources if str(item.get("id")) not in excluded_ids]
     return config
 
 def validate_config(config):
@@ -303,7 +309,10 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
             restaurants.append(item)
         municipalities[municipality]={"restaurants":restaurants,"referenceSources":config.get("referenceSources",{}).get(municipality,[])}
-    return {"version":"0.22.0","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","municipalities":municipalities}
+    excluded_count=0
+    if EXCLUSIONS.exists():
+        excluded_count=len(json.loads(EXCLUSIONS.read_text(encoding="utf-8")).get("excludedRestaurants",[]))
+    return {"version":"0.22.1","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","curation":{"menuCandidates":sum(len(row["restaurants"]) for row in municipalities.values()),"excludedWithoutVerifiableMenu":excluded_count,"exclusionSource":"data/lunch-exclusions.json"},"municipalities":municipalities}
 
 def main():
     config=json.loads(SOURCES.read_text(encoding="utf-8")); now=datetime.now(TIMEZONE)

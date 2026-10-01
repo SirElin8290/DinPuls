@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import unittest
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -7,6 +8,22 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_curated_exclusions_are_removed_from_production_catalog(self):
+        config = json.loads(update_lunch.SOURCES.read_text(encoding="utf-8"))
+        merged = update_lunch.merge_config(config)
+        configured_ids = {
+            item["id"]
+            for sources in merged["municipalities"].values()
+            for item in sources
+            if item.get("active") is not False
+        }
+        exclusions = json.loads(update_lunch.EXCLUSIONS.read_text(encoding="utf-8"))
+        excluded_ids = {item["id"] for item in exclusions["excludedRestaurants"]}
+
+        self.assertTrue(excluded_ids)
+        self.assertTrue(configured_ids.isdisjoint(excluded_ids))
+        self.assertEqual(56, len(configured_ids))
+
     def test_ocr_parser_requires_identity_and_reads_current_week(self):
         text = """Restaurang Ferrum\nVeckans meny vecka 40\nMåndag\nPannbiff med potatismos\nTisdag\nFiskgratäng med ris"""
         week,days=update_lunch.parse_ocr_menu(text,{"expectedTextPattern":r"Restaurang Ferrum"})
@@ -156,15 +173,17 @@ class LunchUpdateTests(unittest.TestCase):
         dishes = output["municipalities"]["Åmål"]["restaurants"][0]["days"]["monday"]
         self.assertEqual(dishes, ["Pannbiff med potatis"])
 
-    def test_hammaro_supplement_adds_verified_sources(self):
+    def test_hammaro_supplement_keeps_only_verified_menu_sources(self):
         config = {
             "municipalities": {name: [] for name in update_lunch.EXPECTED_MUNICIPALITIES},
             "referenceSources": {},
         }
         merged = update_lunch.merge_config(config)
         sources = merged["municipalities"]["Hammarö"]
-        self.assertGreaterEqual(len(sources), 5)
-        self.assertTrue(any(source.get("id") == "abbes-golfkrog-hammaro" for source in sources))
+        self.assertEqual(
+            {"skoghalls-folkets-hus-restaurang", "ica-supermarket-skoghall"},
+            {item["id"] for item in sources},
+        )
         self.assertTrue(merged["referenceSources"].get("Hammarö"))
 
     def test_source_only_season_uses_exact_date_window(self):
