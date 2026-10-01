@@ -76,6 +76,7 @@ jobs:
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
           lunch = json.loads(Path('data/lunch.json').read_text(encoding='utf-8'))
           launch = json.loads(Path('data/lunch-launch-supplement.json').read_text(encoding='utf-8'))
+          exclusions = json.loads(Path('data/lunch-exclusions.json').read_text(encoding='utf-8'))
           expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
           got = set(lunch.get('municipalities', {}))
           assert got == expected, f'Lunchkommuner avviker: expected={sorted(expected)}, got={sorted(got)}'
@@ -84,19 +85,14 @@ jobs:
               if name == 'Hammarö':
                   continue
               assert entry.get('restaurants') or entry.get('referenceSources'), f'{name}: saknar både lunchrestaurang och lokal matguide'
-          hammaro = lunch['municipalities']['Hammarö']
-          assert len(hammaro.get('restaurants') or []) >= 5, f"Hammarö: för få verifierade lunchkällor: {len(hammaro.get('restaurants') or [])}"
-          assert hammaro.get('referenceSources'), 'Hammarö: lokal matguide saknas'
-          hagfors = lunch['municipalities']['Hagfors']
-          assert len(hagfors.get('restaurants') or []) >= 8, f"Hagfors: för få verifierade lunchställen: {len(hagfors.get('restaurants') or [])}"
-          fargelanda = lunch['municipalities']['Färgelanda']
-          assert len(fargelanda.get('restaurants') or []) >= 4, f"Färgelanda: för få verifierade lunchställen: {len(fargelanda.get('restaurants') or [])}"
-          storfors = lunch['municipalities']['Storfors']
-          assert len(storfors.get('restaurants') or []) >= 2, f"Storfors: verifierade lunchställen saknas: {len(storfors.get('restaurants') or [])}"
-          assert storfors.get('referenceSources'), 'Storfors: kommunal matguide saknas'
+          restaurants = [item for row in lunch['municipalities'].values() for item in (row.get('restaurants') or [])]
+          excluded_ids = {item['id'] for item in exclusions.get('excludedRestaurants', [])}
+          assert len(restaurants) == lunch.get('curation', {}).get('menuCandidates'), 'Lunchkatalogens kandidatantal avviker'
+          assert excluded_ids.isdisjoint({item.get('id') for item in restaurants}), 'Exkluderad katalogpost publicerades på nytt'
+          assert lunch.get('curation', {}).get('excludedWithoutVerifiableMenu') == len(excluded_ids), 'Exkluderingsantalet avviker'
           karlstad = lunch['municipalities']['Karlstad']
           names = {item.get('name') for item in (karlstad.get('restaurants') or [])}
-          assert {'Go Medda', "Joan's Karlstad", 'Nöjesfabriken', 'Scandic Winn Restaurang'} <= names, 'Karlstad: verifierade lunchankare saknas'
+          assert {'Go Medda', "Joan's Karlstad", 'Nöjesfabriken'} == names, 'Karlstad: lunchkatalogen avviker från verifierade menykällor'
           assert any('karlstad.com/restauranger' in item.get('url','') for item in (karlstad.get('referenceSources') or [])), 'Karlstad: bred restaurangguide saknas'
           print(f"Verifierade lunchdata för {len(expected)} kommuner; Karlstad {len(karlstad.get('restaurants') or [])} restaurangkällor")
           PY

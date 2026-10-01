@@ -53,11 +53,11 @@ def main() -> None:
 
     lunch = municipality(load("lunch.json"))
     restaurants = lunch.get("restaurants") or []
-    assert len(restaurants) >= 5, f"{NAME}: för få verifierade lunchreferenser: {len(restaurants)}"
+    assert {item.get("id") for item in restaurants} == {
+        "skoghalls-folkets-hus-restaurang",
+        "ica-supermarket-skoghall",
+    }, f"{NAME}: lunchkatalogen innehåller andra poster än verifierbara menykällor"
     assert all(str(item.get("url", "")).startswith("https://") for item in restaurants)
-    assert any(item.get("id") == "abbes-golfkrog-hammaro" for item in restaurants)
-    abbes = next(item for item in restaurants if item.get("id") == "abbes-golfkrog-hammaro")
-    assert abbes.get("mode") == "reference" and not abbes.get("days"), "Abbes får inte visa gissad/stale veckomeny"
     assert lunch.get("referenceSources"), f"{NAME}: lokal matguide saknas"
 
     health = effective_named(
