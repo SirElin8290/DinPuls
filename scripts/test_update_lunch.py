@@ -7,6 +7,34 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_ocr_parser_requires_identity_and_reads_current_week(self):
+        text = """Restaurang Ferrum\nVeckans meny vecka 40\nMåndag\nPannbiff med potatismos\nTisdag\nFiskgratäng med ris"""
+        week,days=update_lunch.parse_ocr_menu(text,{"expectedTextPattern":r"Restaurang Ferrum"})
+        self.assertEqual(week,40)
+        self.assertEqual(days["monday"],["Pannbiff med potatismos"])
+        self.assertEqual(days["tuesday"],["Fiskgratäng med ris"])
+
+    def test_ocr_parser_rejects_wrong_restaurant(self):
+        with self.assertRaisesRegex(RuntimeError,"identiteten"):
+            update_lunch.parse_ocr_menu("Annan restaurang vecka 40\nMåndag\nPannbiff",{"expectedTextPattern":r"Ferrum"})
+
+    def test_image_menu_without_verified_current_week_goes_to_review(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Hagfors"]=[{"id":"image","name":"Bildmeny","url":"https://example.test","imageUrl":"https://example.test/menu.png","parser":"image-weekday-menu","expectedTextPattern":"Bildmeny"}]
+        original=update_lunch.fetch_ocr_menu
+        try:
+            update_lunch.fetch_ocr_menu=lambda *_args,**_kwargs: (_ for _ in ()).throw(RuntimeError("OCR-identiteten kunde inte verifieras"))
+            item=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")))["municipalities"]["Hagfors"]["restaurants"][0]
+        finally: update_lunch.fetch_ocr_menu=original
+        self.assertEqual(item["status"],"review_required")
+        self.assertEqual(item["days"],{})
+
+    def test_image_menu_requires_identity_check_in_config(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Hagfors"]=[{"id":"unsafe","name":"Unsafe","url":"https://example.test","parser":"image-weekday-menu"}]
+        with self.assertRaisesRegex(ValueError,"identitetskontroll"):
+            update_lunch.validate_config({"municipalities":municipalities})
+
     def test_parser_accepts_weekday_with_date(self):
         page = "<h2>Vecka 31</h2><h3>Måndag 27/7</h3><p>Korvstroganoff med ris</p>"
         week, days = update_lunch.parse_weekday_menu(page)

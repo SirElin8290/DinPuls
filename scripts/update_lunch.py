@@ -5,12 +5,14 @@ from __future__ import annotations
 import html
 import json
 import re
+import subprocess
 import sys
 import time
 from datetime import date, datetime
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -21,12 +23,13 @@ HAMMARO_SUPPLEMENT = ROOT / "data" / "lunch-hammaro-supplement.json"
 HAGFORS_SUPPLEMENT = ROOT / "data" / "lunch-hagfors-supplement.json"
 TORSBY_SUPPLEMENT = ROOT / "data" / "lunch-torsby-supplement.json"
 OUTPUT = ROOT / "data" / "lunch.json"
+REVIEW_OUTPUT = ROOT / "data" / "lunch-review.json"
 TIMEZONE = ZoneInfo("Europe/Stockholm")
 USER_AGENT = "DinPuls/0.21.2 (+https://sirelin8290.github.io/DinPuls/)"
 EXPECTED_MUNICIPALITIES = {item["name"] for item in json.loads((ROOT / "data" / "municipalities.json").read_text(encoding="utf-8"))["municipalities"]}
 DAYS = {"måndag":"monday","mandag":"monday","tisdag":"tuesday","onsdag":"wednesday","torsdag":"thursday","fredag":"friday","lördag":"saturday","lordag":"saturday","söndag":"sunday","sondag":"sunday"}
 STOP_MARKERS = ("veckans vegetariska","sallader","lunchpriser","öppettider","kontakt","pris ","priser","barn ","utkörningsservice","ta kontakt","catering","ring oss","galleri","adress","bordsbokning","öppet för","veckans meny","inkl.","sommarerbjudanden","ladda ner","med goda drycker","övrigt","lördagslunch","veckans burgare","veckans pasta","ta en titt på vår meny","kunden har alltid rätt","det här tycker våra kunder")
-NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","måltidsdryck","kaffe & kaka","dessert","ingen dagens","ingen dagens."}
+NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","veckans fisk","veckans vegetariska","fredagsdessert","måltidsdryck","kaffe & kaka","dessert","ingen dagens","ingen dagens."}
 
 class TextExtractor(HTMLParser):
     def __init__(self): super().__init__(); self.lines=[]; self.blocked=0
@@ -41,6 +44,13 @@ class TextExtractor(HTMLParser):
     def text_lines(self):
         text=html.unescape("".join(self.lines)); return [re.sub(r"\s+"," ",line).strip(" \t–—|") for line in text.splitlines() if re.sub(r"\s+"," ",line).strip(" \t–—|")]
 
+class ImageExtractor(HTMLParser):
+    def __init__(self): super().__init__(); self.images=[]
+    def handle_starttag(self,tag,attrs):
+        if tag != "img": return
+        values=dict(attrs); src=values.get("src") or values.get("data-src") or values.get("data-lazy-src")
+        if src: self.images.append((src,values.get("alt", "")))
+
 def fetch(url):
     last_error="okänt hämtningsfel"
     for attempt in range(3):
@@ -54,6 +64,43 @@ def fetch(url):
         except TimeoutError: last_error="timeout"
         if attempt < 2: time.sleep(2 ** attempt)
     raise RuntimeError(last_error)
+
+def fetch_binary(url):
+    request=Request(url,headers={"User-Agent":USER_AGENT,"Accept":"image/*"})
+    try:
+        with urlopen(request,timeout=30) as response: payload=response.read(12_000_001)
+    except (HTTPError,URLError,TimeoutError) as error: raise RuntimeError(f"bildhämtning misslyckades: {error}") from None
+    if len(payload)>12_000_000: raise RuntimeError("menybilden är större än 12 MB")
+    if not (payload.startswith(b"\x89PNG\r\n\x1a\n") or payload.startswith(b"\xff\xd8\xff") or payload.startswith(b"RIFF")): raise RuntimeError("källan returnerade inte en stödd menybild")
+    return payload
+
+def find_menu_image(page,base_url,pattern):
+    parser=ImageExtractor(); parser.feed(page); matcher=re.compile(pattern,re.I)
+    matches=[urljoin(base_url,src) for src,alt in parser.images if matcher.search(f"{src} {alt}")]
+    if not matches: raise RuntimeError("ingen aktuell menybild hittades på källsidan")
+    return matches[0]
+
+def run_tesseract(payload):
+    try: result=subprocess.run(["tesseract","stdin","stdout","-l","swe+eng","--psm","6"],input=payload,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,timeout=45)
+    except FileNotFoundError: raise RuntimeError("OCR-motorn Tesseract saknas") from None
+    except subprocess.TimeoutExpired: raise RuntimeError("OCR-tolkningen tog för lång tid") from None
+    if result.returncode: raise RuntimeError("OCR-tolkningen misslyckades")
+    text=result.stdout.decode("utf-8",errors="replace").strip()
+    if len(text)<20: raise RuntimeError("OCR gav för lite text för säker publicering")
+    return text
+
+def parse_ocr_menu(text,source):
+    if source.get("expectedTextPattern") and not re.search(source["expectedTextPattern"],text,re.I): raise RuntimeError("OCR-identiteten kunde inte verifieras")
+    markup="".join(f"<p>{html.escape(line)}</p>" for line in text.splitlines() if line.strip())
+    return parse_weekday_menu(markup,source.get("stopAfterPattern"))
+
+def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract):
+    image_url=source.get("imageUrl")
+    if not image_url:
+        page=page_fetcher(source.get("dataUrl") or source["url"])
+        image_url=find_menu_image(page,source.get("dataUrl") or source["url"],source.get("imagePattern",r"lunch|meny|menu"))
+    payload=binary_fetcher(image_url); text=ocr_runner(payload); week,days=parse_ocr_menu(text,source)
+    return week,days,image_url
 
 def fetch_source(source, fetcher=fetch):
     page=fetcher(source.get("dataUrl") or source["url"])
@@ -204,6 +251,7 @@ def validate_config(config):
             source_id=source.get("id")
             if not source_id or source_id in seen: raise ValueError(f"Saknat eller dubblerat restaurang-id: {source_id!r} ({municipality})")
             if not source.get("name") or not source.get("url"): raise ValueError(f"Ofullständig restaurangkälla: {source_id}")
+            if source.get("parser")=="image-weekday-menu" and not source.get("expectedTextPattern"): raise ValueError(f"Bildmeny saknar identitetskontroll: {source_id}")
             seen.add(source_id)
 
 def build_output(config,now,fetcher=fetch,previous_output=None):
@@ -216,9 +264,12 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu"}:
                 try:
-                    page=fetch_source(source,fetcher)
+                    if parser_name=="image-weekday-menu":
+                        week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
+                        item["sourceAsset"]=image_url; item["extraction"]="ocr"
+                    else: page=fetch_source(source,fetcher)
                     if parser_name=="all-days-heading":
                         week,days=parse_all_days_menu(page)
                         if any(days.values()): week=current_week
@@ -226,13 +277,13 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    else: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name!="image-weekday-menu": week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
                     if source.get("dishSplitPattern"):
                         days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and any(days.values()) else "outdated"; item["mode"]="automatic"
                 except RuntimeError as error:
-                    item["status"]="unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
+                    item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
             if source.get("seasonal"):
                 item["seasonal"]=True
                 season_months=source.get("seasonMonths") or []
@@ -246,7 +297,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
             restaurants.append(item)
         municipalities[municipality]={"restaurants":restaurants,"referenceSources":config.get("referenceSources",{}).get(municipality,[])}
-    return {"version":"0.21.4","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","municipalities":municipalities}
+    return {"version":"0.22.0","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","municipalities":municipalities}
 
 def main():
     config=json.loads(SOURCES.read_text(encoding="utf-8")); now=datetime.now(TIMEZONE)
@@ -254,6 +305,8 @@ def main():
     output=build_output(config,now,previous_output=previous)
     for municipality,entry in output["municipalities"].items():
         for item in entry["restaurants"]: print(f"{municipality}: {item['name']} – {item['status']}")
-    OUTPUT.write_text(json.dumps(output,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); return 0
+    OUTPUT.write_text(json.dumps(output,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    review=[{"municipality":municipality,"id":item.get("id"),"name":item.get("name"),"status":item.get("status"),"error":item.get("error"),"source":item.get("url"),"sourceAsset":item.get("sourceAsset")} for municipality,entry in output["municipalities"].items() for item in entry["restaurants"] if item.get("status")=="review_required"]
+    REVIEW_OUTPUT.write_text(json.dumps({"generatedAt":now.isoformat(timespec="seconds"),"items":review},ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); return 0
 
 if __name__=="__main__": sys.exit(main())

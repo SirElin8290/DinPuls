@@ -67,7 +67,7 @@
         "url": "https://www.nojesfabriken.se/mat/lunch/",
         "address": "Karlagatan 42, Karlstad",
         "hours": "Lunchbuffé tisdag–fredag 11.30–14.00",
-        "parser": "source-only"
+        "parser": "weekday-headings"
       },
       {
         "id": "karlstad-restaurangguide",
@@ -75,7 +75,9 @@
         "url": "https://www.karlstad.com/restauranger",
         "address": "Karlstad",
         "hours": "Se aktuell lunchinformation",
-        "parser": "source-only"
+        "parser": "source-only",
+        "active": false,
+        "inactiveReason": "Katalogkälla, inte ett lunchställe"
       }
     ],
     "Eda": [
@@ -344,10 +346,13 @@
       {
         "id": "ferrum-hagfors",
         "name": "Restaurang Ferrum",
-        "url": "https://www.visitvarmland.com/hagfors/produkter/mat-dryck/lunch/restaurang-ferrum",
+        "url": "https://www.restaurangferrum.se/veckansmeny",
         "address": "Uvedsvägen 24, Hagfors",
         "hours": "Dagens lunch och lunchbuffé – se aktuell meny och öppettider",
-        "parser": "source-only"
+        "parser": "image-weekday-menu",
+        "imagePattern": "storage\\.quickbutik\\.com/stores/67760N/files/.*\\.(?:png|jpe?g)",
+        "expectedTextPattern": "Ferrum|Veckans\\s+meny|Dagens\\s+lunch",
+        "fallbackMode": "reference"
       },
       {
         "id": "einar-rada",
