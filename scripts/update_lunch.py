@@ -255,7 +255,11 @@ def validate_config(config):
             seen.add(source_id)
 
 def build_output(config,now,fetcher=fetch,previous_output=None):
-    config=merge_config(config); validate_config(config); current_week=now.isocalendar().week; municipalities={}
+    # Produktionskonfigurationen har versionsfält och kompletteras med kommunfiler.
+    # Små syntetiska testkonfigurationer ska inte utlösa nät- eller OCR-hämtning
+    # för hela produktionskatalogen.
+    config=merge_config(config) if config.get("version") else config
+    validate_config(config); current_week=now.isocalendar().week; municipalities={}
     previous_by_id={item.get("id"):item for row in ((previous_output or {}).get("municipalities") or {}).values() for item in (row.get("restaurants") or []) if isinstance(item,dict)}
     for municipality,sources in config.get("municipalities",{}).items():
         restaurants=[]
