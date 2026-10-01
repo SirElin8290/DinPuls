@@ -273,6 +273,8 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     if parser_name=="image-weekday-menu":
                         week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
                         item["sourceAsset"]=image_url; item["extraction"]="ocr"
+                        if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
+                        if not any(days.values()): raise RuntimeError("OCR hittade inga säkra lunchrätter")
                     else: page=fetch_source(source,fetcher)
                     if parser_name=="all-days-heading":
                         week,days=parse_all_days_menu(page)

@@ -29,6 +29,18 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(item["status"],"review_required")
         self.assertEqual(item["days"],{})
 
+    def test_image_menu_with_ocr_text_but_no_week_goes_to_review(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Hagfors"]=[{"id":"image","name":"Bildmeny","url":"https://example.test","parser":"image-weekday-menu","expectedTextPattern":"Bildmeny"}]
+        original=update_lunch.fetch_ocr_menu
+        try:
+            update_lunch.fetch_ocr_menu=lambda *_args,**_kwargs: (None,{"monday":["Pannbiff"]},"https://example.test/menu.png")
+            item=update_lunch.build_output({"municipalities":municipalities},datetime(2026,9,28,8,tzinfo=ZoneInfo("Europe/Stockholm")))["municipalities"]["Hagfors"]["restaurants"][0]
+        finally: update_lunch.fetch_ocr_menu=original
+        self.assertEqual(item["status"],"review_required")
+        self.assertEqual(item["sourceAsset"],"https://example.test/menu.png")
+        self.assertEqual(item["days"],{})
+
     def test_image_menu_requires_identity_check_in_config(self):
         municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
         municipalities["Hagfors"]=[{"id":"unsafe","name":"Unsafe","url":"https://example.test","parser":"image-weekday-menu"}]
