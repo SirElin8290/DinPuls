@@ -64,10 +64,10 @@ sr=sp.setdefault('municipalities',{}).setdefault('Torsby',{})
 sr['clubs']=merge_named(sr.get('clubs') or [],SRC['sports'])
 save('sports.json',sp)
 
-# Lunch: endast verifierade faktiska lunchställen.
+# Lunch: STRICT får inte återinföra katalogposter som lunchmotorn har exkluderat.
 lu=load('lunch.json')
 lur=lu.setdefault('municipalities',{}).setdefault('Torsby',{})
-lur['restaurants']=merge_named(lur.get('restaurants') or [],SRC['lunch'])
+lur['restaurants']=[x for x in (lur.get('restaurants') or []) if x.get('id') in {'skogsstjarnan-torsby','valbergsangen-torsby'}]
 save('lunch.json',lu)
 
 # Kontrollera samtliga tidigare Torsby-blockerare. Workflow ska falla i stället för att publicera under STRICT-tröskel.
@@ -89,6 +89,6 @@ assert all(ar['serviceUrls'].get(k) for k in ['socialtjanst','ekonomiskt-bistand
 assert len(c['municipalities']['Torsby'])>=1 and all(x.get('programUrl') or x.get('bookingUrl') for x in c['municipalities']['Torsby'])
 assert len(lr['activities'])>=10,len(lr['activities'])
 assert len(sr['clubs'])>=20,len(sr['clubs'])
-assert len(lur['restaurants'])>=4,len(lur['restaurants'])
+assert {x.get('id') for x in lur['restaurants']}=={'skogsstjarnan-torsby','valbergsangen-torsby'},lur['restaurants']
 
 print(f"Torsby STRICT patch: health={len(health)}/{len(cats(health))} kat, service={len(service)}/{len(cats(service))} kat, authorities=6, cinema={len(c['municipalities']['Torsby'])}, leisure={len(lr['activities'])}, sports={len(sr['clubs'])}, lunch={len(lur['restaurants'])}")

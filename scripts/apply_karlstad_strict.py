@@ -3,14 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 SRC = json.loads((DATA / "karlstad-strict-source.json").read_text(encoding="utf-8"))
-TIMEZONE = ZoneInfo("Europe/Stockholm")
 
 
 def load(name: str):
@@ -100,28 +97,10 @@ def apply_authorities() -> None:
 def apply_lunch() -> tuple[int, int]:
     lunch = load("lunch.json")
     row = lunch.setdefault("municipalities", {}).setdefault("Karlstad", {})
-    now = datetime.now(TIMEZONE).isoformat(timespec="seconds")
-    existing = row.get("restaurants") or []
-    by_id = {str(item.get("id")): item for item in existing if isinstance(item, dict) and item.get("id")}
-    additions = []
-    for source in SRC["lunch"]:
-        source_id = str(source["id"])
-        if source_id in by_id:
-            current = dict(by_id[source_id])
-            for field in ("name", "url", "address", "hours"):
-                if source.get(field):
-                    current[field] = source[field]
-            additions.append(current)
-        else:
-            additions.append({
-                **source,
-                "checkedAt": now,
-                "weekNumber": None,
-                "days": {},
-                "status": "reference",
-                "mode": "reference",
-            })
-    row["restaurants"] = merge_named(existing, additions)
+    row["restaurants"] = [
+        item for item in (row.get("restaurants") or [])
+        if item.get("id") in {"gomedda-karlstad", "joans-karlstad", "nojesfabriken-karlstad"}
+    ]
     refs = row.setdefault("referenceSources", [])
     seen = {str(item.get("url")) for item in refs if isinstance(item, dict)}
     for item in SRC.get("lunchReferenceSources", []):
@@ -129,8 +108,8 @@ def apply_lunch() -> tuple[int, int]:
             refs.append(item)
             seen.add(item.get("url"))
     names = {str(item.get("name")) for item in row["restaurants"]}
-    required_anchors = {"Go Medda", "Joan's Karlstad", "Nöjesfabriken", "Scandic Winn Restaurang"}
-    assert required_anchors <= names, f"Karlstad lunch saknar verifierade ankarkällor: {sorted(required_anchors - names)}"
+    required_anchors = {"Go Medda", "Joan's Karlstad", "Nöjesfabriken"}
+    assert names == required_anchors, f"Karlstad lunch avviker från verifierade menykällor: {sorted(names ^ required_anchors)}"
     assert any("karlstad.com/restauranger" in str(item.get("url", "")) for item in refs), "Karlstads breda restaurangguide saknas"
     save("lunch.json", lunch)
     return len(row["restaurants"]), len(refs)
