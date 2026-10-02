@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-02T01:41:44+00:00",
+  "generatedAt": "2026-10-02T01:56:44+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -95,11 +95,23 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-10-01T19:10+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-01T21:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-02T04:53:00+02:00",
+              "realtime": "2026-10-02T04:53:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "bus",
               "line": "800",
@@ -241,6 +253,18 @@
               "operator": "Västtrafik",
               "scheduled": "2026-10-02T04:09:00+02:00",
               "realtime": "2026-10-02T04:09:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-10-02T04:53:00+02:00",
+              "realtime": "2026-10-02T04:53:00+02:00",
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
@@ -997,7 +1021,7 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-10-02T00:10+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-02T02:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1012,8 +1036,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "bus",
@@ -1369,11 +1392,23 @@
           "name": "Sunne station",
           "alerts": [],
           "lookupTime": "2026-10-01T18:25+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-01T20:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "train",
+              "line": "74",
+              "direction": "Karlstads central",
+              "operator": "Vy Tåg",
+              "scheduled": "2026-10-02T04:53:00+02:00",
+              "realtime": "2026-10-02T04:53:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B-SC"
+            },
             {
               "mode": "bus",
               "line": "213",
@@ -1546,7 +1581,8 @@
           "name": "Karlstad",
           "alerts": [
             "Linje 500 och 501,  Rönndungen Karlstad indragen",
-            "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november"
+            "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november",
+            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 oktober"
           ],
           "lookupTime": "2026-10-02T00:25+02:00",
           "retained": false,
@@ -1564,7 +1600,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1636,8 +1673,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -1649,8 +1685,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "O",
-              "stale": true
+              "platform": "O"
             },
             {
               "mode": "bus",
@@ -2030,9 +2065,9 @@
               "direction": "Tjärnheden Deje",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-02T04:29:00+02:00",
-              "realtime": "2026-10-02T04:29:00+02:00",
+              "realtime": "2026-10-02T04:29:04+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -2046,8 +2081,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2643,11 +2677,23 @@
           "name": "Filipstad busstation",
           "alerts": [],
           "lookupTime": "2026-10-01T17:25+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-01T19:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "408",
+              "direction": "Lesjöfors",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-02T04:50:00+02:00",
+              "realtime": "2026-10-02T04:50:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "C"
+            },
             {
               "mode": "bus",
               "line": "408",
@@ -2723,13 +2769,27 @@
         {
           "id": "740000376",
           "name": "Hagfors busstation",
-          "alerts": [],
+          "alerts": [
+            "Linje 304 och 600: Hållplats Risätersvägen stängs från och med tisdag 29 september till och med söndag 4 oktober"
+          ],
           "lookupTime": "2026-10-01T17:25+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-01T19:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "600",
+              "direction": "Munkfors Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-02T04:51:00+02:00",
+              "realtime": "2026-10-02T04:51:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "600",
@@ -2868,18 +2928,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "202",
-              "direction": "Lysvik Sunne",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-02T03:50:00+02:00",
-              "realtime": "2026-10-02T03:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "D"
-            },
             {
               "mode": "bus",
               "line": "202",
