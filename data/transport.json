@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-03T00:42:01+00:00",
+  "generatedAt": "2026-10-03T00:57:25+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -650,23 +650,11 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-10-02T23:26+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-03T01:26+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "860",
-              "direction": "Segmon",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:45:00+02:00",
-              "realtime": "2026-10-03T02:52:09+02:00",
-              "delayMinutes": 7,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "D"
-            },
             {
               "mode": "bus",
               "line": "801",
@@ -768,28 +756,13 @@
         {
           "id": "740000206",
           "name": "Kil station",
-          "alerts": [
-            "Linje 260 försenad Högboda kl 2:15 - Karlstad busstation",
-            "Försening på linje 260 mot Kil Karlstad"
-          ],
+          "alerts": [],
           "lookupTime": "2026-10-02T22:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-03T00:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "260",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:40:00+02:00",
-              "realtime": "2026-10-03T02:44:09+02:00",
-              "delayMinutes": 4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "C"
-            },
             {
               "mode": "train",
               "line": "73",
@@ -1095,11 +1068,7 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje 3: Hållplats Gunnern stängs från 21 september till och med 23 oktober",
-            "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
-            "Linje 4: Hållplatserna 4H-gården, Strågatan och Gräsdalen stängs dagtid under vecka 40 och 41",
-            "Linje 4: Hållplatserna Östra infarten och Kyrkogårdsallén stängs från 28 september",
-            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 oktober"
+            "Linje 3: Hållplats Gunnern stängs från 21 september till och med 23 oktober"
           ],
           "lookupTime": "2026-10-02T00:25+02:00",
           "retained": false,
@@ -1107,54 +1076,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "3",
-              "direction": "Ruds bytespunkt",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:44:00+02:00",
-              "realtime": "2026-10-03T02:44:12+02:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Edsgatan via Norra Kroppkärr",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:45:00+02:00",
-              "realtime": "2026-10-03T02:45:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Gruvlyckan, Oskarslund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:48:00+02:00",
-              "realtime": "2026-10-03T02:47:27+02:00",
-              "delayMinutes": -1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "7",
-              "direction": "Stora Torget via Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:53:00+02:00",
-              "realtime": "2026-10-03T02:53:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "O"
-            },
             {
               "mode": "bus",
               "line": "S",
@@ -1165,7 +1086,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "O"
+              "platform": "O",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1209,9 +1131,9 @@
               "direction": "Henstad via Våxnäs",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-03T03:17:00+02:00",
-              "realtime": "2026-10-03T03:17:00+02:00",
+              "realtime": "2026-10-03T03:16:36+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
@@ -1333,24 +1255,12 @@
           "id": "740000375",
           "name": "Forshaga centrum",
           "alerts": [],
-          "lookupTime": "2026-10-03T00:40+02:00",
+          "lookupTime": "2026-10-03T02:55+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-10-03T02:40+02:00",
+          "nextSearchAfter": "2026-10-03T03:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "660",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-03T02:43:00+02:00",
-              "realtime": "2026-10-03T02:49:02+02:00",
-              "delayMinutes": 6,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "601",
@@ -1361,8 +1271,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -1374,8 +1283,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -1789,11 +1697,9 @@
         {
           "id": "740000376",
           "name": "Hagfors busstation",
-          "alerts": [
-            "Linje 304 och 600: Hållplats Risätersvägen stängs från och med tisdag 29 september till och med måndag 5 oktober"
-          ],
+          "alerts": [],
           "lookupTime": "2026-10-03T02:40+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-03T03:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1808,7 +1714,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D"
+              "platform": "D",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1820,7 +1727,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -2079,24 +1987,12 @@
           "id": "740000986",
           "name": "Färgelanda centrum",
           "alerts": [],
-          "lookupTime": "2026-10-02T22:40+02:00",
+          "lookupTime": "2026-10-03T02:55+02:00",
           "retained": false,
-          "nextSearchAfter": "2026-10-03T00:40+02:00",
+          "nextSearchAfter": "2026-10-03T04:55+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "730",
-              "direction": "Bäckefors via Stigen",
-              "operator": "Västtrafik",
-              "scheduled": "2026-10-03T02:50:00+02:00",
-              "realtime": "2026-10-03T02:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "730",
@@ -2107,8 +2003,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2120,8 +2015,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -2133,8 +2027,31 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Bengtsfors",
+              "operator": "Västtrafik",
+              "scheduled": "2026-10-03T14:55:00+02:00",
+              "realtime": "2026-10-03T14:55:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-10-03T15:19:00+02:00",
+              "realtime": "2026-10-03T15:19:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
             }
           ]
         }
