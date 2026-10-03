@@ -1,22 +1,22 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-10-03T22:27:27+02:00
+Genererad: 2026-10-03T22:32:11+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
 Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras av tekniska fel eller dokumenterade kända väsentliga luckor enligt v4.
 
-## Resultat: 19 GREEN / 2 YELLOW / 0 RED
+## Resultat: 20 GREEN / 1 YELLOW / 0 RED
 
-**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Sunne, Torsby
+**GREEN:** Åmål, Årjäng, Bengtsfors, Mellerud, Arvika, Grums, Säffle, Dals-Ed, Eda, Filipstad, Forshaga, Färgelanda, Hagfors, Hammarö, Karlstad, Kil, Kristinehamn, Munkfors, Sunne, Torsby
 
-**YELLOW:** Forshaga, Storfors
+**YELLOW:** Storfors
 
 **RED:** inga
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 GREEN | 20 | 46 | 13 | 35 / 35 färska | 19 / 8 kat | 17 / 5 kat | 3 | 28 | 27 |
+| Åmål | 🟢 GREEN | 20 | 46 | 13 | 35 / 35 färska | 19 / 8 kat | 17 / 5 kat | 4 | 28 | 27 |
 | Årjäng | 🟢 GREEN | 33 | 10 | 78 | 33 / 33 färska | 8 / 5 kat | 11 / 4 kat | 3 | 37 | 31 |
 | Bengtsfors | 🟢 GREEN | 16 | 38 | 2 | 43 / 43 färska | 16 / 10 kat | 16 / 10 kat | 1 | 28 | 19 |
 | Mellerud | 🟢 GREEN | 23 | 14 | 27 | 24 / 24 färska | 7 / 4 kat | 15 / 4 kat | 3 | 46 | 17 |
@@ -26,7 +26,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Dals-Ed | 🟢 GREEN | 8 | 21 | 23 | 22 / 22 färska | 9 / 7 kat | 12 / 8 kat | 2 | 13 | 3 |
 | Eda | 🟢 GREEN | 29 | 46 | 8 | 38 / 38 färska | 13 / 7 kat | 12 / 7 kat | 4 | 21 | 24 |
 | Filipstad | 🟢 GREEN | 10 | 54 | 23 | 58 / 58 färska | 8 / 5 kat | 14 / 8 kat | 2 | 10 | 7 |
-| Forshaga | 🟡 YELLOW | 17 | 2 | 80 | 32 / 32 färska | 11 / 6 kat | 13 / 13 kat | 0 | 26 | 21 |
+| Forshaga | 🟢 GREEN | 17 | 2 | 80 | 32 / 32 färska | 11 / 6 kat | 13 / 13 kat | 1 | 26 | 21 |
 | Färgelanda | 🟢 GREEN | 7 | 7 | 4 | 27 / 27 färska | 9 / 8 kat | 8 / 5 kat | 3 | 11 | 17 |
 | Hagfors | 🟢 GREEN | 20 | 20 | 79 | 62 / 62 färska | 14 / 9 kat | 12 / 7 kat | 4 | 15 | 22 |
 | Hammarö | 🟢 GREEN | 11 | 1 | 51 | 59 / 59 färska | 10 / 7 kat | 8 / 5 kat | 2 | 42 | 23 |
@@ -70,8 +70,8 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 ### Filipstad — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
-### Forshaga — 🟡 YELLOW
-- **Dagens lunch:** 🟡 — inga verifierade lunchställen (0)
+### Forshaga — 🟢 GREEN
+Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ### Färgelanda — 🟢 GREEN
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
