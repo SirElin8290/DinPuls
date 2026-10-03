@@ -114,7 +114,7 @@ def fetch_source(source, fetcher=fetch):
 
 def extract_week(lines):
     for line in lines:
-        match=re.search(r"(?:vecka|v\.)\s*(\d{1,2})",line,re.I)
+        match=re.search(r"(?:vecka|\bv\.?)\s*(\d{1,2})(?!\d)",line,re.I)
         if match: return int(match.group(1))
     return None
 
@@ -150,7 +150,7 @@ def parse_weekday_menu(page, stop_after_pattern=None):
 def parse_scoped_weekday_menu(page, heading, expected_week):
     """Läser endast den namngivna restaurangens sektion och exakt efterfrågad vecka."""
     parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
-    marker=re.compile(heading,re.I); week_marker=re.compile(r"(?:vecka|v\.)\s*(\d{1,2})",re.I); start=None
+    marker=re.compile(heading,re.I); week_marker=re.compile(r"(?:vecka|\bv\.?)\s*(\d{1,2})(?!\d)",re.I); start=None
     for index,line in enumerate(lines):
         match=week_marker.search(line)
         if marker.search(line) and match and int(match.group(1))==expected_week: start=index; break
@@ -183,6 +183,41 @@ def parse_dated_weekday_menu(page, today):
     index,start_date,_end_date=selected; following=[entry[0] for entry in candidates if entry[0]>index]; end=min(following) if following else len(lines)
     _unused,days=parse_weekday_menu("\n".join(lines[index:end]))
     return start_date.isocalendar().week,days
+
+def parse_calendar_week_menu(page, today, stop_after_pattern=None):
+    """Select only explicitly dated weekdays in the current ISO year/week."""
+    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
+    menu={key:[] for key in DAYS.values()}; active=None; found=False
+    pattern=re.compile(r"^(måndag|mandag|tisdag|onsdag|torsdag|fredag|lördag|lordag|söndag|sondag)\s+(\d{1,2})(?:[/.](\d{1,2})|\s+([a-zåäö]+))(?:\s+Hej på Mârten)?$",re.I)
+    for line in lines:
+        if found and stop_after_pattern and re.search(stop_after_pattern,line,re.I): break
+        match=pattern.fullmatch(line)
+        if match:
+            month=int(match.group(3)) if match.group(3) else MONTHS.get(match.group(4).lower())
+            active=None
+            if not month: continue
+            year=today.year + (1 if today.month==12 and month==1 else -1 if today.month==1 and month==12 else 0)
+            try: day_date=date(year,month,int(match.group(2)))
+            except ValueError: continue
+            key=DAYS[match.group(1).lower()]
+            if day_date.isocalendar()[:2]==today.isocalendar()[:2] and day_date.weekday()==list(dict.fromkeys(DAYS.values())).index(key):
+                active=key; found=True
+            continue
+        if active and any(line.lower().startswith(marker) for marker in STOP_MARKERS): active=None
+        if active and useful_dish(line) and len(menu[active])<5: menu[active].append(line.lstrip("¤ "))
+    return (today.isocalendar().week if found else None),menu
+
+
+def parse_rotating_week_menu(page, today):
+    """Use a source's explicit even/odd recurring menu without inventing dishes."""
+    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
+    wanted="Jämn vecka" if today.isocalendar().week%2==0 else "Ojämn vecka"
+    try: start=next(i for i,line in enumerate(lines) if line.casefold()==wanted.casefold())
+    except StopIteration: return None,{key:[] for key in DAYS.values()}
+    end=next((i for i in range(start+1,len(lines)) if lines[i].casefold() in {"jämn vecka","ojämn vecka","nyfiken på köttet?"}),len(lines))
+    _week,days=parse_weekday_menu("".join(f"<p>{html.escape(line)}</p>" for line in lines[start+1:end]))
+    return today.isocalendar().week,days
+
 
 def parse_lunchsidan_restaurant(page, expected_name, expected_address, remove_prefixes=None):
     """Tolkar en restaurangsida hos Lunchsidan efter hård identitets- och veckokontroll."""
@@ -274,7 +309,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings"}:
                 try:
                     if parser_name=="image-weekday-menu":
                         week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
@@ -286,14 +321,19 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                         week,days=parse_all_days_menu(page)
                         if any(days.values()): week=current_week
                     elif parser_name=="scoped-weekday-headings": week,days=parse_scoped_weekday_menu(page,source["headingPattern"],current_week)
+                    elif parser_name=="calendar-weekday-headings": week,days=parse_calendar_week_menu(page,now.date(),source.get("stopAfterPattern"))
+                    elif parser_name=="rotating-weekday-headings": week,days=parse_rotating_week_menu(page,now.date()); item["menuSchedule"]="recurring_even_odd_week"
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name!="image-weekday-menu": week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
+                        days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
                     if source.get("dishSplitPattern"):
                         days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and any(days.values()) else "outdated"; item["mode"]="automatic"
+                    if item.get("closureNotice"): item["status"]="unavailable"
                 except RuntimeError as error:
                     item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
             if source.get("seasonal"):
@@ -303,7 +343,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                 if parser_name=="source-only" and season_start and season_end:
                     current_mmdd=now.strftime("%m-%d")
                     item["status"]="active" if season_start <= current_mmdd <= season_end else "seasonally_closed"
-                elif parser_name=="source-only": item["status"]="active" if now.month in season_months else "seasonally_closed"
+                elif parser_name=="source-only" and season_months: item["status"]="active" if now.month in season_months else "seasonally_closed"
             previous=previous_by_id.get(source.get("id"))
             if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}

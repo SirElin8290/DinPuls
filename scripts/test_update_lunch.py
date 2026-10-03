@@ -334,6 +334,40 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(item["status"],"outdated")
         self.assertEqual(item["days"],{})
 
+class CalendarMenuTests(unittest.TestCase):
+    def test_current_dates_exclude_next_week_and_footer(self):
+        page="<p>Måndag 28 september</p><p>Fisk med potatis</p><p>Fredag 2 oktober</p><p>Kyckling med ris</p><p>Sidfot</p><p>Reklamtext</p><p>Måndag 5 oktober</p><p>Nästa veckas rätt</p>"
+        week,days=update_lunch.parse_calendar_week_menu(page,datetime(2026,10,3).date(),"Sidfot")
+        self.assertEqual(week,40);self.assertEqual(days["monday"],["Fisk med potatis"]);self.assertEqual(days["friday"],["Kyckling med ris"])
+
+    def test_wrong_weekday_and_stale_dates_are_rejected(self):
+        week,days=update_lunch.parse_calendar_week_menu("<p>Måndag 29 september</p><p>Fel datumrätt</p><p>Tisdag 22 september</p><p>Gammal rätt</p>",datetime(2026,10,3).date())
+        self.assertIsNone(week);self.assertFalse(any(days.values()))
+
+    def test_next_week_and_year_boundary(self):
+        week,days=update_lunch.parse_calendar_week_menu("<p>Måndag 5/10</p><p>Framtida fisk</p>",datetime(2026,10,3).date())
+        self.assertIsNone(week);self.assertFalse(any(days.values()))
+        week,days=update_lunch.parse_calendar_week_menu("<p>Torsdag 1 januari</p><p>Nyårsfisk med potatis</p>",datetime(2025,12,29).date())
+        self.assertEqual(week,1);self.assertTrue(days["thursday"])
+
+    def test_closure_and_unknown_season_do_not_publish_dishes(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities["Åmål"]=[{"id":"closed","name":"Closed","url":"https://official.test","parser":"weekday-headings","closedTextPattern":"dagens lunch stängt"},{"id":"season","name":"Season","url":"https://official.test","parser":"source-only","seasonal":True}]
+        page="<p>Vecka 40</p><p>Vi håller dagens lunch stängt</p><p>Måndag</p><p>Gammal fisk med potatis</p>"
+        rows=update_lunch.build_output({"municipalities":municipalities},datetime(2026,10,3,tzinfo=ZoneInfo("Europe/Stockholm")),fetcher=lambda url:page)["municipalities"]["Åmål"]["restaurants"]
+        self.assertEqual(rows[0]["days"],{});self.assertEqual(rows[0]["status"],"unavailable");self.assertTrue(rows[0]["closureNotice"])
+        self.assertEqual(rows[1]["status"],"reference")
+
+    def test_compact_week_notation(self):
+        self.assertEqual(update_lunch.extract_week(["Dagens Lunch V40"]),40)
+        self.assertEqual(update_lunch.extract_week(["Lunchmeny v 40"]),40)
+        self.assertIsNone(update_lunch.extract_week(["Lunchmeny v 400"]))
+
+    def test_recurring_even_and_odd_are_isolated(self):
+        page="<h2>Jämn vecka</h2><p>Måndag</p><p>Jämn veckas fisk</p><h2>Ojämn vecka</h2><p>Måndag</p><p>Ojämn veckas kyckling</p><p>Nyfiken på köttet?</p><p>Kontaktinformation</p>"
+        self.assertEqual(update_lunch.parse_rotating_week_menu(page,datetime(2026,10,3).date())[1]["monday"],["Jämn veckas fisk"])
+        self.assertEqual(update_lunch.parse_rotating_week_menu(page,datetime(2026,10,5).date())[1]["monday"],["Ojämn veckas kyckling"])
+
 
 if __name__ == "__main__":
     unittest.main()
