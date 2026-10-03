@@ -478,5 +478,32 @@ class PublicSocialMenuTests(unittest.TestCase):
             with self.assertRaises(RuntimeError): update_lunch.parse_public_image_date(text,published,actual)
 
 
+class RetainedMenuTests(unittest.TestCase):
+    def setUp(self):
+        self.now=datetime(2026,10,3,20,tzinfo=ZoneInfo("Europe/Stockholm"))
+        self.previous={"status":"current","url":"https://official.test","parser":"weekday-headings","checkedAt":"2026-10-03T19:00:00+02:00","weekNumber":40,"days":{"monday":["Verifierad fisk"]}}
+        self.item={"status":"unavailable","url":"https://official.test","parser":"weekday-headings","error":"timeout","fetchFailure":True,"days":{}}
+    def test_same_week_network_failure_keeps_verified_dishes_and_original_time(self):
+        update_lunch.retain_verified_week(self.item,self.previous,self.now)
+        self.assertEqual(self.item["status"],"current");self.assertEqual(self.item["days"],self.previous["days"])
+        self.assertEqual(self.item["checkedAt"],self.previous["checkedAt"]);self.assertEqual(self.item["fetchWarning"],"timeout")
+    def test_validation_failure_is_not_overridden(self):
+        self.item.pop("fetchFailure");update_lunch.retain_verified_week(self.item,self.previous,self.now)
+        self.assertEqual(self.item["days"],{})
+    def test_next_week_never_keeps_old_dishes(self):
+        update_lunch.retain_verified_week(self.item,self.previous,datetime(2026,10,5,10,tzinfo=ZoneInfo("Europe/Stockholm")))
+        self.assertEqual(self.item["days"],{})
+    def test_real_outdated_source_is_not_overridden(self):
+        self.item["status"]="outdated";update_lunch.retain_verified_week(self.item,self.previous,self.now)
+        self.assertEqual(self.item["days"],{})
+    def test_source_changes_are_not_overridden(self):
+        self.item["url"]="https://changed.test";update_lunch.retain_verified_week(self.item,self.previous,self.now)
+        self.assertEqual(self.item["days"],{})
+    def test_future_or_wrong_year_verification_is_not_retained(self):
+        for timestamp in ["2026-10-03T21:00:00+02:00","2025-10-02T19:00:00+02:00"]:
+            self.previous["checkedAt"]=timestamp;update_lunch.retain_verified_week(self.item,self.previous,self.now)
+            self.assertEqual(self.item["days"],{})
+
+
 if __name__ == "__main__":
     unittest.main()

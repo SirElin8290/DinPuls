@@ -34,6 +34,9 @@ DAYS = {"måndag":"monday","mandag":"monday","tisdag":"tuesday","onsdag":"wednes
 STOP_MARKERS = ("veckans vegetariska","sallader","lunchpriser","öppettider","kontakt","pris ","priser","barn ","utkörningsservice","ta kontakt","catering","ring oss","galleri","adress","bordsbokning","öppet för","veckans meny","inkl.","sommarerbjudanden","ladda ner","med goda drycker","övrigt","lördagslunch","veckans burgare","veckans pasta","ta en titt på vår meny","kunden har alltid rätt","det här tycker våra kunder")
 NON_DISH_LINES = {"stängt","lunchbuffé","lunchbuffe","helgbuffé","dagens lunch","veckans lunch","veckans fisk","veckans vegetariska","fredagsdessert","måltidsdryck","kaffe & kaka","dessert","ingen dagens","ingen dagens."}
 
+class SourceFetchError(RuntimeError):
+    pass
+
 class TextExtractor(HTMLParser):
     def __init__(self): super().__init__(); self.lines=[]; self.blocked=0
     def handle_starttag(self, tag, attrs):
@@ -66,7 +69,7 @@ def fetch(url):
         except URLError as error: last_error=str(error.reason)
         except TimeoutError: last_error="timeout"
         if attempt < 2: time.sleep(2 ** attempt)
-    raise RuntimeError(last_error)
+    raise SourceFetchError(last_error)
 
 def fetch_binary(url):
     request=Request(url,headers={"User-Agent":USER_AGENT,"Accept":"image/*"})
@@ -555,6 +558,18 @@ def validate_config(config):
             if source.get("parser")=="image-weekday-menu" and not source.get("expectedTextPattern"): raise ValueError(f"Bildmeny saknar identitetskontroll: {source_id}")
             seen.add(source_id)
 
+
+def retain_verified_week(item,previous,now):
+    """A network failure cannot revoke verified dishes still within their ISO week."""
+    if item.get("status")!="unavailable" or not item.get("fetchFailure") or not item.get("error") or not previous or previous.get("status")!="current" or not any((previous.get("days") or {}).values()): return
+    if any(item.get(key)!=previous.get(key) for key in ("url","parser","dataUrl")): return
+    try: verified=datetime.fromisoformat(previous["checkedAt"])
+    except (KeyError,ValueError,TypeError): return
+    if verified.tzinfo is None: return
+    if verified > now or verified.isocalendar()[:2]!=now.isocalendar()[:2] or previous.get("weekNumber")!=now.isocalendar().week: return
+    item.update(status="current",weekNumber=previous["weekNumber"],days=previous["days"],checkedAt=previous["checkedAt"],fetchAttemptedAt=now.isoformat(timespec="seconds"),fetchWarning=item["error"],menuFreshness="retained_verified",mode="automatic")
+
+
 def build_output(config,now,fetcher=fetch,previous_output=None):
     # Produktionskonfigurationen har versionsfält och kompletteras med kommunfiler.
     # Små syntetiska testkonfigurationer ska inte utlösa nät- eller OCR-hämtning
@@ -621,6 +636,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     if item.get("availabilityNotice"): item["status"]="awaiting_publication"
                     if item.get("closureNotice"): item["status"]="unavailable"
                 except RuntimeError as error:
+                    if isinstance(error,SourceFetchError): item["fetchFailure"]=True
                     item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
             if source.get("seasonal"):
                 item["seasonal"]=True
@@ -633,6 +649,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             if source.get("closureNotice") and source.get("closureEvidenceUrl"):
                 item["status"]="unavailable"; item["days"]={}; item.pop("verifiedMenuImage",None)
             previous=previous_by_id.get(source.get("id"))
+            retain_verified_week(item,previous,now)
             if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
             restaurants.append(item)
