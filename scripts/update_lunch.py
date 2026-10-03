@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -94,7 +94,8 @@ def run_tesseract(payload, min_length=20):
 def parse_ocr_menu(text,source):
     if source.get("expectedTextPattern") and not re.search(source["expectedTextPattern"],text,re.I): raise RuntimeError("OCR-identiteten kunde inte verifieras")
     markup="".join(f"<p>{html.escape(line)}</p>" for line in text.splitlines() if line.strip())
-    return parse_weekday_menu(markup,source.get("stopAfterPattern"))
+    week,days=parse_weekday_menu(markup,source.get("stopAfterPattern"))
+    return week or extract_week([text]),days
 
 def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract):
     image_url=source.get("imageUrl")
@@ -102,6 +103,9 @@ def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_run
         page=page_fetcher(source.get("dataUrl") or source["url"])
         if source.get("expectedPagePattern") and not re.search(source["expectedPagePattern"],page,re.I): raise RuntimeError("källsidans identitet kunde inte verifieras")
         image_url=find_menu_image(page,source.get("dataUrl") or source["url"],source.get("imagePattern",r"lunch|meny|menu"))
+    if source.get("originalWixImage"):
+        if urlsplit(image_url).hostname!="static.wixstatic.com": raise RuntimeError("oväntad värd för originalbilden")
+        image_url=image_url.split("/v1/",1)[0]
     payload=binary_fetcher(image_url)
     if source.get("ocrRegions"):
         from PIL import Image

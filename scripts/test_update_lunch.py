@@ -8,6 +8,12 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_image_week_label_can_span_lines_without_guessing(self):
+        week,_=update_lunch.parse_ocr_menu("VECKA\n40\nFYRENDUSEUDDE.SE",{"expectedTextPattern":"FYRENDUSEUDDE"})
+        self.assertEqual(40,week)
+        week,_=update_lunch.parse_ocr_menu("40\nFYRENDUSEUDDE.SE",{"expectedTextPattern":"FYRENDUSEUDDE"})
+        self.assertIsNone(week)
+
     def test_public_json_requires_exact_date_and_preserves_dishes(self):
         now=datetime(2026,10,3,tzinfo=ZoneInfo("Europe/Stockholm"))
         source={"parser":"galna-tuppen-json"}
