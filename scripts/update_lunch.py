@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import base64
 import io
 import json
 import re
@@ -126,6 +127,120 @@ def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_run
     week,days=parse_ocr_menu(text,source)
     return week,days,image_url
 
+def parse_hogsater_days(rows):
+    days={key:[] for key in DAYS.values()}
+    for row in rows:
+        if not isinstance(row,dict): raise RuntimeError("ogiltig menydag")
+        index=row.get("day_index")
+        if not isinstance(index,int) or not 0<=index<=6: raise RuntimeError("ogiltig dag i restaurangens menyflöde")
+        if row.get("is_lunch_served") is not True: continue
+        dish=row.get("dish")
+        if not isinstance(dish,str) or not dish.strip() or re.search(r"kommer snart|kontakta oss|pizza och grill",dish,re.I): continue
+        description=row.get("description") or ""
+        if not isinstance(description,str): raise RuntimeError("ogiltig lunchbeskrivning")
+        days[list(dict.fromkeys(DAYS.values()))[index]]=[dish.strip()+(" – "+description.strip() if description.strip() else "")]
+    return days
+
+def fetch_hogsater_menu(source, now, fetcher=fetch):
+    """Use only the anonymous read API embedded in the restaurant's public site."""
+    page=fetcher(source["url"])
+    match=re.search(r'<script[^>]+src=["\'](/assets/index-[^"\']+\.js)["\']',page)
+    if not match: raise RuntimeError("restaurangens offentliga menyprogram hittades inte")
+    script=fetcher(urljoin(source["url"],match.group(1)))
+    host_match=re.search(r'https://[a-z0-9]+\.supabase\.co',script)
+    key=None
+    for candidate in re.findall(r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+',script):
+        try: claims=json.loads(base64.urlsafe_b64decode(candidate.split(".")[1]+"==="))
+        except (ValueError,UnicodeDecodeError): continue
+        if claims.get("role")=="anon": key=candidate; break
+    if not host_match or not key: raise RuntimeError("restaurangens offentliga läsflöde hittades inte")
+    def read(path):
+        request=Request(host_match.group(0)+"/rest/v1/"+path,headers={"User-Agent":USER_AGENT,"apikey":key,"Authorization":"Bearer "+key})
+        try:
+            with urlopen(request,timeout=30) as response: return json.loads(response.read().decode("utf-8"))
+        except (HTTPError,URLError,TimeoutError,ValueError): raise RuntimeError("restaurangens offentliga menyflöde kunde inte läsas") from None
+    for target in [now,(now+timedelta(days=7))]:
+        iso=target.isocalendar()
+        menus=read(f"weekly_menus?select=id,week_number,year&week_number=eq.{iso.week}&year=eq.{iso.year}")
+        if not isinstance(menus,list): raise RuntimeError("ogiltigt offentligt menysvar")
+        for menu in menus:
+            if not isinstance(menu,dict): raise RuntimeError("ogiltig veckomeny")
+            if menu.get("year")!=iso.year or menu.get("week_number")!=iso.week: continue
+            identifier=menu.get("id")
+            if not isinstance(identifier,str) or not re.fullmatch(r"[a-zA-Z0-9-]+",identifier): raise RuntimeError("ogiltigt meny-ID")
+            rows=read("weekly_menu_days?select=day_index,dish,description,is_lunch_served&weekly_menu_id=eq."+identifier)
+            if not isinstance(rows,list): raise RuntimeError("ogiltiga menydagar")
+            days=parse_hogsater_days(rows)
+            if any(days.values()): return iso.week,days
+    return None,{key:[] for key in DAYS.values()}
+
+def parse_mashie_menu(page, today, expected_heading):
+    """Read only the named dining room and exact ISO dates in its public menu."""
+    parser=TextExtractor(); parser.feed(page)
+    if not re.search(expected_heading," ".join(parser.text_lines()),re.I): raise RuntimeError("Mashie: fel matsal")
+    days={key:[] for key in DAYS.values()}
+    dates=list(re.finditer(r'js-date=["\'](\d{4}-\d{2}-\d{2})["\']',page,re.I))
+    for index,match in enumerate(dates):
+        block=page[match.end():dates[index+1].start() if index+1<len(dates) else len(page)]
+        try: menu_date=date.fromisoformat(match.group(1))
+        except ValueError: continue
+        if menu_date.isocalendar()[:2]!=today.isocalendar()[:2]: continue
+        day=list(dict.fromkeys(DAYS.values()))[menu_date.weekday()]
+        for section in re.findall(r'<section[^>]+class=["\']day-alternative["\'][^>]*>(.*?)</section>',block,re.I|re.S):
+            extractor=TextExtractor(); extractor.feed(section); lines=extractor.text_lines()
+            dish_match=re.search(r'<span[^>]*>(.*?)</span>',section,re.I|re.S)
+            if not dish_match: continue
+            dish_extractor=TextExtractor(); dish_extractor.feed(dish_match.group(1)); dish=" ".join(dish_extractor.text_lines())
+            if useful_dish(dish): days[day].append(("Efterrätt: " if lines and lines[0].startswith("Dessert") else "")+dish)
+    return (today.isocalendar().week if any(days.values()) else None),days
+
+def parse_standing_html(page, source):
+    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
+    if not re.search(source["expectedPagePattern"]," ".join(lines),re.I): raise RuntimeError("fast lunchmeny: fel restaurang")
+    try: start=next(i for i,line in enumerate(lines) if re.fullmatch(source["headingPattern"],line,re.I))
+    except StopIteration: raise RuntimeError("fast lunchmeny: rubriken saknas") from None
+    dishes=[]; pending=[]; categories=set(source.get("menuCategories",[]))
+    for line in lines[start+1:]:
+        if re.search(source["stopAfterPattern"],line,re.I): break
+        if line in categories: continue
+        if re.fullmatch(r"\d+(?:[,.]\d+)?\s*(?::-|kr)",line,re.I):
+            if pending: dishes.append(" – ".join(pending)); pending=[]
+        else: pending.append(line)
+    if not dishes: raise RuntimeError("fast lunchmeny: inga säkra rätter hittades")
+    return dishes
+
+def parse_standing_pdf(text):
+    """Only the explicitly labelled lunch section, excluding a la carte/drinks."""
+    match=re.search(r"LUNCHMENY(.*?)(?=À LA CARTE|A LA CARTE|DRYCK|\Z)",text,re.I|re.S)
+    if not match: raise RuntimeError("PDF saknar lunchmenysektion")
+    dishes=[]; pending=[]
+    for line in match.group(1).splitlines():
+        line=line.strip()
+        if not line or line.upper()=="LUNCHMENY" or line.startswith("("): continue
+        heading=re.match(r"^\d{2,4}\s*(.+)$",line)
+        if heading:
+            if pending: dishes.append(" – ".join(pending))
+            pending=[heading.group(1).strip()]
+        elif pending: pending.append(line)
+    if pending: dishes.append(" – ".join(pending))
+    if not dishes: raise RuntimeError("PDF saknar säkra lunchrätter")
+    return dishes
+
+def fetch_standing_pdf(source, fetcher=fetch):
+    from pypdf import PdfReader
+    from pypdf.errors import PdfReadError
+    page=fetcher(source["url"])
+    links=[urljoin(source["url"],html.unescape(url)) for url in re.findall(r'href=["\']([^"\']+)["\']',page,re.I) if re.search(source["pdfLinkPattern"],url,re.I)]
+    for url in dict.fromkeys(links):
+        if urlsplit(url).hostname!=urlsplit(source["url"]).hostname: continue
+        try:
+            with urlopen(Request(url,headers={"User-Agent":USER_AGENT,"Accept":"application/pdf"}),timeout=30) as response: payload=response.read(12_000_001)
+            if len(payload)>12_000_000 or not payload.startswith(b"%PDF-"): continue
+            text="\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(payload)).pages)
+            return parse_standing_pdf(text),url
+        except (RuntimeError,OSError,ValueError,PdfReadError): continue
+    raise RuntimeError("ingen verifierbar fast lunchmeny-PDF hittades")
+
 def parse_pdf_week(text, today):
     iso=today.isocalendar()
     if not re.search(r"Matsedel\s*"+str(iso.year),text,re.I): raise RuntimeError("PDF-matsedelns år kunde inte verifieras")
@@ -183,8 +298,73 @@ def fetch_structured_menu(source, now, fetcher=fetch):
     except (ValueError,KeyError,TypeError,AttributeError):
         raise RuntimeError("ogiltigt offentligt menyflöde") from None
 
+
+class PublicPostExtractor(HTMLParser):
+    """Read only story data included in the unauthenticated public HTML response."""
+    def __init__(self): super().__init__(); self.active=False; self.parts=[]; self.documents=[]
+    def handle_starttag(self,tag,attrs):
+        if tag=="script": self.active=dict(attrs).get("type")=="application/json"; self.parts=[]
+    def handle_data(self,text):
+        if self.active: self.parts.append(text)
+    def handle_endtag(self,tag):
+        if tag=="script" and self.active:
+            try: self.documents.append(json.loads("".join(self.parts)))
+            except ValueError: pass
+            self.active=False
+
+def public_menu_posts(page,actor_id):
+    parser=PublicPostExtractor(); parser.feed(page); posts=[]
+    def walk(value):
+        if isinstance(value,dict):
+            if value.get("__typename")=="Story" and "creation_time" in value:
+                actors=value.get("actors") or []
+                if not value.get("sponsored_data") and not value.get("attached_story") and not value.get("work_reposted_story") and actors and all(actor.get("id")==actor_id for actor in actors): posts.append(value)
+                return
+            for child in value.values(): walk(child)
+        elif isinstance(value,list):
+            for child in value: walk(child)
+    for document in parser.documents: walk(document)
+    return posts
+
+def parse_public_image_date(text,published,today):
+    match=re.search(r"(måndag|tisdag|onsdag|torsdag|fredag|lördag|söndag)\s+(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})",text,re.I)
+    if not match: raise RuntimeError("menybilden saknar ett fullständigt verifierbart datum")
+    try: menu_date=date(int(match[4]),int(match[3]),int(match[2]))
+    except ValueError: raise RuntimeError("menybildens datum är ogiltigt") from None
+    day_key=DAYS[match[1].lower()]
+    if day_key!=list(dict.fromkeys(DAYS.values()))[menu_date.weekday()]: raise RuntimeError("menybildens veckodag och datum stämmer inte överens")
+    if not published <= menu_date <= published+timedelta(days=7): raise RuntimeError("menybildens datum stämmer inte med inläggets publicering")
+    if menu_date.isocalendar()[:2]!=today.isocalendar()[:2]: raise RuntimeError("menybilden gäller inte aktuell vecka")
+    return menu_date,day_key
+
+def fetch_public_social_image(source,now,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract):
+    posts=public_menu_posts(page_fetcher(source["url"]),source["publicActorId"])
+    def images(value):
+        if isinstance(value,dict):
+            if isinstance(value.get("photo_image"),dict): yield value["photo_image"].get("uri")
+            for child in value.values(): yield from images(child)
+        elif isinstance(value,list):
+            for child in value: yield from images(child)
+    for post in sorted(posts,key=lambda row:row.get("creation_time",0),reverse=True):
+        try: published=datetime.fromtimestamp(post["creation_time"],TIMEZONE).date()
+        except (TypeError,ValueError,OverflowError): continue
+        if not now.date()-timedelta(days=7) <= published <= now.date(): continue
+        for image_url in dict.fromkeys(images(post.get("attachments",[]))):
+            host=urlsplit(image_url or "").hostname or ""
+            if not host.endswith(".fbcdn.net") or urlsplit(image_url).scheme!="https": continue
+            text=ocr_runner(binary_fetcher(image_url))
+            if not re.search(source["expectedTextPattern"],text,re.I): continue
+            menu_date,day_key=parse_public_image_date(text,published,now.date())
+            return menu_date.isocalendar().week,image_url,menu_date.isoformat(),day_key,post.get("permalink_url")
+    raise RuntimeError("inget offentligt inlägg med säkert daterad lunchbild hittades")
+
+
 def fetch_source(source, fetcher=fetch):
-    page=fetcher(source.get("dataUrl") or source["url"])
+    error=None
+    for url in [source.get("dataUrl") or source["url"],*source.get("fallbackDataUrls",[])]:
+        try: page=fetcher(url); break
+        except RuntimeError as failure: error=failure
+    else: raise error or RuntimeError("ingen källa konfigurerad")
     if source.get("dataFormat") != "wordpress-page": return page
     try:
         payload=json.loads(page); rendered=payload[0]["content"]["rendered"]
@@ -242,9 +422,9 @@ def parse_scoped_weekday_menu(page, heading, expected_week):
 
 MONTHS={"jan":1,"januari":1,"feb":2,"februari":2,"mar":3,"mars":3,"apr":4,"april":4,"maj":5,"jun":6,"juni":6,"jul":7,"juli":7,"aug":8,"augusti":8,"sep":9,"sept":9,"september":9,"okt":10,"oktober":10,"nov":11,"november":11,"dec":12,"december":12}
 
-def parse_dated_weekday_menu(page, today):
+def parse_dated_weekday_menu(page, today, heading_pattern=None):
     """Väljer bara menysektionen vars publicerade datumintervall innehåller dagens datum."""
-    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines(); heading=re.compile(r"lunchmeny\s+(\d{1,2})\s+([a-zåäö]+)\s*[-–]\s*(\d{1,2})(?:\s+([a-zåäö]+))?",re.I); candidates=[]
+    parser=TextExtractor(); parser.feed(page); lines=parser.text_lines(); heading=re.compile(heading_pattern or r"lunchmeny\s+(\d{1,2})\s+([a-zåäö]+)\s*[-–]\s*(\d{1,2})(?:\s+([a-zåäö]+))?",re.I); candidates=[]
     for index,line in enumerate(lines):
         match=heading.search(line)
         if not match: continue
@@ -389,33 +569,56 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image"}:
                 try:
-                    if parser_name=="image-weekday-menu":
+                    if parser_name=="public-social-image":
+                        week,image_url,image_date,image_day,post_url=fetch_public_social_image(source,now,page_fetcher=fetcher)
+                        days={}; item["verifiedMenuImage"]=image_url; item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
+                    elif parser_name=="image-weekday-menu":
                         week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
                         item["sourceAsset"]=image_url; item["extraction"]="ocr"
                         if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
                         if not any(days.values()) and not source.get("displayAsImage"): raise RuntimeError("OCR hittade inga säkra lunchrätter")
                         if source.get("displayAsImage"): item["verifiedMenuImage"]=image_url; days={}
+                    elif parser_name=="hogsater-json":
+                        week,days=fetch_hogsater_menu(source,now,fetcher)
+                        if not any(days.values()): item["availabilityNotice"]="Restaurangen har ännu inte publicerat veckans lunchrätter."
+                    elif parser_name=="standing-pdf": item["standingDishes"],item["sourceAsset"]=fetch_standing_pdf(source,fetcher); week=None; days={}
                     elif parser_name=="pdf-weekday-menu": week,days,pdf_url=fetch_pdf_menu(source,now,fetcher); item["sourceAsset"]=pdf_url
                     elif parser_name in {"galna-tuppen-json","omsorgen-json"}: week,days=fetch_structured_menu(source,now,fetcher)
                     else: page=fetch_source(source,fetcher)
-                    if parser_name=="all-days-heading":
+                    if parser_name=="mashie-menu": week,days=parse_mashie_menu(page,now.date(),source["expectedMenuPattern"])
+                    elif parser_name=="standing-html": item["standingDishes"]=parse_standing_html(page,source); week=None; days={}
+                    elif parser_name=="all-days-heading":
                         week,days=parse_all_days_menu(page)
                         if any(days.values()): week=current_week
                     elif parser_name=="scoped-weekday-headings": week,days=parse_scoped_weekday_menu(page,source["headingPattern"],current_week)
-                    elif parser_name=="calendar-weekday-headings": week,days=parse_calendar_week_menu(page,now.date(),source.get("stopAfterPattern"))
+                    elif parser_name=="calendar-weekday-headings":
+                        week,days=parse_calendar_week_menu(page,now.date(),source.get("stopAfterPattern"))
+                        if not any(days.values()): week,days=parse_calendar_week_menu(page,(now+timedelta(days=7)).date(),source.get("stopAfterPattern"))
                     elif parser_name=="rotating-weekday-headings": week,days=parse_rotating_week_menu(page,now.date()); item["menuSchedule"]="recurring_even_odd_week"
-                    elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
+                    elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    if source.get("menuYearPattern"):
+                        match=re.search(source["menuYearPattern"],page,re.I)
+                        target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
+                        if not match or int(match.group(1))!=target.year: raise RuntimeError("menyns år kunde inte verifieras")
+                    if source.get("pendingTextPattern") and re.search(source["pendingTextPattern"],page,re.I) and not any(days.values()):
+                        item["availabilityNotice"]=source["pendingNotice"]
                     if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
                         days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
                     if source.get("dishSplitPattern"):
                         days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and (any(days.values()) or item.get("verifiedMenuImage")) else "outdated"; item["mode"]="automatic"
+                    next_date=(now.date()-timedelta(days=now.weekday()))+timedelta(days=7)
+                    if week==next_date.isocalendar().week and any(days.values()):
+                        item["upcomingMenu"]={"weekNumber":week,"year":next_date.isocalendar().year,"validFrom":next_date.isoformat(),"days":days}
+                        item["status"]="upcoming"
+                    if item.get("standingDishes"): item["status"]="standing_menu"; item["menuSchedule"]="standing"
+                    if item.get("availabilityNotice"): item["status"]="awaiting_publication"
                     if item.get("closureNotice"): item["status"]="unavailable"
                 except RuntimeError as error:
                     item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
@@ -437,7 +640,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
     excluded_count=0
     if EXCLUSIONS.exists():
         excluded_count=len(json.loads(EXCLUSIONS.read_text(encoding="utf-8")).get("excludedRestaurants",[]))
-    return {"version":"0.22.1","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","curation":{"menuCandidates":sum(len(row["restaurants"]) for row in municipalities.values()),"excludedWithoutVerifiableMenu":excluded_count,"exclusionSource":"data/lunch-exclusions.json"},"municipalities":municipalities}
+    return {"version":"0.23.0","generatedAt":now.isoformat(timespec="seconds"),"timezone":"Europe/Stockholm","currentWeek":current_week,"principle":"Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.","curation":{"menuCandidates":sum(len(row["restaurants"]) for row in municipalities.values()),"excludedWithoutVerifiableMenu":excluded_count,"exclusionSource":"data/lunch-exclusions.json"},"municipalities":municipalities}
 
 def main():
     config=json.loads(SOURCES.read_text(encoding="utf-8")); now=datetime.now(TIMEZONE)

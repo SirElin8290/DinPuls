@@ -59,7 +59,15 @@
         "url": "https://joans.se/lunch/lunch-karlstad/",
         "address": "Kungsgatan 16, Karlstad",
         "hours": "Lunch vardagar 11.00–14.30",
-        "parser": "weekday-headings"
+        "parser": "standing-html",
+        "expectedPagePattern": "Lunch Karlstad",
+        "headingPattern": "Sallader & bakpotatis",
+        "stopAfterPattern": "Sugen på de söta",
+        "menuCategories": [
+          "Pasta",
+          "Pizza",
+          "Joan´s Klassiker"
+        ]
       },
       {
         "id": "nojesfabriken-karlstad",
@@ -82,15 +90,18 @@
     ],
     "Eda": [
       {
-        "id": "kallmans-konditori",
-        "name": "Källmans Konditori",
-        "url": "https://xn--kllmans-5wa.se/lunch/",
-        "address": "Storgatan 14, Charlottenberg",
-        "hours": "Husmanslunch måndag–fredag",
-        "parser": "weekday-headings",
-        "stopAfterPattern": "^10 pack",
-        "fallbackMode": "reference"
-      },
+          "id": "kallmans-konditori",
+          "name": "Källmans Konditori",
+          "url": "https://xn--kllmans-5wa.se/lunch/",
+          "address": "Storgatan 14, Charlottenberg",
+          "hours": "Husmanslunch måndag–fredag",
+          "parser": "weekday-headings",
+          "stopAfterPattern": "^10 pack",
+          "fallbackMode": "reference",
+          "fallbackDataUrls": [
+            "https://www.xn--kllmans-5wa.se/lunch/"
+          ]
+        },
       {
         "id": "hotell-charlottenberg",
         "name": "Hotell Charlottenberg",
@@ -253,8 +264,10 @@
         "name": "Öppna matsalen Uranus",
         "url": "https://www.kristinehamn.se/stod-och-omsorg/aldreomsorg/mat-och-maltider/mat-i-oppna-matsalen-uranus/",
         "address": "Kristinehamn",
-        "hours": "Besökare 12.15–13.30",
-        "parser": "source-only"
+        "hours": "Besökare 12.15–13.30 – se kommunens aktuella information",
+        "parser": "mashie-menu",
+        "dataUrl": "https://mpi.mashie.com/public/menu/kristinehamns+kommun/27756661?country=se",
+        "expectedMenuPattern": "Matsedel Uranus Matsal"
       }
     ],
     "Storfors": [
@@ -323,10 +336,13 @@
       {
         "id": "restaurang-kronan-hagfors",
         "name": "Restaurang Kronan",
-        "url": "https://www.visitvarmland.com/hagfors/mat-dryck/lunch/restaurang-kronan",
+        "url": "https://www.facebook.com/Restaurangkronanhagfors/",
         "address": "Kyrkogatan 6, Hagfors",
         "hours": "Dagens lunch måndag–fredag 11.00–15.30",
-        "parser": "source-only"
+        "parser": "public-social-image",
+        "publicActorId": "100063482894666",
+        "expectedTextPattern": "KRONAN",
+        "fallbackMode": "reference"
       },
       {
         "id": "uwan-hagfors",

@@ -32,9 +32,9 @@
     ],
     "Årjäng": [
       {"id":"travmuseet","name":"Restaurang Travmuseet","url":"https://restaurangtravmuseet.se/veckans-lunchbuffe/","address":"Marknadsvägen 24, Årjäng","hours":"Vardagar 11.00–14.30","parser":"weekday-headings"},
-      {"id":"krogeriet","name":"Krogeriet","url":"https://krogeriet.se/","address":"Storgatan 53, Årjäng","hours":"Vardagar 11.30–15.00","parser":"weekday-headings"},
+      {"id":"krogeriet","name":"Krogeriet","url":"http://krogeriet.se/","address":"Storgatan 53, Årjäng","hours":"Vardagar 11.30–15.00","parser":"weekday-headings"},
       {"id":"hotell-arjang","name":"Hotell Årjäng","url":"https://hotellarjang.com/ata/lunch/","address":"Claras Torg 1, Årjäng","hours":"Se aktuell lunchstatus","parser":"source-only"},
-      {"id":"waterside","name":"Waterside Restaurant","url":"https://waterside.se/","address":"Bögatan 1, Töcksfors","hours":"Dagens lunch, se aktuell tid","parser":"source-only"},
+      {"id":"waterside","name":"Waterside Restaurant","url":"http://waterside.se/dagens-lunch-12968849","address":"Bögatan 1, Töcksfors","hours":"Dagens lunch, se aktuell tid","parser":"dated-weekday-headings","dateHeadingPattern":"Dagens lunch (?:måndag|tisdag|onsdag|torsdag|fredag)\\s+(\\d{1,2})\\s+([a-zåäö]+)\\s*[-–]\\s*(?:måndag|tisdag|onsdag|torsdag|fredag)\\s+(\\d{1,2})(?:\\s+([a-zåäö]+))?","pendingTextPattern":"Dagens lunch menyn kommer tisdag morgon","pendingNotice":"Restaurangen meddelar att lunchmenyn publiceras tisdag morgon."},
       {"id":"asian-town-tocksfors","name":"Asian Town Töcksfors","url":"https://asiantown.se/tocksfors/","address":"Töcksfors Shoppingcenter","hours":"Buffé dagligen från 11.00","parser":"source-only"},
       {"id":"curry-punjabi-arjang","name":"Curry Punjabi","url":"https://www.facebook.com/currypunjabi1/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"},
       {"id":"hornet-arjang","name":"Hörnet","url":"https://www.facebook.com/p/H%C3%B6rnet-61559522264272/","address":"Årjäng","hours":"Se dagens lunch","parser":"source-only"}
@@ -63,7 +63,7 @@
     ],
     "Kil":[{"id":"kils-golfrestaurang","name":"Kils Golfrestaurang","url":"https://www.kilsgolfrestaurang.se/","address":"Skärningsberg 125","hours":"Lunch 11.00–15.00","parser":"weekday-headings","stopAfterPattern":"LÖRDAG OCH SÖNDAG"},{"id":"kils-hotell","name":"Kils Hotell & Restaurang","url":"https://www.kilshotell.com/","address":"Storgatan 16","hours":"Vardagslunch 11.00–14.30","parser":"source-only"}],
     "Sunne":[{"id":"nils-holgerssons-vardshus","name":"Nils Holgerssons Värdshus","url":"https://www.nilsholgerssonswardshus.se/lunch/","address":"Nils Holgerssons väg 1","hours":"Lunch dagligen 11.00–16.00","parser":"calendar-weekday-headings","stopAfterPattern":"ÖPPET MÅNDAG"},{"id":"saffran-vitlok-sunne","name":"Saffran & Vitlök","url":"https://saffranvitlok.se/","address":"Storgatan 36","hours":"Lunch måndag–lördag 11.00–15.00","parser":"weekday-headings"},{"id":"sagolika-loven","name":"Sagolika Löven","url":"https://sagolikaloven.se/dagens-lunch.html","address":"Brårudsallén 7","hours":"Lunch måndag–fredag 11.30–14.30","parser":"calendar-weekday-headings","stopAfterPattern":"Mârtenserbjudanden|Kupongerbjudande|Vi har även sallader|ADRESS"}],
-    "Eda":[{"id":"kallmans-konditori","name":"Källmans Konditori","url":"https://xn--kllmans-5wa.se/lunch/","address":"Storgatan 14, Charlottenberg","hours":"Husmanslunch måndag–fredag","parser":"weekday-headings","stopAfterPattern":"^10 pack","fallbackMode":"reference"}],
+    "Eda":[{"id":"kallmans-konditori","name":"Källmans Konditori","url":"https://xn--kllmans-5wa.se/lunch/","address":"Storgatan 14, Charlottenberg","hours":"Husmanslunch måndag–fredag","parser":"weekday-headings","stopAfterPattern":"^10 pack","fallbackMode":"reference","fallbackDataUrls":["https://www.xn--kllmans-5wa.se/lunch/"]}],
     "Karlstad":[],
     "Hammarö":[
       {"id":"skoghalls-folkets-hus-restaurang","name":"Restaurangen på Skoghalls Folkets Hus","url":"https://skoghallsfolketshus.se/","dataUrl":"https://www.lunchsidan.se/restaurang/restaurant-at-skoghalls-folkets-hus/11203315438","address":"Skogåsvägen 3, Skoghall","hours":"Lunch måndag–fredag 11.00–14.00","parser":"lunchsidan-restaurant","expectedNamePattern":"Restaurant at Skoghalls Folkets Hus","expectedAddress":"Skogåsvägen 3, 663 30 Skoghall","fallbackMode":"reference"}
@@ -75,12 +75,12 @@
       {"id":"cafe-huset-filipstad","name":"Café Huset","url":"https://cafehuset.se/","address":"Stora Torget 4A, Filipstad","hours":"Dagens lunch måndag–fredag 11.00–14.30","parser":"weekday-headings","stopAfterPattern":"^Smaklig måltid","fallbackMode":"reference"}
     ],
     "Hagfors":[],
-    "Munkfors":[{"id":"master-falling-munkfors","name":"Mäster Fälling","url":"https://www.visitvarmland.com/munkfors/mat-dryck/lunch/master-falling","address":"Munkfors","hours":"Dagens lunch – se aktuell meny","parser":"source-only"},{"id":"munkfors-steakhouse","name":"Munkfors Steakhouse & Pizzeria","url":"https://www.visitvarmland.com/munkfors/food-drinks/restaurant/munkfors-steakhouse-pizzeria","address":"Munkfors","hours":"Dagens lunch – se aktuell meny","parser":"source-only"}],
+    "Munkfors":[{"id":"master-falling-munkfors","name":"Mäster Fälling","url":"https://www.farinn62.com/lunch","address":"Munkfors","hours":"Dagens lunch – se aktuell meny","parser":"weekday-headings","dataUrl":"https://farinn62.github.io/lunch/","menuYearPattern":"Lunch V\\.\\s*\\d{1,2}\\s+(\\d{4})","stopAfterPattern":"SMAKLIG MÅLTID"},{"id":"munkfors-steakhouse","name":"Munkfors Steakhouse & Pizzeria","url":"https://www.visitvarmland.com/munkfors/food-drinks/restaurant/munkfors-steakhouse-pizzeria","address":"Munkfors","hours":"Dagens lunch – se aktuell meny","parser":"source-only"}],
     "Torsby":[],
     "Dals-Ed":[
       {"id":"eds-bowlinghall","name":"Eds Bowlinghall","url":"https://www.edsbowlinghall.com/maten","address":"Jordbrovägen 15, Ed","hours":"Lunchbuffé måndag–fredag 11.00–14.00","parser":"weekday-headings","stopAfterPattern":"^Crispy chicken burger","dishSplitPattern":"(?<=\\.)\\s+(?=Pannkakor)","fallbackMode":"reference"}
     ],
-    "Färgelanda":[{"id":"hogsater-restaurang","name":"Högsäter Restaurang","url":"https://www.vastsverige.com/fargelanda/produkter/hogsater-restaurang/","address":"Högsäter","hours":"Lunchmeny – se aktuell meny","parser":"source-only"}]
+    "Färgelanda":[{"id":"hogsater-restaurang","name":"Högsäter Restaurang","url":"https://hogsaterresturang.se/","address":"Högsäter","hours":"Lunch onsdag–fredag 11.00–14.00, enligt restaurangens webbplats","parser":"hogsater-json"}]
   },
   "referenceSources": {
     "Åmål": [{"name":"Visit Åmål – lunch","url":"https://www.vastsverige.com/amal/ata/lunch/"}],

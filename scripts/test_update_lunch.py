@@ -8,6 +8,66 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_mashie_exact_dates_keep_current_day_and_next_week_isolated(self):
+        page='<h1>Matsedel Uranus Matsal</h1><span js-date="2026-10-02"></span><section class="day-alternative"><strong>Lunch 1<span>Fredagens fisk</span></strong></section><div class="row day-current"><span js-date="2026-10-03"></span></div><section class="day-alternative"><strong>Lunch 1<span>Lördagens gryta</span></strong></section><span js-date="2026-10-05"></span><section class="day-alternative"><strong>Lunch 1<span>Nästa veckas korv</span></strong></section>'
+        week,days=update_lunch.parse_mashie_menu(page,datetime(2026,10,3).date(),'Matsedel Uranus Matsal')
+        self.assertEqual(40,week)
+        self.assertEqual(['Fredagens fisk'],days['friday'])
+        self.assertEqual(['Lördagens gryta'],days['saturday'])
+        self.assertFalse(days['monday'])
+        with self.assertRaisesRegex(RuntimeError,'fel matsal'):
+            update_lunch.parse_mashie_menu(page,datetime(2026,10,3).date(),'Annan matsal')
+        self.assertIsNone(update_lunch.parse_mashie_menu(page.replace('2026-','2025-'),datetime(2026,10,3).date(),'Matsedel Uranus Matsal')[0])
+
+    def test_standing_pdf_excludes_a_la_carte_and_drinks(self):
+        text='LUNCHMENY\n209FISK MED POTATIS\nCitron och grönsaker\n(fisk, mjölk)\nÀ LA CARTE\n229BURGER\nDRYCK\n100VIN'
+        self.assertEqual(['FISK MED POTATIS – Citron och grönsaker'],update_lunch.parse_standing_pdf(text))
+        with self.assertRaisesRegex(RuntimeError,'lunchmenysektion'):
+            update_lunch.parse_standing_pdf('DRYCK\n100VIN')
+
+    def test_upcoming_menu_is_preserved_without_publishing_as_current(self):
+        config={'municipalities':{name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}}
+        config['municipalities']['Munkfors']=[{'id':'next','name':'Meny','url':'https://example.test','parser':'weekday-headings'}]
+        output=update_lunch.build_output(config,datetime(2026,10,3,tzinfo=ZoneInfo('Europe/Stockholm')),fetcher=lambda _:'<h1>Vecka 41</h1><h2>Måndag</h2><p>Kyckling med ris</p>')
+        row=output['municipalities']['Munkfors']['restaurants'][0]
+        self.assertEqual('upcoming',row['status'])
+        self.assertEqual({},row['days'])
+        self.assertEqual('2026-10-05',row['upcomingMenu']['validFrom'])
+        self.assertEqual(['Kyckling med ris'],row['upcomingMenu']['days']['monday'])
+
+    def test_menu_from_two_weeks_ahead_is_not_upcoming(self):
+        config={'municipalities':{name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}}
+        config['municipalities']['Munkfors']=[{'id':'later','name':'Meny','url':'https://example.test','parser':'weekday-headings'}]
+        row=update_lunch.build_output(config,datetime(2026,10,3,tzinfo=ZoneInfo('Europe/Stockholm')),fetcher=lambda _:'<h1>Vecka 42</h1><h2>Måndag</h2><p>Kyckling med ris</p>')['municipalities']['Munkfors']['restaurants'][0]
+        self.assertEqual('outdated',row['status'])
+        self.assertNotIn('upcomingMenu',row)
+
+    def test_source_fallback_only_after_fetch_failure(self):
+        calls=[]
+        def fetcher(url):
+            calls.append(url)
+            if url.endswith('/first'): raise RuntimeError('timeout')
+            return '<p>Verifierad källa</p>'
+        self.assertEqual('<p>Verifierad källa</p>',update_lunch.fetch_source({'url':'https://example.test/first','fallbackDataUrls':['https://example.test/second']},fetcher))
+        self.assertEqual(['https://example.test/first','https://example.test/second'],calls)
+
+    def test_public_menu_placeholders_and_closed_days_are_not_dishes(self):
+        rows=[{'day_index':0,'dish':'Dagens rätt kommer snart','is_lunch_served':True},{'day_index':1,'dish':'Pizza och Grill','is_lunch_served':False},{'day_index':2,'dish':'Fiskgratäng','description':'med potatis','is_lunch_served':True}]
+        days=update_lunch.parse_hogsater_days(rows)
+        self.assertFalse(days['monday'])
+        self.assertFalse(days['tuesday'])
+        self.assertEqual(['Fiskgratäng – med potatis'],days['wednesday'])
+
+    def test_standing_menu_is_never_a_current_week_menu(self):
+        source={'id':'standing','name':'Restaurangen','url':'https://example.test','parser':'standing-html','expectedPagePattern':'Restaurangen','headingPattern':'Lunch','stopAfterPattern':'Dryck','menuCategories':[]}
+        config={'municipalities':{name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}};config['municipalities']['Sunne']=[source]
+        page='<h1>Restaurangen</h1><h2>Lunch</h2><p>Fiskgratäng</p><p>120:-</p><h2>Dryck</h2><p>Vin</p>'
+        row=update_lunch.build_output(config,datetime(2026,10,3,tzinfo=ZoneInfo('Europe/Stockholm')),fetcher=lambda _:page)['municipalities']['Sunne']['restaurants'][0]
+        self.assertEqual('standing_menu',row['status'])
+        self.assertIsNone(row['weekNumber'])
+        self.assertEqual({},row['days'])
+        self.assertEqual(['Fiskgratäng'],row['standingDishes'])
+
     def test_image_week_label_can_span_lines_without_guessing(self):
         week,_=update_lunch.parse_ocr_menu("VECKA\n40\nFYRENDUSEUDDE.SE",{"expectedTextPattern":"FYRENDUSEUDDE"})
         self.assertEqual(40,week)
@@ -401,6 +461,21 @@ class CalendarMenuTests(unittest.TestCase):
         page="<h2>Jämn vecka</h2><p>Måndag</p><p>Jämn veckas fisk</p><h2>Ojämn vecka</h2><p>Måndag</p><p>Ojämn veckas kyckling</p><p>Nyfiken på köttet?</p><p>Kontaktinformation</p>"
         self.assertEqual(update_lunch.parse_rotating_week_menu(page,datetime(2026,10,3).date())[1]["monday"],["Jämn veckas fisk"])
         self.assertEqual(update_lunch.parse_rotating_week_menu(page,datetime(2026,10,5).date())[1]["monday"],["Ojämn veckas kyckling"])
+
+
+class PublicSocialMenuTests(unittest.TestCase):
+    def test_public_actor_reposts_and_adverts_are_isolated(self):
+        def story(actor="own",**extra): return {"__typename":"Story","creation_time":1790882411,"actors":[{"id":actor}],**extra}
+        import json
+        page='<script type="application/json">'+json.dumps([story(),story("other"),story(sponsored_data={"id":"ad"}),story(attached_story={"id":"repost"})])+'</script>'
+        self.assertEqual(len(update_lunch.public_menu_posts(page,"own")),1)
+
+    def test_social_date_requires_year_weekday_and_fresh_publication(self):
+        from datetime import date
+        actual=date(2026,10,3);published=date(2026,10,1)
+        self.assertEqual(update_lunch.parse_public_image_date("Fredag 2/10/2026",published,actual),(date(2026,10,2),"friday"))
+        for text in ["Fredag 3/10/2026","Fredag 2/10","Fredag 25/9/2026","Fredag 2/10/2025"]:
+            with self.assertRaises(RuntimeError): update_lunch.parse_public_image_date(text,published,actual)
 
 
 if __name__ == "__main__":
