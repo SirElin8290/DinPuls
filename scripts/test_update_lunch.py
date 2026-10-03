@@ -116,7 +116,7 @@ class LunchUpdateTests(unittest.TestCase):
 
         self.assertTrue(excluded_ids)
         self.assertTrue(configured_ids.isdisjoint(excluded_ids))
-        self.assertEqual(56, len(configured_ids))
+        self.assertEqual(58, len(configured_ids))
 
     def test_ocr_parser_requires_identity_and_reads_current_week(self):
         text = """Restaurang Ferrum\nVeckans meny vecka 40\nMåndag\nPannbiff med potatismos\nTisdag\nFiskgratäng med ris"""
@@ -532,6 +532,19 @@ class AdditionalPublicLunchTests(unittest.TestCase):
         dishes=update_lunch.parse_hagfors_lunch_pizzas(text)
         self.assertEqual(len(dishes),5);self.assertEqual(dishes[0],"MARGARETA ost");self.assertFalse(any('Inte lunch' in d or '85' in d for d in dishes))
         with self.assertRaises(RuntimeError):update_lunch.parse_hagfors_lunch_pizzas(text.replace('PRISKLASS 4','PRISKLASS 5'))
+
+    def test_ramo_only_explicit_lunch_products(self):
+        page='<p>Pizzeria Ramo i Forshaga Storgatan 2, 667 30 Forshaga</p><article><h2>KEBABTALLRIK</h2><p>LUNCHPAKET med sås</p></article><article><h2>OXFILÉ</h2><p>Middag</p></article>'
+        self.assertEqual(update_lunch.parse_ramo_lunch(page),['KEBABTALLRIK'])
+        with self.assertRaises(RuntimeError):update_lunch.parse_ramo_lunch(page.replace('Forshaga','Karlstad'))
+    def test_scan_images_prefers_current_week_and_rejects_stale(self):
+        page='<title>Dalslands Skafferi</title><img src="https://static.wixstatic.com/next.jpg"><img src="https://static.wixstatic.com/current.jpg">'
+        source={'url':'https://restaurant.test','scanMenuImages':True,'expectedPagePattern':'Dalslands Skafferi','expectedTextPattern':'DAGENS LUNCH'}
+        def ocr(payload):return 'DAGENS LUNCH VECKA '+('41' if payload==b'next' else '40')+'\nMÅNDAG (varje måndag)\nPannbiff med potatis\nTisdag\nStekt fisk'
+        now=datetime(2026,10,3,tzinfo=ZoneInfo('Europe/Stockholm'))
+        result=update_lunch.fetch_ocr_menu(source,page_fetcher=lambda _:page,binary_fetcher=lambda url:b'next' if 'next' in url else b'current',ocr_runner=ocr,now=now)
+        self.assertEqual(result[0],40);self.assertEqual(result[1]['monday'],['Pannbiff med potatis'])
+        with self.assertRaises(RuntimeError):update_lunch.fetch_ocr_menu(source,page_fetcher=lambda _:page,binary_fetcher=lambda _:b'current',ocr_runner=ocr,now=datetime(2026,10,12,tzinfo=ZoneInfo('Europe/Stockholm')))
 
 
 if __name__ == "__main__":

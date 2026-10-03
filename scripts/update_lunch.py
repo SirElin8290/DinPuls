@@ -97,11 +97,27 @@ def run_tesseract(payload, min_length=20):
 
 def parse_ocr_menu(text,source):
     if source.get("expectedTextPattern") and not re.search(source["expectedTextPattern"],text,re.I): raise RuntimeError("OCR-identiteten kunde inte verifieras")
+    text=re.sub(r"^(MÅNDAG)\s+\(varje måndag\)\s*$",r"\1",text,flags=re.I|re.M)
     markup="".join(f"<p>{html.escape(line)}</p>" for line in text.splitlines() if line.strip())
     week,days=parse_weekday_menu(markup,source.get("stopAfterPattern"))
     return week or extract_week([text]),days
 
-def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract):
+def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract,now=None):
+    if source.get("scanMenuImages"):
+        now=now or datetime.now(TIMEZONE)
+        page=page_fetcher(source.get("dataUrl") or source["url"])
+        if not re.search(source["expectedPagePattern"],page,re.I): raise RuntimeError("källsidans identitet kunde inte verifieras")
+        extractor=ImageExtractor();extractor.feed(page);next_menu=None
+        for src,alt in dict.fromkeys(extractor.images):
+            image_url=urljoin(source["url"],src)
+            if urlsplit(image_url).hostname!="static.wixstatic.com": continue
+            try:
+                result=fetch_ocr_menu({**source,"scanMenuImages":False,"imageUrl":image_url},page_fetcher,binary_fetcher,ocr_runner,now)
+            except RuntimeError: continue
+            if result[0]==now.isocalendar().week and any(result[1].values()): return result
+            if result[0]==(now+timedelta(days=7)).isocalendar().week and any(result[1].values()): next_menu=result
+        if next_menu: return next_menu
+        raise RuntimeError("ingen verifierad aktuell eller kommande veckobild hittades")
     image_url=source.get("imageUrl")
     if not image_url:
         page=page_fetcher(source.get("dataUrl") or source["url"])
@@ -233,6 +249,20 @@ def fetch_hagfors_lunch(source,fetcher=fetch):
     if not re.search(r"PIZZERIA HAGFORS",text,re.I) or not re.search(r"DAGENS LUNCH.*?Pizza klass 1-4",text,re.I): raise RuntimeError("det fasta luncherbjudandet kunde inte verifieras")
     if not re.search(r"href=[\"']pizza\.html[\"']",page,re.I): raise RuntimeError("lunchens pizzameny är inte länkad av restaurangen")
     return parse_hagfors_lunch_pizzas(fetcher(urljoin(source["url"],"pizza.html")))
+
+
+def parse_ramo_lunch(page):
+    extractor=TextExtractor();extractor.feed(page);text=" ".join(extractor.text_lines())
+    if "Pizzeria Ramo i Forshaga" not in text or "Storgatan 2, 667 30 Forshaga" not in text: raise RuntimeError("lunchrestaurangens identitet kunde inte verifieras")
+    dishes=[]
+    for article in re.findall(r"<article\b[^>]*>(.*?)</article>",page,re.I|re.S):
+        title=re.search(r"<h2\b[^>]*>(.*?)</h2>",article,re.I|re.S)
+        content=TextExtractor();content.feed(article)
+        if not title or not any(line.startswith("LUNCHPAKET") for line in content.text_lines()): continue
+        name=TextExtractor();name.feed(title[1]);dish=" ".join(name.text_lines())
+        if useful_dish(dish) and dish not in dishes: dishes.append(dish)
+    if not dishes: raise RuntimeError("inga uttryckliga lunchpaket hittades")
+    return dishes
 
 
 def parse_standing_pdf(text):
@@ -642,9 +672,11 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch"}:
                 try:
-                    if parser_name=="hagfors-standing-pizza":
+                    if parser_name=="ramo-standing-lunch":
+                        item["standingDishes"]=parse_ramo_lunch(fetcher(source["url"])); week=None; days={}
+                    elif parser_name=="hagfors-standing-pizza":
                         item["standingDishes"]=fetch_hagfors_lunch(source,fetcher); week=None; days={}
                     elif parser_name=="public-social-text":
                         week,days,post_url,menu_date=fetch_public_social_text(source,now,page_fetcher=fetcher)
@@ -654,7 +686,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                         days={}; item["verifiedMenuImage"]=image_url; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
                         if image_date: item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]
                     elif parser_name=="image-weekday-menu":
-                        week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
+                        week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher,now=now)
                         item["sourceAsset"]=image_url; item["extraction"]="ocr"
                         if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
                         if not any(days.values()) and not source.get("displayAsImage"): raise RuntimeError("OCR hittade inga säkra lunchrätter")
@@ -679,7 +711,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
                     if source.get("menuYearPattern"):
                         match=re.search(source["menuYearPattern"],page,re.I)
                         target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
