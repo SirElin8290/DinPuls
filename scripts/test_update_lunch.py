@@ -505,5 +505,34 @@ class RetainedMenuTests(unittest.TestCase):
             self.assertEqual(self.item["days"],{})
 
 
+class AdditionalPublicLunchTests(unittest.TestCase):
+    WEEK="VECKA 40\nMån 28/9\nPasta\nTis 29/9\nFläsk\nOns 30/9\nLax\nTor 1/10\nPannbiff\nFre 2/10\nSchnitzel"
+    def test_public_week_image_requires_all_dates(self):
+        from datetime import date
+        self.assertEqual(update_lunch.parse_public_week_image(self.WEEK,date(2026,9,28),date(2026,10,3)),40)
+        for wrong in [self.WEEK.replace("Ons 30/9","Ons 29/9"),self.WEEK.replace("VECKA 40","VECKA 41"),self.WEEK.replace("Mån 28/9","Mån 28/9/2025"),self.WEEK.replace("Fre 2/10","Fre")]:
+            with self.assertRaises(RuntimeError): update_lunch.parse_public_week_image(wrong,date(2026,9,28),date(2026,10,3))
+    def test_public_next_week_image_is_verified_separately(self):
+        from datetime import date
+        text="VECKA 41\nMån 5/10\nTis 6/10\nOns 7/10\nTor 8/10\nFre 9/10"
+        self.assertEqual(update_lunch.parse_public_week_image(text,date(2026,10,3),date(2026,10,3)),41)
+    def test_public_message_never_reads_comments(self):
+        self.assertEqual(update_lunch.public_post_message({"feedback":{"text":"Dagens lunch idag är fake fisk"}}),"")
+    def test_daily_public_text_belongs_only_to_publication_day(self):
+        import json
+        post={"__typename":"Story","actors":[{"id":"own"}],"creation_time":int(datetime(2026,10,2,12,tzinfo=ZoneInfo("Europe/Stockholm")).timestamp()),"message":{"text":"Dagen lunch idag är Flapsteak Sandwich 😋 välkomna!"}}
+        page='<script type="application/json">'+json.dumps(post)+'</script>'
+        source={"url":"https://public.test","publicActorId":"own"}
+        now=datetime(2026,10,3,tzinfo=ZoneInfo("Europe/Stockholm"))
+        week,days,_,date=update_lunch.fetch_public_social_text(source,now,page_fetcher=lambda _:page)
+        self.assertEqual(week,40);self.assertEqual(days,{"friday":["Flapsteak Sandwich"]});self.assertEqual(date,"2026-10-02")
+        with self.assertRaises(RuntimeError):update_lunch.fetch_public_social_text(source,datetime(2026,10,5,tzinfo=ZoneInfo("Europe/Stockholm")),page_fetcher=lambda _:page)
+    def test_hagfors_only_lunch_classes_are_extracted(self):
+        text='<p>PRISKLASS 1. 85 :- FAMILJEPIZZA 210:-1. MARGARETA ost2. VESUVIO skinka</p><p>PRISKLASS 2. 90:- FAMILJEPIZZA 220:-</p><p>3. HAWAII skinka, ananas</p><p>PRISKLASS 3. 95:- FAMILJEPIZZA 225:-</p><p>4. VEGETARIANA grönsaker</p><p>PRISKLASS 4 100:- FAMILJEPIZZA 255:-</p><p>5. INDIA kyckling</p><p>Pizzor med fläskfilé 105:-</p><p>6. Inte lunch</p>'
+        dishes=update_lunch.parse_hagfors_lunch_pizzas(text)
+        self.assertEqual(len(dishes),5);self.assertEqual(dishes[0],"MARGARETA ost");self.assertFalse(any('Inte lunch' in d or '85' in d for d in dishes))
+        with self.assertRaises(RuntimeError):update_lunch.parse_hagfors_lunch_pizzas(text.replace('PRISKLASS 4','PRISKLASS 5'))
+
+
 if __name__ == "__main__":
     unittest.main()

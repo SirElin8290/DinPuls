@@ -122,10 +122,14 @@
       {
         "id": "amotfors-pizzeria",
         "name": "Åmotfors Pizzeria",
-        "url": "https://www.visitvarmland.com/eda/mat-dryck/restaurang/amotfors-pizzeria",
+        "url": "https://www.facebook.com/%C3%85motfors-Pizza-1049076465113639/",
         "address": "Strandvägen 5, Åmotfors",
         "hours": "Dagens lunch vardagar – se aktuell matsedel",
-        "parser": "source-only"
+        "parser": "public-social-image",
+        "publicActorId": "100063540134753",
+        "expectedTextPattern": "VECKA\\s*\\d{1,2}",
+        "socialMenuSchedule": "weekly",
+        "fallbackMode": "reference"
       },
       {
         "id": "la-delal-koppom",
@@ -328,10 +332,11 @@
       {
         "id": "hagfors-pizzeria",
         "name": "Hagfors Pizzeria",
-        "url": "https://www.visitvarmland.com/hagfors/mat-dryck/restaurang/pizzeria-hagfors",
+        "url": "https://pizzeriahagfors.yourwebsitespace.com/",
         "address": "Storgatan 9, Hagfors",
         "hours": "Dagens lunch måndag–fredag 11.00–14.00",
-        "parser": "source-only"
+        "parser": "hagfors-standing-pizza",
+        "standingNotice": "Fast lunchutbud: pizzor i prisklass 1–4 enligt restaurangens luncherbjudande. Övriga lunchalternativ finns i originalmenyn."
       },
       {
         "id": "restaurang-kronan-hagfors",

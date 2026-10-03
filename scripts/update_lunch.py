@@ -212,6 +212,29 @@ def parse_standing_html(page, source):
     if not dishes: raise RuntimeError("fast lunchmeny: inga säkra rätter hittades")
     return dishes
 
+
+def parse_hagfors_lunch_pizzas(page):
+    extractor=TextExtractor();extractor.feed(page);text="\n".join(extractor.text_lines())
+    match=re.search(r"(PRISKLASS\s+1\b.*?)(?=Pizzor med fläskfilé|PRISKLASS\s+5\b|\Z)",text,re.I|re.S)
+    if not match: raise RuntimeError("pizzornas lunchprisklasser saknas")
+    section=match[1]
+    if set(re.findall(r"PRISKLASS\s+([1-4])\b",section,re.I))!={"1","2","3","4"}: raise RuntimeError("lunchprisklasserna kunde inte verifieras")
+    section=re.sub(r"PRISKLASS\s+[1-4]\.?\s+\d+\s*:-\s*FAMILJEPIZZA\s*\d+\s*:-","",section,flags=re.I)
+    matches=list(re.finditer(r"(?<!\d)(\d{1,2})\.\s*",section));dishes=[]
+    if not matches or [int(m[1]) for m in matches]!=list(range(1,len(matches)+1)): raise RuntimeError("pizzornas numrering kunde inte verifieras")
+    for i,m in enumerate(matches):
+        dish=re.sub(r"\s+"," ",section[m.end():matches[i+1].start() if i+1<len(matches) else len(section)]).strip()
+        if not useful_dish(dish): raise RuntimeError("ogiltig rätt i lunchutbudet")
+        dishes.append(dish)
+    return dishes
+
+def fetch_hagfors_lunch(source,fetcher=fetch):
+    page=fetcher(source["url"]);extractor=TextExtractor();extractor.feed(page);text=" ".join(extractor.text_lines())
+    if not re.search(r"PIZZERIA HAGFORS",text,re.I) or not re.search(r"DAGENS LUNCH.*?Pizza klass 1-4",text,re.I): raise RuntimeError("det fasta luncherbjudandet kunde inte verifieras")
+    if not re.search(r"href=[\"']pizza\.html[\"']",page,re.I): raise RuntimeError("lunchens pizzameny är inte länkad av restaurangen")
+    return parse_hagfors_lunch_pizzas(fetcher(urljoin(source["url"],"pizza.html")))
+
+
 def parse_standing_pdf(text):
     """Only the explicitly labelled lunch section, excluding a la carte/drinks."""
     match=re.search(r"LUNCHMENY(.*?)(?=À LA CARTE|A LA CARTE|DRYCK|\Z)",text,re.I|re.S)
@@ -321,7 +344,7 @@ def public_menu_posts(page,actor_id):
         if isinstance(value,dict):
             if value.get("__typename")=="Story" and "creation_time" in value:
                 actors=value.get("actors") or []
-                if not value.get("sponsored_data") and not value.get("attached_story") and not value.get("work_reposted_story") and actors and all(actor.get("id")==actor_id for actor in actors): posts.append(value)
+                if not value.get("sponsored_data") and not value.get("attached_story") and not value.get("work_reposted_story") and isinstance(actors,list) and actors and all(isinstance(actor,dict) and actor.get("id")==actor_id for actor in actors): posts.append(value)
                 return
             for child in value.values(): walk(child)
         elif isinstance(value,list):
@@ -340,6 +363,38 @@ def parse_public_image_date(text,published,today):
     if menu_date.isocalendar()[:2]!=today.isocalendar()[:2]: raise RuntimeError("menybilden gäller inte aktuell vecka")
     return menu_date,day_key
 
+
+def parse_public_week_image(text,published,today):
+    week=extract_week([text]); aliases={"mån":0,"måndag":0,"tis":1,"tisdag":1,"ons":2,"onsdag":2,"tor":3,"torsdag":3,"fre":4,"fredag":4}
+    dates=re.findall(r"\b(mån(?:dag)?|tis(?:dag)?|ons(?:dag)?|tor(?:sdag)?|fre(?:dag)?)\s+(\d{1,2})\s*/\s*(\d{1,2})(?:\s*/\s*(\d{4}))?",text,re.I)
+    if len(dates)!=5 or {aliases[name.lower()] for name,_,_,_ in dates}!=set(range(5)): raise RuntimeError("veckobilden saknar fem verifierbara vardagsdatum")
+    monday=today-timedelta(days=today.weekday())
+    for candidate in [monday,monday+timedelta(days=7)]:
+        if week!=candidate.isocalendar().week or not candidate-timedelta(days=7)<=published<=candidate+timedelta(days=4): continue
+        if all((date_for_day:=candidate+timedelta(days=aliases[name.lower()])).day==int(day) and date_for_day.month==int(month) and (not year or date_for_day.year==int(year)) for name,day,month,year in dates): return week
+    raise RuntimeError("veckobildens datum, vecka och publicering stämmer inte överens")
+
+def public_post_message(post):
+    content=(post.get("comet_sections") or {}).get("content") or {}
+    body=content.get("story") or post
+    return (body.get("message") or {}).get("text") or ""
+
+def fetch_public_social_text(source,now,page_fetcher=fetch):
+    posts=public_menu_posts(page_fetcher(source["url"]),source["publicActorId"])
+    for post in sorted(posts,key=lambda row:row.get("creation_time",0),reverse=True):
+        try: published=datetime.fromtimestamp(post["creation_time"],TIMEZONE).date()
+        except (TypeError,ValueError,OverflowError): continue
+        if published>now.date() or published.isocalendar()[:2]!=now.isocalendar()[:2]: continue
+        text=public_post_message(post)
+        # 'Idag' belongs only to the post's dated publication day, never all days.
+        match=re.search(r"\bDagens? lunch idag är\s+([^\n.!]+)",text,re.I)
+        if not match: continue
+        dish=re.split(r"[^\w\s&(),/–-]",match[1],maxsplit=1)[0].strip()
+        if not useful_dish(dish) or len(dish)>250: continue
+        return published.isocalendar().week,{list(dict.fromkeys(DAYS.values()))[published.weekday()]:[dish]},post.get("permalink_url"),published.isoformat()
+    raise RuntimeError("inget offentligt daterat inlägg med dagens lunch hittades")
+
+
 def fetch_public_social_image(source,now,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_runner=run_tesseract):
     posts=public_menu_posts(page_fetcher(source["url"]),source["publicActorId"])
     def images(value):
@@ -357,6 +412,9 @@ def fetch_public_social_image(source,now,page_fetcher=fetch,binary_fetcher=fetch
             if not host.endswith(".fbcdn.net") or urlsplit(image_url).scheme!="https": continue
             text=ocr_runner(binary_fetcher(image_url))
             if not re.search(source["expectedTextPattern"],text,re.I): continue
+            if source.get("socialMenuSchedule")=="weekly":
+                week=parse_public_week_image(text,published,now.date())
+                return week,image_url,None,None,post.get("permalink_url")
             menu_date,day_key=parse_public_image_date(text,published,now.date())
             return menu_date.isocalendar().week,image_url,menu_date.isoformat(),day_key,post.get("permalink_url")
     raise RuntimeError("inget offentligt inlägg med säkert daterad lunchbild hittades")
@@ -584,11 +642,17 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza"}:
                 try:
-                    if parser_name=="public-social-image":
+                    if parser_name=="hagfors-standing-pizza":
+                        item["standingDishes"]=fetch_hagfors_lunch(source,fetcher); week=None; days={}
+                    elif parser_name=="public-social-text":
+                        week,days,post_url,menu_date=fetch_public_social_text(source,now,page_fetcher=fetcher)
+                        item["sourcePost"]=post_url; item["menuDate"]=menu_date; item["menuSchedule"]="daily_public_post"
+                    elif parser_name=="public-social-image":
                         week,image_url,image_date,image_day,post_url=fetch_public_social_image(source,now,page_fetcher=fetcher)
-                        days={}; item["verifiedMenuImage"]=image_url; item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
+                        days={}; item["verifiedMenuImage"]=image_url; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
+                        if image_date: item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]
                     elif parser_name=="image-weekday-menu":
                         week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
                         item["sourceAsset"]=image_url; item["extraction"]="ocr"
@@ -615,7 +679,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
                     if source.get("menuYearPattern"):
                         match=re.search(source["menuYearPattern"],page,re.I)
                         target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
@@ -629,9 +693,10 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
                     item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and (any(days.values()) or item.get("verifiedMenuImage")) else "outdated"; item["mode"]="automatic"
                     next_date=(now.date()-timedelta(days=now.weekday()))+timedelta(days=7)
-                    if week==next_date.isocalendar().week and any(days.values()):
+                    if week==next_date.isocalendar().week and (any(days.values()) or item.get("verifiedMenuImage")):
                         item["upcomingMenu"]={"weekNumber":week,"year":next_date.isocalendar().year,"validFrom":next_date.isoformat(),"days":days}
                         item["status"]="upcoming"
+                        if item.get("verifiedMenuImage"): item["upcomingMenu"]["image"]=item.pop("verifiedMenuImage")
                     if item.get("standingDishes"): item["status"]="standing_menu"; item["menuSchedule"]="standing"
                     if item.get("availabilityNotice"): item["status"]="awaiting_publication"
                     if item.get("closureNotice"): item["status"]="unavailable"
