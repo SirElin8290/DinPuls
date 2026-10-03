@@ -57,11 +57,13 @@ function renderLunchPage(){
       return bVerified-aVerified||a.name.localeCompare(b.name,"sv");
     });
   const dayLabel=LUNCH_DAYS.find(([value])=>value===day)?.[1]||"Vald dag";
+  const imageMenus=filtered.filter(item=>item.status==="current"&&item.verifiedMenuImage).length;
   const verified=filtered.filter(item=>item.status==="current"&&(item.days?.[day]||[]).length).length;
   document.querySelector("#lunch-page-total").textContent=`Lunch i ${lunchMunicipality} · ${dayLabel}`;
   document.querySelector("#lunch-page-summary").innerHTML=`
     <span><strong>${filtered.length}</strong> lunchställen</span>
     <span class="${verified?"verified":""}"><strong>${verified}</strong> verifierade menyer för dagen</span>
+    ${imageMenus?`<span><strong>${imageMenus}</strong> verifierade veckomenyer som bild</span>`:""}
     <span><i data-lucide="${["saturday","sunday"].includes(day)?"calendar-days":"clock-3"}"></i>${["saturday","sunday"].includes(day)?"Helgutbud kan avvika – kontrollera originalkällan":"Verifierade rätter visas först"}</span>`;
   const updated=new Date(lunchData.generatedAt||"");
   document.querySelector("#lunch-page-updated").textContent=Number.isNaN(updated.getTime())?"":`Kontrollerat ${updated.toLocaleString("sv-SE",{timeZone:"Europe/Stockholm",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`;
@@ -78,8 +80,9 @@ function renderLunchPage(){
 
 function renderLunchCard(item,day,isSelected=false){
   const dishes=item.status==="current"?(item.days?.[day]||[]):[];
-  const status=item.closureNotice?item.closureNotice:dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":item.status==="seasonally_closed"?"Säsongsstängt":item.status==="active"?"Öppet för säsongen – kontrollera dagens rätt":item.seasonal?"Säsongsöppet lunchställe":"Lunch serveras – kontrollera dagens utbud";
-  const menu=dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna originalkällan för dagens utbud och eventuella ändringar.</p>`;
+  const image=item.status==="current"&&item.verifiedMenuImage?safeLunchUrl(item.verifiedMenuImage):null;
+  const status=image?"Verifierad veckomeny som bild":item.closureNotice?item.closureNotice:dishes.length?"Verifierad meny för vald dag":item.status==="outdated"?"Ingen verifierad meny för aktuell vecka":item.status==="unavailable"?"Källan kunde inte nås vid senaste kontrollen":item.status==="seasonally_closed"?"Säsongsstängt":item.status==="active"?"Öppet för säsongen – kontrollera dagens rätt":item.seasonal?"Säsongsöppet lunchställe":"Lunch serveras – kontrollera dagens utbud";
+  const menu=image?`<a href="${escapeLunch(image)}" target="_blank" rel="noopener noreferrer"><img src="${escapeLunch(image)}" alt="${escapeLunch(item.name)} – veckomeny ${escapeLunch(item.weekNumber)}" loading="lazy" style="display:block;width:100%;max-width:560px;height:auto;margin-top:12px"></a>`:dishes.length?`<ul class="lunch-dishes">${dishes.map(dish=>`<li>${escapeLunch(dish)}</li>`).join("")}</ul>`:`<p class="lunch-source-note">Öppna originalkällan för dagens utbud och eventuella ändringar.</p>`;
   return `<article class="portal-card lunch-card ${isSelected?"selected":""}" id="lunch-${escapeLunch(item.id)}">
     <span class="portal-card-icon lunch"><i data-lucide="utensils"></i></span>
     <div><span class="lunch-status ${dishes.length?"verified":""}">${escapeLunch(status)}</span><h3>${escapeLunch(item.name)}</h3><p>${escapeLunch(item.address)} · ${escapeLunch(item.hours)}</p>${menu}</div>

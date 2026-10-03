@@ -4,13 +4,13 @@
     "Åmål": [
       {"id":"mickans-grill","name":"Mickans Grill","url":"https://www.mickansgrill.se/","address":"Åmål","hours":"Vardagar 11.00–14.00","parser":"weekday-headings"},
       {"id":"berga-bistro","name":"Berga Bistro","url":"https://bergabistro.se/dagenslunch","address":"Stora Berga 501","hours":"Vardagar 11.30–14.00","parser":"all-days-heading"},
-      {"id":"presseriet","name":"Restaurang Presseriet","url":"https://www.presseriet.com/","address":"Industrigatan 12","hours":"Vardagar 11.30–14.00","parser":"source-only"},
+      {"id":"presseriet","name":"Restaurang Presseriet","url":"https://www.presseriet.com/","address":"Industrigatan 12","hours":"Verksamheten har meddelat stängning","parser":"source-only","closureNotice":"Presseriet meddelar på sin egen webbplats att verksamheten har stängt; sista öppetdag anges som 21 september.","closureEvidenceUrl":"https://static.wixstatic.com/media/27421f_8781314605a2457c86e741bef487d7f0~mv2.png","closureVerifiedAt":"2026-10-03"},
       {"id":"amal-stadshotell","name":"Åmåls Stadshotell","url":"https://www.amalsstadshotell.se/restaurang","address":"Kungsgatan 9","hours":"Tisdag–fredag 11.30–14.00","parser":"source-only"}
     ],
     "Säffle": [
       {"id":"tommy-carros","name":"Tommy & Carros Fik","url":"https://www.tommyochcarrosfik.se/","address":"Norrlandsvägen 39","hours":"Vardagar 11.00–15.00","parser":"weekday-headings"},
       {"id":"smorgasbutiken","name":"Smörgåsbutiken i Säffle","url":"https://smorgasbutiken.org/meny/","address":"Säffle","hours":"Vardagar 11.00–14.00","parser":"calendar-weekday-headings"},
-      {"id":"galna-tuppen","name":"Galna Tuppen","url":"https://galnatuppen.nu/","address":"Sundsgatan 30","hours":"Se aktuell lunchmeny","parser":"source-only"},
+      {"id":"galna-tuppen","name":"Galna Tuppen","url":"https://galnatuppen.nu/lunch/","address":"Sundsgatan 30","hours":"Se aktuell lunchmeny","parser":"galna-tuppen-json"},
       {"id":"first-royal","name":"First Royal","url":"https://royal.se/restaurang/","address":"Olov Trätäljagatan 2","hours":"Se aktuell lunchbuffé","parser":"source-only"},
       {"id":"bella-rosa-saffle","name":"Bella Rosa","url":"https://www.facebook.com/BellaRosaSaffle/","address":"Säffle","hours":"Se dagens lunch","parser":"source-only"},
       {"id":"kanalcafeet-saffle","name":"Kanalcaféet i Säffle","url":"https://www.facebook.com/p/Kanalcaf%C3%A9et-i-S%C3%A4ffle-100057529275303/","address":"Säffle","hours":"Se dagens lunch","parser":"source-only","seasonal":true},
@@ -25,7 +25,7 @@
     ],
     "Mellerud": [
       {"id":"sunnana-restaurang","name":"Sunnanå Restaurang","url":"https://xn--sunnanrestaurang-iob.se/meny/","address":"Sunnanå Kullen 2","hours":"Vardagar 11.00–15.00","parser":"weekday-headings"},
-      {"id":"kanyas","name":"Kanyas Café & Restaurang","url":"https://thairestaurangen.se/dagens-lunch/","address":"Sjögatan 1","hours":"Dagens lunch","parser":"source-only"},
+      {"id":"kanyas","name":"Kanyas Café & Restaurang","url":"https://thairestaurangen.se/dagens-lunch/","address":"Sjögatan 1","hours":"Dagens lunch","parser":"image-weekday-menu","imagePattern":"mellerud-vecka-\\d","expectedPagePattern":"Kanyas","expectedTextPattern":"Husmanskost\\s+Buff","displayAsImage":true,"ocrRegions":[[0.01,0.07,0.49,0.17]]},
       {"id":"dinners-mellerud","name":"Dinners Mellerud","url":"https://dinners.se/restaurang/mellerud/","address":"Mellerud","hours":"Vardagar 11.00–14.00","parser":"weekday-headings"},
       {"id":"nya-vagen-mellerud","name":"Nya Vågen Restaurang","url":"https://www.facebook.com/profile.php?id=61574961930176","address":"Mellerud","hours":"Se dagens lunch","parser":"source-only"},
       {"id":"borsen-mellerud","name":"Restaurang Börsen","url":"https://www.facebook.com/RestaurangBorsen/","address":"Mellerud","hours":"Se aktuell lunchmeny","parser":"source-only"}

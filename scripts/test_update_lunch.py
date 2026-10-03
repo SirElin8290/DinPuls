@@ -8,6 +8,34 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_public_json_requires_exact_date_and_preserves_dishes(self):
+        now=datetime(2026,10,3,tzinfo=ZoneInfo("Europe/Stockholm"))
+        source={"parser":"galna-tuppen-json"}
+        payload={"mode":"daily","week_start":"2026-09-28","days":[{"weekday":1,"dishes":[{"description":"Pannbiff med potatis"}]}]}
+        week,days=update_lunch.fetch_structured_menu(source,now,lambda _:json.dumps(payload))
+        self.assertEqual((week,days["monday"]),(40,["Pannbiff med potatis"]))
+        payload["week_start"]="2025-09-29"
+        with self.assertRaisesRegex(RuntimeError,"aktuell vecka"):
+            update_lunch.fetch_structured_menu(source,now,lambda _:json.dumps(payload))
+
+    def test_facility_feed_rejects_other_municipality_and_closed_days(self):
+        now=datetime(2026,10,3,tzinfo=ZoneInfo("Europe/Stockholm"))
+        source={"parser":"omsorgen-json","facilityId":"facility","expectedMunicipalityId":"1737","expectedFacilityName":"Skogsstjärnan"}
+        payload={"ok":True,"facility":{"id":"facility","municipalityId":"1737","name":"Skogsstjärnan"},"week":{"year":2026,"weekNumber":40,"days":{"MONDAY":{"isOpen":True,"rows":[{"text":"Fiskgratäng\nPotatis"}]},"SATURDAY":{"isOpen":False,"rows":[{"text":"Gammal rätt"}]}}}}
+        _,days=update_lunch.fetch_structured_menu(source,now,lambda _:json.dumps(payload))
+        self.assertNotIn("saturday",days)
+        payload["facility"]["municipalityId"]="1780"
+        with self.assertRaisesRegex(RuntimeError,"kommun"):
+            update_lunch.fetch_structured_menu(source,now,lambda _:json.dumps(payload))
+
+    def test_pdf_selects_exact_week_and_rejects_other_year(self):
+        today=datetime(2026,10,3).date()
+        text="Matsedel 2026\nVecka 39\nMÅNDAG Gammal meny\nVecka 40\nMÅNDAG Fisk med potatis\nTISDAG Pannbiff med potatis\nVecka 41\nMÅNDAG Framtida meny"
+        week,days=update_lunch.parse_pdf_week(text,today)
+        self.assertEqual((week,days["monday"]),(40,["Fisk med potatis"]))
+        with self.assertRaisesRegex(RuntimeError,"år"):
+            update_lunch.parse_pdf_week(text.replace("2026","2025"),today)
+
     def test_curated_exclusions_are_removed_from_production_catalog(self):
         config = json.loads(update_lunch.SOURCES.read_text(encoding="utf-8"))
         merged = update_lunch.merge_config(config)

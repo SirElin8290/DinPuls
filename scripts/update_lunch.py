@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import html
+import io
 import json
 import re
 import subprocess
 import sys
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -81,13 +82,13 @@ def find_menu_image(page,base_url,pattern):
     if not matches: raise RuntimeError("ingen aktuell menybild hittades på källsidan")
     return matches[0]
 
-def run_tesseract(payload):
+def run_tesseract(payload, min_length=20):
     try: result=subprocess.run(["tesseract","stdin","stdout","-l","swe+eng","--psm","6"],input=payload,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,timeout=45)
     except FileNotFoundError: raise RuntimeError("OCR-motorn Tesseract saknas") from None
     except subprocess.TimeoutExpired: raise RuntimeError("OCR-tolkningen tog för lång tid") from None
     if result.returncode: raise RuntimeError("OCR-tolkningen misslyckades")
     text=result.stdout.decode("utf-8",errors="replace").strip()
-    if len(text)<20: raise RuntimeError("OCR gav för lite text för säker publicering")
+    if len(text)<min_length: raise RuntimeError("OCR gav för lite text för säker publicering")
     return text
 
 def parse_ocr_menu(text,source):
@@ -99,9 +100,84 @@ def fetch_ocr_menu(source,page_fetcher=fetch,binary_fetcher=fetch_binary,ocr_run
     image_url=source.get("imageUrl")
     if not image_url:
         page=page_fetcher(source.get("dataUrl") or source["url"])
+        if source.get("expectedPagePattern") and not re.search(source["expectedPagePattern"],page,re.I): raise RuntimeError("källsidans identitet kunde inte verifieras")
         image_url=find_menu_image(page,source.get("dataUrl") or source["url"],source.get("imagePattern",r"lunch|meny|menu"))
-    payload=binary_fetcher(image_url); text=ocr_runner(payload); week,days=parse_ocr_menu(text,source)
+    payload=binary_fetcher(image_url)
+    if source.get("ocrRegions"):
+        from PIL import Image
+        try:
+            image=Image.open(io.BytesIO(payload)); image.load(); crops=[]
+            for region in source["ocrRegions"]:
+                if len(region)!=4 or not all(isinstance(n,(int,float)) and 0<=n<=1 for n in region) or region[0]>=region[2] or region[1]>=region[3]: raise RuntimeError("ogiltig OCR-region")
+                crop=image.crop(tuple(round(value*(image.width if index%2==0 else image.height)) for index,value in enumerate(region)))
+                crops.append(crop.convert("RGB"))
+            texts=[]
+            for crop in crops:
+                buffer=io.BytesIO(); crop.save(buffer,format="PNG")
+                texts.append(ocr_runner(buffer.getvalue(),min_length=0) if ocr_runner is run_tesseract else ocr_runner(buffer.getvalue()))
+            text="\n".join(texts)
+            if len(text.strip())<20: raise RuntimeError("OCR gav för lite text för säker publicering")
+        except (OSError,ValueError): raise RuntimeError("menybilden kunde inte läsas") from None
+    else: text=ocr_runner(payload)
+    week,days=parse_ocr_menu(text,source)
     return week,days,image_url
+
+def parse_pdf_week(text, today):
+    iso=today.isocalendar()
+    if not re.search(r"Matsedel\s*"+str(iso.year),text,re.I): raise RuntimeError("PDF-matsedelns år kunde inte verifieras")
+    match=re.search(r"Vecka\s*"+str(iso.week)+r"(?!\d)(.*?)(?=Vecka\s*\d|\Z)",text,re.I|re.S)
+    if not match: raise RuntimeError("PDF-matsedeln saknar aktuell vecka")
+    lines=match.group(1).splitlines(); markup=[]
+    for line in lines:
+        if re.match(r"\s*(RESERVATION|Matsedel)",line,re.I): break
+        line=re.sub(r"^(MÅNDAG|TISDAG|ONSDAG|TORSDAG|FREDAG|LÖRDAG|SÖNDAG)\s+",r"\1: ",line.strip(),flags=re.I)
+        markup.append("<p>"+html.escape(line)+"</p>")
+    _,days=parse_weekday_menu("".join(markup))
+    return iso.week,days
+
+def fetch_pdf_menu(source, now, fetcher=fetch):
+    from pypdf import PdfReader
+    page=fetcher(source["url"])
+    links=[urljoin(source["url"],html.unescape(url)) for url in re.findall(r'href=["\']([^"\']+)["\']',page,re.I) if re.search(source["pdfLinkPattern"],url,re.I)]
+    for url in dict.fromkeys(links):
+        try:
+            with urlopen(Request(url,headers={"User-Agent":USER_AGENT,"Accept":"application/pdf"}),timeout=30) as response: payload=response.read(12_000_001)
+            if len(payload)>12_000_000 or not payload.startswith(b"%PDF-"): continue
+            reader=PdfReader(io.BytesIO(payload)); text="\n".join(page.extract_text() or "" for page in reader.pages)
+            week,days=parse_pdf_week(text,now.date())
+            if any(days.values()): return week,days,url
+        except RuntimeError: continue
+        except (OSError,ValueError): continue
+    raise RuntimeError("ingen verifierad PDF-matsedel för aktuell vecka hittades")
+
+def fetch_structured_menu(source, now, fetcher=fetch):
+    """Read public restaurant feeds, requiring the exact ISO week and identity."""
+    monday=now.date()-timedelta(days=now.weekday())
+    iso=now.isocalendar()
+    try:
+        if source["parser"]=="galna-tuppen-json":
+            payload=json.loads(fetcher("https://galnatuppen.nu/api/lunch?week="+monday.isoformat()))
+            if payload.get("week_start")!=monday.isoformat() or payload.get("mode")!="daily":
+                raise RuntimeError("källan saknar daterad meny för aktuell vecka")
+            days={}
+            for row in payload.get("days",[]):
+                number=row.get("weekday")
+                if not isinstance(number,int) or not 1<=number<=7: raise RuntimeError("ogiltig veckodag i menyflödet")
+                values=[dish.get("description") or dish.get("name") for dish in row.get("dishes",[])]
+                if any(not isinstance(value,str) for value in values): raise RuntimeError("ogiltiga lunchrätter")
+                days[list(dict.fromkeys(DAYS.values()))[number-1]]=[value.strip() for value in values if value.strip()]
+        else:
+            facility=source["facilityId"]
+            payload=json.loads(fetcher(f"https://www.omsorgen.se/api/public/matsedlar/{facility}?year={iso.year}&week={iso.week}"))
+            identity=payload.get("facility") or {}; menu=payload.get("week") or {}
+            if payload.get("ok") is not True or identity.get("id")!=facility or str(identity.get("municipalityId"))!=str(source["expectedMunicipalityId"]) or identity.get("name")!=source["expectedFacilityName"]:
+                raise RuntimeError("menyflödets verksamhet eller kommun kunde inte verifieras")
+            if menu.get("year")!=iso.year or menu.get("weekNumber")!=iso.week:
+                raise RuntimeError("källan saknar daterad meny för aktuell vecka")
+            days={day:[line.strip() for row in record.get("rows",[]) for line in row.get("text","").splitlines() if line.strip()] for key,record in menu.get("days",{}).items() if (day:=key.lower()) in DAYS.values() and record.get("isOpen") is True}
+        return iso.week,days
+    except (ValueError,KeyError,TypeError,AttributeError):
+        raise RuntimeError("ogiltigt offentligt menyflöde") from None
 
 def fetch_source(source, fetcher=fetch):
     page=fetcher(source.get("dataUrl") or source["url"])
@@ -309,13 +385,16 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu"}:
                 try:
                     if parser_name=="image-weekday-menu":
                         week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher)
                         item["sourceAsset"]=image_url; item["extraction"]="ocr"
                         if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
-                        if not any(days.values()): raise RuntimeError("OCR hittade inga säkra lunchrätter")
+                        if not any(days.values()) and not source.get("displayAsImage"): raise RuntimeError("OCR hittade inga säkra lunchrätter")
+                        if source.get("displayAsImage"): item["verifiedMenuImage"]=image_url; days={}
+                    elif parser_name=="pdf-weekday-menu": week,days,pdf_url=fetch_pdf_menu(source,now,fetcher); item["sourceAsset"]=pdf_url
+                    elif parser_name in {"galna-tuppen-json","omsorgen-json"}: week,days=fetch_structured_menu(source,now,fetcher)
                     else: page=fetch_source(source,fetcher)
                     if parser_name=="all-days-heading":
                         week,days=parse_all_days_menu(page)
@@ -326,13 +405,13 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date())
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name!="image-weekday-menu": week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
                     if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
                         days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
                     if source.get("dishSplitPattern"):
                         days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
-                    item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and any(days.values()) else "outdated"; item["mode"]="automatic"
+                    item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and (any(days.values()) or item.get("verifiedMenuImage")) else "outdated"; item["mode"]="automatic"
                     if item.get("closureNotice"): item["status"]="unavailable"
                 except RuntimeError as error:
                     item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
@@ -344,6 +423,8 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     current_mmdd=now.strftime("%m-%d")
                     item["status"]="active" if season_start <= current_mmdd <= season_end else "seasonally_closed"
                 elif parser_name=="source-only" and season_months: item["status"]="active" if now.month in season_months else "seasonally_closed"
+            if source.get("closureNotice") and source.get("closureEvidenceUrl"):
+                item["status"]="unavailable"; item["days"]={}; item.pop("verifiedMenuImage",None)
             previous=previous_by_id.get(source.get("id"))
             if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
                 item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
