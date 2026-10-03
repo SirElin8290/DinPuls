@@ -720,6 +720,8 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                         item["availabilityNotice"]=source["pendingNotice"]
                     if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
                         days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
+                    if source.get("excludeDishPattern"):
+                        days={day:list(dict.fromkeys(dish for dish in dishes if not re.search(source["excludeDishPattern"],dish,re.I))) for day,dishes in days.items()}
                     if source.get("dishSplitPattern"):
                         days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
                     if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}

@@ -116,7 +116,7 @@ class LunchUpdateTests(unittest.TestCase):
 
         self.assertTrue(excluded_ids)
         self.assertTrue(configured_ids.isdisjoint(excluded_ids))
-        self.assertEqual(58, len(configured_ids))
+        self.assertEqual(61, len(configured_ids))
 
     def test_ocr_parser_requires_identity_and_reads_current_week(self):
         text = """Restaurang Ferrum\nVeckans meny vecka 40\nMåndag\nPannbiff med potatismos\nTisdag\nFiskgratäng med ris"""
@@ -275,7 +275,7 @@ class LunchUpdateTests(unittest.TestCase):
         merged = update_lunch.merge_config(config)
         sources = merged["municipalities"]["Hammarö"]
         self.assertEqual(
-            {"skoghalls-folkets-hus-restaurang", "ica-supermarket-skoghall"},
+            {"skoghalls-folkets-hus-restaurang", "ica-supermarket-skoghall", "glg-lysasen"},
             {item["id"] for item in sources},
         )
         self.assertTrue(merged["referenceSources"].get("Hammarö"))
@@ -545,6 +545,13 @@ class AdditionalPublicLunchTests(unittest.TestCase):
         result=update_lunch.fetch_ocr_menu(source,page_fetcher=lambda _:page,binary_fetcher=lambda url:b'next' if 'next' in url else b'current',ocr_runner=ocr,now=now)
         self.assertEqual(result[0],40);self.assertEqual(result[1]['monday'],['Pannbiff med potatis'])
         with self.assertRaises(RuntimeError):update_lunch.fetch_ocr_menu(source,page_fetcher=lambda _:page,binary_fetcher=lambda _:b'current',ocr_runner=ocr,now=datetime(2026,10,12,tzinfo=ZoneInfo('Europe/Stockholm')))
+
+    def test_source_filter_removes_unspecified_choices_and_duplicates(self):
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities['Hammarö']=[{'id':'glg-test','name':'GLG','url':'https://test.invalid','parser':'weekday-headings','excludeDishPattern':'^Kökets val','stopAfterPattern':'^Varje dag'}]
+        page='<p>Lunchmeny v. 40</p><p>Måndag</p><p>Panerad fisk med potatis</p><p>Panerad fisk med potatis</p><p>Kökets val ett alternativ varje dag</p><p>Varje dag</p><p>Middag</p>'
+        result=update_lunch.build_output({'municipalities':municipalities},datetime(2026,10,3,tzinfo=ZoneInfo('Europe/Stockholm')),fetcher=lambda _:page)
+        self.assertEqual(result['municipalities']['Hammarö']['restaurants'][0]['days']['monday'],['Panerad fisk med potatis'])
 
 
 if __name__ == "__main__":

@@ -164,10 +164,12 @@
       {
         "id": "glg-lysasen",
         "name": "GLG Lysåsen",
-        "url": "https://glg.se/",
+        "url": "https://glg.se/lysasen/",
         "address": "Lysåsen, Skoghall",
         "hours": "Lunch måndag–fredag 11.00–14.00",
-        "parser": "source-only"
+        "parser": "weekday-headings",
+        "stopAfterPattern": "^Varje dag|VECKANS Veg|Välj dag",
+        "excludeDishPattern": "^Kökets val"
       },
       {
         "id": "ica-supermarket-skoghall",
