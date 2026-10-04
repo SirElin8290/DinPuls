@@ -6,6 +6,8 @@ on:
     paths:
       - 'data/kristinehamn-strict-source.json'
       - 'scripts/apply_kristinehamn_strict.py'
+      - 'scripts/curated_lunch_gate.py'
+      - 'scripts/test_curated_lunch_gate.py'
       - '.github/workflows/update-kristinehamn-strict.yml'
   workflow_run:
     workflows:
@@ -33,6 +35,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Testa kurerad lunch och bevarade menyer
+        run: PYTHONPATH=scripts python -m unittest scripts/test_curated_lunch_gate.py
       - name: Apply and hard-gate Kristinehamn
         run: python scripts/apply_kristinehamn_strict.py
       - name: Commit active data

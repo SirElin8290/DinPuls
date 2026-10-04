@@ -7,6 +7,8 @@ on:
     paths:
       - 'data/munkfors-strict-source.json'
       - 'scripts/apply_munkfors_strict.py'
+      - 'scripts/curated_lunch_gate.py'
+      - 'scripts/test_curated_lunch_gate.py'
       - '.github/workflows/update-munkfors-strict.yml'
   workflow_run:
     workflows:
@@ -34,6 +36,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Testa kurerad lunch och bevarade menyer
+        run: PYTHONPATH=scripts python -m unittest scripts/test_curated_lunch_gate.py
       - name: Apply and hard-gate Munkfors
         run: python scripts/apply_munkfors_strict.py
       - name: Commit active data

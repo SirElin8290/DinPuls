@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import json
+from curated_lunch_gate import assert_curated_lunch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,11 +103,9 @@ def apply(modules):
         save('authorities.json', data)
 
     if 'lunch' in modules:
-        data = load('lunch.json')
-        entry = data.setdefault('municipalities', {}).setdefault('Munkfors', {})
-        entry['restaurants'] = merge(entry.get('restaurants') or [], SRC['lunch'])
-        entry.setdefault('referenceSources', [])
-        save('lunch.json', data)
+        # Lunchmotorn äger menyerna; verifiera hela den beslutade kurerade listan.
+        entry = load('lunch.json').get('municipalities', {}).get('Munkfors', {})
+        assert_curated_lunch('Munkfors', entry)
 
     if 'leisure' in modules:
         data = load('leisure.json')
@@ -162,7 +161,7 @@ def gate(modules):
         assert all((entry.get('serviceUrls') or {}).get(k) for k in required), 'Munkfors authorities incomplete'
     if 'lunch' in modules:
         entry = load('lunch.json').get('municipalities', {}).get('Munkfors', {})
-        assert len(entry.get('restaurants') or []) >= 4, f"Munkfors lunch={len(entry.get('restaurants') or [])}"
+        assert_curated_lunch('Munkfors', entry)
     if 'leisure' in modules:
         entry = load('leisure.json').get('municipalities', {}).get('Munkfors', {})
         assert len(entry.get('activities') or []) >= 10, f"Munkfors leisure={len(entry.get('activities') or [])}"

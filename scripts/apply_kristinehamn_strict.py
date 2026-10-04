@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import json
+from curated_lunch_gate import assert_curated_lunch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,12 +66,9 @@ def apply(modules):
         save('authorities.json', data)
 
     if 'lunch' in modules:
-        data = load('lunch.json')
-        entry = data.setdefault('municipalities', {}).setdefault('Kristinehamn', {})
-        restaurants = merge(entry.get('restaurants') or [], SRC['lunch'])
-        entry['restaurants'] = restaurants
-        entry.setdefault('referenceSources', [])
-        save('lunch.json', data)
+        # Lunchmotorn äger menyerna; verifiera hela den beslutade kurerade listan.
+        entry = load('lunch.json').get('municipalities', {}).get('Kristinehamn', {})
+        assert_curated_lunch('Kristinehamn', entry)
 
     if 'leisure' in modules:
         data = load('leisure.json')
@@ -138,7 +136,7 @@ def gate(modules):
 
     if 'lunch' in modules:
         entry = load('lunch.json').get('municipalities', {}).get('Kristinehamn', {})
-        assert len(entry.get('restaurants') or []) >= 4, f"Kristinehamn lunch={len(entry.get('restaurants') or [])}"
+        assert_curated_lunch('Kristinehamn', entry)
 
     if 'leisure' in modules:
         entry = load('leisure.json').get('municipalities', {}).get('Kristinehamn', {})
