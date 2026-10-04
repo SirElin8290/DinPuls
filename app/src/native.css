@@ -6,3 +6,10 @@
 .app-network-notice{display:none;background:#ffdc73;color:#082653;padding:12px;font:14px/1.4 system-ui}
 .app-offline .app-network-notice{display:block}
 .native-app body>header{padding-top:env(safe-area-inset-top)}
+
+/* Låt samma mobilformulär rymmas när telefonens tangentbord är öppet. */
+.app-keyboard-open .app-navigation{display:none}
+.native-app.app-keyboard-open body{padding-bottom:0!important;overflow-y:auto!important;height:auto!important;min-height:100%}
+.native-app.app-keyboard-open .auth-shell{display:block}
+.native-app.app-keyboard-open .auth-card{min-height:560px!important;max-height:none!important}
+.native-app.app-keyboard-open .hero{height:auto!important;min-height:100%}

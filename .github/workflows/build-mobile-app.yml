@@ -44,7 +44,19 @@ jobs:
           api-level: 35
           arch: x86_64
           disable-animations: true
-          script: cd app/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
+          script: |
+            adb shell wm size 390x844
+            adb shell wm density 160
+            cd app/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
+            adb pull /sdcard/Android/data/se.dinpuls.app/files/qa app-screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: DinPuls-Android-mobilkontroll
+          path: |
+            app/android/app-screenshots
+            app/android/app/build/reports/androidTests
+          retention-days: 3
   ios:
     runs-on: macos-latest
     timeout-minutes: 25

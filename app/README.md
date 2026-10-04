@@ -14,7 +14,7 @@ GitHub bygger debug-APK och osignerad simulatorapp på appbranchen. Inga butiksk
 
 Publik HTML, JavaScript, CSS och befintliga bilder paketeras från Git-spårade filer. Inga backendfiler, secrets eller dynamiska meny-/nyhetsdata packas. JSON från `/data/` hämtas från `https://dinpuls.se` varje gång via Capacitors officiella native HTTP-bridge. Befintliga tokenbaserade API-anrop återanvänds. Inga CORS- eller autentiseringskontroller ändras i backend.
 
-Mobilnavigation, Androids bakåtknapp, säkra externa länkar och internetstatus är appspecifika. Konton och kommunval använder befintliga flöden. Aktiveringsmejl öppnas fortfarande på webbplatsen; övergång tillbaka till appen via verifierade applänkar återstår inför lansering.
+Mobilnavigation, Androids bakåtknapp, säkra externa länkar och internetstatus är appspecifika. Kommunbyte uppdaterar navigationen direkt. Paketerade DinPuls-länkar stannar i appen. Tangentbordet döljer bottennavigationen och gör formuläret scrollbart medan det är öppet. Android-emulatorn testar start, live-data, undersidor och tangentbord vid 390 × 844; skärmbilder sparas i byggjobbet. Konton och kommunval använder befintliga flöden. Aktiveringsmejl öppnas fortfarande på webbplatsen; övergång tillbaka till appen via verifierade applänkar återstår inför lansering.
 
 ## Kvar inför lansering
 

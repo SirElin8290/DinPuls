@@ -20,7 +20,7 @@ for(const file of files.filter(publicFile)){
 }
 // Endast kommunlistan paketeras. Alla föränderliga JSON-data hämtas live.
 await mkdir(resolve(out,'data'),{recursive:true});await copyFile(resolve(root,'data/municipalities.json'),resolve(out,'data/municipalities.json'));
-await build({entryPoints:[resolve(app,'src/native.js')],bundle:true,format:'iife',outfile:resolve(out,'native.js'),target:'es2022'});
+await build({entryPoints:[resolve(app,'src/native.js')],bundle:true,format:'iife',outfile:resolve(out,'native.js'),target:'es2022',define:{__DINPULS_PAGES__:JSON.stringify(files.filter(publicFile).filter(p=>p.endsWith('.html')).map(p=>'/'+p))}});
 await copyFile(resolve(app,'src/native.css'),resolve(out,'native.css'));
 await writeFile(resolve(out,'app-build.json'),JSON.stringify({version:'0.1.0',commit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),publicFiles:copied},null,2));
 console.log(`DinPuls app: ${copied} publika filer paketerade; live-data och befintlig backend återanvänds.`);

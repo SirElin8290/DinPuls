@@ -27,18 +27,36 @@ public class AppSmokeTest {
         }
         fail("Villkoret uppfylldes inte: " + js + "; " + evaluate(app,"document.body.innerText.slice(0,1000)"));
     }
+    private void screenshot(String name) throws Exception {
+        android.graphics.Bitmap bitmap=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+        java.io.File folder=new java.io.File(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null),"qa");
+        folder.mkdirs();
+        try(java.io.FileOutputStream out=new java.io.FileOutputStream(new java.io.File(folder,name+".png"))){bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}
+        bitmap.recycle();
+    }
     @Test public void localPagesLiveDataAndNavigation() throws Exception {
         try (ActivityScenario<MainActivity> app = ActivityScenario.launch(MainActivity.class)) {
             awaitTrue(app,"!!document.querySelector('.app-navigation')");
             assertEquals("\"localhost\"",evaluate(app,"location.hostname"));
+            screenshot("home");
             assertEquals("4",evaluate(app,"document.querySelectorAll('.app-navigation a').length"));
             evaluate(app,"window.appSmoke={}; Promise.all([fetch('data/municipalities.json').then(r=>r.json()),fetch('data/lunch.json').then(r=>r.json()),fetch('https://dinpuls-push.soren-johansson-7.workers.dev/health').then(r=>r.json())]).then(([m,l,h])=>{appSmoke.municipalities=m.municipalities.length;appSmoke.lunch=Object.values(l.municipalities).reduce((n,v)=>n+(v.restaurants||[]).length,0);appSmoke.backend=h.ok;}).catch(e=>appSmoke.error=String(e));");
             awaitTrue(app,"appSmoke.municipalities===21 && appSmoke.lunch>0 && appSmoke.backend===true");
             evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');document.querySelector('.app-navigation a[href*=\"lunch.html\"]').click();");
             awaitTrue(app,"location.pathname==='/lunch.html' && !!document.querySelector('.app-navigation')");
             assertEquals("\"Åmål\"",evaluate(app,"localStorage.getItem('dinpuls-municipality')"));
+            screenshot("lunch");
+            for(String page:new String[]{"evenemang.html","foreningsliv.html","skola-familj.html","praktiskt.html","kris-beredskap.html"}){
+                evaluate(app,"location.href='/"+page+"?kommun="+java.net.URLEncoder.encode("Åmål","UTF-8")+"';");
+                awaitTrue(app,"location.pathname==='/"+page+"' && !!document.querySelector('.app-navigation')");
+                screenshot(page.replace(".html",""));
+            }
             evaluate(app,"location.href='/foretag/start.html';");
             awaitTrue(app,"location.pathname==='/foretag/start.html' && !!document.querySelector('input[type=password]')");
+            screenshot("login");
+            evaluate(app,"document.querySelector('input[type=password]').focus();");
+            awaitTrue(app,"document.documentElement.classList.contains('app-keyboard-open')");
+            screenshot("login-keyboard");
         }
     }
 }
