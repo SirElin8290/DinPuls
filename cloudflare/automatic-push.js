@@ -53,7 +53,8 @@ async function schema(db){
   db.prepare('CREATE TABLE IF NOT EXISTS automatic_push_lock (id INTEGER PRIMARY KEY,until_at INTEGER NOT NULL)'),
   db.prepare('CREATE TABLE IF NOT EXISTS automatic_push_status (id INTEGER PRIMARY KEY,report TEXT NOT NULL)'),
   db.prepare('INSERT OR IGNORE INTO automatic_push_lock(id,until_at) VALUES(1,0)'),
-  db.prepare('CREATE TABLE IF NOT EXISTS native_push_devices (id TEXT PRIMARY KEY,token TEXT NOT NULL,municipality TEXT NOT NULL,categories TEXT NOT NULL,updated_at TEXT NOT NULL,last_test_at INTEGER NOT NULL DEFAULT 0)')
+  db.prepare('CREATE TABLE IF NOT EXISTS native_push_devices (id TEXT PRIMARY KEY,token TEXT NOT NULL,municipality TEXT NOT NULL,categories TEXT NOT NULL,updated_at TEXT NOT NULL,last_test_at INTEGER NOT NULL DEFAULT 0)'),
+  db.prepare('CREATE TABLE IF NOT EXISTS native_push_ios_devices (id TEXT PRIMARY KEY,token TEXT NOT NULL,municipality TEXT NOT NULL,categories TEXT NOT NULL,updated_at TEXT NOT NULL,last_test_at INTEGER NOT NULL DEFAULT 0)')
  ]);
 }
 function wanted(target,category){try{return list(JSON.parse(target.categories)).includes(category);}catch{return false;}}
@@ -106,7 +107,8 @@ export async function runAutomaticPush(env,{send=fetch,now=Date.now(),sendWeb=(.
    const payload=JSON.parse(n.payload);
    const web=rows(await env.DB.prepare('SELECT endpoint_hash id,endpoint,p256dh,auth,categories,created_at FROM subscriptions WHERE municipality=?').bind(n.municipality).all()).map(r=>({...r,kind:'web'}));
    const android=rows(await env.DB.prepare('SELECT id,token,categories,updated_at created_at FROM native_push_devices WHERE municipality=?').bind(n.municipality).all()).map(r=>({...r,kind:'android'}));
-   for(const target of [...web,...android]){
+   const ios=env.IOS_PUSH_ENABLED==='true'?rows(await env.DB.prepare('SELECT id,token,categories,updated_at created_at FROM native_push_ios_devices WHERE municipality=?').bind(n.municipality).all()).map(r=>({...r,kind:'ios'})):[];
+   for(const target of [...web,...android,...ios]){
     if(!wanted(target,n.category)||date(target.created_at)>n.created_at)continue;
     if(attempts>=20)break;
     const lock=await env.DB.prepare("INSERT INTO automatic_push_delivery(notification_id,target_id,kind,status,attempts,last_attempt) VALUES(?,?,?,'pending',1,?) ON CONFLICT(notification_id,target_id,kind) DO UPDATE SET status='pending',attempts=attempts+1,last_attempt=excluded.last_attempt WHERE status IN ('pending','retry') AND attempts<3 AND last_attempt<?").bind(n.id,target.id,target.kind,now,now-5*60000).run();
@@ -122,14 +124,14 @@ export async function runAutomaticPush(env,{send=fetch,now=Date.now(),sendWeb=(.
       const account=JSON.parse(env.FCM_SERVICE_ACCOUNT_JSON||'null');
       if(account?.project_id!=='dinpuls-57683')throw Error('android configuration');
       const token=await fcmAccessToken(account,send);
-      const response=await send('https://fcm.googleapis.com/v1/projects/'+account.project_id+'/messages:send',{method:'POST',signal:AbortSignal.timeout(8000),headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({message:{token:target.token,notification:{title:payload.title,body:payload.body},data:{path:payload.path},android:{priority:'normal',ttl:'900s',collapse_key:n.id,notification:{channel_id:'dinpuls',tag:payload.tag}}}})});
+      const response=await send('https://fcm.googleapis.com/v1/projects/'+account.project_id+'/messages:send',{method:'POST',signal:AbortSignal.timeout(8000),headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({message:{token:target.token,notification:{title:payload.title,body:payload.body},data:{path:payload.path},android:{priority:'normal',ttl:'900s',collapse_key:n.id,notification:{channel_id:'dinpuls',tag:payload.tag}},apns:{headers:{'apns-push-type':'alert','apns-priority':'10','apns-expiration':String(Math.floor(now/1000)+900),'apns-collapse-id':n.id},payload:{aps:{sound:'default'}}}}})});
       if(!response.ok){const d=await response.json().catch(()=>({}));throw Object.assign(Error('FCM rejection'),{unregistered:d.error?.details?.some(e=>e.errorCode==='UNREGISTERED'),statusCode:response.status});}
      }
      report.accepted++;
     }catch(error){
      report.failed++;status='retry';
      if(error.unregistered||(target.kind==='web'&&[404,410].includes(Number(error.statusCode)))){
-      const table=target.kind==='web'?'subscriptions':'native_push_devices',key=target.kind==='web'?'endpoint_hash':'id';
+      const table=target.kind==='web'?'subscriptions':target.kind==='ios'?'native_push_ios_devices':'native_push_devices',key=target.kind==='web'?'endpoint_hash':'id';
       await env.DB.prepare('DELETE FROM '+table+' WHERE '+key+'=?').bind(target.id).run();status='expired';report.expiredDevices++;
      }
     }

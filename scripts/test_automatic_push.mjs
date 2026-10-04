@@ -69,6 +69,12 @@ try{
  data.news.articles.push(article('batch-new','Åmål'));
  report=await runAutomaticPush(env,{send,sendWeb,now:now+7*3600000});assert.equal(report.accepted,20);
  report=await runAutomaticPush(env,{send,sendWeb,now:now+7*3600000+600000});assert.equal(report.accepted,2);
+ await db.prepare('DELETE FROM native_push_devices').run();
+ await db.prepare('INSERT INTO native_push_ios_devices VALUES(?,?,?,?,?,0)').bind('iphone','isolated-ios-fcm-token','Åmål','["news"]',new Date(now+7.5*3600000).toISOString()).run();
+ data.news.articles.push(article('iphone-new','Åmål'));
+ report=await runAutomaticPush(env,{send,sendWeb,now:now+8*3600000+600000});assert.equal(report.accepted,0,'iOS is disabled without server configuration');
+ report=await runAutomaticPush({...env,IOS_PUSH_ENABLED:'true'},{send,sendWeb,now:now+8*3600000+1200000});assert.equal(report.accepted,1);
+ const message=deliveries.at(-1).body.message;assert.equal(message.token,'isolated-ios-fcm-token');assert.equal(message.apns.headers['apns-push-type'],'alert');assert.equal(message.apns.payload.aps.sound,'default');assert.equal(message.data.path,'/nyheter.html?kommun=%C3%85m%C3%A5l');
  await db.prepare('UPDATE automatic_push_lock SET until_at=? WHERE id=1').bind(now+9*3600000).run();
  assert.equal((await runAutomaticPush(env,{send,sendWeb,now:now+8*3600000})).busy,true);
  console.log('PASS automatic push: cold start, deduplication, municipality/category isolation, Android/web payloads, cooldown, unsubscribe, stale/expired sources, no inferred warnings. No real notifications sent.');

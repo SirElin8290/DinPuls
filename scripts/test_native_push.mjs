@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import { build } from 'esbuild';
+import { Miniflare } from 'miniflare';
+import { writeFile } from 'node:fs/promises';
+import { generateKeyPairSync,verify } from 'node:crypto';
+const bundled=await build({entryPoints:['cloudflare/native-push.js'],bundle:true,format:'esm',write:false});
+await writeFile('tmp/native-push-unit.mjs',bundled.outputFiles[0].text);
+const {fcmAccessToken}=await import('../tmp/native-push-unit.mjs');
+const pair=generateKeyPairSync('rsa',{modulusLength:2048});
+const account={type:'service_account',project_id:'dinpuls-57683',client_email:'test@example.test',private_key:pair.privateKey.export({type:'pkcs8',format:'pem'})};
+let exchanges=0;
+assert.equal(await fcmAccessToken(account,async(url,init)=>{
+  exchanges++;assert.equal(url,'https://oauth2.googleapis.com/token');
+  const assertion=init.body.get('assertion'),parts=assertion.split('.');
+  const claims=JSON.parse(Buffer.from(parts[1],'base64url'));
+  assert.equal(claims.scope,'https://www.googleapis.com/auth/firebase.messaging');
+  assert.equal(claims.iss,account.client_email);
+  assert(verify('RSA-SHA256',Buffer.from(parts[0]+'.'+parts[1]),pair.publicKey,Buffer.from(parts[2],'base64url')));
+  return Response.json({access_token:'test-only',expires_in:3600});
+}),'test-only');
+assert.equal(await fcmAccessToken(account,()=>{throw Error('cache missed');}),'test-only');
+assert.equal(exchanges,1);
+const script=bundled.outputFiles[0].text+'\nexport default {fetch:handleNativePush};';
+const runtime=new Miniflare({modules:true,script,compatibilityDate:'2026-08-06',bindings:{FCM_SERVICE_ACCOUNT_JSON:JSON.stringify(account)},d1Databases:{DB:'native-push-test'}});
+const base='https://test.local/native-push';
+const call=(path,method='GET',secret='a'.repeat(64),body)=>runtime.dispatchFetch(base+path,{method,headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+try{
+  assert.equal((await call('/config').then(r=>r.json())).androidConfigured,true);
+  assert.equal((await call('/config').then(r=>r.json())).iosConfigured,false);
+  assert.equal((await call('/test','POST','wrong')).status,401);
+  assert.equal((await call('/test','POST','b'.repeat(64))).status,404);
+  const data={platform:'android',token:'test-device-token-'.repeat(4),municipality:'Åmål',categories:['news','arbitrary']};
+  assert.equal((await call('/device','PUT','c'.repeat(64),{...data,platform:'ios'})).status,503);
+  assert.equal((await call('/device','PUT','c'.repeat(64),{...data,platform:'ios',token:'a'.repeat(64)})).status,400,'raw APNs tokens must not be treated as FCM tokens');
+  assert.equal((await call('/device','PUT','a'.repeat(64),{...data,municipality:'Unknown'})).status,400);
+  assert.equal((await call('/device','PUT','a'.repeat(64),data)).status,200);
+  const db=await runtime.getD1Database('DB');
+  let rows=await db.prepare('SELECT * FROM native_push_devices').all();assert.equal(rows.results.length,1);
+  assert.deepEqual(JSON.parse(rows.results[0].categories),['extreme-weather','missing-people','important','news']);
+  assert.equal((await call('/device','PUT','a'.repeat(64),{...data,municipality:'Kil'})).status,200);
+  assert.equal((await db.prepare('SELECT * FROM native_push_devices').all()).results.length,1);
+  await call('/device','DELETE','b'.repeat(64));assert.equal((await db.prepare('SELECT * FROM native_push_devices').all()).results.length,1);
+  await db.prepare('UPDATE native_push_devices SET last_test_at=?').bind(Date.now()).run();
+  assert.equal((await call('/test','POST')).status,429);
+  await call('/device','DELETE');assert.equal((await db.prepare('SELECT * FROM native_push_devices').all()).results.length,0);
+  console.log('PASS native push: signed OAuth, cache, municipality/category validation, idempotent registration, device isolation, unsubscribe and rate limit. No live notification sent.');
+}finally{await runtime.dispose();}
+const ios=new Miniflare({modules:true,script,compatibilityDate:'2026-08-06',bindings:{FCM_SERVICE_ACCOUNT_JSON:JSON.stringify(account),IOS_PUSH_ENABLED:'true'},d1Databases:{DB:'ios-push-test'}});
+try{
+ const send=(path,method='GET',secret='c'.repeat(64),body)=>ios.dispatchFetch(base+path,{method,headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+ assert.equal((await send('/config').then(r=>r.json())).iosConfigured,true);
+ const registration={platform:'ios',token:'isolated-fcm-ios-token-'.repeat(4),municipality:'Kil',categories:['news']};
+ assert.equal((await send('/device','PUT',undefined,registration)).status,200);
+ const db=await ios.getD1Database('DB');
+ assert.equal((await db.prepare('SELECT * FROM native_push_ios_devices').all()).results.length,1);
+ assert.equal((await db.prepare('SELECT * FROM native_push_devices').all()).results.length,0);
+ await send('/device','DELETE','d'.repeat(64));assert.equal((await db.prepare('SELECT * FROM native_push_ios_devices').all()).results.length,1);
+ await db.prepare('UPDATE native_push_ios_devices SET last_test_at=?').bind(Date.now()).run();assert.equal((await send('/test','POST')).status,429);
+ await send('/device','DELETE');assert.equal((await db.prepare('SELECT * FROM native_push_ios_devices').all()).results.length,0);
+ console.log('PASS iOS backend gate, FCM registration, device isolation, unsubscribe and rate limit; no real push sent.');
+}finally{await ios.dispose();}
