@@ -50,10 +50,13 @@ public class AppSmokeTest {
             evaluate(app,"location.href='/foretag/start.html';");
             awaitTrue(app,"location.pathname==='/foretag/start.html' && !!document.querySelector('input[type=password]')");
             screenshot("login");
-            evaluate(app,"document.querySelector('input[type=password]').focus();");
+            org.json.JSONArray point=new org.json.JSONArray(evaluate(app,"(()=>{const r=document.querySelector('input[type=password]').getBoundingClientRect();return [(r.x+r.width/2)*devicePixelRatio,(r.y+r.height/2)*devicePixelRatio];})()"));
+            float x=(float)point.getDouble(0), y=(float)point.getDouble(1);
+            main.runOnUiThread(()->{long now=android.os.SystemClock.uptimeMillis();android.view.MotionEvent down=android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_DOWN,x,y,0);android.view.MotionEvent up=android.view.MotionEvent.obtain(now,now+100,android.view.MotionEvent.ACTION_UP,x,y,0);main.getBridge().getWebView().dispatchTouchEvent(down);main.getBridge().getWebView().dispatchTouchEvent(up);down.recycle();up.recycle();});
             awaitTrue(app,"document.documentElement.classList.contains('app-keyboard-open')");
             screenshot("login-keyboard");
-            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent 4").close();
+            main.runOnUiThread(()->{android.view.inputmethod.InputMethodManager keyboard=(android.view.inputmethod.InputMethodManager)main.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);keyboard.hideSoftInputFromWindow(main.getBridge().getWebView().getWindowToken(),0);});
+            awaitTrue(app,"!document.documentElement.classList.contains('app-keyboard-open')");
             main.runOnUiThread(()->{android.content.Intent link=new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("dinpuls://app/lunch.html?kommun=Kil"));link.setPackage("se.dinpuls.app");main.startActivity(link);});
             awaitTrue(app,"location.pathname==='/lunch.html' && new URLSearchParams(location.search).get('kommun')==='Kil'");
             screenshot("app-link-kil");
