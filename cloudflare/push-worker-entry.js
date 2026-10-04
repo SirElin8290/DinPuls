@@ -1,5 +1,6 @@
 import worker from "./push-worker.js";
 import { handleNativePush } from "./native-push.js";
+import { runAutomaticPush, automaticPushStatus } from "./automatic-push.js";
 
 const ALLOWED_ORIGINS = new Set(["https://dinpuls.se", "https://www.dinpuls.se"]);
 
@@ -88,6 +89,11 @@ export default {
     const nativeResponse = await handleNativePush(request, env);
     if (nativeResponse) return nativeResponse;
     const url = new URL(request.url);
+    if(request.method==='GET'&&url.pathname==='/push/status')return json(request,await automaticPushStatus(env));
+    if(request.method==='POST'&&url.pathname==='/portal/admin/push/run'){
+      if(!await requireAdmin(request,env))return json(request,{ok:false,error:'Obehörig.'},401);
+      return json(request,await runAutomaticPush(env));
+    }
     const origin = request.headers.get("Origin");
 
     if (request.method === "OPTIONS" && origin && !ALLOWED_ORIGINS.has(origin)) {
@@ -100,5 +106,6 @@ export default {
     }
 
     return worker.fetch(request, env, ctx);
-  }
+  },
+  async scheduled(event,env,ctx){ctx.waitUntil(runAutomaticPush(env));}
 };
