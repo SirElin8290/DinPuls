@@ -8,6 +8,7 @@ import { resolve } from 'node:path';
 const root=resolve(import.meta.dirname,'../..');
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64');
 const mail=[];
+let command=null,nextCommand=0;const results=new Map();
 const bundle=await build({entryPoints:[resolve(root,'cloudflare/push-worker.js')],bundle:true,format:'esm',platform:'browser',write:false,
  plugins:[{name:'isolated-push',setup(b){b.onResolve({filter:/^web-push$/},()=>({path:'push',namespace:'test'}));b.onLoad({filter:/.*/,namespace:'test'},()=>({contents:'export default {setVapidDetails(){},async sendNotification(){return {statusCode:201}}}'}));}}]});
 const runtime=new Miniflare({modules:true,script:bundle.outputFiles[0].text,compatibilityDate:'2026-08-06',compatibilityFlags:['nodejs_compat'],
@@ -19,7 +20,11 @@ const server=createServer(async(req,res)=>{
  try{
   const parts=[];for await(const p of req)parts.push(p);const bytes=Buffer.concat(parts);
   const url=new URL(req.url,'http://127.0.0.1:8788');let response;
-  if(url.pathname==='/__test/banner')response=new Response(await readFile(resolve(root,'assets/heroes/amal/amal-06-stadsutsikt.webp')),{headers:{'Content-Type':'image/webp'}});
+  if(url.pathname==='/__test/command'&&req.method==='POST'){command={id:++nextCommand,script:JSON.parse(bytes).script};response=Response.json({id:nextCommand});}
+  else if(url.pathname==='/__test/command'){response=Response.json(command||{});command=null;}
+  else if(url.pathname==='/__test/result'&&req.method==='POST'){const result=JSON.parse(bytes);results.set(result.id,result);response=Response.json({ok:true});}
+  else if(url.pathname==='/__test/result')response=Response.json(results.get(Number(url.searchParams.get('id')))||{});
+  else if(url.pathname==='/__test/banner')response=new Response(await readFile(resolve(root,'assets/heroes/amal/amal-06-stadsutsikt.webp')),{headers:{'Content-Type':'image/webp'}});
   else if(url.pathname==='/__test/mail')response=Response.json({messages:mail});
   else if(url.pathname==='/data/business-config.json')response=Response.json({enabled:true,apiBase:'http://127.0.0.1:8788'});
   else if(url.pathname.startsWith('/data/')){const file=url.pathname.slice(1);if(!/^data\/[a-z-]+\.json$/.test(file))throw Error('Invalid path');response=new Response(await readFile(resolve(root,file)),{headers:{'Content-Type':'application/json'}});}

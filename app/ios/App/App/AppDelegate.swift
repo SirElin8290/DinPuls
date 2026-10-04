@@ -1,14 +1,48 @@
 import UIKit
 import Capacitor
+import FirebaseCore
+import FirebaseMessaging
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // No Firebase token collection until the user opts in to push.
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: path),
+           options.projectID == "dinpuls-57683", options.bundleID == "se.dinpuls.app" {
+            FirebaseApp.configure(options: options)
+            Messaging.messaging().delegate = self
+        }
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        guard FirebaseApp.app() != nil else {
+            NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: NSError(domain: "DinPuls", code: 1, userInfo: [NSLocalizedDescriptionKey: "iPhone-notiser är inte konfigurerade."]))
+            return
+        }
+        Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().isAutoInitEnabled = true
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+            } else if let token = token {
+                // Backend expects an FCM token, never a raw APNs device token.
+                NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: token)
+            }
+        }
+    }
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard UIApplication.shared.isRegisteredForRemoteNotifications, let token = fcmToken else { return }
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: token)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

@@ -49,6 +49,7 @@ if(Capacitor.isNativePlatform()){
  window.addEventListener('online',updateConnection);window.addEventListener('offline',updateConnection);
  document.addEventListener('DOMContentLoaded',()=>{
   document.documentElement.classList.add('native-app');
+  document.documentElement.dataset.nativePlatform=Capacitor.getPlatform();
   const notice=document.createElement('div');notice.className='app-network-notice';notice.role='status';notice.textContent='Ingen internetanslutning. Aktuella uppgifter behöver hämtas när du är online.';document.body.prepend(notice);updateConnection();
   const nav=document.createElement('nav');nav.className='app-navigation';nav.setAttribute('aria-label','Appnavigation');
   const municipality=window.DinPulsMunicipalityState?.getInitial?.()||new URLSearchParams(location.search).get('kommun')||'';
@@ -71,6 +72,6 @@ if(Capacitor.isNativePlatform()){
    Browser.open({url:target}).catch(()=>{noticeExternalFailure();});
   }
  });
- App.addListener('backButton',({canGoBack})=>{if(canGoBack)history.back();else App.exitApp();});
+ if(Capacitor.getPlatform?.()==='android')App.addListener('backButton',({canGoBack})=>{if(canGoBack)history.back();else App.exitApp();});
  App.addListener('appStateChange',({isActive})=>{if(isActive)updateConnection();});
 }

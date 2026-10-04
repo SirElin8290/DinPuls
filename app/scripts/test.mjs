@@ -6,7 +6,7 @@ import vm from 'node:vm';
 test('live data rewrite preserves body, credentials and external requests',async()=>{
  const code=(await readFile(new URL('../src/native.js',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'');
  const calls=[],listeners={};
- const context={savePdf(){},initializeNativePush(){},sessionStorage:{getItem(){return null;},setItem(){}},__DINPULS_PAGES__:["/index.html","/lunch.html"],Keyboard:{addListener(){}},URL,Request,location:{href:'https://localhost/foretag/index.html',origin:'https://localhost'},Capacitor:{isNativePlatform:()=>true},App:{addListener(){},getLaunchUrl:()=>Promise.resolve()},Browser:{open(){}},navigator:{onLine:true},window:{fetch:(...args)=>{calls.push(args);return Promise.resolve({ok:true});},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
+ const context={savePdf(){},initializeNativePush(){},sessionStorage:{getItem(){return null;},setItem(){}},__DINPULS_PAGES__:["/index.html","/lunch.html"],Keyboard:{addListener(){}},URL,Request,location:{href:'https://localhost/foretag/index.html',origin:'https://localhost'},Capacitor:{isNativePlatform:()=>true,getPlatform:()=> 'android'},App:{addListener(){},getLaunchUrl:()=>Promise.resolve()},Browser:{open(){}},navigator:{onLine:true},window:{fetch:(...args)=>{calls.push(args);return Promise.resolve({ok:true});},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
  vm.runInNewContext(code,context);
  await context.window.fetch('../data/lunch.json?week=41',{cache:'no-cache'});
  assert.equal(calls[0][0],'https://dinpuls.se/data/lunch.json?week=41');
