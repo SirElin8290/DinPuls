@@ -5,8 +5,16 @@ import android.net.Uri;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    @Override public void onCreate(android.os.Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        openPackagedLink(getIntent());
+    }
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        openPackagedLink(intent);
+    }
+    private void openPackagedLink(Intent intent) {
+        if(intent==null)return;
         Uri uri=intent.getData();
         if(uri==null||!"dinpuls".equals(uri.getScheme())||!"app".equals(uri.getHost()))return;
         String path=uri.getPath();
