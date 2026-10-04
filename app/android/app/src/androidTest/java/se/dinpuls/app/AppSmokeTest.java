@@ -27,13 +27,7 @@ public class AppSmokeTest {
         }
         fail("Villkoret uppfylldes inte: " + js + "; " + evaluate(app,"document.body.innerText.slice(0,1000)"));
     }
-    private void screenshot(String name) throws Exception {
-        android.graphics.Bitmap bitmap=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-        java.io.File folder=new java.io.File(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null),"qa");
-        folder.mkdirs();
-        try(java.io.FileOutputStream out=new java.io.FileOutputStream(new java.io.File(folder,name+".png"))){bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}
-        bitmap.recycle();
-    }
+    private void screenshot(String name) { System.out.println("DinPuls QA: "+name); }
     @Test public void localPagesLiveDataAndNavigation() throws Exception {
         try (ActivityScenario<MainActivity> app = ActivityScenario.launch(MainActivity.class)) {
             awaitTrue(app,"!!document.querySelector('.app-navigation')");

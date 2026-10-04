@@ -44,9 +44,7 @@ jobs:
           api-level: 35
           arch: x86_64
           disable-animations: true
-          script: |
-            cd app/android && timeout 360 ./gradlew :app:connectedDebugAndroidTest --no-daemon
-            adb pull /sdcard/Android/data/se.dinpuls.app/files/qa app-screenshots
+          script: bash app/scripts/emulator-test.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
