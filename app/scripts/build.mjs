@@ -16,7 +16,7 @@ for(const file of files.filter(publicFile)){
   html=html.replace('width=device-width,initial-scale=1','width=device-width,initial-scale=1,viewport-fit=cover');
   await writeFile(target,html);
  }else if(file==='push-notifications.js'){
-  const source=await readFile(resolve(root,file),'utf8');
+  const source=(await readFile(resolve(root,file),'utf8')).replace(/\r\n/g,'\n');
   const anchor='    const current = await loadConfig();\n    if (!supported())';
   if(!source.includes(anchor))throw new Error('Push-UI har ändrats: kontrollera appanpassningen.');
   await writeFile(target,source.replace(anchor,`    const current = await loadConfig();
