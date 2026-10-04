@@ -51,3 +51,14 @@ test('cold app link is handled once, preventing a navigation loop',async()=>{
  events.appUrlOpen({url:'https://evil.example.test/lunch.html'});assert.equal(context.location.href,'https://localhost/index.html');
  events.appUrlOpen({url:'dinpuls://app/lunch.html?kommun=Arvika'});assert.equal(context.location.href,'/lunch.html?kommun=Arvika');
 });
+
+test('portal directory redirect resolves its packaged index and preserves query/hash',async()=>{
+ const source=await readFile(new URL('../src/native.js',import.meta.url),'utf8');
+ const guard=source.slice(source.indexOf(' const currentPage='),source.indexOf(' const openAppLink='));
+ const redirects=[];
+ const context={URL,localPages:new Set(['/foretag/index.html']),location:{href:'https://localhost/foretag/?from=login#overview',replace:p=>redirects.push(p)}};
+ vm.runInNewContext(guard,context);
+ assert.deepEqual(redirects,['/foretag/index.html?from=login#overview']);
+ context.location.href='https://localhost/foretag/index.html';
+ vm.runInNewContext('{'+guard+'}',context);assert.equal(redirects.length,1);
+});
