@@ -2,8 +2,10 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Keyboard } from '@capacitor/keyboard';
+import { initializeNativePush } from './native-push';
 
 if(Capacitor.isNativePlatform()){
+ window.DinPulsNativePush={initialize:initializeNativePush};
  const localPages=new Set(__DINPULS_PAGES__);
  const openAppLink=({url}={})=>{
   if(!url)return;

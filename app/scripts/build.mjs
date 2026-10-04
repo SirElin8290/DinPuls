@@ -17,16 +17,10 @@ for(const file of files.filter(publicFile)){
   await writeFile(target,html);
  }else if(file==='push-notifications.js'){
   const source=(await readFile(resolve(root,file),'utf8')).replace(/\r\n/g,'\n');
-  const anchor='    const current = await loadConfig();\n    if (isIos() && !isStandalone())';
+  const anchor='    const container = document.querySelector("#push-settings");';
   if(!source.includes(anchor))throw new Error('Push-UI har ändrats: kontrollera appanpassningen.');
-  await writeFile(target,source.replace(anchor,`    const current = await loadConfig();
-    if (window.Capacitor?.isNativePlatform?.()) {
-      enable.disabled = true; disable.hidden = true;
-      setStatus("setup", "Appnotiser är inte anslutna ännu", "Native push kräver en separat anslutning. Dina notisval sparas på enheten.");
-      help.textContent = "Notiscentret fungerar när appen är öppen. Push i bakgrunden är ännu inte aktiverat.";
-      return;
-    }
-    if (isIos() && !isStandalone())`));
+  await writeFile(target,source.replace(anchor,`    if (window.DinPulsNativePush) { await window.DinPulsNativePush.initialize(); return; }
+${anchor}`));
  }else await copyFile(resolve(root,file),target);
  copied++;
 }

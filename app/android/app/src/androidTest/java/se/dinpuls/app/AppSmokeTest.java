@@ -97,7 +97,7 @@ public class AppSmokeTest {
             evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
             awaitTrue(app,"!!document.querySelector('#homepage-customize-button') && typeof HOME_OPTIONAL_MODULES!=='undefined' && !!document.querySelector('.sport-home')");
             awaitTrue(app,"(()=>{document.querySelector('#homepage-customize-button')?.click();return !!document.querySelector('#homepage-customize-dialog')?.open;})()");
-            awaitTrue(app,"document.querySelector('#push-status')?.dataset.state==='setup' && document.querySelector('#push-enable').disabled");
+            awaitTrue(app,"!!window.DinPulsNativePush && !!document.querySelector('#push-status')?.dataset.state");
             evaluate(app,"document.querySelector('#homepage-customize-button').click();document.querySelector('#homepage-customize-reset').click();for(const c of document.querySelectorAll('[data-home-module]'))if(c.checked)c.click();");
             awaitTrue(app,hidden);
             assertEquals("true",evaluate(app,"JSON.parse(localStorage.getItem('dinpuls-home-modules-v1')).hidden.length===document.querySelectorAll('[data-home-module]').length"));
