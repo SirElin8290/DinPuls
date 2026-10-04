@@ -161,7 +161,9 @@ public class AppSmokeTest {
             evaluate(app,"document.querySelector('[data-add]').click();document.querySelector('#prepareOrder').click();");
             awaitTrue(app,"document.querySelector('#orderDialog').open && !document.querySelector('#dinpulsFixedSignature').hidden");
             evaluate(app,"document.querySelector('#signerName').value='CI Test';document.querySelector('#signerTitle').value='Test';const c=document.querySelector('#signaturePad');const r=c.getBoundingClientRect();c.setPointerCapture=()=>{};for(const [type,x,y] of [['pointerdown',25,35],['pointermove',70,55],['pointerup',100,35]])c.dispatchEvent(new PointerEvent(type,{clientX:r.x+x,clientY:r.y+y,bubbles:true,pointerId:1,buttons:type==='pointerup'?0:1}));document.querySelector('#confirmTerms').click();document.querySelector('#confirmOrder').click();");
-            awaitTrue(app,"location.pathname==='/foretag/' || location.pathname==='/foretag/index.html'");
+            awaitTrue(app,"!!document.querySelector('#confirmationMessage a') && document.querySelector('#confirmationMessage').textContent.includes('är låst')");
+            evaluate(app,"document.querySelector('#confirmationMessage a').click();");
+            awaitTrue(app,"location.pathname==='/foretag/index.html'");
             awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
             evaluate(app,"fetch('http://127.0.0.1:8788/portal/company/me',{headers:{Authorization:'Bearer '+sessionStorage.getItem('dp-company-session')}}).then(r=>r.json()).then(d=>fetch('http://127.0.0.1:8788/portal/company/contracts/'+d.contract.id+'/pdf',{headers:{Authorization:'Bearer '+sessionStorage.getItem('dp-company-session')}})).then(r=>r.blob()).then(b=>window.DinPulsNativeFiles.savePdf(b,'ci-contract.pdf',{share:false})).then(uri=>window.ciPdf=uri).catch(e=>window.ciPdfError=e.message);");
             awaitTrue(app,"typeof window.ciPdf==='string' && window.ciPdf.includes('ci-contract.pdf')");
