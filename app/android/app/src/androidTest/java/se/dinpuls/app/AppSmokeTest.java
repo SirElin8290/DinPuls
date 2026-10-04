@@ -188,6 +188,7 @@ public class AppSmokeTest {
             awaitTrue(app,"window.ciMailCount>=3");
             evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
             awaitTrue(app,"!!document.querySelector('.scheduled-public-ad img') && document.querySelector('.scheduled-public-ad img').complete && document.querySelector('.scheduled-public-ad img').naturalWidth>0");
+            evaluate(app,"document.querySelector('[data-privacy-essential-only]')?.click();");
             Thread.sleep(5000);
             awaitStableTrue(app,"(()=>{const image=document.querySelector('.scheduled-public-ad img');if(!image||!image.complete||!image.naturalWidth)return false;image.scrollIntoView({block:'center'});const r=image.getBoundingClientRect();return r.width>0 && r.width<=innerWidth && document.documentElement.scrollWidth<=innerWidth;})()");
             Thread.sleep(700);
