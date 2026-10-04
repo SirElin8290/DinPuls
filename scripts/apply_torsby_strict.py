@@ -41,7 +41,7 @@ save('authorities.json',a)
 # Bio: aktiv basfil.
 c=load('cinemas.json')
 c.setdefault('municipalities',{})['Torsby']=merge_named(c.setdefault('municipalities',{}).get('Torsby') or [],SRC['cinemas'])
-c['updatedAt']=SRC['sourceChecked']
+# Bevara biouppdaterarens verifieringstid; statiskt supplement får inte bakdatera hela biolagret.
 save('cinemas.json',c)
 
 # Fritid och föreningar: aktiva basfiler.

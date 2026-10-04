@@ -12,6 +12,7 @@ class LunchUpdateTests(unittest.TestCase):
         import ast
         from pathlib import Path
         source=(Path(__file__).parent/"apply_torsby_strict.py").read_text(encoding="utf-8")
+        self.assertNotIn("c['updatedAt']=SRC['sourceChecked']",source)
         tree=ast.parse(source)
         start=next(i for i,n in enumerate(tree.body) if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="excluded" for t in n.targets))
         code=ast.Module(body=tree.body[start:start+2],type_ignores=[])
