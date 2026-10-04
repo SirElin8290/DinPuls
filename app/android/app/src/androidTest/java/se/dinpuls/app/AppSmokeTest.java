@@ -136,8 +136,9 @@ public class AppSmokeTest {
             evaluate(app,"document.querySelector('#loginEmail').value='android@example.invalid';document.querySelector('#companyEntryLogin [name=password]').value='Android-Test-2026!';document.querySelector('#companyEntryLogin').requestSubmit();");
             awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
             assertEquals("false",evaluate(app,"window.__e2eLoginFlash"));
-            for(String view:new String[]{"overview","banners","purchases","contracts","profile"}) {
+            for(String view:new String[]{"overview","banners","purchases","contract","profile"}) {
                 evaluate(app,"document.querySelector('[data-view=\""+view+"\"]')?.click();");
+                awaitTrue(app,"!document.querySelector('#"+view+"').hidden");
             }
             evaluate(app,"location.href='/foretag/kop.html';");
             awaitTrue(app,"!!document.querySelector('#buyApp') && !document.querySelector('#buyApp').hidden");
