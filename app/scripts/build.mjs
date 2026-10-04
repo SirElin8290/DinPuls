@@ -6,7 +6,7 @@ import { build } from 'esbuild';
 const app=resolve(dirname(fileURLToPath(import.meta.url)),'..'),root=resolve(app,'..'),out=resolve(app,'www');
 await rm(out,{recursive:true,force:true});await mkdir(out,{recursive:true});
 const files=execFileSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean);
-export function publicFile(path){return path==='admin/ad-inventory.js'||path==='cloudflare/swedish-org-number.js'||!path.startsWith('app/')&&( /^[^/]+\.(html|css|js|ico|webmanifest)$/.test(path)||/^(assets|components|foretag)\//.test(path));}
+export function publicFile(path){return path==='företagloggin.png'||path==='admin/ad-inventory.js'||path==='cloudflare/swedish-org-number.js'||!path.startsWith('app/')&&( /^[^/]+\.(html|css|js|ico|webmanifest)$/.test(path)||/^(assets|components|foretag)\//.test(path));}
 let copied=0;
 for(const file of files.filter(publicFile)){
  const target=resolve(out,file);await mkdir(dirname(target),{recursive:true});
