@@ -8,7 +8,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = DinPulsViewController()
+        window?.rootViewController = DinPulsStatusBarContainer()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
@@ -20,6 +20,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+    }
+}
+
+// Reserve UIKit's actual safe area on every page, including after navigation.
+class DinPulsStatusBarContainer: UIViewController {
+    private let content = DinPulsViewController()
+    override var preferredStatusBarStyle: UIStatusBarStyle { .lightContent }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        addChild(content)
+        view.addSubview(content.view)
+        content.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            content.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            content.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            content.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            content.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        content.didMove(toParent: self)
     }
 }
 
@@ -42,7 +62,8 @@ class DinPulsViewController: CAPBridgeViewController {
             if let data = data, let command = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let id = command["id"] as? Int, let script = command["script"] as? String {
                 DispatchQueue.main.async {
-                    self.webView?.evaluateJavaScript(script) { value, error in
+                    let nativeTop = self.view.convert(self.view.bounds, to: self.view.window).minY
+                    self.webView?.evaluateJavaScript("window.__dinpulsCINativeTop = \(nativeTop);\n" + script) { value, error in
                         var request = URLRequest(url: URL(string: "http://127.0.0.1:8788/__test/result")!)
                         request.httpMethod = "POST"
                         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

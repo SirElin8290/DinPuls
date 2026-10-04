@@ -127,7 +127,7 @@ jobs:
           IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
         run: node scripts/prepare-ios.mjs
       - name: Bygg utan betalt konto för iPhone-simulator
-        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios CODE_SIGNING_ALLOWED=NO build
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=YES "ARCHS=$(uname -m)" build
       - name: Paketera simulatorapp
         run: ditto -c -k --sequesterRsrc --keepParent build-ios/Build/Products/Debug-iphonesimulator/App.app DinPuls-iOS-simulator.zip
       - uses: actions/upload-artifact@v4
@@ -143,7 +143,7 @@ jobs:
           DINPULS_IOS_CI=1 node scripts/prepare-ios.mjs
           /usr/libexec/PlistBuddy -c 'Add :NSAppTransportSecurity dict' ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c 'Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true' ios/App/App/Info.plist
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios-ci CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios-ci CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=YES "ARCHS=$(uname -m)" build
       - name: Kör isolerad kedja i riktig iPhone-simulator
         run: bash scripts/ios-simulator-test.sh
       - uses: actions/upload-artifact@v4

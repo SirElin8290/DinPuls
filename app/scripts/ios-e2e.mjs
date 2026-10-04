@@ -23,6 +23,8 @@ async function screenshot(name){await wait(700);execFileSync('xcrun',['simctl','
 await mkdir('ios-qa',{recursive:true});
 try{
  await until("!!document.querySelector('.app-navigation')");
+ await until('window.__dinpulsCINativeTop>=20');
+ report.checks.push('native status-bar safe area reserved above every web page');
  await evaluate("localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
  await until("!!document.querySelector('#homepage-customize-button')&&typeof HOME_OPTIONAL_MODULES!=='undefined'");
  await evaluate("document.querySelector('[data-privacy-essential-only]')?.click();document.querySelector('#homepage-customize-button').click();document.querySelector('#homepage-customize-reset').click();for(const c of document.querySelectorAll('[data-home-module]'))if(c.checked)c.click();document.querySelector('#homepage-customize-dialog').close();");
