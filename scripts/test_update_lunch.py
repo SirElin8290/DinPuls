@@ -8,6 +8,19 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_strict_does_not_remove_new_verified_torsby_sources(self):
+        import ast
+        from pathlib import Path
+        source=(Path(__file__).parent/"apply_torsby_strict.py").read_text(encoding="utf-8")
+        tree=ast.parse(source)
+        start=next(i for i,n in enumerate(tree.body) if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="excluded" for t in n.targets))
+        code=ast.Module(body=tree.body[start:start+2],type_ignores=[])
+        namespace={"load":lambda _: {"excludedRestaurants":[{"id":"excluded"}]},"lur":{"restaurants":[{"id":"skogsstjarnan-torsby"},{"id":"valbergsangen-torsby"},{"id":"sahlstromsgarden-torsby","days":{"monday":["Verifierad rätt"]}},{"id":"excluded"}]}}
+        exec(compile(code,"STRICT lunch filter","exec"),namespace)
+        rows=namespace["lur"]["restaurants"]
+        self.assertEqual(["skogsstjarnan-torsby","valbergsangen-torsby","sahlstromsgarden-torsby"],[r["id"] for r in rows])
+        self.assertEqual({"monday":["Verifierad rätt"]},rows[2]["days"])
+
     def test_mashie_exact_dates_keep_current_day_and_next_week_isolated(self):
         page='<h1>Matsedel Uranus Matsal</h1><span js-date="2026-10-02"></span><section class="day-alternative"><strong>Lunch 1<span>Fredagens fisk</span></strong></section><div class="row day-current"><span js-date="2026-10-03"></span></div><section class="day-alternative"><strong>Lunch 1<span>Lördagens gryta</span></strong></section><span js-date="2026-10-05"></span><section class="day-alternative"><strong>Lunch 1<span>Nästa veckas korv</span></strong></section>'
         week,days=update_lunch.parse_mashie_menu(page,datetime(2026,10,3).date(),'Matsedel Uranus Matsal')

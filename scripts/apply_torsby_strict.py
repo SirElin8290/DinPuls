@@ -67,7 +67,9 @@ save('sports.json',sp)
 # Lunch: STRICT får inte återinföra katalogposter som lunchmotorn har exkluderat.
 lu=load('lunch.json')
 lur=lu.setdefault('municipalities',{}).setdefault('Torsby',{})
-lur['restaurants']=[x for x in (lur.get('restaurants') or []) if x.get('id') in {'skogsstjarnan-torsby','valbergsangen-torsby'}]
+# Lunchmotorn äger aktiva källor; STRICT får bara ta bort uttryckligen exkluderade poster.
+excluded={x.get('id') for x in load('lunch-exclusions.json').get('excludedRestaurants',[]) if isinstance(x,dict)}
+lur['restaurants']=[x for x in (lur.get('restaurants') or []) if x.get('id') not in excluded]
 save('lunch.json',lu)
 
 # Kontrollera samtliga tidigare Torsby-blockerare. Workflow ska falla i stället för att publicera under STRICT-tröskel.
@@ -89,6 +91,6 @@ assert all(ar['serviceUrls'].get(k) for k in ['socialtjanst','ekonomiskt-bistand
 assert len(c['municipalities']['Torsby'])>=1 and all(x.get('programUrl') or x.get('bookingUrl') for x in c['municipalities']['Torsby'])
 assert len(lr['activities'])>=10,len(lr['activities'])
 assert len(sr['clubs'])>=20,len(sr['clubs'])
-assert {x.get('id') for x in lur['restaurants']}=={'skogsstjarnan-torsby','valbergsangen-torsby'},lur['restaurants']
+assert {'skogsstjarnan-torsby','valbergsangen-torsby'}.issubset({x.get('id') for x in lur['restaurants']}),lur['restaurants']
 
 print(f"Torsby STRICT patch: health={len(health)}/{len(cats(health))} kat, service={len(service)}/{len(cats(service))} kat, authorities=6, cinema={len(c['municipalities']['Torsby'])}, leisure={len(lr['activities'])}, sports={len(sr['clubs'])}, lunch={len(lur['restaurants'])}")

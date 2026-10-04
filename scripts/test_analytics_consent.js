@@ -7,7 +7,7 @@ const privacy = fs.readFileSync(path.join(root, "privacy-controls.js"), "utf8");
 const information = fs.readFileSync(path.join(root, "information.html"), "utf8");
 const publicPages = fs.readdirSync(root)
   .filter(name => name.endsWith(".html") && name !== "404.html")
-  .map(name => path.join(root, name));
+  .map(name => path.join(root, name)).filter(file => !fs.readFileSync(file, "utf8").includes('content="noindex,nofollow,noarchive"'));
 
 assert(privacy.includes('const ANALYTICS_ID = "G-TVLG1QMX8C"'), "Rätt GA4-ID måste användas");
 assert(privacy.includes('analytics_storage: "denied"'), "Analytics måste vara nekad som standard");

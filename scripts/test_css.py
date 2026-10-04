@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CSS_FILES = sorted(ROOT.glob("*.css"))
+CSS_FILES = sorted(p for p in ROOT.rglob("*.css") if not any(x in p.parts for x in ("node_modules", "tmp", ".git")))
 CORE_TOKENS = {
     "blue950", "blue900", "blue700", "blue600", "blue100",
     "green", "red", "text", "muted", "border", "bg", "card",
