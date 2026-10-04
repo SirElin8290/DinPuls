@@ -88,8 +88,6 @@ export default {
     const nativeResponse = await handleNativePush(request, env);
     if (nativeResponse) return nativeResponse;
     const url = new URL(request.url);
-    const nativeResponse = await handleNativePush(request, env);
-    if (nativeResponse) return nativeResponse;
     const origin = request.headers.get("Origin");
 
     if (request.method === "OPTIONS" && origin && !ALLOWED_ORIGINS.has(origin)) {

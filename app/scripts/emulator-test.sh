@@ -2,11 +2,20 @@
 set -eu
 cd "$(dirname "$0")/../android"
 mkdir -p app-screenshots
+node ../scripts/e2e-server.mjs > app-screenshots/isolated-backend.log 2>&1 &
+backend_pid=$!
 cleanup() {
+  kill "$backend_pid" 2>/dev/null || true
   timeout 20 adb logcat -d > app-screenshots/device.log 2>&1 || true
   timeout 20 adb exec-out screencap -p > app-screenshots/current-screen.png || true
 }
 trap cleanup EXIT
+timeout 20 adb reverse tcp:8788 tcp:8788
+for i in $(seq 1 30); do
+  if curl --silent --fail http://127.0.0.1:8788/health >/dev/null; then break; fi
+  sleep 1
+done
+curl --silent --fail http://127.0.0.1:8788/health >/dev/null
 timeout 20 adb shell settings put secure show_ime_with_hard_keyboard 1
 timeout 360 ./gradlew :app:connectedDebugAndroidTest --no-daemon
 timeout 30 adb install -r app/build/outputs/apk/debug/app-debug.apk

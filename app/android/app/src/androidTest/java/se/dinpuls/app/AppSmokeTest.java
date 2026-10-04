@@ -119,4 +119,53 @@ public class AppSmokeTest {
         }finally{closeWithoutWaitingForWebViewIdle();}
     }
 
+    @Test public void isolatedAccountPurchaseBannerChain() throws Exception {
+        launchWithoutWaitingForWebViewIdle();
+        ActivityScenario<MainActivity> app=null;
+        try {
+            evaluate(app,"sessionStorage.setItem('dp-isolated-e2e','true');sessionStorage.removeItem('dp-company-session');location.href='/foretag/start.html';");
+            awaitTrue(app,"!!document.querySelector('#registrationForm') && !document.querySelector('#registrationForm').hidden");
+            evaluate(app,"document.querySelector('#showRegistration').click();const f=document.querySelector('#registrationForm');const d={orgNo:'5561234567',company:'ISOLATED ANDROID TEST',address:'Testgatan 1',postalCode:'66230',city:'Åmål',contact:'CI Test',phone:'0701234567',email:'android@example.invalid'};for(const [k,v] of Object.entries(d))f.elements[k].value=v;f.requestSubmit();");
+            awaitTrue(app,"document.querySelector('#registrationResult').textContent.includes('aktiverings') && !document.querySelector('#registrationResult').textContent.includes('misslyck')");
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages[0].text.match(/#token=[a-f0-9]+&purpose=activate-account/)[0];sessionStorage.setItem('ci-activation',link);location.href='/foretag/konto.html'+link;});");
+            awaitTrue(app,"!!document.querySelector('#passwordForm') && !document.querySelector('#passwordForm').hidden");
+            evaluate(app,"document.querySelector('#newPassword').value='Android-Test-2026!';document.querySelector('#confirmPassword').value='Android-Test-2026!';document.querySelector('#passwordForm').requestSubmit();");
+            awaitTrue(app,"!!document.querySelector('#statusView') && !document.querySelector('#statusView').hidden && document.querySelector('#statusTitle').textContent==='Klart!'");
+            evaluate(app,"location.href='/foretag/start.html';");
+            awaitTrue(app,"!!document.querySelector('#companyEntryLogin') && !document.querySelector('#registrationForm').hidden");
+            evaluate(app,"document.querySelector('#loginEmail').value='android@example.invalid';document.querySelector('#companyEntryLogin [name=password]').value='Android-Test-2026!';document.querySelector('#companyEntryLogin').requestSubmit();");
+            awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
+            assertEquals("false",evaluate(app,"window.__e2eLoginFlash"));
+            for(String view:new String[]{"dashboard","banners","purchases","contracts","profile"}) {
+                evaluate(app,"document.querySelector('[data-view=\""+view+"\"]')?.click();");
+            }
+            evaluate(app,"location.href='/foretag/kop.html';");
+            awaitTrue(app,"!!document.querySelector('#buyApp') && !document.querySelector('#buyApp').hidden");
+            evaluate(app,"document.querySelector('#buyMunicipality').value='Åmål';document.querySelector('#findSlots').click();");
+            awaitTrue(app,"document.querySelectorAll('[data-add]').length>0");
+            evaluate(app,"document.querySelector('[data-add]').click();document.querySelector('#prepareOrder').click();");
+            awaitTrue(app,"document.querySelector('#orderDialog').open && !document.querySelector('#dinpulsFixedSignature').hidden");
+            evaluate(app,"document.querySelector('#signerName').value='CI Test';document.querySelector('#signerTitle').value='Test';const c=document.querySelector('#signaturePad');const r=c.getBoundingClientRect();c.setPointerCapture=()=>{};for(const [type,x,y] of [['pointerdown',25,35],['pointermove',70,55],['pointerup',100,35]])c.dispatchEvent(new PointerEvent(type,{clientX:r.x+x,clientY:r.y+y,bubbles:true,pointerId:1,buttons:type==='pointerup'?0:1}));document.querySelector('#confirmTerms').click();document.querySelector('#confirmOrder').click();");
+            awaitTrue(app,"location.pathname==='/foretag/' || location.pathname==='/foretag/index.html'");
+            awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
+            evaluate(app,"fetch('http://127.0.0.1:8788/portal/company/me',{headers:{Authorization:'Bearer '+sessionStorage.getItem('dp-company-session')}}).then(r=>r.json()).then(d=>fetch('http://127.0.0.1:8788/portal/company/contracts/'+d.contract.id+'/pdf',{headers:{Authorization:'Bearer '+sessionStorage.getItem('dp-company-session')}})).then(r=>r.blob()).then(b=>window.DinPulsNativeFiles.savePdf(b,'ci-contract.pdf',{share:false})).then(uri=>window.ciPdf=uri).catch(e=>window.ciPdfError=e.message);");
+            awaitTrue(app,"typeof window.ciPdf==='string' && window.ciPdf.includes('ci-contract.pdf')");
+            evaluate(app,"document.querySelector('[data-view=banners]').click();const bytes=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='),c=>c.charCodeAt(0));const dt=new DataTransfer();dt.items.add(new File([bytes],'existing-test-fixture.png',{type:'image/png'}));const input=document.querySelector('#bannerUpload');input.files=dt.files;input.dispatchEvent(new Event('change'));document.querySelector('#bannerStart').value=new Date(Date.now()-60000-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);document.querySelector('#bannerStart').dispatchEvent(new Event('input'));document.querySelector('#bannerLink').value='https://dinpuls.se/information.html';");
+            awaitTrue(app,"!document.querySelector('#saveBanner').disabled");
+            evaluate(app,"document.querySelector('#saveBanner').click();");
+            awaitTrue(app,"document.querySelector('#bannerSchedule').textContent.includes('existing-test-fixture')");
+            assertEquals("[]",evaluate(app,"window.__e2eAlerts"));
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/approve',{method:'POST'}).then(r=>r.json()).then(d=>{window.ciApproved=d.count;});");
+            awaitTrue(app,"window.ciApproved===1");
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{window.ciMailCount=d.messages.length;});");
+            awaitTrue(app,"window.ciMailCount>=3");
+            evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
+            awaitTrue(app,"!!document.querySelector('.scheduled-public-ad img') && document.querySelector('.scheduled-public-ad img').complete && document.querySelector('.scheduled-public-ad img').naturalWidth>0");
+            assertEquals("true",evaluate(app,"document.documentElement.scrollWidth<=innerWidth"));
+            assertEquals("true",evaluate(app,"(()=>{const r=document.querySelector('.scheduled-public-ad img').getBoundingClientRect();return r.width>0 && r.width<=innerWidth;})()"));
+            System.out.println("DinPuls E2E PASS: real Android UI, isolated registration/password/login/purchase/signature/upload/moderation/public ad; captured mail, no real delivery.");
+            evaluate(app,"sessionStorage.removeItem('dp-isolated-e2e');sessionStorage.removeItem('dp-company-session');");
+        } finally {closeWithoutWaitingForWebViewIdle();}
+    }
+
 }

@@ -3,9 +3,11 @@ import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Keyboard } from '@capacitor/keyboard';
 import { initializeNativePush } from './native-push';
+import { savePdf } from './native-files.js';
 
 if(Capacitor.isNativePlatform()){
  window.DinPulsNativePush={initialize:initializeNativePush};
+ window.DinPulsNativeFiles={savePdf};
  const localPages=new Set(__DINPULS_PAGES__);
  const openAppLink=({url}={})=>{
   if(!url)return;
