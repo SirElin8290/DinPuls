@@ -19,7 +19,8 @@ const server=createServer(async(req,res)=>{
  try{
   const parts=[];for await(const p of req)parts.push(p);const bytes=Buffer.concat(parts);
   const url=new URL(req.url,'http://127.0.0.1:8788');let response;
-  if(url.pathname==='/__test/mail')response=Response.json({messages:mail});
+  if(url.pathname==='/__test/banner')response=new Response(await readFile(resolve(root,'assets/heroes/amal/amal-06-stadsutsikt.webp')),{headers:{'Content-Type':'image/webp'}});
+  else if(url.pathname==='/__test/mail')response=Response.json({messages:mail});
   else if(url.pathname==='/data/business-config.json')response=Response.json({enabled:true,apiBase:'http://127.0.0.1:8788'});
   else if(url.pathname.startsWith('/data/')){const file=url.pathname.slice(1);if(!/^data\/[a-z-]+\.json$/.test(file))throw Error('Invalid path');response=new Response(await readFile(resolve(root,file)),{headers:{'Content-Type':'application/json'}});}
   else if(url.pathname==='/__test/approve'){
