@@ -14,7 +14,11 @@ if(Capacitor.isNativePlatform()){
   }catch{/* Ogiltiga länkar ska inte kunna lämna appens paketerade sidor. */}
  };
  App.addListener('appUrlOpen',openAppLink);
- App.getLaunchUrl().then(openAppLink);
+ // Startlänken följer aktiviteten. Hantera den en gång, inte vid varje sidbyte.
+ App.getLaunchUrl().then(link=>{
+  if(!link?.url||sessionStorage.getItem('dp-native-launch-handled'))return;
+  sessionStorage.setItem('dp-native-launch-handled','1');openAppLink(link);
+ });
  const keyboardVisible=visible=>document.documentElement.classList.toggle('app-keyboard-open',visible);
  Keyboard.addListener('keyboardWillShow',()=>keyboardVisible(true));
  Keyboard.addListener('keyboardDidShow',()=>{keyboardVisible(true);document.activeElement?.scrollIntoView?.({block:'center',behavior:'smooth'});});
