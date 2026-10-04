@@ -13,7 +13,7 @@ public class MainActivity extends BridgeActivity {
         if(path==null||!path.matches("/(?:[a-z0-9-]+/)*[a-z0-9-]+\\.html"))return;
         // Endast en faktiskt paketerad publik HTML-sida får öppnas.
         try(java.io.InputStream page=getAssets().open("public"+path)) {
-            String target=bridge.getServerUrl()+path;
+            String target=bridge.getScheme()+"://"+bridge.getHost()+path;
             if(uri.getEncodedQuery()!=null)target+="?"+uri.getEncodedQuery();
             if(uri.getEncodedFragment()!=null)target+="#"+uri.getEncodedFragment();
             bridge.getWebView().loadUrl(target);
