@@ -12,7 +12,7 @@ if(Capacitor.isNativePlatform()){
  // Capacitors lokala server behandlar katalogadresser som startsidan.
  // Använd den verkliga paketerade indexfilen efter login och avtal.
  const currentPage=new URL(location.href);
- if(currentPage.pathname.endsWith('/')&&localPages.has(currentPage.pathname+'index.html')){
+ if(currentPage.pathname!=='/'&&currentPage.pathname.endsWith('/')&&localPages.has(currentPage.pathname+'index.html')){
   location.replace(currentPage.pathname+'index.html'+currentPage.search+currentPage.hash);
  }
  const openAppLink=({url}={})=>{

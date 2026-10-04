@@ -61,4 +61,6 @@ test('portal directory redirect resolves its packaged index and preserves query/
  assert.deepEqual(redirects,['/foretag/index.html?from=login#overview']);
  context.location.href='https://localhost/foretag/index.html';
  vm.runInNewContext('{'+guard+'}',context);assert.equal(redirects.length,1);
+ context.localPages.add('/index.html');context.location.href='https://localhost/';
+ vm.runInNewContext('{'+guard+'}',context);assert.equal(redirects.length,1);
 });
