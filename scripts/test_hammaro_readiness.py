@@ -56,6 +56,7 @@ def main() -> None:
     assert {item.get("id") for item in restaurants} == {
         "skoghalls-folkets-hus-restaurang",
         "ica-supermarket-skoghall",
+        "glg-lysasen",
     }, f"{NAME}: lunchkatalogen innehåller andra poster än verifierbara menykällor"
     assert all(str(item.get("url", "")).startswith("https://") for item in restaurants)
     assert lunch.get("referenceSources"), f"{NAME}: lokal matguide saknas"
