@@ -45,9 +45,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           script: |
-            adb shell wm size 390x844
-            adb shell wm density 160
-            cd app/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
+            cd app/android && timeout 360 ./gradlew :app:connectedDebugAndroidTest --no-daemon
             adb pull /sdcard/Android/data/se.dinpuls.app/files/qa app-screenshots
       - uses: actions/upload-artifact@v4
         if: always()
