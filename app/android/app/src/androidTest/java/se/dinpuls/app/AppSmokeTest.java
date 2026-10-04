@@ -62,10 +62,37 @@ public class AppSmokeTest {
             screenshot("app-link-kil");
         }
     }
+    private void launchWithoutWaitingForWebViewIdle() throws Exception {
+        CountDownLatch resumed=new CountDownLatch(1);
+        android.app.Application application=(android.app.Application)androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
+        android.app.Application.ActivityLifecycleCallbacks callback=new android.app.Application.ActivityLifecycleCallbacks(){
+            public void onActivityResumed(android.app.Activity activity){if(activity instanceof MainActivity){main=(MainActivity)activity;resumed.countDown();}}
+            public void onActivityCreated(android.app.Activity a,android.os.Bundle b){}
+            public void onActivityStarted(android.app.Activity a){}
+            public void onActivityPaused(android.app.Activity a){}
+            public void onActivityStopped(android.app.Activity a){}
+            public void onActivitySaveInstanceState(android.app.Activity a,android.os.Bundle b){}
+            public void onActivityDestroyed(android.app.Activity a){}
+        };
+        application.registerActivityLifecycleCallbacks(callback);
+        try{
+            android.content.Intent intent=new android.content.Intent(application,MainActivity.class);
+            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            application.startActivity(intent);
+            assertTrue("Appen startade inte",resumed.await(20,TimeUnit.SECONDS));
+        }finally{application.unregisterActivityLifecycleCallbacks(callback);}
+    }
+    private void closeWithoutWaitingForWebViewIdle() throws Exception {
+        CountDownLatch finished=new CountDownLatch(1);
+        main.runOnUiThread(()->{main.finish();finished.countDown();});
+        assertTrue("Appen stängdes inte",finished.await(10,TimeUnit.SECONDS));
+        Thread.sleep(1000);
+    }
     @Test public void moduleChoicesPersistAfterAppRestart() throws Exception {
         String hidden="[...document.querySelectorAll('[data-home-module]')].every(c=>!c.checked && HOME_OPTIONAL_MODULES[c.dataset.homeModule].some(selector=>document.querySelector(selector)) && HOME_OPTIONAL_MODULES[c.dataset.homeModule].every(selector=>[...document.querySelectorAll(selector)].every(el=>el.hidden&&getComputedStyle(el).display==='none')))";
-        try(ActivityScenario<MainActivity> app=ActivityScenario.launch(MainActivity.class)){
-            app.onActivity(activity->main=activity);
+        launchWithoutWaitingForWebViewIdle();
+        ActivityScenario<MainActivity> app=null;
+        try{
             awaitTrue(app,"!!document.querySelector('.app-navigation')");
             evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
             awaitTrue(app,"!!document.querySelector('#homepage-customize-button') && typeof HOME_OPTIONAL_MODULES!=='undefined' && !!document.querySelector('.sport-home')");
@@ -75,15 +102,15 @@ public class AppSmokeTest {
             awaitTrue(app,hidden);
             assertEquals("true",evaluate(app,"JSON.parse(localStorage.getItem('dinpuls-home-modules-v1')).hidden.length===document.querySelectorAll('[data-home-module]').length"));
             evaluate(app,"document.querySelector('#homepage-customize-dialog').close();");
-        }
-        try(ActivityScenario<MainActivity> app=ActivityScenario.launch(MainActivity.class)){
-            app.onActivity(activity->main=activity);
+        }finally{closeWithoutWaitingForWebViewIdle();}
+        launchWithoutWaitingForWebViewIdle();
+        try{
             awaitTrue(app,"!!document.querySelector('.sport-home') && typeof HOME_OPTIONAL_MODULES!=='undefined'");
             awaitTrue(app,hidden);
             evaluate(app,"document.querySelector('#homepage-customize-button').click();document.querySelector('#homepage-customize-reset').click();");
             awaitTrue(app,"[...document.querySelectorAll('[data-home-module]')].every(c=>c.checked)");
             assertEquals("[]",evaluate(app,"JSON.parse(localStorage.getItem('dinpuls-home-modules-v1')).hidden"));
-        }
+        }finally{closeWithoutWaitingForWebViewIdle();}
     }
 
 }
