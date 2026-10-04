@@ -29,6 +29,15 @@ public class AppSmokeTest {
         fail("Villkoret uppfylldes inte: " + js + "; " + evaluate(app,"JSON.stringify(window.appSmoke)+document.body.innerText.slice(0,1000)"));
     }
     private void screenshot(String name) { System.out.println("DinPuls QA: "+name); }
+    private void awaitStableTrue(ActivityScenario<MainActivity> app,String js) throws Exception {
+        int stable=0;
+        for(int i=0;i<90;i++){
+            stable="true".equals(evaluate(app,js))?stable+1:0;
+            if(stable>=3)return;
+            Thread.sleep(1000);
+        }
+        fail("Vyn blev inte stabil: "+js);
+    }
     @Test public void localPagesLiveDataAndNavigation() throws Exception {
         try (ActivityScenario<MainActivity> app = ActivityScenario.launch(MainActivity.class)) {
             app.onActivity(activity -> main=activity);
@@ -179,14 +188,13 @@ public class AppSmokeTest {
             awaitTrue(app,"window.ciMailCount>=3");
             evaluate(app,"localStorage.setItem('dinpuls-municipality','Åmål');location.href='/index.html?kommun='+encodeURIComponent('Åmål');");
             awaitTrue(app,"!!document.querySelector('.scheduled-public-ad img') && document.querySelector('.scheduled-public-ad img').complete && document.querySelector('.scheduled-public-ad img').naturalWidth>0");
-            evaluate(app,"document.querySelector('.scheduled-public-ad img').scrollIntoView({block:'center'});");
+            Thread.sleep(5000);
+            awaitStableTrue(app,"(()=>{const image=document.querySelector('.scheduled-public-ad img');if(!image||!image.complete||!image.naturalWidth)return false;image.scrollIntoView({block:'center'});const r=image.getBoundingClientRect();return r.width>0 && r.width<=innerWidth && document.documentElement.scrollWidth<=innerWidth;})()");
             Thread.sleep(700);
             android.graphics.Bitmap shot=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
             android.content.ContentValues values=new android.content.ContentValues();values.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME,"isolated-public-ad.png");values.put(android.provider.MediaStore.Images.Media.MIME_TYPE,"image/png");values.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH,"Pictures/DinPulsCI");
             android.net.Uri shotUri=main.getContentResolver().insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values);
             assertNotNull(shotUri);try(java.io.OutputStream output=main.getContentResolver().openOutputStream(shotUri)){assertTrue(shot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,output));}shot.recycle();
-            assertEquals("true",evaluate(app,"document.documentElement.scrollWidth<=innerWidth"));
-            assertEquals("true",evaluate(app,"(()=>{const r=document.querySelector('.scheduled-public-ad img').getBoundingClientRect();return r.width>0 && r.width<=innerWidth;})()"));
             System.out.println("DinPuls E2E PASS: real Android UI, isolated registration/password/login/purchase/signature/upload/moderation/public ad; captured mail, no real delivery.");
             evaluate(app,"sessionStorage.removeItem('dp-isolated-e2e');sessionStorage.removeItem('dp-company-session');");
         } finally {closeWithoutWaitingForWebViewIdle();}
