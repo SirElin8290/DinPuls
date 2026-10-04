@@ -57,6 +57,10 @@ public class AppSmokeTest {
             evaluate(app,"document.querySelector('input[type=password]').focus();");
             awaitTrue(app,"document.documentElement.classList.contains('app-keyboard-open')");
             screenshot("login-keyboard");
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent 4").close();
+            app.onActivity(activity->{android.content.Intent link=new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("dinpuls://app/lunch.html?kommun=Kil"));link.setPackage("se.dinpuls.app");activity.startActivity(link);});
+            awaitTrue(app,"location.pathname==='/lunch.html' && new URLSearchParams(location.search).get('kommun')==='Kil'");
+            screenshot("app-link-kil");
         }
     }
 }

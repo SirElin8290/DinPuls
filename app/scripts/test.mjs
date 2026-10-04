@@ -6,7 +6,7 @@ import vm from 'node:vm';
 test('live data rewrite preserves body, credentials and external requests',async()=>{
  const code=(await readFile(new URL('../src/native.js',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'');
  const calls=[],listeners={};
- const context={__DINPULS_PAGES__:["/index.html","/lunch.html"],Keyboard:{addListener(){}},URL,Request,location:{href:'https://localhost/foretag/index.html',origin:'https://localhost'},Capacitor:{isNativePlatform:()=>true},App:{addListener(){}},Browser:{open(){}},navigator:{onLine:true},window:{fetch:(...args)=>{calls.push(args);return Promise.resolve({ok:true});},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
+ const context={__DINPULS_PAGES__:["/index.html","/lunch.html"],Keyboard:{addListener(){}},URL,Request,location:{href:'https://localhost/foretag/index.html',origin:'https://localhost'},Capacitor:{isNativePlatform:()=>true},App:{addListener(){},getLaunchUrl:()=>Promise.resolve()},Browser:{open(){}},navigator:{onLine:true},window:{fetch:(...args)=>{calls.push(args);return Promise.resolve({ok:true});},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
  vm.runInNewContext(code,context);
  await context.window.fetch('../data/lunch.json?week=41',{cache:'no-cache'});
  assert.equal(calls[0][0],'https://dinpuls.se/data/lunch.json?week=41');
@@ -29,7 +29,7 @@ test('packaged app contains all public entry points without secrets or stale fee
 test('native links stay in app; external sources use the browser',async()=>{
  const code=(await readFile(new URL('../src/native.js',import.meta.url),'utf8')).replace(/^import .*;\r?\n/gm,'');
  const listeners={},opened=[];
- const context={__DINPULS_PAGES__:['/index.html','/lunch.html'],URL,Request,Keyboard:{addListener(){}},Capacitor:{isNativePlatform:()=>true},App:{addListener(){}},Browser:{open:options=>{opened.push(options.url);return Promise.resolve();}},location:{href:'https://localhost/index.html',origin:'https://localhost'},navigator:{onLine:true},window:{fetch(){},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
+ const context={__DINPULS_PAGES__:['/index.html','/lunch.html'],URL,Request,Keyboard:{addListener(){}},Capacitor:{isNativePlatform:()=>true},App:{addListener(){},getLaunchUrl:()=>Promise.resolve()},Browser:{open:options=>{opened.push(options.url);return Promise.resolve();}},location:{href:'https://localhost/index.html',origin:'https://localhost'},navigator:{onLine:true},window:{fetch(){},addEventListener(){}},document:{addEventListener:(name,fn)=>{listeners[name]=fn;},documentElement:{classList:{toggle(){}}}}};
  vm.runInNewContext(code,context);
  function click(href){let prevented=false;listeners.click({target:{closest:()=>({href,hasAttribute:()=>false})},preventDefault(){prevented=true;}});return prevented;}
  assert(click('https://dinpuls.se/lunch.html?kommun=Kil#menu'));assert.equal(context.location.href,'/lunch.html?kommun=Kil#menu');

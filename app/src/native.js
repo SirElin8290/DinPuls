@@ -5,6 +5,16 @@ import { Keyboard } from '@capacitor/keyboard';
 
 if(Capacitor.isNativePlatform()){
  const localPages=new Set(__DINPULS_PAGES__);
+ const openAppLink=({url}={})=>{
+  if(!url)return;
+  try{
+   const target=new URL(url);
+   if(target.protocol!=='dinpuls:'||target.hostname!=='app'||!localPages.has(target.pathname))return;
+   location.href=target.pathname+target.search+target.hash;
+  }catch{/* Ogiltiga länkar ska inte kunna lämna appens paketerade sidor. */}
+ };
+ App.addListener('appUrlOpen',openAppLink);
+ App.getLaunchUrl().then(openAppLink);
  const keyboardVisible=visible=>document.documentElement.classList.toggle('app-keyboard-open',visible);
  Keyboard.addListener('keyboardWillShow',()=>keyboardVisible(true));
  Keyboard.addListener('keyboardDidShow',()=>{keyboardVisible(true);document.activeElement?.scrollIntoView?.({block:'center',behavior:'smooth'});});
