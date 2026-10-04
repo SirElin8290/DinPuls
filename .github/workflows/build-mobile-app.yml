@@ -128,10 +128,10 @@ jobs:
         run: |
           DINPULS_ISOLATED_E2E=1 npm run build
           npx cap sync ios
-          node scripts/prepare-ios.mjs
+          DINPULS_IOS_CI=1 node scripts/prepare-ios.mjs
           /usr/libexec/PlistBuddy -c 'Add :NSAppTransportSecurity dict' ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c 'Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true' ios/App/App/Info.plist
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios-ci CODE_SIGNING_ALLOWED=NO SWIFT_ACTIVE_COMPILATION_CONDITIONS='DEBUG IOS_CI' build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios-ci CODE_SIGNING_ALLOWED=NO build
       - name: Kör isolerad kedja i riktig iPhone-simulator
         run: bash scripts/ios-simulator-test.sh
       - uses: actions/upload-artifact@v4

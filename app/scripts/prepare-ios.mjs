@@ -14,4 +14,8 @@ p=p.replaceAll('CODE_SIGN_STYLE = Automatic;','CODE_SIGN_STYLE = Automatic;\n CO
 if(!p.includes('APS_ENVIRONMENT = development;'))p=p.replace('SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;\n\t\t\t\tSWIFT_VERSION','APS_ENVIRONMENT = development;\n\t\t\t\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;\n\t\t\t\tSWIFT_VERSION');
 if(!p.includes('APS_ENVIRONMENT = production;'))p=p.replace('SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";','APS_ENVIRONMENT = production;\n SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";');
 await writeFile(path,p);
+if(process.env.DINPULS_IOS_CI==='1'){
+ p=p.replace('SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;\n\t\t\t\tSWIFT_VERSION','SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG IOS_CI";\n\t\t\t\tSWIFT_VERSION');
+ await writeFile(path,p);
+}
 console.log('iOS prepared: Firebase Messaging and APNs entitlement; no signing credentials.');

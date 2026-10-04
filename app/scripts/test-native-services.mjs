@@ -8,7 +8,7 @@ async function module(path,globals){
   plugins:[{name:'native-mocks',setup(b){b.onResolve({filter:/^@capacitor\//},a=>({path:a.path,namespace:'native'}));b.onLoad({filter:/.*/,namespace:'native'},a=>({contents:a.path.endsWith('core')?'export const Capacitor=globalThis.cap;':a.path.endsWith('push-notifications')?'export const PushNotifications=globalThis.push;':a.path.endsWith('filesystem')?'export const Filesystem=globalThis.files;export const Directory={Cache:"CACHE"};':'export const Share=globalThis.share;'}));}}]});
  const context={...globals,URL,Blob,Uint8Array,Promise,Date,JSON,crypto:webcrypto,setTimeout(){}};vm.createContext(context);vm.runInContext(result.outputFiles[0].text,context);return context.Subject;
 }
-for(const platform of ['android','ios'])test(platform+' push permission, token/settings sync, foreground notice, safe routing and unsubscribe',async()=>{
+for(const [platform,configured] of [['android',true],['ios',true],['ios',false]])test(platform+' push configured='+configured+': permission, token/settings sync, foreground notice, safe routing and unsubscribe',async()=>{
  const listeners={},calls=[],store=new Map();let notice;
  class Element{
   constructor(){this.handlers={};this.dataset={};this.children=[];this.hidden=false;this.checked=false;}
@@ -19,8 +19,10 @@ for(const platform of ['android','ios'])test(platform+' push permission, token/s
  const location={origin:'https://localhost',href:'https://localhost/index.html'};const events={};let permissions=0,registrations=0,unregistered=0;
  const subject=await module('native-push.js',{cap:{getPlatform:()=> platform},push:{async addListener(k,f){events[k]=f;},async checkPermissions(){return {receive:'prompt'};},async requestPermissions(){permissions++;return {receive:'granted'};},async createChannel(){assert.equal(platform,'android');},async register(){registrations++;},async unregister(){unregistered++;}},
   document:doc,window:{DinPulsMunicipality:{getName:()=> 'Åmål'}},location,__DINPULS_PAGES__:['/index.html','/lunch.html'],localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},
-  async fetch(url,options){calls.push({url,options});return {ok:true,json:async()=>({ok:true,androidConfigured:true,iosConfigured:true,message:'Accepted, receipt not proven'})};}});
- await subject.initializeNativePush();assert.equal(status.dataset.state,'inactive');assert.equal(permissions,0,'No permission prompt without opt-in');
+  async fetch(url,options){calls.push({url,options});return {ok:true,json:async()=>({ok:true,androidConfigured:true,iosConfigured:configured,message:'Accepted, receipt not proven'})};}});
+ await subject.initializeNativePush();assert.equal(permissions,0,'No permission prompt without opt-in');
+ if(!configured){assert.equal(status.dataset.state,'setup');assert.equal(enable.disabled,true);assert.equal(registrations,0);return;}
+ assert.equal(status.dataset.state,'inactive');
  await enable.handlers.click();assert.equal(permissions,1);assert.equal(registrations,1);
  await events.registration({value:'isolated-fcm-device-token'});assert.equal(status.dataset.state,'active');assert.equal(store.get('dp-native-push-token'),'isolated-fcm-device-token');
  assert.equal(JSON.parse(calls.at(-1).options.body).platform,platform);
