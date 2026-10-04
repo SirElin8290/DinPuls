@@ -49,5 +49,18 @@ try{
  assert.equal(collectCandidates('news',{generatedAt:stamp,articles:[{...article('not-warning','Åmål'),notificationCategory:'extreme-weather',sourceType:'publisher'}]},now)[0].category,'news');
  assert.equal((await automaticPushStatus(env)).municipalities,21);
  assert.deepEqual(await runAutomaticPush({...env,AUTOMATIC_PUSH_ENABLED:'false'}),{enabled:false});
+ await db.prepare("INSERT INTO subscriptions VALUES('temporary','https://example.invalid/temporary','key','auth','Eda','[\"news\"]','2026-10-01T00:00:00Z')").run();
+ data.news.articles.push(article('retry-ed a','Eda'));
+ let retries=0;const failingWeb=async()=>{retries++;throw {statusCode:503};};
+ for(let i=0;i<4;i++)await runAutomaticPush(env,{send,sendWeb:failingWeb,now:now+5*3600000+i*600000});
+ assert.equal(retries,3);
+ // A bounded dispatch must resume remaining devices on the next run.
+ await db.prepare('DELETE FROM subscriptions').run();
+ for(let i=0;i<22;i++)await db.prepare('INSERT INTO native_push_devices VALUES(?,?,?,?,?,0)').bind('batch-'+i,'fake-token-'+i,'Åmål','["news"]','2026-10-01T00:00:00Z').run();
+ data.news.articles.push(article('batch-new','Åmål'));
+ report=await runAutomaticPush(env,{send,sendWeb,now:now+7*3600000});assert.equal(report.accepted,20);
+ report=await runAutomaticPush(env,{send,sendWeb,now:now+7*3600000+600000});assert.equal(report.accepted,2);
+ await db.prepare('UPDATE automatic_push_lock SET until_at=? WHERE id=1').bind(now+9*3600000).run();
+ assert.equal((await runAutomaticPush(env,{send,sendWeb,now:now+8*3600000})).busy,true);
  console.log('PASS automatic push: cold start, deduplication, municipality/category isolation, Android/web payloads, cooldown, unsubscribe, stale/expired sources, no inferred warnings. No real notifications sent.');
 }finally{await runtime.dispose();}
