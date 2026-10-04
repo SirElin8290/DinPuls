@@ -11,10 +11,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
 public class AppSmokeTest {
+    private MainActivity main;
     private String evaluate(ActivityScenario<MainActivity> activity, String js) throws Exception {
         AtomicReference<String> result = new AtomicReference<>();
         CountDownLatch done = new CountDownLatch(1);
-        activity.onActivity(app -> app.getBridge().getWebView().evaluateJavascript(js, value -> {
+        main.runOnUiThread(() -> main.getBridge().getWebView().evaluateJavascript(js, value -> {
             result.set(value); done.countDown();
         }));
         assertTrue("JavaScript svarade inte", done.await(10, TimeUnit.SECONDS));
@@ -25,11 +26,12 @@ public class AppSmokeTest {
             if ("true".equals(evaluate(app, js))) return;
             Thread.sleep(1000);
         }
-        fail("Villkoret uppfylldes inte: " + js + "; " + evaluate(app,"document.body.innerText.slice(0,1000)"));
+        fail("Villkoret uppfylldes inte: " + js + "; " + evaluate(app,"JSON.stringify(window.appSmoke)+document.body.innerText.slice(0,1000)"));
     }
     private void screenshot(String name) { System.out.println("DinPuls QA: "+name); }
     @Test public void localPagesLiveDataAndNavigation() throws Exception {
         try (ActivityScenario<MainActivity> app = ActivityScenario.launch(MainActivity.class)) {
+            app.onActivity(activity -> main=activity);
             awaitTrue(app,"!!document.querySelector('.app-navigation')");
             assertEquals("\"localhost\"",evaluate(app,"location.hostname"));
             screenshot("home");
@@ -52,7 +54,7 @@ public class AppSmokeTest {
             awaitTrue(app,"document.documentElement.classList.contains('app-keyboard-open')");
             screenshot("login-keyboard");
             androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent 4").close();
-            app.onActivity(activity->{android.content.Intent link=new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("dinpuls://app/lunch.html?kommun=Kil"));link.setPackage("se.dinpuls.app");activity.startActivity(link);});
+            main.runOnUiThread(()->{android.content.Intent link=new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("dinpuls://app/lunch.html?kommun=Kil"));link.setPackage("se.dinpuls.app");main.startActivity(link);});
             awaitTrue(app,"location.pathname==='/lunch.html' && new URLSearchParams(location.search).get('kommun')==='Kil'");
             screenshot("app-link-kil");
         }
