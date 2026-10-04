@@ -44,7 +44,7 @@ jobs:
           api-level: 35
           arch: x86_64
           disable-animations: true
-          script: cd app/android && ./gradlew connectedDebugAndroidTest --no-daemon
+          script: cd app/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
   ios:
     runs-on: macos-latest
     timeout-minutes: 25
