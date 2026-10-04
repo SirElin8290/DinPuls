@@ -48,7 +48,7 @@ assert.match(welcomeHtml, /href="start\.html"[^>]*>Logga in/);
 assert.match(welcomeHtml, /href="registrera\.html"[^>]*>Skapa företagskonto och se lediga platser/);
 assert.match(welcomeHtml, /8 000 kr/);
 assert.match(welcomeHtml, /800 kr/);
-assert.match(welcomeHtml, /48 gånger under året/);
+assert.match(welcomeHtml, /4 publicerade bannerbyten per 30-dagarsperiod/);
 assert.match(entryHtml, /id="companyEntryLogin"/);
 assert.match(entryHtml, /id="showRegistration"[^>]*href="registrera\.html">Skapa företagskonto/);
 assert.match(entryHtml, /name="email"/);
