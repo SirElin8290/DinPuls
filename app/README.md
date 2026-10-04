@@ -8,7 +8,7 @@ Node 22 eller senare: `npm ci`, `npm run build`, `npm test`, `npx cap sync`.
 Android: öppna med `npm run android`; kräver kostnadsfria Android Studio/SDK och JDK 21.
 iOS: öppna med `npm run ios` på Mac med Xcode. Simulatorbygge behöver inget betalt utvecklarkonto.
 
-GitHub bygger debug-APK och osignerad simulatorapp på appbranchen. Inga butikskonton, betalningar eller produktionsdeploy görs. Standardrunners är kostnadsfria i detta publika repo. Artefakter sparas i tre dagar.
+GitHub bygger debug-APK, osignerat Android App Bundle efter godkända Androidtester och osignerad simulatorapp på appbranchen. Inga butikskonton, betalningar eller produktionsdeploy görs. Standardrunners är kostnadsfria i detta publika repo. Artefakter sparas i tre dagar.
 
 ## Arkitektur
 
@@ -19,7 +19,7 @@ Mobilnavigation, Androids bakåtknapp, säkra externa länkar och internetstatus
 ## Kvar inför lansering
 
 - Verifiera rendering, tangentbord, login, uppladdning och session på verklig Android och iPhone.
-- Native push-notiser är ännu inte kopplade; befintlig webbpush ersätter inte native push.
+- Androids Firebase-klient och serveranslutning är konfigurerade. Faktisk mottagning på telefon, särskilt med stängd app, återstår att verifiera. Automatisk utskicksmotor är inte aktiverad.
 - Verifierade applänkar, konto-/integritetskrav och full butikstestning.
 - Butiksgodkända ikonresurser, appmetadata, release-signering och utvecklarkonton när användaren vill publicera.
 
@@ -27,6 +27,14 @@ En lyckad kompilering är inte ett godkänt fullständigt E2E-test. Första vers
 
 ## Verifieringsgräns för push
 
-Den befintliga servern och VAPID-nyckeln hanterar webbpush, inte native app-token. Det finns varken `google-services.json`, Firebase-avsändarcredentials eller APNs-konfiguration i appen. Appens inställningar visar därför uttryckligen att appnotiser inte är anslutna; sparade kategorier får inte förväxlas med en aktiv prenumeration.
+Webbpush använder befintlig VAPID-konfiguration. Android använder Firebase-projektet `dinpuls-57683` och app-ID `se.dinpuls.app`; serverns native-konfiguration bekräftar Android-stöd. Tillstånd begärs först när användaren väljer att ansluta notiser. Enhetstoken och valda kategorier registreras, och avslutad prenumeration raderas. Lokala tester verifierar dessa klientflöden samt synlig notis i öppen app; detta bevisar inte verklig leverans. iOS/APNs är inte konfigurerat.
 
-För Android krävs ett Firebase-projekt med appen `se.dinpuls.app`, klientkonfiguration och en säker serveranslutning till FCM. För iPhone krävs APNs-capability, korrekt signing och servernyckel. En levererad notis med appen stängd måste därefter verifieras på en faktisk enhet. Befintliga webbprenumerationer lämnas orörda.
+För iPhone krävs APNs-capability, korrekt signing och servernyckel. En levererad notis med appen stängd måste därefter verifieras på en faktisk enhet. Befintliga webbprenumerationer lämnas orörda.
+
+## Isolerad Androidverifiering
+
+Instrumenteringen använder en separat lokal D1/R2-backend och fångar mejlanrop utan externa utskick. Testet kontrollerar registrering, aktivering, lösenordsbyte och sessionsspärr, login, portalvyer, köp/signatur, PDF, banneruppladdning, granskning och publicerad bild. Testkopplingen paketeras endast i instrumenteringsvarianten, aldrig i den distribuerade APK/AAB-filen. Ett godkänt testresultat måste kontrolleras i aktuell GitHub Actions-körning.
+
+Avtals-PDF kan sparas och delas via telefonens filfunktioner. Ordinarie bildgräns och format återanvänds: PNG/JPG/WebP, högst 5 MB. GIF/video har inte lagts till.
+
+Permanent release-signering och lagring av privat nyckel i GitHub Actions secrets är inte genomförda. Det osignerade AAB-paketet är inte färdigt för Play Store. Automatisk push till prenumeranter är inte aktiverad. Båda åtgärderna kräver uttryckligt godkännande efter automatisk säkerhetsgranskning.

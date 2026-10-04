@@ -123,6 +123,7 @@ public class AppSmokeTest {
         launchWithoutWaitingForWebViewIdle();
         ActivityScenario<MainActivity> app=null;
         try {
+            awaitTrue(app,"!!document.querySelector('.app-navigation') && location.hostname==='localhost'");
             evaluate(app,"sessionStorage.setItem('dp-isolated-e2e','true');sessionStorage.removeItem('dp-company-session');location.href='/foretag/start.html';");
             awaitTrue(app,"!!document.querySelector('#registrationForm') && !document.querySelector('#registrationForm').hidden");
             evaluate(app,"document.querySelector('#showRegistration').click();const f=document.querySelector('#registrationForm');const d={orgNo:'5561234567',company:'ISOLATED ANDROID TEST',address:'Testgatan 1',postalCode:'66230',city:'Åmål',contact:'CI Test',phone:'0701234567',email:'android@example.invalid'};for(const [k,v] of Object.entries(d))f.elements[k].value=v;f.requestSubmit();");
