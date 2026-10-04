@@ -30,6 +30,6 @@ for (const privatePage of ["admin/index.html", "foretag/index.html"]) {
   assert(!html.includes("privacy-controls.js") && !html.includes("googletagmanager.com"), `${privatePage} ska inte analyseras`);
 }
 
-assert(fs.readFileSync(path.join(root, "innebandyregler/index.html"), "utf8").includes("../privacy-controls.js?version=0.25.2"), "Regelgeneratorn ska ha samma aktiva samtyckesval");
+assert(!fs.existsSync(path.join(root, "innebandyregler")), "VDK:s regelgenerator ska inte finnas i DinPuls");
 
 console.log("✓ GA4 laddas endast efter aktivt samtycke och kan återkallas");

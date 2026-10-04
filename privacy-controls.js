@@ -23,7 +23,7 @@
     if (document.querySelector('link[data-dinpuls-seasonal-theme]')) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `${location.pathname.includes("/innebandyregler/") ? "../" : ""}seasonal-theme.css?version=0.2.0`;
+    link.href = "seasonal-theme.css?version=0.2.0";
     link.dataset.dinpulsSeasonalTheme = "autumn";
     (document.head || document.documentElement).appendChild(link);
     document.documentElement.dataset.season = "autumn";
@@ -177,7 +177,7 @@
       <div class="dp-privacy-notice-actions">
         <button type="button" data-privacy-accept-analytics>Tillåt statistik</button>
         <button type="button" data-privacy-essential-only>Endast nödvändiga</button>
-        <a href="${location.pathname.includes("/innebandyregler/") ? "../" : ""}information.html#integritet">Läs mer</a>
+        <a href="information.html#integritet">Läs mer</a>
       </div>
     `;
     (document.body || document.documentElement).appendChild(notice);

@@ -85,6 +85,8 @@ async function deleteContract(request, env, id) {
 
 export default {
   async fetch(request, env, ctx) {
+    const nativeResponse = await handleNativePush(request, env);
+    if (nativeResponse) return nativeResponse;
     const url = new URL(request.url);
     const nativeResponse = await handleNativePush(request, env);
     if (nativeResponse) return nativeResponse;
