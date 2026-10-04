@@ -104,7 +104,8 @@ def fetch_json(url, opener=urllib.request.urlopen):
         return json.loads(response.read().decode("utf-8"))
 
 
-def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlopen):
+def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlopen, reporting_exceptions=None):
+    exceptions = reporting_exceptions or []
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     base_url = base_url.rstrip("/") + "/"
     municipality_payload = fetch_json(base_url + "municipalities.json", opener)
@@ -140,7 +141,12 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
                     count = sum(count_for(module, item, municipality) for item in payloads)
                 checked = payload_time(payload)
                 age_hours = (now - checked).total_seconds() / 3600 if checked else None
-                if count == 0 and not verified_zero(module, payload, municipality):
+                accepted_empty = next((entry for entry in exceptions
+                    if entry.get("municipality") == municipality and entry.get("module") == module
+                    and entry.get("allowEmpty") is True), None)
+                if count == 0 and accepted_empty:
+                    status, reason = "green", "accepted_empty_supply"
+                elif count == 0 and not verified_zero(module, payload, municipality):
                     status, reason = "critical", "zero_records"
                 elif checked is None:
                     status, reason = "warning", "missing_timestamp"
@@ -160,6 +166,7 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
         "generatedAt": now.isoformat(timespec="seconds"),
         "summary": summary,
         "municipalities": results,
+        "reportNotes": exceptions,
     }
 
 
@@ -168,7 +175,8 @@ def main():
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
-    result = build_health(args.base_url)
+    exceptions = json.loads((ROOT / "data" / "reporting-exceptions.json").read_text(encoding="utf-8"))["entries"]
+    result = build_health(args.base_url, reporting_exceptions=exceptions)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = result["summary"]

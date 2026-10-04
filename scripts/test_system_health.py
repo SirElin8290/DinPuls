@@ -89,6 +89,20 @@ class SystemHealthTests(unittest.TestCase):
         result = health.build_health("https://example.test/data", self.now, opener_for(data))
         self.assertEqual(result["municipalities"]["Storfors"]["lunch"]["status"], "green")
 
+    def test_approved_empty_supply_is_a_note(self):
+        exception = {"municipality": "Storfors", "module": "lunch", "allowEmpty": True, "note": "Tills vidare undantagen."}
+        data = payloads("lunch")
+        result = health.build_health("https://example.test/data", self.now, opener_for(data), [exception])
+        self.assertEqual(result["summary"], {"green": 252, "warning": 0, "critical": 0})
+        self.assertEqual(result["municipalities"]["Storfors"]["lunch"]["reason"], "accepted_empty_supply")
+        self.assertEqual(result["reportNotes"], [exception])
+        # Undantaget gäller tomt utbud, inte trasig hämtning eller andra kommuner.
+        broken = health.build_health("https://example.test/data", self.now, opener_for(data, broken="lunch.json"), [exception])
+        self.assertEqual(broken["municipalities"]["Storfors"]["lunch"]["reason"], "unreadable_source")
+        data["lunch.json"]["municipalities"]["Kommun 0"]["restaurants"] = []
+        other = health.build_health("https://example.test/data", self.now, opener_for(data), [exception])
+        self.assertEqual(other["municipalities"]["Kommun 0"]["lunch"]["status"], "critical")
+
 
 if __name__ == "__main__":
     unittest.main()
