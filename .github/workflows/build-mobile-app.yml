@@ -1,5 +1,12 @@
 name: Bygg DinPuls testapp
 on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        default: all
+        options: [all, ios, android]
+        description: Plattform att bygga och verifiera
   push:
     branches: ['app/**']
     paths: ['app/**', '.github/workflows/build-mobile-app.yml']
@@ -10,6 +17,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   android:
+    if: github.event_name != 'workflow_dispatch' || inputs.platform != 'ios'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -98,6 +106,7 @@ jobs:
           retention-days: 7
           if-no-files-found: error
   ios:
+    if: github.event_name != 'workflow_dispatch' || inputs.platform != 'android'
     runs-on: macos-latest
     timeout-minutes: 35
     defaults:
@@ -113,7 +122,10 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm --prefix .. ci --no-audit --no-fund
       - run: npm run build && npm test && npx cap sync ios
-      - run: node scripts/prepare-ios.mjs
+      - name: Förbered iOS och eventuell Firebase-konfiguration
+        env:
+          IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
+        run: node scripts/prepare-ios.mjs
       - name: Bygg utan betalt konto för iPhone-simulator
         run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build-ios CODE_SIGNING_ALLOWED=NO build
       - name: Paketera simulatorapp

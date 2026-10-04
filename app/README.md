@@ -27,7 +27,7 @@ En lyckad kompilering är inte ett godkänt fullständigt E2E-test. Första vers
 
 ## Verifieringsgräns för push
 
-Webbpush använder befintlig VAPID-konfiguration. Android använder Firebase-projektet `dinpuls-57683` och app-ID `se.dinpuls.app`; serverns native-konfiguration bekräftar Android-stöd. Tillstånd begärs först när användaren väljer att ansluta notiser. Enhetstoken och valda kategorier registreras, och avslutad prenumeration raderas. Lokala tester verifierar dessa klientflöden samt synlig notis i öppen app; detta bevisar inte verklig leverans. iOS/APNs är inte konfigurerat.
+Webbpush använder befintlig VAPID-konfiguration. Android använder Firebase-projektet `dinpuls-57683` och app-ID `se.dinpuls.app`; serverns native-konfiguration bekräftar Android-stöd. Tillstånd begärs först när användaren väljer att ansluta notiser. Enhetstoken och valda kategorier registreras, och avslutad prenumeration raderas. Lokala tester verifierar dessa klientflöden samt synlig notis i öppen app; detta bevisar inte verklig leverans. iOS-klient och serverkod är förberedda, men Apple/APNs-konfiguration och fysisk mottagning saknas.
 
 För iPhone krävs APNs-capability, korrekt signing och servernyckel. En levererad notis med appen stängd måste därefter verifieras på en faktisk enhet. Befintliga webbprenumerationer lämnas orörda.
 
@@ -40,3 +40,13 @@ Avtals-PDF kan sparas och delas via telefonens filfunktioner. Ordinarie bildgrä
 Permanent release-signering är genomförd efter uttryckligt godkännande. Krypterad nyckel och lösenord lagras i GitHub Actions secrets; privat lokal reservkopia ligger utanför repot. GitHub verifierar både APK-signatur och AAB-signatur. Första installationen av den permanent signerade APK-filen kan kräva avinstallation av den tidigare debugsignerade testappen.
 
 Automatisk pushmotor körs på produktion var tionde minut, filtrerar kommun/kategorier, etablerar baslinje utan historiska utskick, samlar per kategori och kommun högst en gång per timme och har dubblettskydd samt avregistrering av utgångna token. Aktuella offentliga flöden för nyheter, evenemang, jobb, bostäder, trafik, kollektivtrafik och sport används. Varningar gissas aldrig från väderprognoser eller nyckelord; särskilda varningskategorier kräver uttryckligt klassad och verifierad myndighetsinformation. Första produktionskörningen kontrolleras separat via /push/status. Fysisk mottagning återstår som eget test. Inget butikskonto har skapats.
+
+## iPhone: förberedelse utan betalt konto
+
+Efter `npx cap sync ios` körs `node scripts/prepare-ios.mjs`. Firebase Core/Messaging är låsta till 12.19.1. AppDelegate kopplar APNs till Firebase och skickar FCM-token till Capacitor. Råa APNs-token godtas inte av backend. Inga rättigheter eller token begärs vid första appstart; användaren måste välja notiser. Utan Firebase-konfiguration eller aktiverad server visas ett ärligt installationsläge.
+
+När Apple-kontot finns: registrera iOS-appen `se.dinpuls.app` i Firebase-projekt `dinpuls-57683`, lägg GoogleService-Info.plist i GitHub-secreten `IOS_GOOGLE_SERVICE_INFO_PLIST`, koppla APNs-nyckeln i Firebase och välj rätt Apple-team/provisioning. Debug har development-entitlement och release production-entitlement. Aktivera serverns `IOS_PUSH_ENABLED` först när dessa förutsättningar är uppfyllda. Kod och tester stöder båda plattformarna; flaggan är fortfarande false i produktion.
+
+CI bygger först en normal simulatorapp utan testbrygga. Därefter kompileras en separat isolerad variant med `IOS_CI` endast på app-targeten och lokal HTTP endast i testvarianten. Den driver riktig WKWebView på två iPhone-storlekar, återanvänder Androids konto-/köp-/bannertest och sparar rapporter/skärmbilder. Simulatorarkivet kan inte installeras på en fysisk iPhone. Verklig notismottagning, mejlinkorg och Apples godkännande är separata återstående verifieringar.
+
+Butiksunderlag finns i `store/ios-metadata.json`. Detta är ett utkast, inte en inlämning. Annonsköpet måste lösas enligt [Apples regel 3.1.3(g)](https://developer.apple.com/app-store/review/guidelines/#other-purchase-methods) före butikslansering: köp av annonser som visas i samma app omfattas av reglerna för köp i appen. Befintligt köpflöde har inte ändrats till IAP och ingen avgiftsbelagd tjänst har startats.
