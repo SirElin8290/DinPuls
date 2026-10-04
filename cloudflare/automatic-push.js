@@ -4,7 +4,7 @@ import {fcmAccessToken} from './native-push.js';
 
 const names=new Set(municipalities.municipalities.map(m=>m.name));
 const HOUR=3600000;
-const sources=['news','events','jobs','housing','road-traffic','transport','sport-feeds'];
+const sources=['news','events','jobs','housing','road-traffic','transport','sport-feeds','important','missing-people'];
 const pages={news:'nyheter.html',events:'evenemang.html',jobs:'jobb.html',housing:'bostader.html',traffic:'trafik.html',transport:'trafik.html',sport:'sport.html',important:'kris-beredskap.html','extreme-weather':'kris-beredskap.html','missing-people':'kris-beredskap.html'};
 const labels={news:'Nya lokala nyheter',events:'Kommande evenemang',jobs:'Nya lediga jobb',housing:'Nya lediga bostäder',traffic:'Ny trafikinformation',transport:'Ändrad kollektivtrafik',sport:'Nya matchresultat',important:'Viktig information','extreme-weather':'Officiell vädervarning','missing-people':'Officiell efterlysning'};
 const hash=async s=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))),b=>b.toString(16).padStart(2,'0')).join('');
@@ -24,6 +24,12 @@ export function collectCandidates(source,data,now){
    for(const m of list(a.municipalities))add(m,explicit?a.notificationCategory:'news',a.id||a.url);
   }
  }else for(const [m,d] of Object.entries(data.municipalities||{})){
+  if(source==='important'&&fresh(d.checkedAt,now,4*HOUR))for(const item of list(d.items)){
+   const health=list(d.sourceHealth).some(h=>h.id===item.category&&h.status==='ok');
+   const category=item.category==='weather'&&item.source==='SMHI'&&[92,98].includes(Number(item.priority))?'extreme-weather':item.category==='crisis'&&item.source==='Krisinformation.se'?'important':null;
+   if(category&&health&&item.url&&fresh(item.publishedAt,now,48*HOUR))add(m,category,item.id);
+  }
+  if(source==='missing-people'&&fresh(data.generatedAt,now,90*60000))for(const item of list(d.items))if(item.source==='Missing People Sweden'&&item.originMunicipality===m&&item.url?.startsWith('https://www.missingpeople.se/efterlysningar/')&&fresh(item.publishedAt,now,48*HOUR))add(m,'missing-people',item.id);
   if(source==='events')for(const e of list(d.events))if(date(e.startDate)>=now-24*HOUR&&date(e.startDate)<=now+30*24*HOUR)add(m,'events',e.id||e.url);
   if(source==='jobs')for(const j of list(d.jobs))if(fresh(j.publicationDate,now,48*HOUR)&&date(j.applicationDeadline)>now)add(m,'jobs',j.id);
   if(source==='housing')for(const h of list(d.listings))if(h.url)add(m,'housing',h.id||h.url);

@@ -13,7 +13,7 @@ const runtime=new Miniflare({modules:true,script:'export default {fetch(){return
 const db=await runtime.getD1Database('DB');
 const pair=generateKeyPairSync('rsa',{modulusLength:2048}),vapid=webpush.generateVAPIDKeys();
 const env={DB:db,AUTOMATIC_PUSH_ENABLED:'true',VAPID_PUBLIC_KEY:vapid.publicKey,VAPID_PRIVATE_KEY:vapid.privateKey,VAPID_SUBJECT:'mailto:test@example.invalid',FCM_SERVICE_ACCOUNT_JSON:JSON.stringify({type:'service_account',project_id:'dinpuls-57683',client_email:'test@example.invalid',private_key:pair.privateKey.export({type:'pkcs8',format:'pem'})})};
-const data={};for(const s of ['news','events','jobs','housing','road-traffic','transport','sport-feeds'])data[s]={generatedAt:stamp,municipalities:{}};
+const data={};for(const s of ['news','events','jobs','housing','road-traffic','transport','sport-feeds','important','missing-people'])data[s]={generatedAt:stamp,municipalities:{}};
 const article=(id,m)=>({id,municipalities:[m],scope:'local',publishedAt:stamp,title:id});
 data.news.articles=[article('existing','Åmål')];
 const deliveries=[];
@@ -48,6 +48,15 @@ try{
  assert.equal(collectCandidates('events',{generatedAt:stamp,municipalities:{Åmål:{events:[{id:'past',startDate:'2026-09-01'},{id:'future',startDate:'2026-10-12'}]}}},now).length,1);
  assert.equal(collectCandidates('news',{generatedAt:stamp,articles:[{...article('not-warning','Åmål'),notificationCategory:'extreme-weather',sourceType:'publisher'}]},now)[0].category,'news');
  assert.equal((await automaticPushStatus(env)).municipalities,21);
+ const warning={id:'official',category:'weather',source:'SMHI',priority:92,publishedAt:stamp,url:'https://www.smhi.se/'};
+ const important={generatedAt:stamp,municipalities:{Åmål:{checkedAt:stamp,sourceHealth:[{id:'weather',name:'SMHI varningar',status:'ok'}],items:[warning,{...warning,id:'yellow',priority:82}]}}};
+ assert.equal(collectCandidates('important',important,now).length,1);
+ assert.equal(collectCandidates('important',important,now)[0].category,'extreme-weather');
+ important.municipalities.Åmål.sourceHealth[0].status='error';assert.equal(collectCandidates('important',important,now).length,0);
+ const person={id:'new-person',source:'Missing People Sweden',originMunicipality:'Åmål',publishedAt:stamp,url:'https://www.missingpeople.se/efterlysningar/test/'};
+ const missing={generatedAt:stamp,municipalities:{Åmål:{items:[person,{...person,id:'old',publishedAt:'2022-03-31'}]},Säffle:{items:[person]}}};
+ assert.deepEqual(collectCandidates('missing-people',missing,now).map(i=>i.municipality),['Åmål']);
+ assert.equal(collectCandidates('missing-people',{...missing,generatedAt:new Date(now-2*3600000).toISOString()},now).length,0);
  assert.deepEqual(await runAutomaticPush({...env,AUTOMATIC_PUSH_ENABLED:'false'}),{enabled:false});
  await db.prepare("INSERT INTO subscriptions VALUES('temporary','https://example.invalid/temporary','key','auth','Eda','[\"news\"]','2026-10-01T00:00:00Z')").run();
  data.news.articles.push(article('retry-ed a','Eda'));
