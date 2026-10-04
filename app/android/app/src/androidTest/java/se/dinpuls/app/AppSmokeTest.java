@@ -49,6 +49,12 @@ public class AppSmokeTest {
             }
             evaluate(app,"location.href='/foretag/start.html';");
             awaitTrue(app,"location.pathname==='/foretag/start.html' && !!document.querySelector('input[type=password]')");
+            awaitTrue(app,"!document.querySelector('#registrationForm').hidden");
+            evaluate(app,"document.querySelector('#showRegistration').click();");
+            awaitTrue(app,"document.querySelector('#authCard').classList.contains('is-flipped') && !document.querySelector('#registrationPanel').inert");
+            screenshot("company-registration");
+            evaluate(app,"document.querySelector('#showLogin').click();");
+            awaitTrue(app,"!document.querySelector('#authCard').classList.contains('is-flipped') && !document.querySelector('#loginPanel').inert");
             screenshot("login");
             org.json.JSONArray point=new org.json.JSONArray(evaluate(app,"(()=>{const r=document.querySelector('input[type=password]').getBoundingClientRect();return [(r.x+r.width/2)*devicePixelRatio,(r.y+r.height/2)*devicePixelRatio];})()"));
             float x=(float)point.getDouble(0), y=(float)point.getDouble(1);

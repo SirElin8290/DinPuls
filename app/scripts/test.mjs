@@ -24,6 +24,7 @@ test('packaged app contains all public entry points without secrets or stale fee
  assert.deepEqual(await readdir(new URL('../www/data/',import.meta.url)),['municipalities.json']);
  const config=JSON.parse(await readFile(new URL('../capacitor.config.json',import.meta.url),'utf8'));
  assert((await readFile(new URL('../www/admin/ad-inventory.js',import.meta.url),'utf8')).length>0);
+ assert((await readFile(new URL('../www/cloudflare/swedish-org-number.js',import.meta.url),'utf8')).includes('normalizeSwedishOrgNumber'));
  assert(!config.server?.url);assert.equal(config.plugins.CapacitorHttp.enabled,true);
 });
 
