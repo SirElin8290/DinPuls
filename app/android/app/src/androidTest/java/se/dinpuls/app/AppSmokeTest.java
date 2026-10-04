@@ -62,4 +62,24 @@ public class AppSmokeTest {
             screenshot("app-link-kil");
         }
     }
+    @Test public void moduleChoicesPersistAfterAppRestart() throws Exception {
+        String hidden="[...document.querySelectorAll('[data-home-module]')].every(c=>!c.checked && HOME_OPTIONAL_MODULES[c.dataset.homeModule].every(selector=>[...document.querySelectorAll(selector)].every(el=>el.hidden&&getComputedStyle(el).display==='none')))";
+        try(ActivityScenario<MainActivity> app=ActivityScenario.launch(MainActivity.class)){
+            app.onActivity(activity->main=activity);
+            awaitTrue(app,"!!document.querySelector('#homepage-customize-button') && typeof HOME_OPTIONAL_MODULES!=='undefined' && !!document.querySelector('.sport-home')");
+            evaluate(app,"document.querySelector('#homepage-customize-button').click();document.querySelector('#homepage-customize-reset').click();for(const c of document.querySelectorAll('[data-home-module]'))if(c.checked)c.click();");
+            awaitTrue(app,hidden);
+            assertEquals("true",evaluate(app,"JSON.parse(localStorage.getItem('dinpuls-home-modules-v1')).hidden.length===document.querySelectorAll('[data-home-module]').length"));
+            evaluate(app,"document.querySelector('#homepage-customize-dialog').close();");
+        }
+        try(ActivityScenario<MainActivity> app=ActivityScenario.launch(MainActivity.class)){
+            app.onActivity(activity->main=activity);
+            awaitTrue(app,"!!document.querySelector('.sport-home') && typeof HOME_OPTIONAL_MODULES!=='undefined'");
+            awaitTrue(app,hidden);
+            evaluate(app,"document.querySelector('#homepage-customize-button').click();document.querySelector('#homepage-customize-reset').click();");
+            awaitTrue(app,"[...document.querySelectorAll('[data-home-module]')].every(c=>c.checked)");
+            assertEquals("[]",evaluate(app,"JSON.parse(localStorage.getItem('dinpuls-home-modules-v1')).hidden"));
+        }
+    }
+
 }

@@ -24,3 +24,9 @@ Mobilnavigation, Androids bakåtknapp, säkra externa länkar och internetstatus
 - Butiksgodkända ikonresurser, appmetadata, release-signering och utvecklarkonton när användaren vill publicera.
 
 En lyckad kompilering är inte ett godkänt fullständigt E2E-test. Första versionen är en testapp.
+
+## Verifieringsgräns för push
+
+Den befintliga servern och VAPID-nyckeln hanterar webbpush, inte native app-token. Det finns varken `google-services.json`, Firebase-avsändarcredentials eller APNs-konfiguration i appen. Appens inställningar visar därför uttryckligen att appnotiser inte är anslutna; sparade kategorier får inte förväxlas med en aktiv prenumeration.
+
+För Android krävs ett Firebase-projekt med appen `se.dinpuls.app`, klientkonfiguration och en säker serveranslutning till FCM. För iPhone krävs APNs-capability, korrekt signing och servernyckel. En levererad notis med appen stängd måste därefter verifieras på en faktisk enhet. Befintliga webbprenumerationer lämnas orörda.
