@@ -21,7 +21,10 @@ def norm(value: object) -> str:
 
 
 def is_publishable(item: dict) -> bool:
-    return str(item.get("status") or "").casefold() in PUBLISHABLE
+    description = str(item.get("description") or "").strip()
+    return (str(item.get("status") or "").casefold() in PUBLISHABLE
+            and bool(description)
+            and "bedriver lokal medlemsverksamhet" not in description.casefold())
 
 
 def valid_url(value: object) -> bool:

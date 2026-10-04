@@ -29,6 +29,11 @@ jobs:
       - name: Kör lanseringstester
         run: npm test
 
+      - name: Kontrollera föreningarnas publiceringsgrind och profilsidor
+        run: |
+          node scripts/test_association_publication.js
+          node scripts/test_association_profile_runtime.js
+
       - name: Kontrollera kommunernas datatäckning
         run: python scripts/audit_municipality_readiness.py
 
