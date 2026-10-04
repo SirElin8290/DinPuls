@@ -8,7 +8,7 @@ Node 22 eller senare: `npm ci`, `npm run build`, `npm test`, `npx cap sync`.
 Android: öppna med `npm run android`; kräver kostnadsfria Android Studio/SDK och JDK 21.
 iOS: öppna med `npm run ios` på Mac med Xcode. Simulatorbygge behöver inget betalt utvecklarkonto.
 
-GitHub bygger debug-APK, osignerat Android App Bundle efter godkända Androidtester och osignerad simulatorapp på appbranchen. Inga butikskonton, betalningar eller produktionsdeploy görs. Standardrunners är kostnadsfria i detta publika repo. Artefakter sparas i tre dagar.
+GitHub bygger debug-APK, permanent signerat Android App Bundle och release-APK efter godkända Androidtester och osignerad simulatorapp på appbranchen. Inga butikskonton, betalningar eller produktionsdeploy görs. Standardrunners är kostnadsfria i detta publika repo. Artefakter sparas i tre dagar.
 
 ## Arkitektur
 
@@ -19,7 +19,7 @@ Mobilnavigation, Androids bakåtknapp, säkra externa länkar och internetstatus
 ## Kvar inför lansering
 
 - Verifiera rendering, tangentbord, login, uppladdning och session på verklig Android och iPhone.
-- Androids Firebase-klient och serveranslutning är konfigurerade. Faktisk mottagning på telefon, särskilt med stängd app, återstår att verifiera. Automatisk utskicksmotor är inte aktiverad.
+- Androids Firebase-klient och serveranslutning är konfigurerade. Faktisk mottagning på telefon, särskilt med stängd app, återstår att verifiera. Automatisk utskicksmotor är publicerad; utskick väljs efter prenumerantens kommun och kategorier.
 - Verifierade applänkar, konto-/integritetskrav och full butikstestning.
 - Butiksgodkända ikonresurser, appmetadata, release-signering och utvecklarkonton när användaren vill publicera.
 
@@ -37,4 +37,6 @@ Instrumenteringen använder en separat lokal D1/R2-backend och fångar mejlanrop
 
 Avtals-PDF kan sparas och delas via telefonens filfunktioner. Ordinarie bildgräns och format återanvänds: PNG/JPG/WebP, högst 5 MB. GIF/video har inte lagts till.
 
-Permanent release-signering och lagring av privat nyckel i GitHub Actions secrets är inte genomförda. Det osignerade AAB-paketet är inte färdigt för Play Store. Automatisk push till prenumeranter är inte aktiverad. Båda åtgärderna kräver uttryckligt godkännande efter automatisk säkerhetsgranskning.
+Permanent release-signering är genomförd efter uttryckligt godkännande. Krypterad nyckel och lösenord lagras i GitHub Actions secrets; privat lokal reservkopia ligger utanför repot. GitHub verifierar både APK-signatur och AAB-signatur. Första installationen av den permanent signerade APK-filen kan kräva avinstallation av den tidigare debugsignerade testappen.
+
+Automatisk pushmotor körs på produktion var tionde minut, filtrerar kommun/kategorier, etablerar baslinje utan historiska utskick, samlar per kategori och kommun högst en gång per timme och har dubblettskydd samt avregistrering av utgångna token. Aktuella offentliga flöden för nyheter, evenemang, jobb, bostäder, trafik, kollektivtrafik och sport används. Varningar gissas aldrig från väderprognoser eller nyckelord; särskilda varningskategorier kräver uttryckligt klassad och verifierad myndighetsinformation. Första produktionskörningen kontrolleras separat via /push/status. Fysisk mottagning återstår som eget test. Inget butikskonto har skapats.
