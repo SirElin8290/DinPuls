@@ -23,8 +23,16 @@ export async function initializeNativePush(){
   document.addEventListener('dinpuls:municipalitychange',async()=>{const token=localStorage.getItem(TOKEN);if(token)try{await save(token);}catch(error){fail(error);}});
   await PushNotifications.addListener('registration',async({value})=>{try{await save(value);localStorage.setItem(TOKEN,value);active();}catch(error){fail(error);}});
   await PushNotifications.addListener('registrationError',()=>fail(new Error('Android kunde inte registrera enheten hos Firebase.')));
-  await PushNotifications.addListener('pushNotificationReceived',()=>{localStorage.setItem('dp-native-push-last-receipt',new Date().toISOString());help.textContent='En pushnotis har tagits emot av Android-appen.';});
-  await PushNotifications.addListener('pushNotificationActionPerformed',({notification})=>{try{const url=new URL(notification.data?.path||'/index.html',location.origin);if(url.origin===location.origin&&__DINPULS_PAGES__.includes(url.pathname))location.href=url.pathname+url.search;}catch{}});
+  await PushNotifications.addListener('pushNotificationReceived',notification=>{
+    localStorage.setItem('dp-native-push-last-receipt',new Date().toISOString());help.textContent='En pushnotis har tagits emot av Android-appen.';
+    document.querySelector('.app-push-notice')?.remove();
+    const notice=document.createElement('div');notice.className='app-push-notice';notice.setAttribute('role','status');
+    const open=document.createElement('button');open.type='button';open.textContent=[notification.title,notification.body].filter(Boolean).join(' · ')||'Ny notis från DinPuls';
+    open.onclick=()=>{try{const url=new URL(notification.data?.path||'/index.html',location.origin);if(url.origin===location.origin&&__DINPULS_PAGES__.includes(url.pathname))location.href=url.pathname+url.search;}catch{}notice.remove();};
+    const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Stäng notisen');close.onclick=()=>notice.remove();
+    notice.append(open,close);document.body.append(notice);setTimeout(()=>notice.remove(),12000);
+  });
+  await PushNotifications.addListener('pushNotificationActionPerformed',({notification})=>{localStorage.setItem('dp-native-push-last-receipt',new Date().toISOString());try{const url=new URL(notification.data?.path||'/index.html',location.origin);if(url.origin===location.origin&&__DINPULS_PAGES__.includes(url.pathname))location.href=url.pathname+url.search;}catch{}});
   enable.addEventListener('click',async()=>{enable.disabled=true;try{const permission=await PushNotifications.requestPermissions();if(permission.receive!=='granted')throw new Error('Tillåt Android-notiser för DinPuls i telefonens inställningar.');await PushNotifications.createChannel({id:'dinpuls',name:'DinPuls',importance:4});await PushNotifications.register();}catch(error){fail(error);}});
   const stop=async()=>{await request('/device','DELETE');await PushNotifications.unregister();localStorage.removeItem(TOKEN);test.hidden=true;enable.hidden=false;disable.hidden=true;state('inactive','Android-push är avstängd.');};
   disable.addEventListener('click',()=>stop().catch(fail));
