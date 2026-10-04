@@ -127,7 +127,7 @@ public class AppSmokeTest {
             awaitTrue(app,"!!document.querySelector('#registrationForm') && !document.querySelector('#registrationForm').hidden");
             evaluate(app,"document.querySelector('#showRegistration').click();const f=document.querySelector('#registrationForm');const d={orgNo:'5561234567',company:'ISOLATED ANDROID TEST',address:'Testgatan 1',postalCode:'66230',city:'Åmål',contact:'CI Test',phone:'0701234567',email:'android@example.invalid'};for(const [k,v] of Object.entries(d))f.elements[k].value=v;f.requestSubmit();");
             awaitTrue(app,"document.querySelector('#registrationResult').textContent.includes('aktiverings') && !document.querySelector('#registrationResult').textContent.includes('misslyck')");
-            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages[0].text.match(/#token=[a-f0-9]+&purpose=activate-account/)[0];sessionStorage.setItem('ci-activation',link);location.href='/foretag/konto.html'+link;});");
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages[0].text.match(/#token=[a-f0-9]+&purpose=activate-account/)[0];sessionStorage.setItem('ci-activation',link);location.href='/foretag/konto.html?mail=reset'+link;});");
             awaitTrue(app,"!!document.querySelector('#passwordForm') && !document.querySelector('#passwordForm').hidden");
             evaluate(app,"document.querySelector('#newPassword').value='Android-Test-2026!';document.querySelector('#confirmPassword').value='Android-Test-2026!';document.querySelector('#passwordForm').requestSubmit();");
             awaitTrue(app,"!!document.querySelector('#statusView') && !document.querySelector('#statusView').hidden && document.querySelector('#statusTitle').textContent==='Klart!'");
@@ -140,7 +140,7 @@ public class AppSmokeTest {
             awaitTrue(app,"!!document.querySelector('#resetRequestForm') && !document.querySelector('#resetRequestForm').hidden");
             evaluate(app,"document.querySelector('#resetEmail').value='android@example.invalid';document.querySelector('#resetRequestForm').requestSubmit(document.querySelector('#resetRequestForm button'));");
             awaitTrue(app,"!document.querySelector('#resetMessage').hidden");
-            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages.at(-1).text.match(/#token=[a-f0-9]+&purpose=reset-password/)[0];location.href='/foretag/konto.html'+link;});");
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages.at(-1).text.match(/#token=[a-f0-9]+&purpose=reset-password/)[0];location.href='/foretag/konto.html?mail=reset'+link;});");
             awaitTrue(app,"!!document.querySelector('#passwordForm') && !document.querySelector('#passwordForm').hidden");
             evaluate(app,"document.querySelector('#newPassword').value='Android-New-Test-2026!';document.querySelector('#confirmPassword').value='Android-New-Test-2026!';document.querySelector('#passwordForm').requestSubmit();");
             awaitTrue(app,"document.querySelector('#statusTitle').textContent==='Klart!'");
