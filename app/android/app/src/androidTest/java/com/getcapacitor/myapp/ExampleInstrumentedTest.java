@@ -24,4 +24,3 @@ public class ExampleInstrumentedTest {
         assertEquals("se.dinpuls.app", appContext.getPackageName());
     }
 }
-
