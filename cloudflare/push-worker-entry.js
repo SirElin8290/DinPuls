@@ -1,4 +1,5 @@
 import worker from "./push-worker.js";
+import { handleNativePush } from "./native-push.js";
 
 const ALLOWED_ORIGINS = new Set(["https://dinpuls.se", "https://www.dinpuls.se"]);
 
@@ -84,6 +85,8 @@ async function deleteContract(request, env, id) {
 
 export default {
   async fetch(request, env, ctx) {
+    const nativeResponse = await handleNativePush(request, env);
+    if (nativeResponse) return nativeResponse;
     const url = new URL(request.url);
     const origin = request.headers.get("Origin");
 
