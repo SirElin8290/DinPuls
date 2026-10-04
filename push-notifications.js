@@ -111,15 +111,15 @@
     if (!enable || !disable || !help) return;
 
     const current = await loadConfig();
-    if (!supported()) {
-      enable.disabled = true;
-      setStatus("unsupported", "Push stöds inte i den här webbläsaren", "Du kan fortfarande använda notiscentret på sidan.");
-      return;
-    }
     if (isIos() && !isStandalone()) {
       enable.disabled = true;
       setStatus("install", "Lägg först DinPuls på hemskärmen", "På iPhone och iPad fungerar push från en hemskärmsinstallerad webbapp.");
       help.textContent = "Öppna Dela-menyn i Safari och välj Lägg till på hemskärmen. Öppna sedan DinPuls därifrån.";
+      return;
+    }
+    if (!supported()) {
+      enable.disabled = true;
+      setStatus("unsupported", "Push stöds inte i den här webbläsaren", "Du kan fortfarande använda notiscentret på sidan.");
       return;
     }
     if (Notification.permission === "denied") {
@@ -134,6 +134,8 @@
       return;
     }
     const subscription = await currentSubscription();
+    // En lokal prenumeration räcker inte: backend måste känna till samma enhet och val.
+    if (subscription) await saveAtServer(subscription);
     enable.hidden = Boolean(subscription);
     disable.hidden = !subscription;
     enable.disabled = false;
@@ -189,7 +191,7 @@
     document.querySelector("#push-disable")?.addEventListener("click", () => disablePush().catch(() => setStatus("error", "Push kunde inte stängas av", "Försök igen om en stund.")));
     document.addEventListener("dinpuls:municipalitychange", () => syncSettings().then(refreshUi).catch(() => refreshUi()));
     document.addEventListener("dinpuls:local-settings-cleared", () => disablePush().catch(() => {}));
-    await refreshUi();
+    await refreshUi().catch(() => setStatus("error", "Pushanslutningen kunde inte verifieras", "Försök igen när du har internetanslutning."));
     if (window.lucide) lucide.createIcons();
   }
 

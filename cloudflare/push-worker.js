@@ -1731,9 +1731,12 @@ async function sendTestNotification(request, env) {
   if (!isSupportedMunicipality(body?.municipality)) {
     return json(request, { ok: false, error: "Ogiltig kommun." }, 400);
   }
+  if (typeof body.endpoint !== "string" || !body.endpoint.startsWith("https://")) {
+    return json(request, { ok: false, error: "Ange testapparatens egen pushadress." }, 400);
+  }
   const row = await env.DB.prepare(
-    "SELECT endpoint_hash, endpoint, p256dh, auth FROM subscriptions WHERE municipality = ? ORDER BY updated_at DESC LIMIT 1"
-  ).bind(body.municipality).first();
+    "SELECT endpoint_hash, endpoint, p256dh, auth FROM subscriptions WHERE municipality = ? AND endpoint_hash = ? LIMIT 1"
+  ).bind(body.municipality, await endpointHash(body.endpoint)).first();
   if (!row) return json(request, { ok: false, error: "Ingen aktiv prenumeration finns för kommunen." }, 404);
 
   configureWebPush(env);

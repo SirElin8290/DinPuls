@@ -17,7 +17,7 @@ for(const file of files.filter(publicFile)){
   await writeFile(target,html);
  }else if(file==='push-notifications.js'){
   const source=(await readFile(resolve(root,file),'utf8')).replace(/\r\n/g,'\n');
-  const anchor='    const current = await loadConfig();\n    if (!supported())';
+  const anchor='    const current = await loadConfig();\n    if (isIos() && !isStandalone())';
   if(!source.includes(anchor))throw new Error('Push-UI har ändrats: kontrollera appanpassningen.');
   await writeFile(target,source.replace(anchor,`    const current = await loadConfig();
     if (window.Capacitor?.isNativePlatform?.()) {
@@ -26,7 +26,7 @@ for(const file of files.filter(publicFile)){
       help.textContent = "Notiscentret fungerar när appen är öppen. Push i bakgrunden är ännu inte aktiverat.";
       return;
     }
-    if (!supported())`));
+    if (isIos() && !isStandalone())`));
  }else await copyFile(resolve(root,file),target);
  copied++;
 }

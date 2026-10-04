@@ -15,7 +15,11 @@ self.addEventListener("push", event => {
 
 self.addEventListener("notificationclick", event => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  let target = self.location.origin + "/";
+  try {
+    const url = new URL(event.notification.data?.url || "/", self.location.origin);
+    if (url.origin === self.location.origin) target = url.href;
+  } catch { /* Ogiltiga notislänkar öppnar startsidan. */ }
   event.waitUntil(clients.matchAll({ type: "window", includeUncontrolled: true }).then(windows => {
     const existing = windows.find(client => client.url === target);
     return existing ? existing.focus() : clients.openWindow(target);
