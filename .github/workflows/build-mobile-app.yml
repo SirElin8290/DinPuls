@@ -48,7 +48,12 @@ jobs:
       - name: Aktivera emulatoracceleration
         run: sudo chmod 666 /dev/kvm
       - name: Bygg isolerad testvariant utan riktiga köp eller mejl
-        run: DINPULS_ISOLATED_E2E=1 npm run build && npx cap sync android
+        run: |
+          cp capacitor.config.json "$RUNNER_TEMP/capacitor-production.json"
+          trap 'cp "$RUNNER_TEMP/capacitor-production.json" capacitor.config.json' EXIT
+          node --input-type=module -e "import fs from 'node:fs';const p='capacitor.config.json';const c=JSON.parse(fs.readFileSync(p));c.android.allowMixedContent=true;fs.writeFileSync(p,JSON.stringify(c));"
+          DINPULS_ISOLATED_E2E=1 npm run build
+          npx cap sync android
       - name: Testa appstart, live-data, kommunval och navigation på Android
         uses: reactivecircus/android-emulator-runner@v2
         with:
