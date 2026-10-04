@@ -69,12 +69,32 @@ jobs:
             app/android/app-screenshots
             app/android/app/build/reports/androidTests
           retention-days: 3
-      - name: Förbered osignerad AAB utan isolerad testkod
-        run: npm run build && npx cap sync android && cd android && ./gradlew bundleRelease --no-daemon
+      - name: Bygg permanent signerad APK och AAB utan isolerad testkod
+        env:
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+        run: |
+          export ANDROID_RELEASE_KEYSTORE_PATH="$RUNNER_TEMP/dinpuls-release.p12"
+          trap 'rm -f "$ANDROID_RELEASE_KEYSTORE_PATH"' EXIT
+          test -n "$ANDROID_RELEASE_KEYSTORE_BASE64"
+          printf '%s' "$ANDROID_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_RELEASE_KEYSTORE_PATH"
+          chmod 600 "$ANDROID_RELEASE_KEYSTORE_PATH"
+          npm run build && npx cap sync android
+          cd android && ./gradlew assembleRelease bundleRelease --no-daemon
+          "$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)" verify --print-certs app/build/outputs/apk/release/app-release.apk
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
       - uses: actions/upload-artifact@v4
         with:
-          name: DinPuls-Android-AAB-OSIGNERAD
+          name: DinPuls-Android-AAB-SIGNERAD
           path: app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DinPuls-Android-releaseapp
+          path: app/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 7
           if-no-files-found: error
   ios:
