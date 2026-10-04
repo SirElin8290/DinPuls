@@ -498,6 +498,22 @@ def parse_weekday_menu(page, stop_after_pattern=None):
         if active and useful_dish(line) and len(menu[active])<5: menu[active].append(line)
     return extract_week(lines),menu
 
+def parse_wordpress_relative_menu(page, metadata, now, expected_url):
+    # Relativ veckorubrik får bara användas tillsammans med samma sidas färska publiceringsmetadata.
+    records=[r for r in metadata if isinstance(r,dict) and str(r.get("link", "")).rstrip("/")==expected_url.rstrip("/")] if isinstance(metadata,list) else []
+    if len(records)!=1: raise RuntimeError("WordPress: fel eller saknad menysideidentitet")
+    try: modified=datetime.fromisoformat(records[0]["modified_gmt"]+"+00:00").astimezone(TIMEZONE)
+    except (KeyError,ValueError,TypeError): raise RuntimeError("WordPress: verifierad uppdateringstid saknas") from None
+    if modified>now or modified.date().isocalendar()[:2]!=now.date().isocalendar()[:2]: raise RuntimeError("WordPress: menyn uppdaterades inte aktuell vecka")
+    parser=TextExtractor();parser.feed(page);lines=parser.text_lines()
+    if "Denna vecka" not in lines: raise RuntimeError("WordPress: aktuell veckosektion saknas")
+    start=lines.index("Denna vecka")+1
+    end=next((i for i in range(start,len(lines)) if lines[i] in {"Nästa vecka","Helgmeny"}),len(lines))
+    _,days=parse_weekday_menu("\n".join(lines[start:end]))
+    if not any(days.values()): raise RuntimeError("WordPress: veckosektionen saknar lunchrätter")
+    return now.isocalendar().week,days
+
+
 def parse_scoped_weekday_menu(page, heading, expected_week):
     """Läser endast den namngivna restaurangens sektion och exakt efterfrågad vecka."""
     parser=TextExtractor(); parser.feed(page); lines=parser.text_lines()
@@ -672,9 +688,11 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
             item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
             if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
             parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch"}:
+            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}:
                 try:
-                    if parser_name=="ramo-standing-lunch":
+                    if parser_name=="wordpress-relative-week-menu":
+                        page=fetcher(source["url"]); metadata=json.loads(fetcher(source["metadataUrl"])); week,days=parse_wordpress_relative_menu(page,metadata,now,source["url"])
+                    elif parser_name=="ramo-standing-lunch":
                         item["standingDishes"]=parse_ramo_lunch(fetcher(source["url"])); week=None; days={}
                     elif parser_name=="hagfors-standing-pizza":
                         item["standingDishes"]=fetch_hagfors_lunch(source,fetcher); week=None; days={}
@@ -711,7 +729,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
                     elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
                     elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
                     elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
                     if source.get("menuYearPattern"):
                         match=re.search(source["menuYearPattern"],page,re.I)
                         target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()

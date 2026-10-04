@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "verifiedAt": "2026-10-01",
-  "criterion": "Endast verksamheter med verifierbar publicerad dags-/veckolunchmeny eller redan fungerande automatisk meny behålls som lunchmenykandidater. Fasta bufféer, generella restauranglistningar och verksamheter utan fastställbar publicerad meny exkluderas.",
+  "verifiedAt": "2026-10-04",
+  "criterion": "Aktiv lunchlista kräver verifierad automatisk menyhämtning. Kataloglänkar, stängd lunchservering och källor utan verifierbart aktuellt/kommande eller fast lunchmenyinnehåll exkluderas. Beslut kan omprövas när en fungerande källa verifierats.",
   "excludedRestaurants": [
     {
       "municipality": "Åmål",
@@ -546,6 +546,171 @@
       "reason": "Ingen verifierbar publicerad dags- eller veckolunchmeny hittades i verksamhetens angivna källa.",
       "sourceUrl": "https://dalslandspizzeria.se/",
       "verifiedAt": "2026-10-01"
+    },
+    {
+      "municipality": "Åmål",
+      "id": "presseriet",
+      "name": "Restaurang Presseriet",
+      "reason": "Presseriet meddelar på sin egen webbplats att verksamheten har stängt; sista öppetdag anges som 21 september.",
+      "sourceUrl": "https://www.presseriet.com/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "unavailable",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Säffle",
+      "id": "kanalcafeet-saffle",
+      "name": "Kanalcaféet i Säffle",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.facebook.com/p/Kanalcaf%C3%A9et-i-S%C3%A4ffle-100057529275303/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Årjäng",
+      "id": "krogeriet",
+      "name": "Krogeriet",
+      "reason": "Automatisk omkontroll gav ingen säkert daterad aktuell eller kommande meny.",
+      "sourceUrl": "http://krogeriet.se/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "outdated",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Årjäng",
+      "id": "waterside",
+      "name": "Waterside Restaurant",
+      "reason": "Källan kan läsas men publicerar inga verifierbara lunchrätter vid omkontrollen; återaktiveras först efter verifierad automatisk menyhämtning.",
+      "sourceUrl": "http://waterside.se/dagens-lunch-12968849",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "awaiting_publication",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Arvika",
+      "id": "skeppet",
+      "name": "Restaurang Skeppet by Smak & Co",
+      "reason": "Automatisk omkontroll gav ingen säkert daterad aktuell eller kommande meny.",
+      "sourceUrl": "https://aanc.se/i-huset/restaurang-skeppet.html",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "outdated",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Grums",
+      "id": "indian-street-kitchen-grums",
+      "name": "Indian Street Kitchen",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.visitvarmland.com/grums/mat-dryck/lunch/indian-street-kitchen",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Eda",
+      "id": "amotfors-pizzeria",
+      "name": "Åmotfors Pizzeria",
+      "reason": "inget offentligt inlägg med säkert daterad lunchbild hittades",
+      "sourceUrl": "https://www.facebook.com/%C3%85motfors-Pizza-1049076465113639/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "unavailable",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Eda",
+      "id": "la-delal-koppom",
+      "name": "La Delal Pizzeria",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.visitvarmland.com/eda/mat-dryck/restaurang/la-delal-pizzeria",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Kristinehamn",
+      "id": "cafe-paus-kristinehamn",
+      "name": "Café Paus",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.visitvarmland.com/kristinehamn/de/products/food-drinks/lunch/cafe-paus",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Kristinehamn",
+      "id": "brassie-bistro-kristinehamn",
+      "name": "Brassie Bistro",
+      "reason": "Restaurangen meddelar att dagens lunch är stängd. Se källan.",
+      "sourceUrl": "https://www.brassie.se/lunchmeny",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "unavailable",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Hagfors",
+      "id": "uwan-hagfors",
+      "name": "Restaurang & Pizzeria Uwån",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.visitvarmland.com/hagfors/mat-dryck/lunch/takeaway/restaurang-pizzeria-uwan",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Munkfors",
+      "id": "munkfors-steakhouse",
+      "name": "Munkfors Steakhouse & Pizzeria",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.visitvarmland.com/munkfors/food-drinks/restaurant/munkfors-steakhouse-pizzeria",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Dals-Ed",
+      "id": "gasthuset-tjuren-ed",
+      "name": "Gästhuset Tjuren",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://www.vastsverige.com/dalsed/produkter/restaurang-tjuren/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Färgelanda",
+      "id": "hogsater-restaurang",
+      "name": "Högsäter Restaurang",
+      "reason": "Källan kan läsas men publicerar inga verifierbara lunchrätter vid omkontrollen; återaktiveras först efter verifierad automatisk menyhämtning.",
+      "sourceUrl": "https://hogsaterresturang.se/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "awaiting_publication",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
+    },
+    {
+      "municipality": "Färgelanda",
+      "id": "172ans-fargelanda",
+      "name": "172:ans Restaurang & Pizzeria",
+      "reason": "Endast katalog-/referenspost; ingen verifierad automatisk lunchmeny kan hämtas.",
+      "sourceUrl": "https://172an.se/",
+      "verifiedAt": "2026-10-04",
+      "sourceStatus": "reference",
+      "decision": "excluded_from_active_menu_catalogue",
+      "reactivationCriterion": "Verifierad fungerande automatisk hämtning av aktuell/kommande eller uttryckligen fast lunchmeny."
     }
   ]
 }

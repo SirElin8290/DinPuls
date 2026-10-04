@@ -22,6 +22,22 @@ class LunchUpdateTests(unittest.TestCase):
         self.assertEqual(["skogsstjarnan-torsby","valbergsangen-torsby","sahlstromsgarden-torsby"],[r["id"] for r in rows])
         self.assertEqual({"monday":["Verifierad rätt"]},rows[2]["days"])
 
+    def test_relative_wordpress_menu_requires_same_page_and_current_week(self):
+        page='<h4>Denna vecka</h4><h4>Måndag</h4><p>Fisk med kokt potatis</p><h4>Helgmeny</h4><p>Helgens rätt</p><h4>Nästa vecka</h4><h4>Måndag</h4><p>Nästa veckas rätt</p>'
+        now=datetime(2026,10,4,12,tzinfo=ZoneInfo('Europe/Stockholm'))
+        url='https://example.test/meny/'
+        meta=[{'link':url,'modified_gmt':'2026-09-30T11:34:41'}]
+        week,days=update_lunch.parse_wordpress_relative_menu(page,meta,now,url)
+        self.assertEqual(40,week)
+        self.assertEqual(['Fisk med kokt potatis'],days['monday'])
+        for modified in ['2026-09-20T11:00:00','2026-10-05T11:00:00','2025-09-30T11:00:00']:
+            with self.assertRaises(RuntimeError):
+                update_lunch.parse_wordpress_relative_menu(page,[{'link':url,'modified_gmt':modified}],now,url)
+        with self.assertRaisesRegex(RuntimeError,'identitet'):
+            update_lunch.parse_wordpress_relative_menu(page,[{'link':'https://wrong.test/','modified_gmt':'2026-09-30T11:34:41'}],now,url)
+        with self.assertRaises(RuntimeError):
+            update_lunch.parse_wordpress_relative_menu(page.replace('Denna vecka','Nästa vecka'),meta,now,url)
+
     def test_mashie_exact_dates_keep_current_day_and_next_week_isolated(self):
         page='<h1>Matsedel Uranus Matsal</h1><span js-date="2026-10-02"></span><section class="day-alternative"><strong>Lunch 1<span>Fredagens fisk</span></strong></section><div class="row day-current"><span js-date="2026-10-03"></span></div><section class="day-alternative"><strong>Lunch 1<span>Lördagens gryta</span></strong></section><span js-date="2026-10-05"></span><section class="day-alternative"><strong>Lunch 1<span>Nästa veckas korv</span></strong></section>'
         week,days=update_lunch.parse_mashie_menu(page,datetime(2026,10,3).date(),'Matsedel Uranus Matsal')
@@ -130,7 +146,7 @@ class LunchUpdateTests(unittest.TestCase):
 
         self.assertTrue(excluded_ids)
         self.assertTrue(configured_ids.isdisjoint(excluded_ids))
-        self.assertEqual(61, len(configured_ids))
+        self.assertEqual(46, len(configured_ids))
 
     def test_ocr_parser_requires_identity_and_reads_current_week(self):
         text = """Restaurang Ferrum\nVeckans meny vecka 40\nMåndag\nPannbiff med potatismos\nTisdag\nFiskgratäng med ris"""

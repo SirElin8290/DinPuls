@@ -5,8 +5,8 @@
   "currentWeek": 40,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
   "curation": {
-    "menuCandidates": 61,
-    "excludedWithoutVerifiableMenu": 68,
+    "menuCandidates": 46,
+    "excludedWithoutVerifiableMenu": 83,
     "exclusionSource": "data/lunch-exclusions.json"
   },
   "municipalities": {
@@ -145,22 +145,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "presseriet",
-          "name": "Restaurang Presseriet",
-          "url": "https://www.presseriet.com/",
-          "address": "Industrigatan 12",
-          "hours": "Verksamheten har meddelat stängning",
-          "parser": "source-only",
-          "closureNotice": "Presseriet meddelar på sin egen webbplats att verksamheten har stängt; sista öppetdag anges som 21 september.",
-          "closureEvidenceUrl": "https://static.wixstatic.com/media/27421f_8781314605a2457c86e741bef487d7f0~mv2.png",
-          "closureVerifiedAt": "2026-10-03",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "unavailable",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -295,20 +279,6 @@
           "mode": "automatic"
         },
         {
-          "id": "kanalcafeet-saffle",
-          "name": "Kanalcaféet i Säffle",
-          "url": "https://www.facebook.com/p/Kanalcaf%C3%A9et-i-S%C3%A4ffle-100057529275303/",
-          "address": "Säffle",
-          "hours": "Se dagens lunch",
-          "parser": "source-only",
-          "seasonal": true,
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "fyren-duse-udde",
           "name": "Fyren Duse Udde",
           "url": "https://www.fyrenduseudde.se/sommarlunch",
@@ -410,11 +380,39 @@
           "url": "https://xn--sunnanrestaurang-iob.se/meny/",
           "address": "Sunnanå Kullen 2",
           "hours": "Vardagar 11.00–15.00",
-          "parser": "weekday-headings",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "outdated",
+          "parser": "wordpress-relative-week-menu",
+          "metadataUrl": "https://xn--sunnanrestaurang-iob.se/wp-json/wp/v2/pages?slug=meny&_fields=id,modified_gmt,link",
+          "excludeDishPattern": "^Extra rätt\\.?$",
+          "checkedAt": "2026-10-04T12:25:26+02:00",
+          "weekNumber": 40,
+          "days": {
+            "monday": [
+              "Stekt fisk serveras med citruscreme och kokt potatis.",
+              "Kålpudding, lingon, gräddsås samt potatis."
+            ],
+            "tuesday": [
+              "Hemlagade Raggmunkar med lingon.",
+              "Stekt Fläsk serveras med bruna bönor/ löksås.",
+              "Pocherad fiskfilé serveras med gräslökssås och kokt potatis."
+            ],
+            "wednesday": [
+              "Ugnsbakad fisk i pesto serveras med kokt potatis.",
+              "Kycklingschnitzel serveras med sweet chilicremé och stekt potatis."
+            ],
+            "thursday": [
+              "Stekt fiskfilé med mangosås och kokt potatis.",
+              "Nattbakad karré serveras med äppelmos, apelsinsås och rostad potatis.",
+              "Hemlagade tunna pannkakor serveras med sylt och lättvispad grädde."
+            ],
+            "friday": [
+              "Stekt fiskfilé serveras med skagensås och kokt potatis.",
+              "Kotletter i krämig sambaloeleksås serveras med friterad potatis.",
+              "Fredagskaka."
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
           "mode": "automatic"
         },
         {
@@ -544,36 +542,6 @@
               "sunday": []
             }
           }
-        },
-        {
-          "id": "krogeriet",
-          "name": "Krogeriet",
-          "url": "http://krogeriet.se/",
-          "address": "Storgatan 53, Årjäng",
-          "hours": "Vardagar 11.30–15.00",
-          "parser": "weekday-headings",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic"
-        },
-        {
-          "id": "waterside",
-          "name": "Waterside Restaurant",
-          "url": "http://waterside.se/dagens-lunch-12968849",
-          "address": "Bögatan 1, Töcksfors",
-          "hours": "Dagens lunch, se aktuell tid",
-          "parser": "dated-weekday-headings",
-          "dateHeadingPattern": "Dagens lunch (?:måndag|tisdag|onsdag|torsdag|fredag)\\s+(\\d{1,2})\\s+([a-zåäö]+)\\s*[-–]\\s*(?:måndag|tisdag|onsdag|torsdag|fredag)\\s+(\\d{1,2})(?:\\s+([a-zåäö]+))?",
-          "pendingTextPattern": "Dagens lunch menyn kommer tisdag morgon",
-          "pendingNotice": "Restaurangen meddelar att lunchmenyn publiceras tisdag morgon.",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "awaiting_publication",
-          "mode": "automatic",
-          "availabilityNotice": "Restaurangen meddelar att lunchmenyn publiceras tisdag morgon."
         }
       ],
       "referenceSources": [
@@ -713,35 +681,6 @@
           }
         },
         {
-          "id": "skeppet",
-          "name": "Restaurang Skeppet by Smak & Co",
-          "url": "https://aanc.se/i-huset/restaurang-skeppet.html",
-          "dataUrl": "https://www.lunchsidan.se/restaurang/restaurant-skeppet/4741910591",
-          "address": "Strandvägen 2, Arvika",
-          "hours": "Vardagar 10.30–14.00",
-          "parser": "lunchsidan-restaurant",
-          "expectedNamePattern": "Restaurant Skeppet",
-          "expectedAddress": "Strandvägen 2, 671 51 Arvika",
-          "removePrefixes": [
-            "Idag öppnar vi i ny regi! Varmt välkomna till Restaurang Skeppet by Smak & co"
-          ],
-          "nameAfter": "Restaurang Skeppet by Smak & Co",
-          "nameAfterDate": "2026-10-01",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": 40,
-          "days": {
-            "monday": [],
-            "tuesday": [],
-            "wednesday": [],
-            "thursday": [],
-            "friday": [],
-            "saturday": [],
-            "sunday": []
-          },
-          "status": "outdated",
-          "mode": "automatic"
-        },
-        {
           "id": "elins-bakgard",
           "name": "Elins Bakgård",
           "url": "https://elinsbakgard.se/meny.html",
@@ -865,19 +804,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "indian-street-kitchen-grums",
-          "name": "Indian Street Kitchen",
-          "url": "https://www.visitvarmland.com/grums/mat-dryck/lunch/indian-street-kitchen",
-          "address": "Sveagatan 94, Grums",
-          "hours": "Dagens lunch – se aktuell meny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -1252,37 +1178,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "amotfors-pizzeria",
-          "name": "Åmotfors Pizzeria",
-          "url": "https://www.facebook.com/%C3%85motfors-Pizza-1049076465113639/",
-          "address": "Strandvägen 5, Åmotfors",
-          "hours": "Dagens lunch vardagar – se aktuell matsedel",
-          "parser": "public-social-image",
-          "publicActorId": "100063540134753",
-          "expectedTextPattern": "VECKA\\s*\\d{1,2}",
-          "socialMenuSchedule": "weekly",
-          "fallbackMode": "reference",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "unavailable",
-          "mode": "reference",
-          "error": "inget offentligt inlägg med säkert daterad lunchbild hittades"
-        },
-        {
-          "id": "la-delal-koppom",
-          "name": "La Delal Pizzeria",
-          "url": "https://www.visitvarmland.com/eda/mat-dryck/restaurang/la-delal-pizzeria",
-          "address": "Koppomsvägen 102, Koppom",
-          "hours": "Dagens lunch 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -1620,34 +1515,6 @@
     "Kristinehamn": {
       "restaurants": [
         {
-          "id": "cafe-paus-kristinehamn",
-          "name": "Café Paus",
-          "url": "https://www.visitvarmland.com/kristinehamn/de/products/food-drinks/lunch/cafe-paus",
-          "address": "Kristinehamn",
-          "hours": "Dagens lunch – se aktuell meny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
-          "id": "brassie-bistro-kristinehamn",
-          "name": "Brassie Bistro",
-          "url": "https://www.brassie.se/lunchmeny",
-          "address": "Ämbetsägorna 1, Kristinehamn",
-          "hours": "Dagens lunch måndag–fredag 11.00–14.00",
-          "parser": "weekday-headings",
-          "closedTextPattern": "Från och med vecka 40 håller vi dagens lunch stängt",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "unavailable",
-          "mode": "automatic",
-          "closureNotice": "Restaurangen meddelar att dagens lunch är stängd. Se källan."
-        },
-        {
           "id": "uranus-kristinehamn",
           "name": "Öppna matsalen Uranus",
           "url": "https://www.kristinehamn.se/stod-och-omsorg/aldreomsorg/mat-och-maltider/mat-i-oppna-matsalen-uranus/",
@@ -1903,20 +1770,6 @@
           ]
         },
         {
-          "id": "uwan-hagfors",
-          "name": "Restaurang & Pizzeria Uwån",
-          "url": "https://www.visitvarmland.com/hagfors/mat-dryck/lunch/takeaway/restaurang-pizzeria-uwan",
-          "address": "Norrings väg 2, Hagfors",
-          "hours": "Lunchbuffé måndag–fredag 11.00–14.30",
-          "parser": "source-only",
-          "verified": true,
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
-        {
           "id": "ferrum-hagfors",
           "name": "Restaurang Ferrum",
           "url": "https://www.restaurangferrum.se/veckansmeny",
@@ -2005,19 +1858,6 @@
               "sunday": []
             }
           }
-        },
-        {
-          "id": "munkfors-steakhouse",
-          "name": "Munkfors Steakhouse & Pizzeria",
-          "url": "https://www.visitvarmland.com/munkfors/food-drinks/restaurant/munkfors-steakhouse-pizzeria",
-          "address": "Munkfors",
-          "hours": "Dagens lunch – se aktuell meny",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -2181,19 +2021,6 @@
           },
           "status": "current",
           "mode": "automatic"
-        },
-        {
-          "id": "gasthuset-tjuren-ed",
-          "name": "Gästhuset Tjuren",
-          "url": "https://www.vastsverige.com/dalsed/produkter/restaurang-tjuren/",
-          "address": "Jordbrovägen 8, Ed",
-          "hours": "Två dagens rätter, varav en fiskrätt – se aktuell publicering",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
         }
       ],
       "referenceSources": [
@@ -2209,33 +2036,6 @@
     },
     "Färgelanda": {
       "restaurants": [
-        {
-          "id": "hogsater-restaurang",
-          "name": "Högsäter Restaurang",
-          "url": "https://hogsaterresturang.se/",
-          "address": "Högsäter",
-          "hours": "Lunch onsdag–fredag 11.00–14.00, enligt restaurangens webbplats",
-          "parser": "hogsater-json",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "awaiting_publication",
-          "mode": "automatic",
-          "availabilityNotice": "Restaurangen har ännu inte publicerat veckans lunchrätter."
-        },
-        {
-          "id": "172ans-fargelanda",
-          "name": "172:ans Restaurang & Pizzeria",
-          "url": "https://172an.se/",
-          "address": "Håvestensvägen 2, 458 32 Färgelanda",
-          "hours": "Dagens lunch måndag–fredag 11.00–14.00",
-          "parser": "source-only",
-          "checkedAt": "2026-10-04T12:20:34+02:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "reference",
-          "mode": "reference"
-        },
         {
           "id": "fargelanda-oppen-matsal",
           "name": "Färgelanda kommuns öppna matservering",
