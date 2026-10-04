@@ -136,6 +136,20 @@ public class AppSmokeTest {
             evaluate(app,"document.querySelector('#loginEmail').value='android@example.invalid';document.querySelector('#companyEntryLogin [name=password]').value='Android-Test-2026!';document.querySelector('#companyEntryLogin').requestSubmit();");
             awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
             assertEquals("false",evaluate(app,"window.__e2eLoginFlash"));
+            evaluate(app,"sessionStorage.setItem('ci-old-session',sessionStorage.getItem('dp-company-session'));location.href='/foretag/konto.html';");
+            awaitTrue(app,"!!document.querySelector('#resetRequestForm') && !document.querySelector('#resetRequestForm').hidden");
+            evaluate(app,"document.querySelector('#resetEmail').value='android@example.invalid';document.querySelector('#resetRequestForm').requestSubmit(document.querySelector('#resetRequestForm button'));");
+            awaitTrue(app,"!document.querySelector('#resetMessage').hidden");
+            evaluate(app,"fetch('http://127.0.0.1:8788/__test/mail').then(r=>r.json()).then(d=>{const link=d.messages.at(-1).text.match(/#token=[a-f0-9]+&purpose=reset-password/)[0];location.href='/foretag/konto.html'+link;});");
+            awaitTrue(app,"!!document.querySelector('#passwordForm') && !document.querySelector('#passwordForm').hidden");
+            evaluate(app,"document.querySelector('#newPassword').value='Android-New-Test-2026!';document.querySelector('#confirmPassword').value='Android-New-Test-2026!';document.querySelector('#passwordForm').requestSubmit();");
+            awaitTrue(app,"document.querySelector('#statusTitle').textContent==='Klart!'");
+            evaluate(app,"fetch('http://127.0.0.1:8788/portal/company/me',{headers:{Authorization:'Bearer '+sessionStorage.getItem('ci-old-session')}}).then(r=>window.ciOldStatus=r.status);");
+            awaitTrue(app,"window.ciOldStatus===401");
+            evaluate(app,"sessionStorage.removeItem('dp-company-session');location.href='/foretag/start.html';");
+            awaitTrue(app,"!!document.querySelector('#companyEntryLogin') && !document.querySelector('#registrationForm').hidden");
+            evaluate(app,"document.querySelector('#loginEmail').value='android@example.invalid';document.querySelector('#companyEntryLogin [name=password]').value='Android-New-Test-2026!';document.querySelector('#companyEntryLogin').requestSubmit();");
+            awaitTrue(app,"!!document.querySelector('#appView') && !document.querySelector('#appView').hidden");
             for(String view:new String[]{"overview","banners","purchases","contract","profile"}) {
                 evaluate(app,"document.querySelector('[data-view=\""+view+"\"]')?.click();");
                 awaitTrue(app,"!document.querySelector('#"+view+"').hidden");

@@ -17,7 +17,7 @@ for i in $(seq 1 30); do
 done
 curl --silent --fail http://127.0.0.1:8788/health >/dev/null
 timeout 20 adb shell settings put secure show_ime_with_hard_keyboard 1
-timeout 360 ./gradlew :app:connectedDebugAndroidTest --no-daemon
+timeout 600 ./gradlew :app:connectedDebugAndroidTest --no-daemon
 timeout 30 adb install -r app/build/outputs/apk/debug/app-debug.apk
 for page in index.html lunch.html evenemang.html foreningsliv.html skola-familj.html praktiskt.html kris-beredskap.html foretag/start.html foreningskonto.html; do
   timeout 20 adb shell am start -a android.intent.action.VIEW -d "dinpuls://app/$page?kommun=%C3%85m%C3%A5l" se.dinpuls.app
