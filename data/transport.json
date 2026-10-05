@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-05T01:45:37+00:00",
+  "generatedAt": "2026-10-05T01:56:28+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -147,11 +147,23 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-10-04T17:10+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-04T19:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-05T04:53:00+02:00",
+              "realtime": "2026-10-05T04:53:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "train",
               "line": "13273",
@@ -256,8 +268,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -1049,7 +1060,7 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-10-05T00:10+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-05T02:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1064,8 +1075,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "bus",
@@ -1525,7 +1535,7 @@
           "name": "Sunne station",
           "alerts": [],
           "lookupTime": "2026-10-04T20:41+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-04T22:41+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1540,8 +1550,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "train",
@@ -1553,8 +1562,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
             },
             {
               "mode": "bus",
@@ -1768,9 +1776,9 @@
               "direction": "Forshaga Tjärnheden Deje",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-05T03:55:00+02:00",
-              "realtime": "2026-10-05T03:55:00+02:00",
+              "realtime": "2026-10-05T03:55:12+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -1856,8 +1864,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -2146,9 +2153,9 @@
               "direction": "Tjärnheden Deje",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-05T04:29:00+02:00",
-              "realtime": "2026-10-05T04:29:00+02:00",
+              "realtime": "2026-10-05T04:28:48+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -2162,8 +2169,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2486,7 +2492,7 @@
           "name": "Filipstad busstation",
           "alerts": [],
           "lookupTime": "2026-10-04T21:10+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-04T23:10+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2501,8 +2507,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -2605,9 +2610,11 @@
         {
           "id": "740000376",
           "name": "Hagfors busstation",
-          "alerts": [],
+          "alerts": [
+            "Linje 304 och 600: Hållplats Risätersvägen stängs från och med tisdag 29 september till och med måndag 5 oktober"
+          ],
           "lookupTime": "2026-10-04T18:40+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-04T20:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -2622,8 +2629,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2752,18 +2758,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "202",
-              "direction": "Lysvik Sunne",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-05T03:50:00+02:00",
-              "realtime": "2026-10-05T03:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "D"
-            },
             {
               "mode": "bus",
               "line": "202",
