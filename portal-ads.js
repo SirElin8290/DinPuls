@@ -7,6 +7,8 @@
   let inventoryPromise;
   let testPreviewPromise;
   const verifiedEmptySlots = new Set();
+  let homepageRefresh;
+  let homepageRefreshPending = false;
 
   async function testPreview() {
     if (!testPreviewPromise) testPreviewPromise = fetch("data/homepage-test-preview.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -18,7 +20,7 @@
     const frame = document.createElement("div");
     frame.className = "homepage-live-ad";
     const label = document.createElement("p");
-    label.textContent = `TESTANNONS · visningsplats ${group} av 4 · ingen riktig verksamhet`;
+    label.textContent = `TESTANNONS · visningsplats ${group} av 3 · ingen riktig verksamhet`;
     const image = document.createElement("img");
     image.src = config.imageUrl;
     image.alt = "DinPuls testföretag – testannons, ingen riktig verksamhet";
@@ -60,7 +62,12 @@
     const base = await apiBase();
     if (!base || !slotId) return null;
     try {
-      const response = await fetch(`${base}/ads/current/${encodeURIComponent(slotId)}?municipality=${encodeURIComponent(selectedMunicipality)}`, { cache: "no-store" });
+      const url = `${base}/ads/current/${encodeURIComponent(slotId)}?municipality=${encodeURIComponent(selectedMunicipality)}`;
+      let response;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try { response = await fetch(url, { cache: "no-store", signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined }); if (response.ok) break; }
+        catch (error) { if (attempt === 1) throw error; }
+      }
       if (!response.ok) return null;
       const data = await response.json();
       if (data.ok === true && data.banner === null) verifiedEmptySlots.add(key);
@@ -168,15 +175,18 @@
   }
 
   async function refreshHomepageGroup(group) {
+    const selectedMunicipality = municipality();
     const { host, section, module } = clearHomepageGroup(group);
     if (!host || !section || !module) return;
     const catalog = await inventory();
     const groupName = `premium-ad-${group}`;
     const slots = catalog.filter(item => item.group === groupName).sort((a, b) => a.position - b.position);
-    const active = (await Promise.all(slots.map(async slot => ({ slot, banner: await getCurrentBanner(slot.id) })))).filter(item => item.banner);
+    const active = (await Promise.all(slots.map(async slot => ({ slot, banner: await getCurrentBanner(slot.id, selectedMunicipality) })))).filter(item => item.banner);
+    if (selectedMunicipality !== municipality()) return;
     const banners = [...new Map(active.map(item => [item.banner.id, item])).values()];
     if (!banners.length) {
       const config = await testPreview();
+      if (selectedMunicipality !== municipality()) return;
       section.dataset.previewCheck = `${Boolean(config)}:${slots.length}:${slots.filter(slot => verifiedEmptySlots.has(`${municipality()}:${slot.id}`)).length}`;
       if (config && slots.length && slots.every(slot => verifiedEmptySlots.has(`${municipality()}:${slot.id}`))) {
         showTestPreview(module, section, config, group);
@@ -199,21 +209,16 @@
     if (banners.length > 1) homepageTimers.set(group, window.setInterval(show, 30000));
   }
 
-  async function refreshHomepageAds() {
-    await Promise.all([1, 2, 3].map(refreshHomepageGroup));
-    document.querySelector('[data-test-preview-extra]')?.remove();
-    const config = await testPreview();
-    if (config && document.querySelector('[data-test-banner-preview]')) {
-      const section = document.createElement("section");
-      section.className = "premium-ads premium-ad-break";
-      section.dataset.testPreviewExtra = "true";
-      section.setAttribute("aria-label", "Tillfällig fjärde testannons – ingen säljbar annonsplats");
-      const module = document.createElement("article");
-      module.className = "ad-dice";
-      section.append(module);
-      showTestPreview(module, section, config, 4);
-      document.querySelector('[data-component="premium-ad-3"]')?.after(section);
-    }
+  function refreshHomepageAds() {
+    homepageRefreshPending = true;
+    if (homepageRefresh) return homepageRefresh;
+    homepageRefresh = (async () => {
+      while (homepageRefreshPending) {
+        homepageRefreshPending = false;
+        await Promise.all([1, 2, 3].map(refreshHomepageGroup));
+      }
+    })().finally(() => { homepageRefresh = null; });
+    return homepageRefresh;
   }
 
   function initializeHomepageAds() {
