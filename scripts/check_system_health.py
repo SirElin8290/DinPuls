@@ -170,6 +170,21 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
     }
 
 
+
+def source_monitor_health(payload, now=None):
+    now = now or datetime.now(timezone.utc)
+    stamp = parse_time((payload or {}).get("generatedAt"))
+    if not stamp or not payload.get("completed"):
+        return {"status": "critical", "reason": "nightly_check_missing"}
+    if (now - stamp).total_seconds() > 32 * 3600:
+        return {"status": "critical", "reason": "nightly_check_overdue", "lastChecked": stamp.isoformat()}
+    if any(value != "success" for value in payload.get("updates", {}).values()):
+        return {"status": "warning", "reason": "nightly_update_failed", "lastChecked": stamp.isoformat()}
+    summary = payload.get("summary", {})
+    state = "warning" if any(summary.get(key, 0) for key in ("changed", "unverified", "broken", "contentWarnings")) else "green"
+    return {"status": state, "reason": "source_review_required" if state == "warning" else None, "lastChecked": stamp.isoformat()}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
@@ -177,6 +192,11 @@ def main():
     args = parser.parse_args()
     exceptions = json.loads((ROOT / "data" / "reporting-exceptions.json").read_text(encoding="utf-8"))["entries"]
     result = build_health(args.base_url, reporting_exceptions=exceptions)
+    try:
+        source_report = fetch_json(args.base_url.rstrip("/") + "/source-monitor.json")
+    except Exception:
+        source_report = {}
+    result["sourceMonitoring"] = source_monitor_health(source_report)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = result["summary"]

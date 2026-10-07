@@ -159,6 +159,7 @@
     const target = $("#operationsContent");
     if (!target) return;
     target.innerHTML = '<div class="panel"><p class="muted">Läser driftstatus…</p></div>';
+    window.DinPulsSourceMonitoring?.load($("#sourceMonitoring"));
     try {
       const response = await fetch(`../data/system-health.json?time=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

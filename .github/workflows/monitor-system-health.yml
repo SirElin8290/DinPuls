@@ -60,7 +60,7 @@ jobs:
           from pathlib import Path
           data = json.loads(Path('data/system-health.json').read_text())
           summary = data['summary']
-          if summary['warning'] or summary['critical']:
+          if summary['warning'] or summary['critical'] or data.get('sourceMonitoring', {}).get('status') in {'warning', 'critical'}:
               body = json.dumps({'text': f"DinPuls driftstatus: {summary['green']} OK, {summary['warning']} varningar, {summary['critical']} kritiska"}).encode()
               request = urllib.request.Request(os.environ['HEALTH_WEBHOOK_URL'], data=body, headers={'Content-Type': 'application/json'})
               urllib.request.urlopen(request, timeout=15)

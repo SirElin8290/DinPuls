@@ -104,5 +104,18 @@ class SystemHealthTests(unittest.TestCase):
         self.assertEqual(other["municipalities"]["Kommun 0"]["lunch"]["status"], "critical")
 
 
+
+class NightlyWatchdogTests(unittest.TestCase):
+    def test_missing_and_overdue(self):
+        now = datetime(2026, 10, 7, 12, tzinfo=timezone.utc)
+        self.assertEqual(health.source_monitor_health({}, now)["reason"], "nightly_check_missing")
+        self.assertEqual(health.source_monitor_health({"completed": True, "generatedAt": "2026-10-05T01:00:00Z"}, now)["reason"], "nightly_check_overdue")
+    def test_failed_refresh_and_review_needed(self):
+        now = datetime(2026, 10, 7, 12, tzinfo=timezone.utc)
+        report = {"completed": True, "generatedAt": now.isoformat(), "updates": {"lunch": "failure"}}
+        self.assertEqual(health.source_monitor_health(report, now)["reason"], "nightly_update_failed")
+        report["updates"] = {"lunch": "success"}; report["summary"] = {"changed": 1}
+        self.assertEqual(health.source_monitor_health(report, now)["status"], "warning")
+
 if __name__ == "__main__":
     unittest.main()

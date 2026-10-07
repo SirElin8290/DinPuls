@@ -42,3 +42,8 @@ jobs:
 
       - name: Kontrollera sportmodulens avgränsning
         run: node scripts/check-sport-boundaries.js
+
+      - name: Kontrollera nattlig källbevakning
+        run: |
+          PYTHONPATH=scripts python -m unittest scripts/test_public_sources.py scripts/test_system_health.py
+          node scripts/test_source_monitor_admin.js
