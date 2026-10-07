@@ -117,5 +117,11 @@ class NightlyWatchdogTests(unittest.TestCase):
         report["updates"] = {"lunch": "success"}; report["summary"] = {"changed": 1}
         self.assertEqual(health.source_monitor_health(report, now)["status"], "warning")
 
+class MorningDeadlineTests(unittest.TestCase):
+    def test_previous_evening_does_not_hide_missed_night(self):
+        report = {"completed": True, "generatedAt": "2026-10-06T20:00:00Z"}
+        now = datetime(2026, 10, 7, 4, tzinfo=timezone.utc)
+        self.assertEqual(health.source_monitor_health(report, now)["reason"], "nightly_check_overdue")
+
 if __name__ == "__main__":
     unittest.main()

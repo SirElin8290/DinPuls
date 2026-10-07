@@ -49,8 +49,9 @@ Publicering till main följs av en explicit begäran om GitHub Pages-byggning.
 ## Bevakning av bevakningen
 
 Den befintliga timvisa driftkontrollen läser även nattkontrollens tidsstämpel.
-Saknad rapport, ofullständig rapport eller mer än 32 timmar gammal kontroll
-markeras kritisk. Rapportvyn visar själv samma varning även om den timvisa
+Saknad/ofullständig rapport eller mer än 28 timmar gammal kontroll
+markeras kritisk. Från 05.00 svensk tid krävs dessutom en slutförd kontroll
+från dagens datum, så att en utebliven nattkontroll syns på morgonen. Rapportvyn visar själv samma varning även om den timvisa
 kontrollen slutat uppdateras. En misslyckad import syns separat från källfel.
 
 GitHub markerar misslyckade körningar. Den befintliga valfria

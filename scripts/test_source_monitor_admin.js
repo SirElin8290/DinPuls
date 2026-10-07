@@ -8,3 +8,5 @@ const index=fs.readFileSync('admin/index.html','utf8');assert(index.includes('id
 console.log('Nattkontrollens administration: varningar, utebliven körning och säker rendering PASS');
 
 assert(render({...report,completed:false},now).includes("uteblivit"));
+
+assert(render({...report,generatedAt:"2026-10-06T20:00:00Z"},Date.parse("2026-10-07T04:00:00Z")).includes("uteblivit"));

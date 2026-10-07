@@ -2,7 +2,10 @@
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function render(data,now=Date.now()){
   const runLink=/^https:\/\/github\.com\/SirElin8290\/DinPuls\/actions\/runs\/\d+$/.test(data.runUrl||"")?`<a href="${escape(data.runUrl)}" target="_blank" rel="noopener">Visa nattkörningen i GitHub ↗</a>`:"";
-  const age=now-Date.parse(data.generatedAt),late=data.completed!==true||!Number.isFinite(age)||age>32*3600000;
+  const age=now-Date.parse(data.generatedAt);
+  const local=date=>{const parts=Object.fromEntries(new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Stockholm",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",hourCycle:"h23"}).formatToParts(date).map(x=>[x.type,x.value]));return {day:`${parts.year}-${parts.month}-${parts.day}`,hour:Number(parts.hour)};};
+  const current=local(new Date(now)),checked=Number.isFinite(age)?local(new Date(data.generatedAt)):null;
+  const late=data.completed!==true||!checked||age>28*3600000||(current.hour>=5&&checked.day<current.day);
   const summary=data.summary||{},updates=Object.entries(data.updates||{}).filter(([,status])=>status!=="success");
   const labels={broken:"🔴 Bekräftat trasig",unverified:"🟡 Kunde inte verifieras",changed:"🟡 Innehåll ändrat – granska"};
   const sources=(data.sources||[]).filter(x=>x.state!=="reachable");

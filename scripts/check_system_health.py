@@ -7,6 +7,7 @@ import json
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASE_URL = "https://dinpuls.se/data/"
@@ -176,7 +177,9 @@ def source_monitor_health(payload, now=None):
     stamp = parse_time((payload or {}).get("generatedAt"))
     if not stamp or not payload.get("completed"):
         return {"status": "critical", "reason": "nightly_check_missing"}
-    if (now - stamp).total_seconds() > 32 * 3600:
+    local_now = now.astimezone(ZoneInfo("Europe/Stockholm"))
+    local_checked = stamp.astimezone(ZoneInfo("Europe/Stockholm"))
+    if (now - stamp).total_seconds() > 28 * 3600 or (local_now.hour >= 5 and local_checked.date() < local_now.date()):
         return {"status": "critical", "reason": "nightly_check_overdue", "lastChecked": stamp.isoformat()}
     if any(value != "success" for value in payload.get("updates", {}).values()):
         return {"status": "warning", "reason": "nightly_update_failed", "lastChecked": stamp.isoformat()}
