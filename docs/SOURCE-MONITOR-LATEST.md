@@ -1,16 +1,16 @@
 # DinPuls nattkontroll
 
-Kontrollerad: 2026-10-07T13:17:21+00:00
+Kontrollerad: 2026-10-07T13:38:34+00:00
 
 ## Resultat
 
-{'reachable': 3071, 'changed': 0, 'unverified': 310, 'broken': 0, 'total': 3381, 'contentWarnings': 0}
+{'reachable': 3105, 'changed': 0, 'unverified': 263, 'broken': 13, 'total': 3381, 'contentWarnings': 0}
 
 ## Källor som behöver granskas
 
 | Kommun / verksamhet | Status | Källa |
 |---|---|---|
-| Kristinehamn – Visnums och Visnums-Kils Hembygdsförening | unverified | https://aktivlandsbygd.se/wordpress |
+| Kristinehamn – Visnums och Visnums-Kils Hembygdsförening | broken | https://aktivlandsbygd.se/wordpress |
 | Åmål; Åmål – Åmåls kommun – Skolmatsedel | unverified | https://amal.se/download/18.3b9578f419f849e86079f6ad/1786079586924/Matsedel%20H%C3%B6gstadiet%20v.%2034-43%202026.pdf |
 | Åmål; Åmål – Åmåls kommun – Skolmatsedel | unverified | https://amal.se/download/18.3b9578f419f849e86079f6ae/1786079587210/Matsedel%20gymnasie%20v.%2034-43%202026.pdf |
 | Åmål; Åmål – Åmåls kommun – Skolmatsedel | unverified | https://amal.se/download/18.3b9578f419f849e86079f6af/1786079587471/Matsedel%20grundskolan%20v.%2034-43%202026.pdf |
@@ -47,8 +47,7 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Bengtsfors – Laxarby Hembygdsförening | unverified | https://hembygd.se/laxarby |
 | Forshaga – Deje Gymnastikförening | unverified | https://idrottonline.se/DejeGF-Gymnastik/ |
 | Forshaga – Deje Skidförening | unverified | https://idrottonline.se/DejeSF/ |
-| Kristinehamn – IFK Kristinehamn Huvudstyrelsen | unverified | https://ifkkristinehamn.weebly.com/ |
-| Karlstad – Bröstcancerföreningen Värmland | unverified | https://instagram.com/bcfvarmland |
+| Kristinehamn – IFK Kristinehamn Huvudstyrelsen | broken | https://ifkkristinehamn.weebly.com/ |
 | Kristinehamn – Kristinehamns Atlet- och Brottarklubb | unverified | https://kabk.se/ |
 | Karlstad – Karlstad Ridklubb | unverified | https://karlstad.se/uppleva-och-gora/sommarlovswebben/dagkolloveckor-2026/dagkolloveckor-sommaren-2026 |
 | Karlstad – Islamiska Kulturföreningen Karlstad | unverified | https://karlstadmoske.se/ |
@@ -76,36 +75,11 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Kristinehamn – ABF Cantabile | unverified | https://varmland.abf.se/ |
 | Forshaga – Lf 1032 Myran av IOGT-NTO | unverified | https://varmland.iogt.se/lokalforeningar/ |
 | Karlstad – Värmlands Ornitologiska Förening | unverified | https://varmlandsornitologiska.se/ |
-| Filipstad – Folktandvården Lesjöfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Lesjofors/ |
-| Karlstad – Folktandvården Molkom | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Molkom/ |
-| Munkfors – Folktandvården Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Munkfors/ |
-| Sunne – Folktandvården Sunne | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Sunne/ |
-| Karlstad – Folktandvården Tingvalla | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Tingvalla-Karlstad/ |
 | Torsby – Folktandvården Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Torsby/ |
-| Karlstad – Folktandvården Våxnäs | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Vaxnas-Karlstad/ |
-| Hagfors – Första linjen unga norra | unverified | https://www.1177.se/hitta-vard/kontaktkort/Forsta-linjen-unga-norra-Hagfors-Munkfors-Torsby-Sunne/ |
-| Arvika – Fysioterapimottagning Mia Måseide | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagning-Mia-Maseide/ |
-| Årjäng – Fysioterapimottagningen Årjäng | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Arjang/ |
+| Hagfors – Första linjen unga norra | broken | https://www.1177.se/hitta-vard/kontaktkort/Forsta-linjen-unga-norra-Hagfors-Munkfors-Torsby-Sunne/ |
 | Karlstad – Fysioterapimottagningen Centralsjukhuset Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Centralsjukhuset-Karlstad-Centralsjukhuset/ |
-| Eda – Fysioterapimottagningen Charlottenberg | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Charlottenberg/ |
-| Filipstad – Fysioterapimottagningen Filipstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Filipstad/ |
-| Forshaga – Fysioterapimottagningen Forshaga | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Forshaga/ |
-| Hagfors – Fysioterapimottagningen Hagfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hagfors/ |
-| Hammarö – Hammarö Fysioterapi | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hammaro-Fysioterapi/ |
-| Arvika – Fysioterapimottagningen Jösse vårdcentral Arvika | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Josse-vardcentral-Arvika/ |
-| Arvika – Fysioterapimottagningen Karin Jansson Ski och Fysio | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Karin-Jansson-Ski-och-Fysio-Arvika/ |
-| Karlstad – Fysioterapimottagningen Kasernhöjden Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kasernhojden-Karlstad/ |
 | Kil – Fysioterapimottagningen Kil | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kil/ |
-| Kristinehamn – Fysioterapimottagningen Kristinehamn | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kristinehamn/ |
-| Munkfors – Fysioterapimottagningen Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Munkfors/ |
-| Säffle – Fysioterapimottagningen Säffle | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Saffle/ |
-| Hammarö – Fysioterapimottagningen Skoghall | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Skoghall/ |
-| Sunne – Fysioterapimottagningen Sunne | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Sunne/ |
-| Bengtsfors – Gula villans tandvård | unverified | https://www.1177.se/hitta-vard/kontaktkort/Gula-villans-tandvard-Bengtsfors/ |
-| Arvika – Jourcentralen Arvika | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/ |
-| Torsby – Jourcentralen Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Torsby/ |
 | Åmål – Medpro Clinic Rehab Åmål | unverified | https://www.1177.se/hitta-vard/kontaktkort/Medpro-Clinic-Rehab-Amal/ |
-| Bengtsfors – Mini-Maria Bengtsfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Mini-Maria-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors rehabmottagning | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-rehabmottagning-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors vårdcentral – Dals Långed | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Dals-Langed-Dals-Langed/ |
@@ -173,19 +147,18 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Dals-Ed – Ulf Rings El i Ed AB | unverified | https://www.bygg.se/experter/elektriker/dals-ed |
 | Dals-Ed – Eds Byggtjänst AB; Dals-Ed – Hökedalens Alteknik AB; Dals-Ed – KG Karlsson Bilverkstad; Dals-Ed – VVS Montören | unverified | https://www.dalsed.se/media/gxtbvmua/infoguiden-ed-2026.pdf |
 | Arvika – DHR Arvika; Arvika – DHR, Delaktigh, handlingskr, rörelsefrih - Arvika- | unverified | https://www.dhrarvika.se/ |
-| Arvika – Västra Värmlands Diabetesförening | unverified | https://www.diabetes.se/medlem/foreningar/varmlands-lans-diabetesforen/vastra-varmlands-diabetesforening-m.o |
+| Arvika – Västra Värmlands Diabetesförening | broken | https://www.diabetes.se/medlem/foreningar/varmlands-lans-diabetesforen/vastra-varmlands-diabetesforening-m.o |
 | Eda – Eda Ryttarförening | unverified | https://www.edarf.se/ |
 | Eda – Eda Skyttegille | unverified | https://www.edaskyttegille.com/ |
 | Hagfors – Ekshärads Golfklubb | unverified | https://www.eksharadsgk.se/ |
 | Karlstad – Värmlands Museumförening | unverified | https://www.facebook.com/Värmlands-Museiförening-1547093158900181/ |
 | Munkfors – Munkfors revy och teaterförening | unverified | https://www.facebook.com/munkforsrevyn/about?locale=sv_SE |
-| Arvika – Föreningen Arvika Systema | unverified | https://www.facebook.com/search/top?q=arvika%20systema |
+| Arvika – Föreningen Arvika Systema | broken | https://www.facebook.com/search/top?q=arvika%20systema |
 | Forshaga – ForshagaDeje Golfklubb | unverified | https://www.forshagadejegk.se/ |
 | Åmål – Åmåls Försvarsutbildningsförening | unverified | https://www.forsvarsutbildarna.se/bohuslan-dal/forening/amals-forsvarsutbildningsforening/ |
 | Karlstad – Försvarsutbildarna Värmland | unverified | https://www.forsvarsutbildarna.se/varmland/ |
 | Torsby – Konstföreningen Fri Form | unverified | https://www.friform.org/ |
 | Hammarö – Friskvården i Värmland | unverified | https://www.friskvarden.rog/ |
-| Säffle – Fyren Duse Udde | unverified | https://www.fyrenduseudde.se/sommarlunch |
 | Säffle – Gillberga Skidklubb | unverified | https://www.gillbergask.com/ |
 | Arvika – Glafsfjordens musikfestival | unverified | https://www.glafsfjordenfestival.com/ |
 | Arvika – UNF Glava | unverified | https://www.glasidan.se/ |
@@ -196,7 +169,7 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Hagfors – Hagfors SFK | unverified | https://www.hagforssfk.se/ |
 | Hammarö – IOGT-NTO | unverified | https://www.hammaro.iogt.se/ |
 | Forshaga – Abborrtjärn badplats; Forshaga – Skivtjärn badplats; Forshaga – Västra Örten badplats | unverified | https://www.havochvatten.se/badplatser-och-badvatten/hitta-din-badplats.html |
-| Arvika – Hbtqiarvika | unverified | https://www.hbtqiarvika.se/hem |
+| Arvika – Hbtqiarvika | broken | https://www.hbtqiarvika.se/hem |
 | Forshaga – Övre Ulleruds Hembygdsförening | unverified | https://www.hembygd.se/ |
 | Arvika – Älgå Hembygdsförening | unverified | https://www.hembygd.se/alga/ |
 | Karlstad – Alsters Hembygdsförening | unverified | https://www.hembygd.se/alster |
@@ -230,18 +203,12 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Färgelanda – Högsäter Gym | unverified | https://www.hogsatergym.se/ |
 | Arvika – Hotland Rodders | unverified | https://www.hotlandrodders.com/ |
 | Arvika – Ingesunds Musikhögskola SMISK | unverified | https://www.imh.kau.se/ |
-| Karlstad – Bellevues ponnyridklubb | unverified | https://www.instagram.com/bellevuesponnyridklubb/ |
-| Karlstad – Brottsofferjouren Värmland | unverified | https://www.instagram.com/brottsofferjourenvarmland/ |
-| Karlstad – Karlstad Studentkår | unverified | https://www.instagram.com/karlstadstudentkar/ |
-| Karlstad – Studentföreningen Inferno | unverified | https://www.instagram.com/kau_inferno/ |
-| Karlstad – Värmlands Kaninhopparförening | unverified | https://www.instagram.com/varmlandskaninhoppare |
-| Karlstad – Värmlands Teater | unverified | https://www.instagram.com/varmlandsteatern/ |
-| Arvika – IOGT-NTO:s Juniorförening Moviekids; Arvika – Movendi Arvika | unverified | https://www.iogt.se/varmland/foreningsinfo |
+| Arvika – IOGT-NTO:s Juniorförening Moviekids; Arvika – Movendi Arvika | broken | https://www.iogt.se/varmland/foreningsinfo |
 | Arvika – Jössefiskarna | unverified | https://www.jossefiskarna.se/ |
 | Arvika – Jösse MC | unverified | https://www.jossemc.se/ |
 | Säffle – Källarbackens Intresseförening | unverified | https://www.kallarbacken.se/ |
 | Karlstad – Karlstad – restauranger och lunch | unverified | https://www.karlstad.com/restauranger |
-| Karlstad – Karlstad Badmintonklubb | unverified | https://www.karlstadbadminton.se/About |
+| Karlstad – Karlstad Badmintonklubb | broken | https://www.karlstadbadminton.se/About |
 | Forshaga – Alla Kvinnors Hus Karlstad | unverified | https://www.karlstadkvinnojour.se/ |
 | Karlstad – Karlstads Hembygdsförening | unverified | https://www.karlstadshembygd.se/ |
 | Kristinehamn – KFUM Ung | unverified | https://www.kfumungkristinehamn.info/ |
@@ -266,7 +233,7 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Arvika – Pingstförsamlingen Arvika | unverified | https://www.pingstkyrkanarvika.nu/ |
 | Eda – PRO Köla | unverified | https://www.prokola.se/ |
 | Reuters | unverified | https://www.reuters.com/world/ |
-| Forshaga – Röda Korset, Forshagakretsen | unverified | https://www.rodakorset.se/vad-vi-gor/second-hand/butiker/rodakorset- |
+| Forshaga – Röda Korset, Forshagakretsen | broken | https://www.rodakorset.se/vad-vi-gor/second-hand/butiker/rodakorset- |
 | Säffle – Säffle-Åmål Dykarklubb | unverified | https://www.sadk.nu/ |
 | Arvika – Västra Värmlands Fornminnesförening | unverified | https://www.sagudden.se/ |
 | Grums – Sandt Städservice AB | unverified | https://www.sandtstadservice.se/ |
@@ -275,7 +242,6 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Säffle – Husföreningen Silvénska villan | unverified | https://www.silvenskavillan.se/ |
 | Hammarö – Sjöräddningssällskapet, RS Hammarö | unverified | https://www.sjoraddningen.se/hammaro |
 | Hammarö – Skoghalls Innebandyklubb; Hammarö – Skoghalls Innebandyklubb Utveckling | unverified | https://www.skoghallsinnebandy.se/ |
-| Hammarö – Skoghalls Musikkår | unverified | https://www.skoghallsmusikkar.se/ |
 | Karlstad – Bujinkan Solstaden Dojo IF | unverified | https://www.solstadendojo.com/ |
 |  | unverified | https://www.sosalarm.se/112-och-andra-viktiga-nummer/ |
 | SOS Alarm / 112-appen | unverified | https://www.sosalarm.se/112-och-andra-viktiga-nummer/112-appen/ |
@@ -299,9 +265,9 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Storfors; Storfors – Alkvetterns IK; Storfors – Bjurbäckens Byalag; Storfors – Bjurtjärns Byalag; Storfors – Bjurtjärns Bygdegårdsförening; Storfors – Bjurtjärns Hembygdsförening; Storfors – Bjurtjärns Kulturförening; Storfors – Bjurtjärns LRF-avdelning; Storfors – Bjurtjärns Teaterförening; Storfors – Bjurtjärns Ungdomsförening; Storfors – Bjurtjärns kyrkokör; Storfors – Brottsofferjouren Värmland – Storfors; Storfors – Bygdegårdsföreningen Baracken i Kungsskogen; Storfors – Equmenia Storfors; Storfors – FUB Storfors; Storfors – Friluftsfrämjandet Storfors; Storfors – Funktionsrätt Storfors; Storfors – Föreningen Filipstads Bergslags kanal; Storfors – Föreningen Levande Lungsund; Storfors – Föreningen Storfors skidor; Storfors – Företagarna Storfors; Storfors – Hilti BJJ Storfors; Storfors – IOGT-NTO Storfors; Storfors – Kristinehamns Gymnastiksällskap (verksamhet i Storfors); Storfors – Lions Club Storfors; Storfors – Lundsbergs Golfklubb; Storfors – Lungsunds 4H-klubb; Storfors – Lungsunds Byalag; Storfors – Lungsunds Bygdegårdsförening; Storfors – Lungsunds Folkets Husförening; Storfors – Lungsunds Hembygdsförening; Storfors – Lungsunds Kulturförening; Storfors – Lungsunds LRF-avdelning; Storfors – Lungsunds Ungdomsförening; Storfors – Lungsunds kyrkokör; Storfors – Majblomman Storfors; Storfors – Naturskyddsföreningen Storfors; Storfors – Nykroppa-Storfors Fiskevårdsförening; Storfors – Nässundets Byalag; Storfors – Nässundets Bygdegårdsförening; Storfors – PRO Storfors; Storfors – Pingstkyrkan Storfors; Storfors – RPG Storfors; Storfors – RSMH Storfors; Storfors – Rädda Barnen Storfors; Storfors – SKPF Storfors; Storfors – SPF Seniorerna Storfors; Storfors – Sommarmusik på Lundsberg; Storfors – Storfors 4H-klubb; Storfors – Storfors Anhörigförening; Storfors – Storfors Atletklubb; Storfors – Storfors Badmintonklubb; Storfors – Storfors Biodlarförening; Storfors – Storfors Bouleklubb; Storfors – Storfors Bowlingklubb; Storfors – Storfors Bridgeklubb; Storfors – Storfors Byalag; Storfors – Storfors Bygdegårdsförening; Storfors – Storfors Båtklubb; Storfors – Storfors Centerkrets; Storfors – Storfors Civilförsvarsförening; Storfors – Storfors Cykelklubb; Storfors – Storfors Dartklubb; Storfors – Storfors Demensförening; Storfors – Storfors Diabetesförening; Storfors – Storfors Discgolfklubb; Storfors – Storfors Dragspelsklubb; Storfors – Storfors E-sportförening; Storfors – Storfors Filmstudio; Storfors – Storfors Finska Förening; Storfors – Storfors Flugfiskeklubb; Storfors – Storfors Folkets Husförening; Storfors – Storfors Folkets Parkförening; Storfors – Storfors Fotoklubb; Storfors – Storfors Frikyrkoförsamling; Storfors – Storfors Företagarförening; Storfors – Storfors Försvarsutbildningsförening; Storfors – Storfors Hembygdsförening; Storfors – Storfors HjärtLung; Storfors – Storfors Hundklubb; Storfors – Storfors Hundungdom; Storfors – Storfors Idrottsallians; Storfors – Storfors Idrottshistoriska Sällskap; Storfors – Storfors Innebandyförening; Storfors – Storfors Internationella Förening; Storfors – Storfors Jaktskytteklubb; Storfors – Storfors Kanotklubb; Storfors – Storfors Konstförening; Storfors – Storfors Kristdemokratiska förening; Storfors – Storfors Kulturförening; Storfors – Storfors Kvinnojour; Storfors – Storfors Körsällskap; Storfors – Storfors LRF-avdelning; Storfors – Storfors Liberalförening; Storfors – Storfors Miljöpartiavdelning; Storfors – Storfors Missionsförsamling; Storfors – Storfors Moderatförening; Storfors – Storfors Motorhistoriska Förening; Storfors – Storfors Motorklubb; Storfors – Storfors Musikförening; Storfors – Storfors Musikkår; Storfors – Storfors Nykterhetsförening; Storfors – Storfors Orienteringsklubb; Storfors – Storfors Parasportförening; Storfors – Storfors Pistolskytteklubb; Storfors – Storfors Radioamatörklubb; Storfors – Storfors Reumatikerförening; Storfors – Storfors Ridklubb; Storfors – Storfors Rotaryklubb; Storfors – Storfors Röda Korskrets; Storfors – Storfors Schackklubb; Storfors – Storfors Scoutkår; Storfors – Storfors Skytteförening; Storfors – Storfors Släktforskarförening; Storfors – Storfors Socialdemokratiska Förening; Storfors – Storfors Spelförening; Storfors – Storfors Sportfiskeklubb; Storfors – Storfors Sverigedemokratiska förening; Storfors – Storfors Tennisklubb; Storfors – Storfors Trädgårdsförening; Storfors – Storfors Ungdomsförening; Storfors – Storfors Veteranfordonsklubb; Storfors – Storfors Villaägareförening; Storfors – Storfors Vänsterpartiförening; Storfors – Storfors Wolves BSK; Storfors – Storfors kyrkokör; Storfors – Storfors Ångbåtsförening; Storfors – Värmlands Brandhistoriska Klubb | unverified | https://www.storfors.se/upplevaochgora/foreningar/foreningsregister.4.55cd3a5d147583335eb15c7.html |
 | Storfors – Storfors Bordtennisklubb; Storfors – Storfors Judoklubb | unverified | https://www.storfors.se/upplevaochgora/idrottsanlaggningar.4.55cd3a5d147583335eb1835.html |
 | Sunne – Sunne MX Klubb, SMXK | unverified | https://www.sunnmx.com/ |
-| Arvika – Studieförbundet Vuxenskolan | unverified | https://www.sv.se/varmland/arvika |
+| Arvika – Studieförbundet Vuxenskolan | broken | https://www.sv.se/varmland/arvika |
 | Karlstad – Grava kyrkokör; Karlstad – Norrstrands kyrkokör | unverified | https://www.svenskakyrkan.se/filer/574410/Verksamhetskatalog%20h%C3%B6st%202025.pdf |
-| Åmål – Tösse IF | unverified | https://www.svenskalag.se/tosseif |
+| Åmål – Tösse IF | broken | https://www.svenskalag.se/tosseif |
 | Bengtsfors – Dals Långeds IK | unverified | https://www.svenskfotboll.se/widget-go-to/?flid=324747 |
 | Grums – Värmskogs SK | unverified | https://www.svenskfotboll.se/widget-go-to/?flid=39914 |
 | Sveriges Radio Ekot | unverified | https://www.sverigesradio.se/ekot |
@@ -313,11 +279,11 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 | Kristinehamn – ABF | unverified | https://www.varmland.abf.se/ |
 | Arvika – Brottsofferjouren Värmland; Hammarö – Brottsoffersjouren Värmland | unverified | https://www.varmland.boj.se/ |
 | Karlstad – Värmlands Författarsällskap | unverified | https://www.varmlandskaforfattarsallskapet.se/ |
-| Färgelanda – Visit Dalsland – Färgelanda mat & dryck | unverified | https://www.vastsverige.com/dalsland/fargelanda/ata/ |
+| Färgelanda – Visit Dalsland – Färgelanda mat & dryck | broken | https://www.vastsverige.com/dalsland/fargelanda/ata/ |
 | Mellerud – Veteran Classic Dalsland | unverified | https://www.veteranclassic.se/ |
 | Arvika – Villaägarna i Västra Värmland | unverified | https://www.villaagarna.se/varmland |
 | Kristinehamn – Villastadens IF | unverified | https://www.villastadensif.nu/ |
-| Arvika – Konstrundan Värmlands Hjärta | unverified | https://www.visitvarmland.com/arvika/evenemang/utstallning/konstrundan-varmlands-hjarta |
+| Arvika – Konstrundan Värmlands Hjärta | broken | https://www.visitvarmland.com/arvika/evenemang/utstallning/konstrundan-varmlands-hjarta |
 | Arvika – Frigörande dansföreningen Vojago | unverified | https://www.vojago.se/ |
 | Arvika – Västvärmlands OK | unverified | https://www.vvok.se/ |
 
@@ -329,5 +295,5 @@ Kontrollerad: 2026-10-07T13:17:21+00:00
 - news: success
 - events: success
 - lunch: success
-- school: failure
+- school: success
 - associations: success
