@@ -71,4 +71,8 @@ class SourceTests(unittest.TestCase):
             report=s.build(Path('.'),{},self.now,fetch,8)
         suspended=[x for x in report['sources'] if x['checkMode']=='host_access_blocked']
         self.assertTrue(suspended);self.assertTrue(all(x['status'] is None and x['state']=='unverified' for x in suspended))
+    def test_swedish_urls_are_encoded_without_changing_the_destination(self):
+        url=s.canonical('https://eda.se/förskolan/ansökan?q=Åmål&x=a%20b#section')
+        self.assertEqual(url,'https://eda.se/f%C3%B6rskolan/ans%C3%B6kan?q=%C3%85m%C3%A5l&x=a%20b')
+        self.assertEqual(s.canonical('https://förening.se/'),'https://xn--frening-90a.se/')
 if __name__=='__main__':unittest.main()

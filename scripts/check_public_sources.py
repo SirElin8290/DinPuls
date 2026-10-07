@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit, quote
 ROOT = Path(__file__).resolve().parents[1]
 STATIC_FILES = ['municipalities.json','practical.json','family-places.json','school-family.json','emergency-municipalities.json','emergency-national.json','authorities.json','health.json','health-private.json','health-private-supplement.json','health-local-supplement.json','service.json','service-launch-supplement.json','service-private-supplement.json','important-sources.json']
 DYNAMIC_FILES = ['event-sources.json','events.json','news.json','lunch.json','lunch-sources.json','school-family-sources.json']
@@ -27,7 +27,12 @@ class Text(HTMLParser):
 def canonical(url):
     p=urlsplit(str(url).strip())
     if p.scheme not in {'http','https'} or not p.hostname or p.username or p.password: return None
-    return urlunsplit((p.scheme,p.netloc,p.path or '/',p.query,''))
+    try:
+        host=p.hostname.encode('idna').decode('ascii')
+        netloc=('['+host+']') if ':' in host else host
+        if p.port: netloc+=':'+str(p.port)
+        return urlunsplit((p.scheme,netloc,quote(p.path or '/',safe="/:@!$&'()*+,;=-._~%"),quote(p.query,safe="=&?/:@!$'()*+,;~-._%"),''))
+    except (ValueError,UnicodeError): return None
 def check_public(url):
     p=urlsplit(url); host=p.hostname
     if not canonical(url) or p.port not in {None,80,443} or host in {'localhost'} or host.endswith(('.local','.internal')): raise ValueError('non_public_url')
@@ -41,8 +46,9 @@ def fetch(url):
     check_public(url)
     req=urllib.request.Request(url,headers={'User-Agent':'DinPuls-Source-Monitor/1.0 (+https://dinpuls.se/)', 'Accept':'text/html,application/pdf,application/json;q=0.9,*/*;q=0.5'})
     with urllib.request.build_opener(PublicRedirect()).open(req,timeout=14) as r:
-        body=r.read(2_000_001)
-        if len(body)>2_000_000: return {'status':r.status,'finalUrl':r.url,'problem':'response_too_large'}
+        limit=16_000_000 if r.headers.get_content_type()=='application/pdf' else 2_000_000
+        body=r.read(limit+1)
+        if len(body)>limit: return {'status':r.status,'finalUrl':r.url,'problem':'response_too_large'}
         mime=r.headers.get_content_type(); title=''; content=body
         if mime in {'text/html','application/xhtml+xml'}:
             parser=Text(); parser.feed(body.decode(r.headers.get_content_charset() or 'utf-8',errors='replace'))
