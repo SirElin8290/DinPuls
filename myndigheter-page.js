@@ -45,7 +45,7 @@ function renderAuthorities() {
 }
 
 function renderAuthorityAds() {
-  window.renderStrategicAds?.("myndigheter", "Myndigheter & samhällsservice", "#authority-grid");
+  window.renderStrategicAds?.("myndigheter", "Myndigheter & samhällsservice", "#authority-national-grid");
 }
 
 function mergeAuthoritySupplement(supplement) {

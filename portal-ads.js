@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  const CATEGORY_KEYS = Object.freeze({ bio: "BIO", "bostäder": "BOST", drivmedel: "DRIV", evenemang: "EVEN", jobb: "JOBB", lunch: "LUNCH", matkasse: "MAT", authorities: "MYND", myndigheter: "MYND", nyheter: "NYH", service: "SERV", trafik: "TRAF", vard: "VARD", sport: "SPORT", fritid: "FRIT", "skola-familj": "SKOLA-FAMILJ" });
+  const CATEGORY_KEYS = Object.freeze({ bio: "BIO", "bostäder": "BOST", drivmedel: "DRIV", evenemang: "EVEN", jobb: "JOBB", lunch: "LUNCH", matkasse: "MAT", authorities: "MYND", myndigheter: "MYND", nyheter: "NYH", service: "SERV", trafik: "TRAF", vard: "VARD", health: "VARD", sport: "SPORT", fritid: "FRIT", "skola-familj": "SKOLA-FAMILJ" });
   const homepageTimers = new Map();
   const measuredImpressions = new Set();
   let apiBasePromise;
@@ -9,6 +9,7 @@
   const verifiedEmptySlots = new Set();
   let homepageRefresh;
   let homepageRefreshPending = false;
+  const inlineObservers = new WeakMap();
 
   async function testPreview() {
     if (!testPreviewPromise) testPreviewPromise = fetch("data/homepage-test-preview.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -145,16 +146,33 @@
   function renderStrategicAds(category, pageLabel, listSelector) {
     const slots = [...document.querySelectorAll("[data-strategic-ad]")];
     slots.forEach(slot => { slot.hidden = true; slot.replaceChildren(); });
-    const inlineSlot = slots.find(slot => slot.dataset.adPosition === "3" && !slot.dataset.dynamicAd);
+    const inlineSlots = slots.filter(slot => !slot.dataset.dynamicAd && (slot.dataset.adPosition === "3" || (category === "bostäder" && ["4", "5", "6"].includes(slot.dataset.adPosition))));
     const list = document.querySelector(listSelector);
-    if (inlineSlot && list) {
+    if (inlineSlots.length && list) {
+      inlineObservers.get(list)?.disconnect();
       const placeInline = () => {
-        const cards = [...list.children].filter(child => child !== inlineSlot);
-        if (cards.length < 4) return;
-        const anchor = cards[Math.min(cards.length - 1, Math.max(2, Math.floor(cards.length / 2)))];
-        if (anchor.previousElementSibling !== inlineSlot) list.insertBefore(inlineSlot, anchor);
+        const cards = [...list.children].filter(child => !child.hasAttribute("data-strategic-ad"));
+        if (cards.length < 2) {
+          if (inlineSlots.some(slot => slot.parentElement === list || !slot.isConnected)) list.after(...inlineSlots);
+          return;
+        }
+        const groups = new Map();
+        inlineSlots.forEach((slot, index) => {
+          const anchor = cards[Math.min(cards.length - 1, Math.max(1, Math.floor(cards.length * (index + 1) / (inlineSlots.length + 1))))];
+          if (!groups.has(anchor)) groups.set(anchor, []);
+          groups.get(anchor).push(slot);
+        });
+        for (const [anchor, group] of groups) {
+          let next = anchor;
+          for (const slot of group.slice().reverse()) {
+            if (slot.nextElementSibling !== next) list.insertBefore(slot, next);
+            next = slot;
+          }
+        }
       };
-      new MutationObserver(placeInline).observe(list, { childList: true });
+      const observer = new MutationObserver(placeInline);
+      observer.observe(list, { childList: true });
+      inlineObservers.set(list, observer);
       queueMicrotask(placeInline);
     }
     queueMicrotask(refreshStrategicAds);

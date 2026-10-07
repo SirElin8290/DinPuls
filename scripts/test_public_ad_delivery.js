@@ -52,6 +52,10 @@ vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "portal-ads.js"), "ut
   slot.dataset.adPosition = "1";
   await context.window.DinPulsAds.enhanceStrategicSlot(slot);
   assert.equal(await context.window.DinPulsAds.resolveSlotId(slot), "SERV-01");
+  context.window.DINPULS_AD_INVENTORY.push({ id: "VARD-01", group: "subpage-vard", position: 1 });
+  const healthSlot = new Element();
+  healthSlot.dataset = { strategicAd: "health", adPosition: "1" };
+  assert.equal(await context.window.DinPulsAds.resolveSlotId(healthSlot), "VARD-01", "Vårdsidans health-kategori ska använda det centrala VARD-ID:t");
   assert.equal(slot.hidden, false, "Aktiv godkänd banner ska visas");
   assert.equal(slot.dataset.scheduledBanner, "approved-1");
   assert.equal(slot.children[0].children[0].src, "https://ads.test/ads/assets/approved-1");

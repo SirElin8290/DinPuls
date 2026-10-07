@@ -25,6 +25,7 @@ function renderCinemaPage() {
   if (window.lucide) lucide.createIcons();
 }
 async function initializeCinemaPage() {
+  window.renderStrategicAds?.("bio", "Bio", "#cinema-list");
   const select = document.querySelector("#cinema-municipality");
   cinemaState.populateSelect(select, cinemaMunicipality);
   select.addEventListener("change", () => { cinemaMunicipality = cinemaState.set(select.value); renderCinemaPage(); });
