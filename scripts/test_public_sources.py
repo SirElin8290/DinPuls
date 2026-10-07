@@ -64,4 +64,11 @@ class SourceTests(unittest.TestCase):
             report=s.build(Path('.'),{},self.now,fetch,8)
         self.assertLess(len(calls),24);self.assertEqual(report['summary']['unverified'],12)
         self.assertTrue(any(x['checkMode']=='host_access_blocked' for x in report['sources']))
+    def test_unavailable_host_is_not_reported_as_individual_http_403(self):
+        sources=[{**self.src,'url':'https://example.org/'+str(i)} for i in range(12)]
+        def fetch(url): raise TimeoutError()
+        with patch.object(s,'collect',return_value=sources),patch.object(s,'content_issues',return_value=[]):
+            report=s.build(Path('.'),{},self.now,fetch,8)
+        suspended=[x for x in report['sources'] if x['checkMode']=='host_access_blocked']
+        self.assertTrue(suspended);self.assertTrue(all(x['status'] is None and x['state']=='unverified' for x in suspended))
 if __name__=='__main__':unittest.main()

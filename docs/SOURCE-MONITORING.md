@@ -26,7 +26,8 @@ Publicering till main följs av en explicit begäran om GitHub Pages-byggning.
 - 404/410 klassas bekräftat trasigt först efter två misslyckade nattkörningar.
   Timeout, 403, inloggning eller skyddssida klassas ej verifierbar, aldrig
   automatiskt nedlagd förening eller saknad verksamhet.
-- Om en värddator upprepade gånger nekar åtkomst (403/429/451) avbryts fler
+- Om en värddator upprepade gånger nekar åtkomst (403/429/451), får serverfel
+  eller inte svarar avbryts fler
   hämtningar där den natten. Övriga URL:er på värddatorn markeras uttryckligen
   som ej verifierade, inte som trasiga eller individuellt kontrollerade.
   En ny körning inom sex timmar kan återanvända nyligen lyckade kontroller;
