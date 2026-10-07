@@ -177,6 +177,7 @@
     const banners = [...new Map(active.map(item => [item.banner.id, item])).values()];
     if (!banners.length) {
       const config = await testPreview();
+      section.dataset.previewCheck = `${Boolean(config)}:${slots.length}:${slots.filter(slot => verifiedEmptySlots.has(`${municipality()}:${slot.id}`)).length}`;
       if (config && slots.length && slots.every(slot => verifiedEmptySlots.has(`${municipality()}:${slot.id}`))) {
         showTestPreview(module, section, config, group);
         host.hidden = false;
