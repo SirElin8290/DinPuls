@@ -5,6 +5,29 @@
   const measuredImpressions = new Set();
   let apiBasePromise;
   let inventoryPromise;
+  let testPreviewPromise;
+  const verifiedEmptySlots = new Set();
+
+  async function testPreview() {
+    if (!testPreviewPromise) testPreviewPromise = fetch("data/homepage-test-preview.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null);
+    const config = await testPreviewPromise;
+    return config?.enabled === true && Date.parse(config.expiresAt) > Date.now() && /^assets\/[a-z0-9-]+\.png$/i.test(config.imageUrl || "") ? config : null;
+  }
+
+  function showTestPreview(module, section, config, group) {
+    const frame = document.createElement("div");
+    frame.className = "homepage-live-ad";
+    const label = document.createElement("p");
+    label.textContent = `TESTANNONS · visningsplats ${group} av 4 · ingen riktig verksamhet`;
+    const image = document.createElement("img");
+    image.src = config.imageUrl;
+    image.alt = "DinPuls testföretag – testannons, ingen riktig verksamhet";
+    image.loading = "lazy";
+    frame.append(label, image);
+    module.replaceChildren(frame);
+    section.dataset.testBannerPreview = String(group);
+    section.hidden = false;
+  }
 
   function municipality() {
     return window.DinPulsMunicipality?.getName?.() || window.DinPulsMunicipalityState?.getInitial?.() || new URLSearchParams(location.search).get("kommun") || "Åmål";
@@ -32,12 +55,15 @@
   }
 
   async function getCurrentBanner(slotId, selectedMunicipality = municipality()) {
+    const key = `${selectedMunicipality}:${slotId}`;
+    verifiedEmptySlots.delete(key);
     const base = await apiBase();
     if (!base || !slotId) return null;
     try {
       const response = await fetch(`${base}/ads/current/${encodeURIComponent(slotId)}?municipality=${encodeURIComponent(selectedMunicipality)}`, { cache: "no-store" });
       if (!response.ok) return null;
       const data = await response.json();
+      if (data.ok === true && data.banner === null) verifiedEmptySlots.add(key);
       return data.banner ? { ...data.banner, imageUrl: `${base}${data.banner.imageUrl}`, targetUrl: safeTarget(data.banner.targetUrl) } : null;
     } catch { return null; }
   }
@@ -136,6 +162,7 @@
     const module = host?.querySelector("[data-ad-dice]");
     if (module) module.replaceChildren();
     if (section) section.hidden = true;
+    if (section) delete section.dataset.testBannerPreview;
     if (host) host.hidden = true;
     return { host, section, module };
   }
@@ -148,7 +175,14 @@
     const slots = catalog.filter(item => item.group === groupName).sort((a, b) => a.position - b.position);
     const active = (await Promise.all(slots.map(async slot => ({ slot, banner: await getCurrentBanner(slot.id) })))).filter(item => item.banner);
     const banners = [...new Map(active.map(item => [item.banner.id, item])).values()];
-    if (!banners.length) return;
+    if (!banners.length) {
+      const config = await testPreview();
+      if (config && slots.length && slots.every(slot => verifiedEmptySlots.has(`${municipality()}:${slot.id}`))) {
+        showTestPreview(module, section, config, group);
+        host.hidden = false;
+      }
+      return;
+    }
     const frame = document.createElement("div");
     frame.className = "homepage-live-ad";
     module.append(frame);
@@ -166,6 +200,19 @@
 
   async function refreshHomepageAds() {
     await Promise.all([1, 2, 3].map(refreshHomepageGroup));
+    document.querySelector('[data-test-preview-extra]')?.remove();
+    const config = await testPreview();
+    if (config && document.querySelector('[data-test-banner-preview]')) {
+      const section = document.createElement("section");
+      section.className = "premium-ads premium-ad-break";
+      section.dataset.testPreviewExtra = "true";
+      section.setAttribute("aria-label", "Tillfällig fjärde testannons – ingen säljbar annonsplats");
+      const module = document.createElement("article");
+      module.className = "ad-dice";
+      section.append(module);
+      showTestPreview(module, section, config, 4);
+      document.querySelector('[data-component="premium-ad-3"]')?.after(section);
+    }
   }
 
   function initializeHomepageAds() {
