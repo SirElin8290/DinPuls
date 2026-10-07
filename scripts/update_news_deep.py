@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
+from update_news import verified_search_article
 
 ROOT = Path(__file__).resolve().parents[1]
 NEWS = ROOT / "data" / "news.json"
@@ -72,7 +73,7 @@ def fetch_search(municipality: str, terms: list[str]):
         if published < cutoff:
             continue
         summary = node_text(node, ["description", "summary", "content"])
-        rows.append({
+        row = {
             "id": "deep-" + hashlib.sha1((municipality + link).encode()).hexdigest()[:14],
             "scope": "local",
             "source": f"Google Nyheter – djupsökning {municipality}",
@@ -88,7 +89,9 @@ def fetch_search(municipality: str, terms: list[str]):
             "publishedAt": published.isoformat(),
             "url": link,
             "important": False,
-        })
+        }
+        if verified_search_article(row):
+            rows.append(row)
     return rows[:60]
 
 
@@ -116,6 +119,8 @@ def main():
 
     dedup = {}
     for article in existing + deep:
+        if not verified_search_article(article):
+            continue
         key = article.get("url") or article.get("id")
         if not key:
             continue

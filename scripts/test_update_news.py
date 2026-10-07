@@ -9,6 +9,16 @@ import update_news
 
 
 class NewsUpdateTests(unittest.TestCase):
+    def test_search_results_need_actual_local_connection(self):
+        def article(title, municipality):
+            return {"scope": "local", "source": "Google Nyheter – djupsökning " + municipality, "municipalities": [municipality], "title": title}
+        self.assertFalse(update_news.verified_search_article(article("Supergrek, en restaurang i Paris", "Färgelanda")))
+        self.assertFalse(update_news.verified_search_article(article("Stigen i naturreservatet avstängd", "Färgelanda")))
+        self.assertFalse(update_news.verified_search_article(article("Trafikpolisen i Ho Chi Minh City", "Åmål")))
+        self.assertTrue(update_news.verified_search_article(article("Nytt café öppnar i Högsäter", "Färgelanda")))
+        self.assertTrue(update_news.verified_search_article(article("Ny förskola i Ransäter", "Munkfors")))
+        self.assertTrue(update_news.verified_search_article({"scope":"local", "source":"Färgelanda kommun", "title":"Beslut om ny skola", "municipalities":["Färgelanda"]}))
+
     def test_empty_feed_keeps_recent_articles_but_expires_old_ones(self):
         now = datetime.now(timezone.utc)
         recent = {"id": "feed-recent", "scope": "local", "source": "Forshaga feed",

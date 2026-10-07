@@ -151,6 +151,21 @@ def article_municipalities(article):
     return [name for name, terms in MUNICIPALITIES.items() if any(contains_term(haystack, term) for term in terms)]
 
 
+def verified_search_article(article):
+    """A search query alone cannot establish a local news connection."""
+    if article.get("scope") != "local" or not str(article.get("source", "")).startswith("Google Nyheter"):
+        return True
+    text = clean_text(f"{article.get('title', '')} {article.get('summary', '')}")
+    ambiguous = {"stigen", "råda", "rud", "nordmark", "gustav adolf"}
+    assigned = article.get("municipalities") or []
+    matched = [name for name in assigned if any(contains_term(text, term)
+               for term in MUNICIPALITIES.get(name, []) if term.casefold() not in ambiguous)]
+    if not matched:
+        return False
+    article["municipalities"] = matched
+    return True
+
+
 def node_text(node, names):
     for child in node.iter():
         if child.tag.split("}")[-1] in names and child.text:
@@ -263,6 +278,8 @@ def fetch_feed(feed):
             url=link,
             important=False,
         )
+        if not verified_search_article(row):
+            continue
         if row["scope"] == "regional":
             municipalities = article_municipalities(row)
             if municipalities:
@@ -404,6 +421,8 @@ def main():
 
     deduplicated = {}
     for article in retained + fetched:
+        if not verified_search_article(article):
+            continue
         if is_expired_event_article(article, now):
             continue
         max_age = timedelta(days=21 if article.get("scope") == "local" else 5)
