@@ -36,6 +36,7 @@ concurrency:
 jobs:
   update-events:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Hämta projektet
         uses: actions/checkout@v4

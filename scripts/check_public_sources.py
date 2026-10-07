@@ -128,8 +128,21 @@ def build(data_dir,previous,now=None,fetcher=fetch,workers=8,checkpoint=None):
             sources.append(grouped[host].popleft())
             if not grouped[host]: del grouped[host]
     old={x['url']:x for x in previous.get('sources',[])}; locks={urlsplit(x['url']).hostname:threading.Semaphore(2) for x in sources}
+    blocked={}
     def run(source):
-        with locks[urlsplit(source['url']).hostname]: return inspect(source,old,now,fetcher)
+        host=urlsplit(source['url']).hostname
+        with locks[host]:
+            prior=old.get(source['url'],{})
+            try: age=(now-datetime.fromisoformat(prior.get('checkedAt',''))).total_seconds()/3600
+            except (ValueError,TypeError): age=999
+            if previous.get('completed') and prior.get('state')=='reachable' and 0<=age<6 and prior.get('reviewChanges')==source['reviewChanges']:
+                return {**prior,**source,'checkMode':'recent_success_reused'}
+            if blocked.get(host,0)>=3:
+                result=inspect(source,old,now,lambda u:{'status':403,'problem':'host_access_blocked'})
+                result['checkMode']='host_access_blocked';return result
+            result=inspect(source,old,now,fetcher);result['checkMode']='direct'
+            if result.get('status') in {403,429,451}: blocked[host]=blocked.get(host,0)+1
+            return result
     results=[]
     with ThreadPoolExecutor(max_workers=workers) as pool:
         pending=[pool.submit(run,source) for source in sources]
