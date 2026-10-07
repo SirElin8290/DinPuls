@@ -23,7 +23,7 @@
     if (document.querySelector('link[data-dinpuls-seasonal-theme]')) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "seasonal-theme.css?version=0.2.1";
+    link.href = "seasonal-theme.css?version=0.2.2";
     link.dataset.dinpulsSeasonalTheme = "autumn";
     (document.head || document.documentElement).appendChild(link);
     document.documentElement.dataset.season = "autumn";
