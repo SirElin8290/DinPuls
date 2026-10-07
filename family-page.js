@@ -1,5 +1,4 @@
 (async function(){"use strict";
-window.renderStrategicAds?.("skola-familj", "Skola & familj", "#family-place-list");
 const api=window.DinPulsFamily,esc=api.escapeHtml,name=api.municipality(),section=document.querySelector("#family-section"),select=document.querySelector("#family-category"),cards=document.querySelector("#family-place-list"),count=document.querySelector("#family-result-count"),empty=document.querySelector("#family-empty"),mapHost=document.querySelector("#family-map");
 document.querySelector("#family-place").textContent=name;let payload,item;try{payload=await api.load();item=payload.municipalities?.[name]||null}catch{section.dataset.state="error";empty.hidden=false;empty.textContent="Familjeplatserna kunde inte hämtas just nu.";return}
 const categories=payload.categories||[],labels=new Map(categories.map(category=>[category.id,category.label]));select.add(new Option("Visa allt","all"));categories.forEach(category=>select.add(new Option(category.label,category.id)));
