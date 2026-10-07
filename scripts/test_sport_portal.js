@@ -63,5 +63,5 @@ for (const [municipality, payload] of Object.entries(arenas.municipalities)) {
 const health = fs.readFileSync("vard.html", "utf8");
 const leisure = fs.readFileSync("fritid.html", "utf8");
 assert(!/Karate Shotokan JSKA|IF Viken|Åmåls IBK/.test(health), "Vård & hälsa får inte innehålla sportkatalogen");
-assert(leisure.includes("Gå till Idrott &amp; motion"), "Fritid & föreningsliv ska länka vidare utan att blanda katalogerna");
+assert(leisure.includes('new URL("foreningsliv.html"'), "Den avvecklade fritidssidan ska leda till Föreningsliv");
 console.log(`Sportportal verifierad: ${clubCount} föreningar, strikt klubbmatchning, ${Object.values(feeds.municipalities).flatMap(item => item.standings || []).length} tabeller och separata anläggningar.`);

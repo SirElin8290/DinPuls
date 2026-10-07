@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
-const pages = ["bio", "bostader", "drivmedel", "evenemang", "fritid", "jobb", "lunch", "matkasse", "myndigheter", "nyheter", "service", "sport", "trafik", "vard", "information", "praktiskt"];
+const pages = ["bio", "bostader", "drivmedel", "evenemang", "jobb", "lunch", "matkasse", "myndigheter", "nyheter", "service", "trafik", "vard", "information", "praktiskt"];
 const css = fs.readFileSync("portal-pages.css", "utf8");
 const brandRule = css.match(/\.portal-brand img\{([^}]*)\}/)?.[1] || "";
 assert(!/filter\s*:/.test(brandRule), "Portalens logotyp får inte färgfiltreras");
@@ -16,6 +16,15 @@ for (const page of pages) {
 }
 
 const leisure = fs.readFileSync("fritid.html", "utf8");
+for (const page of ["sport", "fritid"]) {
+  const source = fs.readFileSync(`${page}.html`, "utf8").match(/<script>([\s\S]*?)<\/script>/)[1];
+  for (const municipality of ["Åmål", "Munkfors", "Årjäng"]) {
+    let target;
+    require("node:vm").runInNewContext(source, { URL, URLSearchParams, location: { href: `https://dinpuls.se/${page}.html`, search: `?kommun=${encodeURIComponent(municipality)}`, replace(url) { target = new URL(url); } } });
+    assert.equal(target.pathname, "/foreningsliv.html");
+    assert.equal(target.searchParams.get("kommun"), municipality);
+  }
+}
 assert(!/<style>[\s\S]*leisure-show-more/.test(leisure), "Fritidsknappens CSS ska ligga i leisure-hub.css");
 assert(/\.leisure-show-more\{/.test(fs.readFileSync("leisure-hub.css", "utf8")), "Fritidsknappens CSS saknas");
 

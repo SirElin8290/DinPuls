@@ -22,8 +22,8 @@ const dynamicPages = new Set(["sport.html", "fritid.html"]);
 for (const [page, slots] of byPage) {
   const html = fs.readFileSync(path.join(root, page), "utf8");
   if (dynamicPages.has(page)) {
-    assert(html.includes("dynamic-portal-ads.js"), `${page}: dynamisk annonsfördelning saknas`);
-    assert(html.includes("portal-ads.js"), `${page}: annonsmotorn saknas`);
+    assert(html.includes('new URL("foreningsliv.html"'), `${page}: avvecklad sida ska leda till Föreningsliv`);
+    assert(!html.includes("data-strategic-ad"), `${page}: avvecklad sida får inte rendera gamla annonsytor`);
     continue;
   }
   const positions = [...html.matchAll(/data-strategic-ad="[^"]+"[^>]*data-ad-position="(\d+)"/g)].map(match => Number(match[1]));
