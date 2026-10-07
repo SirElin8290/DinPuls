@@ -27,6 +27,10 @@ assert(css.includes("prefers-reduced-motion:reduce") && css.includes("@media(max
 for (const [name, record] of Object.entries(data.municipalities)) {
   assert(record.settlements[0]?.id === "all", `${name}: Hela kommunen saknas`);
   assert(record.categories.length >= 1, `${name}: kategorier saknas`);
+  if (record.categories.some(x => x.presentationType !== "information")) {
+    assert(Array.isArray(record.mapCenter) && record.mapCenter.length === 2 && record.mapCenter.every(Number.isFinite), `${name}: kartcentrum saknas`);
+    assert(Math.abs(record.mapCenter[0]) <= 90 && Math.abs(record.mapCenter[1]) <= 180, `${name}: ogiltigt kartcentrum`);
+  }
   const categoryIds = new Set(record.categories.map(x => x.id));
   const settlementIds = new Set(record.settlements.map(x => x.id));
   assert.equal(categoryIds.size, record.categories.length, `${name}: duplicerade kategori-ID`);
