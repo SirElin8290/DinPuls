@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "data" / "events.json"
 SOURCE_URL = "https://www.dalsed.se/evenemang/"
 SOURCE_NAME = "Dals-Eds kommun – evenemang"
-VISIT_URL = "https://www.vastsverige.com/dalsland/dals-ed/"
+VISIT_URL = "https://www.vastsverige.com/dalsland/destinationer/dals-ed/"
 USER_AGENT = "DinPuls.se/0.21 (+https://dinpuls.se/)"
 
 MONTHS = {

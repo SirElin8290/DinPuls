@@ -1,5 +1,7 @@
 import json
 import unittest
+from unittest.mock import patch
+from tempfile import TemporaryDirectory
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -7,6 +9,20 @@ import update_events
 
 
 class EventUpdateTests(unittest.TestCase):
+    def test_successful_visit_index_drops_deleted_cached_events(self):
+        with TemporaryDirectory() as directory:
+            output = Path(directory) / "events.json"
+            catalog = Path(directory) / "sources.json"
+            old = {"title": "Deleted", "startDate": "2099-01-01", "url": "https://www.visitvarmland.com/deleted"}
+            other = {"title": "Local", "startDate": "2099-01-02", "url": "https://local.example/event"}
+            fresh = {"title": "Current", "startDate": "2099-01-03", "url": "https://www.visitvarmland.com/current"}
+            output.write_text(json.dumps({"municipalities": {"Sunne": {"events": [old, other]}}}), encoding="utf-8")
+            catalog.write_text(json.dumps({"municipalities": {"Sunne": {"sources": [{"name": "Visit Värmland", "url": "https://www.visitvarmland.com/evenemang", "automatic": True}]}}}), encoding="utf-8")
+            with patch.object(update_events, "OUTPUT", output), patch.object(update_events, "SOURCE_CATALOG", catalog), patch.object(update_events, "fetch_html", return_value=""), patch.object(update_events, "fetch_visit_varmland_events", return_value=[fresh]):
+                self.assertEqual(update_events.main(), 0)
+            titles = {e["title"] for e in json.loads(output.read_text(encoding="utf-8"))["municipalities"]["Sunne"]["events"]}
+            self.assertEqual(titles, {"Local", "Current"})
+
     def test_all_municipalities_have_multiple_valid_sources(self):
         catalog = json.loads(Path(update_events.SOURCE_CATALOG).read_text(encoding="utf-8"))
         self.assertEqual(set(catalog["municipalities"]), set(update_events.LOCALITIES))

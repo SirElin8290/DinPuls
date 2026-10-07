@@ -441,6 +441,27 @@ async function currentBanner(request, env, slotId, municipality) {
   return json(request, { ok: true, banner: row ? bannerFromRow(row) : null });
 }
 
+// One public request for multiple slots; same approval and municipality gates as a single slot.
+async function currentBanners(request, env, url) {
+  const municipality = cleanText(url.searchParams.get("municipality"), 80);
+  const ids = [...new Set(String(url.searchParams.get("slots") || "").split(","))];
+  if (!isSupportedMunicipality(municipality) || !ids.length || ids.length > 30 || ids.some(id => !/^[A-Z0-9-]{4,40}$/.test(id))) return json(request, { ok: false, error: "Ogiltig kommun eller annonsplats." }, 400);
+  const now = new Date().toISOString(), today = stockholmDateKey(now);
+  const placeholders = ids.map(() => "?").join(",");
+  const predicate = `b.slot_id IN (${placeholders}) AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.municipality=? AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.municipality=? AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))`;
+  const from = "ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id";
+  const parameters = [...ids, municipality, today, today, municipality, today, today];
+  const due = await env.DB.prepare(`SELECT b.id FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.start_at<=? AND b.published_at IS NULL ORDER BY b.start_at ASC`).bind(...parameters, now).all();
+  for (const banner of due.results || []) {
+    try { await env.DB.prepare("UPDATE ad_banners SET published_at=?, updated_at=? WHERE id=? AND published_at IS NULL").bind(now, now, banner.id).run(); }
+    catch (error) { if (!String(error).includes("BANNER_CHANGE_LIMIT")) throw error; }
+  }
+  const rows = await env.DB.prepare(`SELECT b.* FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.published_at IS NOT NULL ORDER BY b.start_at DESC`).bind(...parameters).all();
+  const banners = Object.fromEntries(ids.map(id => [id, null]));
+  for (const row of rows.results || []) if (banners[row.slot_id] === null) banners[row.slot_id] = bannerFromRow(row);
+  return json(request, { ok: true, banners });
+}
+
 async function currentAssociationAds(request,env,url){const municipality=cleanText(url.searchParams.get("municipality"),80),slug=slugifyAssociation(url.searchParams.get("slug")),slots=associationAdSlots(municipality,slug);if(!slots.length)return json(request,{ok:false,error:"Föreningen finns inte."},404);const now=new Date().toISOString(),today=stockholmDateKey(now),ids=slots.map(slot=>slot.id),placeholders=ids.map(()=>"?").join(","),from="ad_banners b JOIN ad_contracts c ON c.id=b.contract_id LEFT JOIN self_service_purchases p ON p.id=b.purchase_id AND p.company_user_id=b.company_user_id AND p.foundation_contract_id=b.contract_id",predicate=`b.slot_id IN (${placeholders}) AND b.municipality=? AND c.status='Aktivt' AND ((b.purchase_id IS NULL AND c.start_date<=? AND c.end_date>=?) OR (b.purchase_id IS NOT NULL AND p.publication_status='active' AND p.start_date<=? AND p.end_date>=?))`;const due=await env.DB.prepare(`SELECT b.id FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.start_at<=? AND b.published_at IS NULL ORDER BY b.start_at`).bind(...ids,municipality,today,today,today,today,now).all();for(const banner of due.results||[]){try{await env.DB.prepare("UPDATE ad_banners SET published_at=?,updated_at=? WHERE id=? AND published_at IS NULL").bind(now,now,banner.id).run()}catch(error){if(!String(error).includes("BANNER_CHANGE_LIMIT"))throw error}}const rows=await env.DB.prepare(`SELECT b.* FROM ${from} WHERE ${predicate} AND b.approval_status='approved' AND b.published_at IS NOT NULL ORDER BY b.slot_id,b.start_at DESC`).bind(...ids,municipality,today,today,today,today).all();const onePerSlot=new Map;for(const row of rows.results||[])if(!onePerSlot.has(row.slot_id))onePerSlot.set(row.slot_id,row);return json(request,{ok:true,banners:[...onePerSlot.values()].map(bannerFromRow)});}
 
 async function recordBannerEvent(request, env) {
@@ -1067,6 +1088,7 @@ async function createContract(request, env) {
   if (!company || !orgNo || !contact || !validEmail(email) || !phone || !isSupportedMunicipality(municipality) || !placements.length || !validDate(body.startDate) || !validDate(body.endDate) || !["monthly", "annual", "complimentary"].includes(billingType) || !RENEWAL_TYPES.has(renewalType) || body.termsReviewed !== true) {
     return json(request, { ok: false, error: "Avtalet innehåller ogiltiga eller ofullständiga uppgifter." }, 400);
   }
+  if (placements.some(item => globalThis.DINPULS_AD_INVENTORY.find(slot => slot.id === item.slotId)?.purchasable === false)) return json(request, { ok: false, error: "Annonsplatsen tillhör en avvecklad sida och kan inte bokas." }, 400);
   if (!isTwelveMonthContract(body.startDate, body.endDate)) {
     return json(request, { ok: false, error: "Avtalsperioden måste vara exakt 12 månader från startdatum, med slutdatum dagen före motsvarande datum följande år." }, 400);
   }
@@ -1286,7 +1308,7 @@ async function listAvailableCompanySlots(request, env, url) {
   const inventory=associationSlug?associationAdSlots(municipality,associationSlug):globalThis.DINPULS_AD_INVENTORY;
   if(associationSlug&&!inventory.length)return json(request,{ok:false,error:"Föreningen finns inte i vald kommun."},404);
   return json(request, { ok: true, municipality, startDate, endDate,
-    slots: inventory.filter(slot => !occupied.has(slot.id)).map(slot => slotDisplay(slot, municipality)),
+    slots: inventory.filter(slot => slot.purchasable !== false && !occupied.has(slot.id)).map(slot => slotDisplay(slot, municipality)),
     pricing: { monthlyExVat: BILLING.monthly.unitPrice, annualExVat: BILLING.annual.unitPrice, vatRate: 0.25 } });
 }
 
@@ -1328,7 +1350,7 @@ async function getContractSnapshot(request, env, id) {
 function checkedOrderLines(value) {
   if (!Array.isArray(value) || !value.length || value.length > 20) return null;
   const lines = value.map(item => ({ municipality: cleanText(item.municipality, 80), slotId: cleanText(item.slotId, 120), startDate: cleanText(item.startDate, 10), endDate: cleanText(item.endDate, 10) }));
-  if (lines.some(item => !isSupportedMunicipality(item.municipality) || !isTwelveMonthContract(item.startDate, item.endDate) || !findPurchasableSlot(item.municipality,item.slotId) || item.startDate < new Date().toISOString().slice(0, 10))) return null;
+  if (lines.some(item => !isSupportedMunicipality(item.municipality) || !isTwelveMonthContract(item.startDate, item.endDate) || !findPurchasableSlot(item.municipality,item.slotId) || findPurchasableSlot(item.municipality,item.slotId)?.purchasable === false || item.startDate < new Date().toISOString().slice(0, 10))) return null;
   if (new Set(lines.map(item => `${item.municipality}|${item.slotId}|${item.startDate}|${item.endDate}`)).size !== lines.length) return null;
   return lines;
 }
@@ -1900,6 +1922,7 @@ export default {
       const companyBannerMatch = /^\/portal\/company\/banners\/([0-9a-f-]{36})$/i.exec(url.pathname);
       if (request.method === "DELETE" && companyBannerMatch) return deleteCompanyBanner(request, env, companyBannerMatch[1]);
       if (request.method === "GET" && url.pathname === "/ads/association/current") return currentAssociationAds(request,env,url);
+      if (request.method === "GET" && url.pathname === "/ads/current") return currentBanners(request, env, url);
       const currentBannerMatch = /^\/ads\/current\/([A-Z0-9-]{4,40})$/.exec(url.pathname);
       if (request.method === "GET" && currentBannerMatch) return currentBanner(request, env, currentBannerMatch[1], cleanText(url.searchParams.get("municipality"), 80));
       if (request.method === "POST" && url.pathname === "/ads/events") return recordBannerEvent(request, env);

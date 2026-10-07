@@ -104,7 +104,7 @@ SOURCE_DIRECTORY = [
     dict(name="Provinstidningen Dalsland", type="Lokaltidning", access="subscription", scope="local", municipalities=["Åmål", "Mellerud"], url="https://www.provinstidningen.se/"),
     dict(name="Åmåls kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Åmål"], url="https://amal.se/arkiv/nyheter"),
     dict(name="Säffle-Tidningen", type="Lokaltidning", access="subscription", scope="local", municipalities=["Säffle"], url="https://www.saffletidningen.se/"),
-    dict(name="Säffle kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Säffle"], url="https://saffle.se/kommun-och-politik/nyheter.html"),
+    dict(name="Säffle kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Säffle"], url="https://saffle.se/arkiv/nyhetsarkiv.html"),
     dict(name="Dalslänningen", type="Lokaltidning", access="subscription", scope="local", municipalities=["Bengtsfors"], url="https://www.dalslanningen.se/"),
     dict(name="Bengtsfors kommun", type="Kommunala nyheter", access="free", scope="local", municipalities=["Bengtsfors"], url="https://www.bengtsfors.se/arkiv/nyheter"),
     dict(name="Melleruds Nyheter", type="Lokaltidning", access="subscription", scope="local", municipalities=["Mellerud"], url="https://www.mellerudsnyheter.se/"),

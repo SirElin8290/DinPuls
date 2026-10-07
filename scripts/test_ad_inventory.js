@@ -9,6 +9,8 @@ vm.runInNewContext(fs.readFileSync(path.join(root, "admin/ad-inventory.js"), "ut
 const inventory = Array.from(context.window.DINPULS_AD_INVENTORY || []);
 
 assert.strictEqual(inventory.length, 93, "Inventeringen ska innehålla 30 startsidesplatser och 63 undersidesplatser");
+assert.strictEqual(inventory.filter(slot => slot.purchasable !== false).length, 85, "Avvecklade sidor får inte erbjuda åtta nya annonsköp");
+assert(inventory.filter(slot => ["sport.html", "fritid.html"].includes(slot.page)).every(slot => slot.purchasable === false), "Historiska ID:n måste bevaras men stängas för nya köp");
 assert.strictEqual(new Set(inventory.map(slot => slot.id)).size, inventory.length, "Alla annons-ID:n måste vara unika");
 assert(inventory.every(slot => slot.id && slot.module && slot.page && slot.position && slot.label && slot.location), "Varje annonsplats måste vara fullständigt beskriven");
 
@@ -30,8 +32,8 @@ for (const [page, slots] of byPage) {
   assert.deepStrictEqual(positions, slots.map(slot => slot.position), `${page}: annonsinventeringen avviker från HTML`);
 }
 
-assert.strictEqual(byPage.get("sport.html")?.length, 4, "Idrott & motion ska ha fyra säljbara hubplatser");
-assert.strictEqual(byPage.get("fritid.html")?.length, 4, "Fritid ska ha fyra säljbara annonsplatser");
+assert.strictEqual(byPage.get("sport.html")?.length, 4, "Idrott & motion ska bevara fyra historiska ID:n");
+assert.strictEqual(byPage.get("fritid.html")?.length, 4, "Fritid ska bevara fyra historiska ID:n");
 assert.strictEqual(byPage.get("skola-familj.html")?.length, 4, "Skola & familj ska ha fyra fasta annonsplatser");
 const dynamicSource = fs.readFileSync(path.join(root, "dynamic-portal-ads.js"), "utf8");
 assert(dynamicSource.includes("const expectedSlots = 4"), "Alla sportvyer ska använda de fyra centralt säljbara sportplatserna");
@@ -59,4 +61,4 @@ const adminSource = fs.readFileSync(path.join(root, "admin/admin.js"), "utf8");
 assert(adminSource.includes("data/municipalities.json"), "Admin ska läsa aktiva kommuner centralt");
 assert(!adminSource.includes("Dals-Ed") && !adminSource.includes("Karlstad"), "Admin får inte ha en parallell kommunlista");
 
-console.log(`✓ Annonsregistret matchar 93 basplatser och ${byPage.size} undersidor; alla sportvyer använder fyra centrala platser`);
+console.log(`✓ Annonsregistret matchar 85 köpbara basplatser och åtta historiska ID:n`);

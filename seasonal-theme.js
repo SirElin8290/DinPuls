@@ -2,7 +2,7 @@
    Gör att samma hösttema används på startsidan och alla publika undersidor
    utan att varje portal behöver en egen kopia av temat. */
 (() => {
-  const href = "seasonal-theme.css?version=0.1.0";
+  const href = "seasonal-theme.css?version=0.2.3";
   if (!document.querySelector('link[data-dinpuls-seasonal-theme]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";

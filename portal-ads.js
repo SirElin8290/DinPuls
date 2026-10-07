@@ -40,7 +40,7 @@
     if (Array.isArray(window.DINPULS_AD_INVENTORY)) return Promise.resolve(window.DINPULS_AD_INVENTORY);
     if (!inventoryPromise) inventoryPromise = new Promise(resolve => {
       const script = document.createElement("script");
-      script.src = "admin/ad-inventory.js?version=0.26.0";
+      script.src = "admin/ad-inventory.js?version=0.26.3";
       script.onload = () => resolve(window.DINPULS_AD_INVENTORY || []);
       script.onerror = () => resolve([]);
       document.head.append(script);
@@ -74,6 +74,26 @@
       if (data.ok === true && data.banner === null) verifiedEmptySlots.add(key);
       return data.banner ? { ...data.banner, imageUrl: `${base}${data.banner.imageUrl}`, targetUrl: safeTarget(data.banner.targetUrl) } : null;
     } catch { return null; }
+  }
+
+  async function getCurrentBanners(slots, selectedMunicipality) {
+    const base = await apiBase();
+    if (!base) return new Map();
+    try {
+      const ids = slots.map(slot => slot.id);
+      const response = await fetch(`${base}/ads/current?municipality=${encodeURIComponent(selectedMunicipality)}&slots=${encodeURIComponent(ids.join(","))}`, { cache: "no-store", signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined });
+      const data = response.ok ? await response.json() : null;
+      if (data?.ok === true && data.banners && ids.every(id => Object.hasOwn(data.banners, id))) {
+        return new Map(ids.map(id => {
+          const key = `${selectedMunicipality}:${id}`, banner = data.banners[id];
+          verifiedEmptySlots.delete(key);
+          if (banner === null) verifiedEmptySlots.add(key);
+          return [id, banner ? { ...banner, imageUrl: `${base}${banner.imageUrl}`, targetUrl: safeTarget(banner.targetUrl) } : null];
+        }));
+      }
+    } catch {}
+    // Compatible with an older API deployment; failures never count as empty inventory.
+    return new Map(await Promise.all(slots.map(async slot => [slot.id, await getCurrentBanner(slot.id, selectedMunicipality)])));
   }
 
   function showBanner(slot, banner, label = "Annons") {
@@ -192,14 +212,14 @@
     return { host, section, module };
   }
 
-  async function refreshHomepageGroup(group) {
+  async function refreshHomepageGroup(group, batch) {
     const selectedMunicipality = municipality();
     const { host, section, module } = clearHomepageGroup(group);
     if (!host || !section || !module) return;
     const catalog = await inventory();
     const groupName = `premium-ad-${group}`;
     const slots = catalog.filter(item => item.group === groupName).sort((a, b) => a.position - b.position);
-    const active = (await Promise.all(slots.map(async slot => ({ slot, banner: await getCurrentBanner(slot.id, selectedMunicipality) })))).filter(item => item.banner);
+    const active = slots.map(slot => ({ slot, banner: batch?.municipality === selectedMunicipality ? batch.banners.get(slot.id) : null })).filter(item => item.banner);
     if (selectedMunicipality !== municipality()) return;
     const banners = [...new Map(active.map(item => [item.banner.id, item])).values()];
     if (!banners.length) {
@@ -233,7 +253,12 @@
     homepageRefresh = (async () => {
       while (homepageRefreshPending) {
         homepageRefreshPending = false;
-        await Promise.all([1, 2, 3].map(refreshHomepageGroup));
+        const selectedMunicipality = municipality();
+        [1, 2, 3].forEach(clearHomepageGroup);
+        const slots = (await inventory()).filter(slot => ["premium-ad-1", "premium-ad-2", "premium-ad-3"].includes(slot.group));
+        const banners = await getCurrentBanners(slots, selectedMunicipality);
+        if (municipality() !== selectedMunicipality) { homepageRefreshPending = true; continue; }
+        await Promise.all([1, 2, 3].map(group => refreshHomepageGroup(group, { municipality: selectedMunicipality, banners })));
       }
     })().finally(() => { homepageRefresh = null; });
     return homepageRefresh;

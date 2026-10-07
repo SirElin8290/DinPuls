@@ -173,6 +173,10 @@ try {
   assert.equal((await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng")).status, 200);
   assert.equal((await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85rj%C3%A4ng"), 200)).banner, null, "Ogranskad banner får aldrig serveras");
   assert.equal((await request(first.banner.imageUrl)).status, 404, "Ogranskad bannerasset får inte vara publik");
+  const pendingBatch = await responseJson(await request("/ads/current?municipality=%C3%85rj%C3%A4ng&slots=SERV-01,P1-01"), 200);
+  assert.deepEqual(pendingBatch.banners, { "SERV-01": null, "P1-01": null }, "Batch får inte publicera ogranskade annonser");
+  assert.equal((await request("/ads/current?municipality=Okänd&slots=SERV-01")).status, 400);
+  assert.equal((await request("/ads/current?municipality=%C3%85rj%C3%A4ng&slots=bad%27id")).status, 400);
   const reviews = await responseJson(await request("/portal/admin/banners/reviews", { headers: { Authorization: `Bearer ${admin.token}` } }), 200);
   assert.equal(reviews.banners[0].company, "Åslanda bannerkedjetest");
   assert.equal((await request(reviews.banners[0].previewUrl)).status, 404, "Adminpreview kräver autentisering");
@@ -192,6 +196,11 @@ try {
   assert.equal(afterSwitch.banner.targetUrl, "https://example.com/ny");
   const wrongMunicipality = await responseJson(await request("/ads/current/SERV-01?municipality=%C3%85m%C3%A5l"), 200);
   assert.equal(wrongMunicipality.banner, null, "En banner får aldrig läcka till en annan kommun");
+  const activeBatch = await responseJson(await request("/ads/current?municipality=%C3%85rj%C3%A4ng&slots=SERV-01,P1-01"), 200);
+  assert.equal(activeBatch.banners["SERV-01"].id, second.banner.id, "Batch måste välja samma aktuella godkända banner som enkelanropet");
+  assert.equal(activeBatch.banners["P1-01"], null);
+  const isolatedBatch = await responseJson(await request("/ads/current?municipality=%C3%85m%C3%A5l&slots=SERV-01,P1-01"), 200);
+  assert.deepEqual(isolatedBatch.banners, { "SERV-01": null, "P1-01": null }, "Batch måste isolera kommunen");
   const municipalities = JSON.parse(await readFile(new URL("../data/municipalities.json", import.meta.url), "utf8"));
   for (const item of municipalities.municipalities || municipalities) {
     const name = item.name || item;

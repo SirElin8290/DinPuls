@@ -624,7 +624,7 @@ def parse_all_days_menu(page):
     for line in lines:
         normalized=line.lower().strip(" .:-")
         if "alla dagar" in normalized: active=True; continue
-        if active and (weekday_key(line) or any(normalized.startswith(marker) for marker in STOP_MARKERS)): break
+        if active and (weekday_key(line) or extract_week([line]) is not None or any(normalized.startswith(marker) for marker in STOP_MARKERS)): break
         if active and useful_dish(line) and len(dishes)<5: dishes.append(line)
     return extract_week(lines),{day:list(dishes) for day in ("monday","tuesday","wednesday","thursday","friday")}
 

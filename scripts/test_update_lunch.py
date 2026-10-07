@@ -8,6 +8,12 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_static_all_days_menu_stops_before_weekly_buffet(self):
+        page = "<h3>Alla dagar</h3><p>Pannbiff med potatismos</p><h3>Lunchbuffé V 40</h3><p>Veckans andra rätt</p>"
+        week, days = update_lunch.parse_all_days_menu(page)
+        self.assertEqual(week, 40)
+        self.assertEqual(days["wednesday"], ["Pannbiff med potatismos"])
+
     def test_strict_does_not_remove_new_verified_torsby_sources(self):
         import ast
         from pathlib import Path

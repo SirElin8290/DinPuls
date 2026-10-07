@@ -464,6 +464,11 @@ def main() -> int:
                 rows.extend(events_from_filter_api(markup, municipality, source))
                 if "visitvarmland.com" in source["url"]:
                     rows.extend(fetch_visit_varmland_events(municipality))
+                    # A successful current index replaces this source's cached rows.
+                    # Otherwise deleted or rescheduled events survive until their old date.
+                    existing = [item for item in existing
+                                if urlsplit(str(item.get("url") or "")).hostname
+                                not in {"www.visitvarmland.com", "visitvarmland.com"}]
                 if "tickster.com" in source["url"]:
                     rows.extend(tickster_events(markup, municipality, source))
                 collected.extend(rows)

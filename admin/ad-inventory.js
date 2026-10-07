@@ -34,6 +34,7 @@
       group: `subpage-${page.key.toLowerCase()}`,
       module: page.module,
       page: page.page,
+      purchasable: !["SPORT", "FRIT"].includes(page.key),
       position,
       label: `${page.module} · plats ${position}`,
       location: page.locations[index]

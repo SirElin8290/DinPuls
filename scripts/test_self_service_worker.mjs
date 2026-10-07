@@ -98,6 +98,8 @@ try {
   const end = endDate.toISOString().slice(0, 10);
   const slots = await read(`/portal/company/available-slots?municipality=%C3%85m%C3%A5l&startDate=${start}&endDate=${end}`, "GET", null, session.token);
   assert.ok(slots.slots.some(slot => slot.id === "P1-04" && /Övre annonsblocket.*Plats 4 av 10/.test(slot.displayLabel)));
+  assert.ok(!slots.slots.some(slot => /^(SPORT|FRIT)-/.test(slot.id)), "Avvecklade sidor får inte erbjudas för nya köp");
+  await read("/portal/company/foundation/orders", "POST", { placements: [{ municipality: "Åmål", slotId: "SPORT-01", startDate: start, endDate: end }], billingType: "annual" }, session.token, 400);
   assert.equal(slots.pricing.monthlyExVat, 800);
   assert.equal(slots.pricing.annualExVat, 8000);
   await read(`/portal/company/available-slots?municipality=S%C3%A4ffle&startDate=${start}&endDate=${end}`, "GET", null, session.token);

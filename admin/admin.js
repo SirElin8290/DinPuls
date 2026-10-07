@@ -193,7 +193,7 @@
   function availableSlots(municipality, excludedRows = []) {
     const occupied = occupiedMap();
     const selected = new Set(excludedRows.map(row => row.querySelector(".slot")?.value).filter(Boolean));
-    return AD_SLOTS.filter(slot => !occupied.has(`${municipality}|${slot.id}`) && !selected.has(slot.id));
+    return AD_SLOTS.filter(slot => slot.purchasable !== false && !occupied.has(`${municipality}|${slot.id}`) && !selected.has(slot.id));
   }
 
   async function refreshContracts() {

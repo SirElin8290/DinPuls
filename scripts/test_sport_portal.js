@@ -28,7 +28,9 @@ assert(club("Åmål", "Karate Shotokan JSKA Åmål"), "Den verifierade karatefö
 const viken = club("Åmål", "IF Viken");
 const vikenMatches = matches("Åmål").filter(match => belongs(match, viken));
 assert(vikenMatches.some(match => match.status === "finished"), "IF Viken saknar senaste avslutade match");
-assert(vikenMatches.some(match => match.status === "scheduled"), "IF Viken saknar nästa match");
+const vikenSeasonRow = (feeds.municipalities.Åmål.standings || []).flatMap(table => table.rows).find(row => normalize(row.team) === normalize(viken.name));
+const vikenSeasonComplete = vikenMatches.length >= 22 && vikenMatches.every(match => match.status === "finished" && Date.parse(match.startTime) < Date.now()) && vikenSeasonRow?.played === vikenMatches.length;
+assert(vikenMatches.some(match => match.status === "scheduled") || vikenSeasonComplete, "IF Viken saknar nästa match utan att hela seriesäsongen är avslutad");
 const ifkAmal = club("Åmål", "IFK Åmål");
 assert(!vikenMatches.some(match => belongs(match, ifkAmal)), "IFK Åmål får inte ärva IF Vikens matcher");
 const ifkMatches = matches("Åmål").filter(match => belongs(match, ifkAmal));
