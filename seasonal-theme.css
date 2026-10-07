@@ -294,3 +294,11 @@ html[data-theme="dark"] .sport-search-panel input::placeholder{color:#8fa3bb}
 @media(prefers-reduced-motion:reduce){body{transition:none}}
 
 html[data-theme="dark"] .section-kicker,html[data-theme="dark"] .eyebrow.dark{color:#f3bc80}
+
+/* Fixed light surfaces must not inherit dark-theme body text. */
+html[data-theme="dark"] body:has(.info-hero) main>section{color:#10213e;--text:#10213e;--muted:#627087;--border:#dfe6ef;--bg:#f5f7fb}
+html[data-theme="dark"] body:has(.info-hero) main h3,
+html[data-theme="dark"] body:has(.info-hero) .privacy-table{color:#10213e}
+html[data-theme="dark"] .info-page .benefit-grid article,
+html[data-theme="dark"] .info-page .steps li{color:#102b45}
+html[data-theme="dark"] .information{color:#172b3a}
