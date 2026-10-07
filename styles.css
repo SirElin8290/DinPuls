@@ -2297,3 +2297,15 @@ html,body{max-width:100%;overflow-x:clip}
 /* Läsbara hjälptexter i anpassning och pushinställningar. */
 .homepage-customize-intro,.homepage-customize-fixed small,.homepage-customize-footer>span,.push-status small,.push-help,.push-required p small,.push-scope{font-size:12px}
 .push-required>span,.push-options b,.push-options legend,.homepage-customize-options b{font-size:12px}
+
+/* Keep the shared footer readable inside the centered page width. */
+footer:has(.footer-copyright){display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:16px 20px;align-items:center;background:var(--card);color:var(--text)}
+footer:has(.footer-copyright) .footer-copyright{grid-column:1/-1;line-height:1.5}
+footer:has(.footer-copyright) nav{display:flex;flex-wrap:wrap;gap:12px 22px;min-width:0}
+footer:has(.footer-copyright) nav a{white-space:nowrap;color:var(--text);line-height:1.5}
+footer:has(.footer-copyright) nav a:hover{color:var(--blue700)}
+footer:has(.footer-copyright) button{min-height:44px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;line-height:1.4;cursor:pointer}
+footer:has(.footer-copyright) .footer-privacy-status{grid-column:1/-1;min-height:0}
+footer:has(.footer-copyright) .footer-privacy-status:empty{display:none}
+@media(max-width:1000px){footer:has(.footer-copyright){grid-template-columns:1fr 1fr}footer:has(.footer-copyright) nav{grid-column:1/-1}footer:has(.footer-copyright) button{justify-self:stretch;margin:0}}
+@media(max-width:760px){footer:has(.footer-copyright) nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}footer:has(.footer-copyright) nav a{white-space:normal}footer:has(.footer-copyright) .footer-copyright{margin:0}footer:has(.footer-copyright) .footer-privacy-status{margin:0}}
