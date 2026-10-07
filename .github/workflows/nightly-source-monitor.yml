@@ -1,12 +1,6 @@
 name: DinPuls nattkontroll och källuppdatering
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/nightly-source-monitor.yml
-      - scripts/check_public_sources.py
-      - scripts/test_public_sources.py
   schedule:
     - cron: '0 1 * * *'
       timezone: Europe/Stockholm

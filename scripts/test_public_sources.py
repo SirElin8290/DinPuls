@@ -49,4 +49,19 @@ class SourceTests(unittest.TestCase):
             sources=s.collect(d);self.assertNotIn('https://example.org/hidden',[x['url'] for x in sources]);self.assertIn('https://example.org/club',[x['url'] for x in sources])
             issues=s.content_issues(d,self.now);self.assertEqual(issues[0]['kind'],'menu_unverified')
             report=s.build(d,{},self.now,self.ok,2);self.assertEqual(report['summary']['reachable'],3);self.assertTrue(report['completed'])
+    def test_recent_success_is_reused_but_daily_run_fetches_again(self):
+        source={**self.src}; previous={'completed':True,'sources':[{**source,'state':'reachable','checkedAt':'2026-10-07T00:00:00+00:00','reviewChanges':True}]}; calls=[]
+        def fetch(url): calls.append(url); return self.ok(url)
+        with patch.object(s,'collect',return_value=[source]),patch.object(s,'content_issues',return_value=[]):
+            row=s.build(Path('.'),previous,self.now,fetch,2)['sources'][0]
+            self.assertEqual(row['checkMode'],'recent_success_reused');self.assertFalse(calls)
+            s.build(Path('.'),previous,datetime(2026,10,8,1,tzinfo=timezone.utc),fetch,2)
+            self.assertEqual(len(calls),1)
+    def test_repeated_host_access_denials_do_not_probe_every_url(self):
+        sources=[{**self.src,'url':'https://example.org/'+str(i)} for i in range(12)];calls=[]
+        def fetch(url):calls.append(url);return {'status':403,'problem':'http_error'}
+        with patch.object(s,'collect',return_value=sources),patch.object(s,'content_issues',return_value=[]):
+            report=s.build(Path('.'),{},self.now,fetch,8)
+        self.assertLess(len(calls),24);self.assertEqual(report['summary']['unverified'],12)
+        self.assertTrue(any(x['checkMode']=='host_access_blocked' for x in report['sources']))
 if __name__=='__main__':unittest.main()
