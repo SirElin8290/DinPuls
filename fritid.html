@@ -1,50 +1,7 @@
 <!doctype html>
-<html lang="sv" data-portal="leisure">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Hitta scouter, musik, körer, spel, skapande, natur och föreningsliv i din kommun.">
-  <title>Fritid &amp; föreningsliv – DinPuls</title>
-  <link rel="stylesheet" href="styles.css?version=0.26.0">
-  <link rel="stylesheet" href="portal-pages.css?version=0.26.2">
-  <link rel="stylesheet" href="leisure-hub.css?version=1.1.1">
-  <link rel="stylesheet" href="leisure-layout-fix.css?version=1.0.1">
-  <link rel="icon" href="favicon.ico?version=0.26.0" sizes="any">
-  <link rel="icon" type="image/svg+xml" href="assets/compass-mark.svg?version=0.26.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?version=0.26.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?version=0.26.0">
-  <link rel="manifest" href="site.webmanifest?version=0.26.0">
-</head>
-<body>
-  <header class="portal-header">
-    <a href="index.html" class="portal-brand"><picture><source media="(max-width: 620px)" srcset="assets/logo-mobile.svg?version=0.26.0"><img src="assets/logo.svg?version=0.26.0" alt="DinPuls.se – din lokala startsida" width="620" height="150"></picture></a>
-    <a href="index.html">← Till startsidan</a>
-  </header>
-  <main class="portal-main leisure-hub">
-    <section class="leisure-hero">
-      <span class="leisure-hero-spark leisure-hero-spark-one"><i data-lucide="music-2"></i></span>
-      <span class="leisure-hero-spark leisure-hero-spark-two"><i data-lucide="palette"></i></span>
-      <div><span class="section-kicker">Något för varje intresse</span><h1>Fritid &amp; föreningsliv i <span id="leisure-place">Åmål</span></h1><p>Upptäck små och stora föreningar, lokala eldsjälar och aktiviteter från kommunala register och verksamheternas egna källor. Lag, matcher och idrottsföreningar finns i Idrott &amp; motion.</p></div>
-    </section>
-    <section class="leisure-search-panel" aria-labelledby="leisure-search-title">
-      <div class="leisure-search-heading"><span><i data-lucide="search"></i></span><div><h2 id="leisure-search-title">Vad vill du göra?</h2><p>Sök på ett namn eller ett intresse – exempelvis hund, kör, brädspel, scouter eller barn.</p></div></div>
-      <div class="leisure-search-row">
-        <label class="leisure-search-box"><span class="visually-hidden">Sök förening eller aktivitet</span><i data-lucide="search"></i><input id="leisure-search" type="search" autocomplete="off" placeholder="Sök förening eller aktivitet…"><button id="leisure-clear" type="button" aria-label="Rensa sökningen"><i data-lucide="x"></i></button></label>
-      </div>
-      <div class="leisure-suggestions" aria-label="Populära sökningar"><button type="button" data-query="barn">Barn &amp; unga</button><button type="button" data-query="musik">Musik</button><button type="button" data-query="natur">Natur</button><button type="button" data-query="spel">Spel</button><button type="button" data-query="hund">Hund</button></div>
-      <p id="leisure-search-status" class="leisure-search-status" aria-live="polite"></p>
-    </section>
-    <nav class="leisure-crosslink" aria-label="Relaterat innehåll"><span><i data-lucide="trophy"></i><strong>Söker du sport, lag, matcher eller idrottsföreningar?</strong></span><a id="leisure-sport-link" href="sport.html">Gå till Idrott &amp; motion <i data-lucide="arrow-right"></i></a></nav>
-    <section id="leisure-view" class="leisure-view" aria-live="polite"><div class="leisure-loading">Hämtar föreningar och aktiviteter…</div></section>
-  </main>
-  <footer class="portal-footer"><span>© 2026 DinPuls.se</span><nav aria-label="Sidfot"><a href="index.html">Startsidan</a><a href="information.html#om">Om DinPuls</a><a href="information.html#integritet">Integritet</a><a href="information.html#kontakt">Kontakt</a></nav></footer>
-  <script src="assets/vendor/lucide.min.js"></script>
-  <script src="dp-safety.js?version=0.23.6"></script>
-  <script src="portal-ads.js?version=0.26.5"></script>
-  <script src="municipality-engine.js?version=0.24.8"></script>
-  <script src="leisure-cards.js?version=1.0.0"></script>
-  <script src="leisure-hub.js?version=1.2.1"></script>
-  <script src="dynamic-portal-ads.js?version=0.26.5"></script>
-  <script src="privacy-controls.js?version=0.25.2"></script>
-</body>
-</html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Föreningsliv – DinPuls</title><link rel="canonical" href="https://dinpuls.se/foreningsliv.html"><meta name="robots" content="noindex"><script>
+const destination = new URL("foreningsliv.html", location.href);
+const municipality = new URLSearchParams(location.search).get("kommun");
+if (municipality) destination.searchParams.set("kommun", municipality);
+location.replace(destination.href);
+</script></head><body><p>Allt föreningsliv finns nu samlat på <a href="foreningsliv.html">Föreningsliv</a>.</p></body></html>
