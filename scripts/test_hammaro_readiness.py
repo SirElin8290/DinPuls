@@ -127,22 +127,22 @@ def main() -> None:
     index = (ROOT / "index.html").read_text(encoding="utf-8")
     intended_order = [
         'data-component="hero"',
+        'data-component="premium-ad-1"',
         'data-component="missing-people"',
         'data-component="primary-cards"',
+        'data-component="premium-ad-2"',
         'data-component="energy"',
         'data-component="secondary-cards"',
         'data-component="transport"',
-        'data-component="premium-ad-1"',
+        'data-component="premium-ad-3"',
         'data-component="jobs-housing"',
-        'data-component="premium-ad-2"',
         'data-component="health"',
         'data-component="sport"',
-        'data-component="leisure"',
         'data-component="cinema"',
         'data-component="authorities"',
         'id="news-sources"',
-        'data-component="premium-ad-3"',
     ]
+    assert 'data-component="leisure"' not in index, "Avvecklad fritidsmodul får inte komma tillbaka"
     positions = [index.index(marker) for marker in intended_order]
     assert positions == sorted(positions), "Startsidesordningen avviker från aktuell beslutad layout"
 

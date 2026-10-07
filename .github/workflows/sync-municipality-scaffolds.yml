@@ -38,7 +38,10 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import sys
           from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sync_municipality_scaffolds import SCAFFOLD_FILES
 
           config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
           names = [item['name'] for item in config['municipalities']]
@@ -47,6 +50,8 @@ jobs:
               assert f'"{name}"' in engine, f'{name} saknas i municipality-engine.js'
 
           for path in sorted(Path('data').glob('*.json')):
+              if path.name not in SCAFFOLD_FILES:
+                  continue
               payload = json.loads(path.read_text(encoding='utf-8'))
               municipalities = payload.get('municipalities')
               if not isinstance(municipalities, dict):

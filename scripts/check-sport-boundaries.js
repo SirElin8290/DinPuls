@@ -8,11 +8,11 @@ const service = read('service.html');
 const stage = read('sport-hub-stage48.js');
 
 const checks = [
-  [sport.includes('Idrott &amp; motion'), 'sport.html saknar Idrott & motion'],
-  [sport.includes('matcher, resultat'), 'sport.html saknar match/resultat-fokus'],
-  [leisure.includes('Gå till Idrott &amp; motion'), 'fritid.html saknar tydlig sportlänk'],
-  [health.includes('separata modulen Idrott &amp; motion'), 'vard.html saknar modulavgränsning'],
-  [service.includes('hör till Idrott &amp; motion'), 'service.html saknar modulavgränsning'],
+  [sport.includes('new URL("foreningsliv.html"'), 'Avvecklad sportsida måste leda till Föreningsliv'],
+  [!sport.includes('data-strategic-ad'), 'Avvecklad sportsida får inte visa gamla annonser'],
+  [leisure.includes('new URL("foreningsliv.html"'), 'Avvecklad fritidssida måste leda till Föreningsliv'],
+  [health.includes('modulen Föreningsliv'), 'vard.html saknar modulavgränsning'],
+  [service.includes('hör till Föreningsliv'), 'service.html saknar modulavgränsning'],
   [stage.includes('Senaste match'), 'sporthubben saknar senaste match per klubb'],
   [stage.includes('Nästa match'), 'sporthubben saknar nästa match per klubb'],
   [stage.includes('clubMatchSummary'), 'sporthubben saknar klubbcentrerad matchlogik']

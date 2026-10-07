@@ -8,6 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
+# Only these canonical datasets have a defined, safe empty-record schema.
+# Municipality-specific supplements must stay partial.
+SCAFFOLD_FILES = frozenset(('arenas.json', 'authorities.json', 'cinemas.json', 'event-sources.json', 'events.json', 'fuel.json', 'grocery.json', 'health.json', 'housing.json', 'important-sources.json', 'important.json', 'jobs.json', 'leisure-curated.json', 'leisure.json', 'lunch-sources.json', 'lunch.json', 'missing-people.json', 'road-traffic.json', 'service.json', 'sport-feeds.json', 'sport-seasons.json', 'sport-sources.json', 'sports-curated.json', 'sports.json', 'stop-candidates.json', 'transport.json', 'weather-live.json'))
 
 
 def replace_javascript_registry(path: Path, pattern: str, replacement: str) -> None:
@@ -111,7 +114,7 @@ def main() -> None:
     config = json.loads((DATA / "municipalities.json").read_text(encoding="utf-8"))
     sync_runtime_registries(config["municipalities"])
     for path in sorted(DATA.glob("*.json")):
-        if path.name == "municipalities.json":
+        if path.name not in SCAFFOLD_FILES:
             continue
         text = path.read_text(encoding="utf-8")
         payload = json.loads(text)
@@ -122,7 +125,8 @@ def main() -> None:
         if path.name == "lunch-sources.json":
             for municipality in config["municipalities"]:
                 text = add_entry(text, "referenceSources", municipality["name"], municipality.get("lunchReferenceSources", []))
-        path.write_text(text, encoding="utf-8")
+        if text != path.read_text(encoding="utf-8"):
+            path.write_text(text, encoding="utf-8")
 
 
 if __name__ == "__main__":
