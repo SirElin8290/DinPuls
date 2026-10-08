@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-08T01:27:16+00:00",
+  "generatedAt": "2026-10-08T01:42:20+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -550,7 +550,7 @@
           "name": "Arvika",
           "alerts": [],
           "lookupTime": "2026-10-07T21:56+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-07T23:56+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -565,8 +565,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D",
-              "stale": true
+              "platform": "D"
             },
             {
               "mode": "bus",
@@ -1544,7 +1543,9 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje 601 och 660: Hållplats Djupdalsvägen stängd från 6 oktober"
+            "Linje 601 och 660: Hållplats Djupdalsvägen stängd från 6 oktober",
+            "Linje 500 och 501,  Rönndungen Karlstad indragen",
+            "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november"
           ],
           "lookupTime": "2026-10-08T00:26+02:00",
           "retained": false,
@@ -1610,8 +1611,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -1623,8 +1623,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2082,13 +2081,27 @@
         {
           "id": "740000375",
           "name": "Forshaga centrum",
-          "alerts": [],
+          "alerts": [
+            "Linje 601 och 660: Hållplats Djupdalsvägen stängd från 6 oktober"
+          ],
           "lookupTime": "2026-10-07T22:41+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-08T00:41+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-08T04:29:00+02:00",
+              "realtime": "2026-10-08T04:29:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "602",
@@ -2971,6 +2984,30 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "D"
+            },
+            {
+              "mode": "bus",
+              "line": "202",
+              "direction": "Lysvik Sunne",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-08T04:35:00+02:00",
+              "realtime": "2026-10-08T04:35:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "D"
+            },
+            {
+              "mode": "bus",
+              "line": "209",
+              "direction": "Värnäs",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-08T04:40:00+02:00",
+              "realtime": "2026-10-08T04:40:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
             },
             {
               "mode": "bus",
