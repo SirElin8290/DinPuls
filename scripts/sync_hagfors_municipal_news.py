@@ -21,10 +21,10 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 NEWS = ROOT / "data" / "news.json"
-SOURCE_URL = "https://www.hagfors.se/verktygsmeny/kontakta-oss/nyhetsarkiv.html"
+SOURCE_URL = "https://www.hagfors.se/ovrigt/nyheter"
 FALLBACK_URL = "https://www.hagfors.se/"
 SOURCE_NAME = "Hagfors kommun"
-ARTICLE_PREFIX = "/arkiv/nyheter/20"
+ARTICLE_PREFIXES = ("/arkiv/nyheter/20", "/ovrigt/nyheter/nyheter/20")
 BROWSER_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -83,7 +83,7 @@ def parse_listing(page: str, base_url: str = SOURCE_URL) -> list[dict]:
     seen: set[str] = set()
     for href, title in parser.links:
         link = urljoin(base_url, href)
-        if ARTICLE_PREFIX not in urlparse(link).path or link in seen:
+        if not any(prefix in urlparse(link).path for prefix in ARTICLE_PREFIXES) or link in seen:
             continue
         title = re.sub(r"^Läs mer(?: om)?\s+", "", title, flags=re.I).strip()
         if not title or title.casefold() == "läs mer":
@@ -121,7 +121,7 @@ def fetch_page() -> tuple[str, str]:
     for url in (SOURCE_URL, FALLBACK_URL):
         try:
             page = fetch_url(url)
-            if ARTICLE_PREFIX not in page:
+            if not any(prefix in page for prefix in ARTICLE_PREFIXES):
                 raise ValueError("inga Hagfors-nyhetslänkar i svaret")
             return page, url
         except Exception as error:

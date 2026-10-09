@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from unittest.mock import patch
 from datetime import datetime
 
 import sync_hagfors_municipal_news as hagfors_news
@@ -15,6 +16,17 @@ SAMPLE = '''
 
 
 class HagforsMunicipalNewsTests(unittest.TestCase):
+    def test_fetch_accepts_current_official_archive(self):
+        page='<a href="/ovrigt/nyheter/nyheter/2026-10-09-kommunnyhet">Kommunnyhet</a>'
+        with patch.object(hagfors_news,'fetch_url',return_value=page):
+            self.assertEqual(hagfors_news.fetch_page(),(page,hagfors_news.SOURCE_URL))
+
+    def test_new_official_archive_paths_are_supported(self):
+        rows=hagfors_news.parse_listing('<a href="/ovrigt/nyheter/nyheter/2026-10-09-kommunnyhet">Kommunnyhet</a>')
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['title'],'Kommunnyhet')
+        self.assertIn('2026-10-09',rows[0]['publishedAt'])
+
     def test_parses_hagfors_archive_paths_only(self):
         rows = hagfors_news.parse_listing(SAMPLE)
         self.assertEqual(len(rows), 2)

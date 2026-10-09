@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
@@ -674,103 +675,109 @@ def retain_verified_week(item,previous,now):
     item.update(status="current",weekNumber=previous["weekNumber"],days=previous["days"],checkedAt=previous["checkedAt"],fetchAttemptedAt=now.isoformat(timespec="seconds"),fetchWarning=item["error"],menuFreshness="retained_verified",mode="automatic")
 
 
-def build_output(config,now,fetcher=fetch,previous_output=None):
+def fetch_restaurant(source,now,fetcher,previous_by_id,current_week):
+    item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
+    if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
+    parser_name=source.get("parser")
+    if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}:
+        try:
+            if parser_name=="wordpress-relative-week-menu":
+                page=fetcher(source["url"]); metadata=json.loads(fetcher(source["metadataUrl"])); week,days=parse_wordpress_relative_menu(page,metadata,now,source["url"])
+            elif parser_name=="ramo-standing-lunch":
+                item["standingDishes"]=parse_ramo_lunch(fetcher(source["url"])); week=None; days={}
+            elif parser_name=="hagfors-standing-pizza":
+                item["standingDishes"]=fetch_hagfors_lunch(source,fetcher); week=None; days={}
+            elif parser_name=="public-social-text":
+                week,days,post_url,menu_date=fetch_public_social_text(source,now,page_fetcher=fetcher)
+                item["sourcePost"]=post_url; item["menuDate"]=menu_date; item["menuSchedule"]="daily_public_post"
+            elif parser_name=="public-social-image":
+                week,image_url,image_date,image_day,post_url=fetch_public_social_image(source,now,page_fetcher=fetcher)
+                days={}; item["verifiedMenuImage"]=image_url; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
+                if image_date: item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]
+            elif parser_name=="image-weekday-menu":
+                week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher,now=now)
+                item["sourceAsset"]=image_url; item["extraction"]="ocr"
+                if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
+                if not any(days.values()) and not source.get("displayAsImage"): raise RuntimeError("OCR hittade inga säkra lunchrätter")
+                if source.get("displayAsImage"): item["verifiedMenuImage"]=image_url; days={}
+            elif parser_name=="hogsater-json":
+                week,days=fetch_hogsater_menu(source,now,fetcher)
+                if not any(days.values()): item["availabilityNotice"]="Restaurangen har ännu inte publicerat veckans lunchrätter."
+            elif parser_name=="standing-pdf": item["standingDishes"],item["sourceAsset"]=fetch_standing_pdf(source,fetcher); week=None; days={}
+            elif parser_name=="pdf-weekday-menu": week,days,pdf_url=fetch_pdf_menu(source,now,fetcher); item["sourceAsset"]=pdf_url
+            elif parser_name in {"galna-tuppen-json","omsorgen-json"}: week,days=fetch_structured_menu(source,now,fetcher)
+            else: page=fetch_source(source,fetcher)
+            if parser_name=="mashie-menu": week,days=parse_mashie_menu(page,now.date(),source["expectedMenuPattern"])
+            elif parser_name=="standing-html": item["standingDishes"]=parse_standing_html(page,source); week=None; days={}
+            elif parser_name=="all-days-heading":
+                week,days=parse_all_days_menu(page)
+                if any(days.values()): week=current_week
+            elif parser_name=="scoped-weekday-headings": week,days=parse_scoped_weekday_menu(page,source["headingPattern"],current_week)
+            elif parser_name=="calendar-weekday-headings":
+                week,days=parse_calendar_week_menu(page,now.date(),source.get("stopAfterPattern"))
+                if not any(days.values()): week,days=parse_calendar_week_menu(page,(now+timedelta(days=7)).date(),source.get("stopAfterPattern"))
+            elif parser_name=="rotating-weekday-headings": week,days=parse_rotating_week_menu(page,now.date()); item["menuSchedule"]="recurring_even_odd_week"
+            elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
+            elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
+            elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
+            elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+            if source.get("menuYearPattern"):
+                match=re.search(source["menuYearPattern"],page,re.I)
+                target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
+                if not match or int(match.group(1))!=target.year: raise RuntimeError("menyns år kunde inte verifieras")
+            if source.get("pendingTextPattern") and re.search(source["pendingTextPattern"],page,re.I) and not any(days.values()):
+                item["availabilityNotice"]=source["pendingNotice"]
+            if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
+                days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
+            if source.get("excludeDishPattern"):
+                days={day:list(dict.fromkeys(dish for dish in dishes if not re.search(source["excludeDishPattern"],dish,re.I))) for day,dishes in days.items()}
+            if source.get("dishSplitPattern"):
+                days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
+            if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
+            item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and (any(days.values()) or item.get("verifiedMenuImage")) else "outdated"; item["mode"]="automatic"
+            next_date=(now.date()-timedelta(days=now.weekday()))+timedelta(days=7)
+            if week==next_date.isocalendar().week and (any(days.values()) or item.get("verifiedMenuImage")):
+                item["upcomingMenu"]={"weekNumber":week,"year":next_date.isocalendar().year,"validFrom":next_date.isoformat(),"days":days}
+                item["status"]="upcoming"
+                if item.get("verifiedMenuImage"): item["upcomingMenu"]["image"]=item.pop("verifiedMenuImage")
+            if item.get("standingDishes"): item["status"]="standing_menu"; item["menuSchedule"]="standing"
+            if item.get("availabilityNotice"): item["status"]="awaiting_publication"
+            if item.get("closureNotice"): item["status"]="unavailable"
+        except RuntimeError as error:
+            if isinstance(error,SourceFetchError): item["fetchFailure"]=True
+            item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
+    if source.get("seasonal"):
+        item["seasonal"]=True
+        season_months=source.get("seasonMonths") or []
+        season_start=source.get("seasonStart"); season_end=source.get("seasonEnd")
+        if parser_name=="source-only" and season_start and season_end:
+            current_mmdd=now.strftime("%m-%d")
+            item["status"]="active" if season_start <= current_mmdd <= season_end else "seasonally_closed"
+        elif parser_name=="source-only" and season_months: item["status"]="active" if now.month in season_months else "seasonally_closed"
+    if source.get("closureNotice") and source.get("closureEvidenceUrl"):
+        item["status"]="unavailable"; item["days"]={}; item.pop("verifiedMenuImage",None)
+    previous=previous_by_id.get(source.get("id"))
+    retain_verified_week(item,previous,now)
+    if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
+        item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
+    return item
+
+def build_output(config,now,fetcher=fetch,previous_output=None,max_workers=1):
     # Produktionskonfigurationen har versionsfält och kompletteras med kommunfiler.
     # Små syntetiska testkonfigurationer ska inte utlösa nät- eller OCR-hämtning
     # för hela produktionskatalogen.
     config=merge_config(config) if config.get("version") else config
     validate_config(config); current_week=now.isocalendar().week; municipalities={}
     previous_by_id={item.get("id"):item for row in ((previous_output or {}).get("municipalities") or {}).values() for item in (row.get("restaurants") or []) if isinstance(item,dict)}
-    for municipality,sources in config.get("municipalities",{}).items():
-        restaurants=[]
-        for source in sources:
-            if source.get("active") is False: continue
-            item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
-            if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
-            parser_name=source.get("parser")
-            if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}:
-                try:
-                    if parser_name=="wordpress-relative-week-menu":
-                        page=fetcher(source["url"]); metadata=json.loads(fetcher(source["metadataUrl"])); week,days=parse_wordpress_relative_menu(page,metadata,now,source["url"])
-                    elif parser_name=="ramo-standing-lunch":
-                        item["standingDishes"]=parse_ramo_lunch(fetcher(source["url"])); week=None; days={}
-                    elif parser_name=="hagfors-standing-pizza":
-                        item["standingDishes"]=fetch_hagfors_lunch(source,fetcher); week=None; days={}
-                    elif parser_name=="public-social-text":
-                        week,days,post_url,menu_date=fetch_public_social_text(source,now,page_fetcher=fetcher)
-                        item["sourcePost"]=post_url; item["menuDate"]=menu_date; item["menuSchedule"]="daily_public_post"
-                    elif parser_name=="public-social-image":
-                        week,image_url,image_date,image_day,post_url=fetch_public_social_image(source,now,page_fetcher=fetcher)
-                        days={}; item["verifiedMenuImage"]=image_url; item["sourceAsset"]=image_url; item["sourcePost"]=post_url; item["extraction"]="ocr"
-                        if image_date: item["menuImageDate"]=image_date; item["verifiedMenuImageDays"]=[image_day]
-                    elif parser_name=="image-weekday-menu":
-                        week,days,image_url=fetch_ocr_menu(source,page_fetcher=fetcher,now=now)
-                        item["sourceAsset"]=image_url; item["extraction"]="ocr"
-                        if week != current_week: raise RuntimeError("OCR kunde inte verifiera aktuell vecka")
-                        if not any(days.values()) and not source.get("displayAsImage"): raise RuntimeError("OCR hittade inga säkra lunchrätter")
-                        if source.get("displayAsImage"): item["verifiedMenuImage"]=image_url; days={}
-                    elif parser_name=="hogsater-json":
-                        week,days=fetch_hogsater_menu(source,now,fetcher)
-                        if not any(days.values()): item["availabilityNotice"]="Restaurangen har ännu inte publicerat veckans lunchrätter."
-                    elif parser_name=="standing-pdf": item["standingDishes"],item["sourceAsset"]=fetch_standing_pdf(source,fetcher); week=None; days={}
-                    elif parser_name=="pdf-weekday-menu": week,days,pdf_url=fetch_pdf_menu(source,now,fetcher); item["sourceAsset"]=pdf_url
-                    elif parser_name in {"galna-tuppen-json","omsorgen-json"}: week,days=fetch_structured_menu(source,now,fetcher)
-                    else: page=fetch_source(source,fetcher)
-                    if parser_name=="mashie-menu": week,days=parse_mashie_menu(page,now.date(),source["expectedMenuPattern"])
-                    elif parser_name=="standing-html": item["standingDishes"]=parse_standing_html(page,source); week=None; days={}
-                    elif parser_name=="all-days-heading":
-                        week,days=parse_all_days_menu(page)
-                        if any(days.values()): week=current_week
-                    elif parser_name=="scoped-weekday-headings": week,days=parse_scoped_weekday_menu(page,source["headingPattern"],current_week)
-                    elif parser_name=="calendar-weekday-headings":
-                        week,days=parse_calendar_week_menu(page,now.date(),source.get("stopAfterPattern"))
-                        if not any(days.values()): week,days=parse_calendar_week_menu(page,(now+timedelta(days=7)).date(),source.get("stopAfterPattern"))
-                    elif parser_name=="rotating-weekday-headings": week,days=parse_rotating_week_menu(page,now.date()); item["menuSchedule"]="recurring_even_odd_week"
-                    elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
-                    elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-                    elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
-                    if source.get("menuYearPattern"):
-                        match=re.search(source["menuYearPattern"],page,re.I)
-                        target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
-                        if not match or int(match.group(1))!=target.year: raise RuntimeError("menyns år kunde inte verifieras")
-                    if source.get("pendingTextPattern") and re.search(source["pendingTextPattern"],page,re.I) and not any(days.values()):
-                        item["availabilityNotice"]=source["pendingNotice"]
-                    if source.get("closedTextPattern") and re.search(source["closedTextPattern"],page,re.I):
-                        days={}; week=None; item["closureNotice"]="Restaurangen meddelar att dagens lunch är stängd. Se källan."
-                    if source.get("excludeDishPattern"):
-                        days={day:list(dict.fromkeys(dish for dish in dishes if not re.search(source["excludeDishPattern"],dish,re.I))) for day,dishes in days.items()}
-                    if source.get("dishSplitPattern"):
-                        days={day:[part.strip() for dish in dishes for part in re.split(source["dishSplitPattern"],dish) if part.strip()] for day,dishes in days.items()}
-                    if source.get("id")=="mickans-grill": days={day:[dish for dish in dishes if dish!="$9.95"] for day,dishes in days.items()}
-                    item["weekNumber"]=week; item["days"]=days if week==current_week else {}; item["status"]="current" if week==current_week and (any(days.values()) or item.get("verifiedMenuImage")) else "outdated"; item["mode"]="automatic"
-                    next_date=(now.date()-timedelta(days=now.weekday()))+timedelta(days=7)
-                    if week==next_date.isocalendar().week and (any(days.values()) or item.get("verifiedMenuImage")):
-                        item["upcomingMenu"]={"weekNumber":week,"year":next_date.isocalendar().year,"validFrom":next_date.isoformat(),"days":days}
-                        item["status"]="upcoming"
-                        if item.get("verifiedMenuImage"): item["upcomingMenu"]["image"]=item.pop("verifiedMenuImage")
-                    if item.get("standingDishes"): item["status"]="standing_menu"; item["menuSchedule"]="standing"
-                    if item.get("availabilityNotice"): item["status"]="awaiting_publication"
-                    if item.get("closureNotice"): item["status"]="unavailable"
-                except RuntimeError as error:
-                    if isinstance(error,SourceFetchError): item["fetchFailure"]=True
-                    item["status"]="review_required" if parser_name=="image-weekday-menu" else "unavailable"; item["mode"]="reference" if source.get("fallbackMode")=="reference" else "automatic"; item["error"]=str(error)
-            if source.get("seasonal"):
-                item["seasonal"]=True
-                season_months=source.get("seasonMonths") or []
-                season_start=source.get("seasonStart"); season_end=source.get("seasonEnd")
-                if parser_name=="source-only" and season_start and season_end:
-                    current_mmdd=now.strftime("%m-%d")
-                    item["status"]="active" if season_start <= current_mmdd <= season_end else "seasonally_closed"
-                elif parser_name=="source-only" and season_months: item["status"]="active" if now.month in season_months else "seasonally_closed"
-            if source.get("closureNotice") and source.get("closureEvidenceUrl"):
-                item["status"]="unavailable"; item["days"]={}; item.pop("verifiedMenuImage",None)
-            previous=previous_by_id.get(source.get("id"))
-            retain_verified_week(item,previous,now)
-            if item["status"] != "current" and previous and previous.get("status") == "current" and any((previous.get("days") or {}).values()):
-                item["lastSuccessfulMenu"]={"weekNumber":previous.get("weekNumber"),"checkedAt":previous.get("checkedAt"),"days":previous.get("days")}
-            restaurants.append(item)
-        municipalities[municipality]={"restaurants":restaurants,"referenceSources":config.get("referenceSources",{}).get(municipality,[])}
+    tasks=[(municipality,source) for municipality,sources in config.get("municipalities",{}).items() for source in sources if source.get("active") is not False]
+    municipalities={name:{"restaurants":[],"referenceSources":config.get("referenceSources",{}).get(name,[])} for name in config.get("municipalities",{})}
+    def process(task):
+        municipality,source=task
+        return municipality,fetch_restaurant(source,now,fetcher,previous_by_id,current_week)
+    # map preserves source order; each worker only builds its own restaurant row.
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for municipality,item in pool.map(process,tasks):
+            municipalities[municipality]["restaurants"].append(item)
     excluded_count=0
     if EXCLUSIONS.exists():
         excluded_count=len(json.loads(EXCLUSIONS.read_text(encoding="utf-8")).get("excludedRestaurants",[]))
@@ -779,7 +786,7 @@ def build_output(config,now,fetcher=fetch,previous_output=None):
 def main():
     config=json.loads(SOURCES.read_text(encoding="utf-8")); now=datetime.now(TIMEZONE)
     previous=json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else None
-    output=build_output(config,now,previous_output=previous)
+    output=build_output(config,now,previous_output=previous,max_workers=4)
     for municipality,entry in output["municipalities"].items():
         for item in entry["restaurants"]: print(f"{municipality}: {item['name']} – {item['status']}")
     OUTPUT.write_text(json.dumps(output,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")

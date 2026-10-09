@@ -8,6 +8,29 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_concurrent_fetches_preserve_order_and_week_validation(self):
+        import threading
+        import time
+        municipalities={name:[] for name in update_lunch.EXPECTED_MUNICIPALITIES}
+        municipalities['Åmål']=[{'id':f'test-{i}','name':f'Restaurant {i}','url':f'https://test.invalid/{i}','parser':'weekday-headings'} for i in range(6)]
+        page='<p>Lunchmeny v. 41</p><p>Måndag</p><p>Verifierad fisk med potatis</p>'
+        now=datetime(2026,10,9,tzinfo=ZoneInfo('Europe/Stockholm'))
+        serial=update_lunch.build_output({'municipalities':municipalities},now,fetcher=lambda _:page)
+        active=peak=0
+        lock=threading.Lock()
+        def fetcher(url):
+            nonlocal active,peak
+            with lock:
+                active+=1
+                peak=max(peak,active)
+            time.sleep(.025)
+            with lock:active-=1
+            return page
+        parallel=update_lunch.build_output({'municipalities':municipalities},now,fetcher=fetcher,max_workers=4)
+        self.assertEqual(serial,parallel)
+        self.assertGreater(peak,1)
+        self.assertLessEqual(peak,4)
+
     def test_static_all_days_menu_stops_before_weekly_buffet(self):
         page = "<h3>Alla dagar</h3><p>Pannbiff med potatismos</p><h3>Lunchbuffé V 40</h3><p>Veckans andra rätt</p>"
         week, days = update_lunch.parse_all_days_menu(page)

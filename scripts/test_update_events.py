@@ -9,6 +9,18 @@ import update_events
 
 
 class EventUpdateTests(unittest.TestCase):
+    def test_sitevision_calendar_pagination_and_explicit_dates(self):
+        markup="Soleil.webapps['EventsListing'].render('EventsListing', '#calendar', {\"itemsRoute\":\"/appresource/page/module/items\",\"paths\":[\"archive\"]});"
+        item={"title":"Konsert","uri":"/events/2099-12-31-konsert.html","startDate":"31 december","endDate":"1 januari","startTime":"19:00","endTime":"21:00","location":"Medis"}
+        with patch.object(update_events,'fetch_json',side_effect=[{"hits":[item],"hitCount":2},{"hits":[{"title":"Missing year","uri":"/no-date.html"}],"hitCount":2}]) as fetch:
+            rows=update_events.events_from_sitevision_listing(markup,'Säffle',{'name':'Säffle kommun','url':'https://saffle.se/EVENEMANG'})
+        self.assertEqual(fetch.call_count,2)
+        self.assertIn('start=80',fetch.call_args.args[0])
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['startDate'],'2099-12-31')
+        self.assertEqual(rows[0]['endDate'],'2100-01-01')
+        self.assertEqual(rows[0]['time'],'19:00–21:00')
+
     def test_successful_visit_index_drops_deleted_cached_events(self):
         with TemporaryDirectory() as directory:
             output = Path(directory) / "events.json"

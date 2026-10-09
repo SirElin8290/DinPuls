@@ -44,7 +44,7 @@
     if (!root.document || root.document.querySelector('link[data-dinpuls-season-theme]')) return;
     const link = root.document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "season-theme.css?version=1.0.0";
+    link.href = "season-theme.css?version=1.0.1";
     link.dataset.dinpulsSeasonTheme = "true";
     root.document.head.appendChild(link);
   }

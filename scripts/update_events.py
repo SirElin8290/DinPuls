@@ -234,6 +234,54 @@ def event_from_json_ld(item: dict, municipality: str, source: dict) -> dict | No
     }
 
 
+def events_from_sitevision_listing(markup: str, municipality: str, source: dict) -> list[dict]:
+    """Read the same public paginated calendar used by SiteVision's event list."""
+    settings_match=re.search(r"EventsListing'[^\n]+?,\s*(\{.*?\})\s*\);",markup)
+    if not settings_match:
+        return []
+    settings=json.loads(settings_match.group(1))
+    route=settings.get("itemsRoute")
+    if not route or not route.startswith("/appresource/"):
+        return []
+    parts=urlsplit(source["url"])
+    hits=[]
+    for offset in range(0,800,80):
+        query=[("start",offset),("num",80)]+[("paths[]",path) for path in settings.get("paths",[])]
+        payload=fetch_json(f"{parts.scheme}://{parts.netloc}{route}?{urlencode(query)}")
+        page=payload.get("hits") or []
+        hits.extend(page)
+        if not page or len(hits)>=int(payload.get("hitCount") or len(hits)):
+            break
+    results=[]
+    months={"januari":1,"februari":2,"mars":3,"april":4,"maj":5,"juni":6,"juli":7,"augusti":8,"september":9,"oktober":10,"november":11,"december":12}
+    for item in hits:
+        item_url=urljoin(source["url"],str(item.get("uri") or ""))
+        stamp=re.search(r"/(20\d{2}-\d{2}-\d{2})-",urlsplit(item_url).path)
+        title=str(item.get("title") or "").strip()
+        if not stamp or not title or urlsplit(item_url).netloc!=parts.netloc:
+            continue
+        try:
+            start=date.fromisoformat(stamp.group(1))
+            # The article URL supplies the year; the calendar supplies the end day/month.
+            end_label=re.fullmatch(r"(\d{1,2})\s+([a-zåäö]+)(?:\s+(20\d{2}))?",str(item.get("endDate") or "").strip(),re.I)
+            end=start
+            if end_label and end_label.group(2).casefold() in months:
+                month=months[end_label.group(2).casefold()]
+                year=int(end_label.group(3)) if end_label.group(3) else start.year+(month<start.month)
+                end=date(year,month,int(end_label.group(1)))
+            if end<date.today():
+                continue
+        except ValueError:
+            continue
+        time_label=str(item.get("startTime") or "Se källan")
+        if item.get("endTime") and item.get("endTime")!=item.get("startTime"):
+            time_label+='–'+str(item["endTime"])
+        event_category,label=category(title)
+        identifier=hashlib.sha1(f"{municipality}|{item_url}".encode()).hexdigest()[:16]
+        results.append({"id":f"event-{identifier}","title":title,"startDate":start.isoformat(),"endDate":end.isoformat(),"time":time_label,"venue":item.get("location") or municipality,"category":event_category,"categoryLabel":label,"sourceName":source["name"],"url":item_url})
+    return results
+
+
 def filter_api_settings(markup: str) -> tuple[int, int] | None:
     component = re.search(r"<FilterApplication\b[^>]*>", markup, re.I | re.S)
     if not component:
@@ -462,6 +510,7 @@ def main() -> int:
                             if event:
                                 rows.append(event)
                 rows.extend(events_from_filter_api(markup, municipality, source))
+                rows.extend(events_from_sitevision_listing(markup, municipality, source))
                 if "visitvarmland.com" in source["url"]:
                     rows.extend(fetch_visit_varmland_events(municipality))
                     # A successful current index replaces this source's cached rows.

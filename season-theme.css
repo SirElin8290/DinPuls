@@ -96,15 +96,19 @@ html[data-season="spring"] .site-header::after{content:"❧  ❀  ❧";}
 html[data-season="summer"] .site-header::after{content:"☀";font-size:34px;opacity:.16;}
 html[data-season="autumn"] .site-header::after{content:"🍂  🍁  🍂";}
 html[data-season="winter"] .site-header::after{content:"❄  ❅  ❄";}
-html[data-season] .header-inner,
-html[data-season] .notification-panel{position:relative;z-index:1;}
+html[data-season] .header-inner{position:relative;z-index:1;}
 
 html[data-season="autumn"] .weather-compact svg{color:#e5a44a;}
 html[data-season="winter"] .weather-compact svg{color:#cdebf5;}
 html[data-season="spring"] .weather-compact svg{color:#b8d875;}
 
 /* Mörkt läge behåller sin kontrast; säsongen används främst som accent. */
-html[data-theme="dark"][data-season] body{--season-surface:#0e2035;--season-bg:#081827;}
+html[data-theme="dark"][data-season] body{--season-surface:#0e2035;--season-bg:#081827;--season-accent:#ffbd83;}
+html[data-theme="dark"] .health-directory-group-heading h3{color:#f3b6ce;}
+html[data-theme="dark"] .service-directory-group-heading h3{color:#f3c780;}
+html[data-theme="dark"] .health-category-card em{color:#f3b6ce;}
+html[data-theme="dark"] .service-category-card em{color:#f3c780;}
+html[data-theme="dark"] .notification-panel-heading button{color:#eaf1fb;}
 
 @media(max-width:760px){
   html[data-season] .site-header::after{right:8px;bottom:4px;font-size:20px;letter-spacing:3px;opacity:.16;}
