@@ -15,7 +15,10 @@
     const x = luminance(a), y = luminance(b);
     return (Math.max(x, y) + .05) / (Math.min(x, y) + .05);
   }
-  const api = { rgb, contrast };
+  function blend(foreground, background, alpha) {
+    return foreground.map((value, i) => value * alpha + background[i] * (1 - alpha));
+  }
+  const api = { rgb, contrast, blend };
   if (typeof module !== "undefined") module.exports = api;
   if (!root.document) return;
 
@@ -52,6 +55,8 @@
     const r = panel.getBoundingClientRect();
     const bad = root.getComputedStyle(panel).position !== "fixed" || r.left < 0 || r.right > root.innerWidth || r.top < 0 || r.bottom > root.innerHeight;
     if (!bad) return false;
+    // Escape transformed/clipping header ancestors; existing listeners stay attached.
+    if (panel.parentElement !== document.body) document.body.appendChild(panel);
     const bell = document.getElementById("notification-button")?.getBoundingClientRect();
     const top = Math.min(Math.max(8, (bell?.bottom || 48) + 8), Math.max(8, root.innerHeight - 100));
     panel.style.setProperty("position", "fixed", "important");
@@ -82,7 +87,9 @@
       if (!bg || !fg) { result.skipped++; continue; }
       const large = parseFloat(style.fontSize) >= 24 || (parseFloat(style.fontSize) >= 18.66 && Number(style.fontWeight) >= 700);
       const minimum = large ? 3 : 4.5;
-      const before = contrast(fg, bg);
+      const foregroundParts = style.color.match(/[\d.]+/g);
+      const alpha = foregroundParts?.length > 3 ? Number(foregroundParts[3]) : 1;
+      const before = contrast(blend(fg, bg, alpha), bg);
       if (before >= minimum) continue;
       const black = [0, 0, 0], white = [255, 255, 255];
       const replacement = contrast(black, bg) > contrast(white, bg) ? "#000000" : "#ffffff";

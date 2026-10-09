@@ -76,6 +76,7 @@ def main():
             page.set_viewport_size({"width": 1440, "height": 900})
             page.goto(args.base_url.rstrip("/") + "/index.html?kommun=Åmål", wait_until="domcontentloaded")
             page.wait_for_function("!!window.DinPulsUIResilience")
+            page.wait_for_function("document.title.includes('Åmål')")
             page.locator("#notification-button").click()
             recovered = page.evaluate("""() => {
               const panel=document.getElementById('notification-panel');
@@ -89,9 +90,9 @@ def main():
               const r=panel.getBoundingClientRect();
               const readable=getComputedStyle(probe).color==='rgb(0, 0, 0)';
               probe.remove();
-              return {menu: r.left>=0&&r.right<=innerWidth&&getComputedStyle(panel).position==='fixed',contrast:readable};
+              return {menu: r.left>=0&&r.right<=innerWidth&&getComputedStyle(panel).position==='fixed',contrast:readable,menuRect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},position:getComputedStyle(panel).position};
             }""")
-            if not all(recovered.values()):
+            if not recovered["menu"] or not recovered["contrast"]:
                 issues.append({"reason": "automatic_recovery_failed", **recovered})
         except Exception as error:
             issues.append({"reason": "recovery_test_failed", "error": str(error)[:300]})

@@ -1,6 +1,6 @@
 "use strict";
 const assert = require("node:assert/strict");
-const { rgb, contrast } = require("../ui-resilience.js");
+const { rgb, contrast, blend } = require("../ui-resilience.js");
 assert.deepEqual(rgb("rgba(243, 182, 206, 1)"), [243, 182, 206]);
 assert.equal(rgb("transparent"), null);
 assert.equal(contrast([255,255,255], [0,0,0]), 21);
@@ -8,4 +8,5 @@ assert.equal(contrast([40,40,40], [40,40,40]), 1);
 assert.ok(contrast([163,77,45], [14,32,53]) < 3, "The actual autumn regression must be detected");
 assert.ok(contrast([255,255,255], [14,32,53]) >= 4.5);
 assert.ok(contrast([0,0,0], [250,246,239]) >= 4.5);
+assert.ok(contrast(blend([255,255,255], [14,32,53], .12), [14,32,53]) < 3);
 console.log("UI resilience color calculations passed");

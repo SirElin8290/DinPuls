@@ -34,7 +34,7 @@
     if (document.querySelector('script[data-dinpuls-ui-resilience]')) return;
     const script = document.createElement('script');
     const base = document.currentScript?.src || location.href;
-    script.src = new URL('ui-resilience.js?version=1.0.0', base).href;
+    script.src = new URL('ui-resilience.js?version=1.0.1', base).href;
     script.dataset.dinpulsUiResilience = 'true';
     (document.head || document.documentElement).appendChild(script);
   })();

@@ -40,7 +40,7 @@ jobs:
           expected=Path('ui-resilience.js').read_bytes()
           for attempt in range(40):
               try:
-                  actual=urllib.request.urlopen('https://dinpuls.se/ui-resilience.js?version=1.0.0',timeout=15).read()
+                  actual=urllib.request.urlopen('https://dinpuls.se/ui-resilience.js?version=1.0.1',timeout=15).read()
                   if actual==expected: break
               except Exception: pass
               time.sleep(15)
