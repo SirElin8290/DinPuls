@@ -183,6 +183,15 @@ def source_monitor_health(payload, now=None):
         return {"status": "critical", "reason": "nightly_check_overdue", "lastChecked": stamp.isoformat()}
     if any(value != "success" for value in payload.get("updates", {}).values()):
         return {"status": "warning", "reason": "nightly_update_failed", "lastChecked": stamp.isoformat()}
+    if "uiQuality" in payload:
+        quality=payload["uiQuality"] or {}
+        ui_stamp=parse_time(quality.get("generatedAt"))
+        if not quality.get("completed") or not ui_stamp:
+            return {"status":"warning","reason":"ui_check_missing","lastChecked":stamp.isoformat()}
+        if (now-ui_stamp).total_seconds()>28*3600:
+            return {"status":"warning","reason":"ui_check_overdue","lastChecked":stamp.isoformat()}
+        if quality.get("issues"):
+            return {"status":"warning","reason":"ui_review_required","lastChecked":stamp.isoformat(),"uiIssues":len(quality["issues"])}
     summary = payload.get("summary", {})
     state = "warning" if any(summary.get(key, 0) for key in ("changed", "unverified", "broken", "contentWarnings")) else "green"
     return {"status": state, "reason": "source_review_required" if state == "warning" else None, "lastChecked": stamp.isoformat()}
@@ -199,6 +208,10 @@ def main():
         source_report = fetch_json(args.base_url.rstrip("/") + "/source-monitor.json")
     except Exception:
         source_report = {}
+    try:
+        source_report["uiQuality"] = fetch_json(args.base_url.rstrip("/") + "/ui-quality.json")
+    except Exception:
+        source_report["uiQuality"] = None
     result["sourceMonitoring"] = source_monitor_health(source_report)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

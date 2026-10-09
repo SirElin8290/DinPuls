@@ -8,6 +8,18 @@ class SourceTests(unittest.TestCase):
     now=datetime(2026,10,7,1,tzinfo=timezone.utc)
     src={'url':'https://example.org/club','contexts':[],'reviewChanges':True}
     def ok(self,url): return {'status':200,'finalUrl':url,'fingerprint':'a'}
+    def test_empty_calendar_and_unavailable_lunch_are_visible_warnings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d=Path(tmp)
+            for name in ['news.json','school-family.json']:
+                (d/name).write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{}}),encoding='utf-8')
+            (d/'events.json').write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{'Säffle':{'events':[],'sourceHealth':[{'name':'Official','status':'ok','events':0}]}}}),encoding='utf-8')
+            (d/'lunch.json').write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{'Åmål':{'restaurants':[{'name':'Missing menu','status':'unavailable'},{'name':'Known closure','status':'unavailable','closureNotice':'Closed'}]}}}),encoding='utf-8')
+            issues=s.content_issues(d,self.now)
+            self.assertTrue(any(r['kind']=='empty_calendar' and r['municipality']=='Säffle' for r in issues))
+            self.assertTrue(any(r['kind']=='menu_unverified' and r['entity']=='Missing menu' for r in issues))
+            self.assertFalse(any(r['entity']=='Known closure' for r in issues))
+
     def test_redirect_remains_usable_without_rewriting(self):
         row=s.inspect(self.src,{},self.now,lambda u:{'status':200,'finalUrl':'https://example.org/new','fingerprint':'a'})
         self.assertEqual(row['state'],'reachable');self.assertTrue(row['redirected']);self.assertEqual(row['url'],self.src['url'])

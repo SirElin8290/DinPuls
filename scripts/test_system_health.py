@@ -106,6 +106,17 @@ class SystemHealthTests(unittest.TestCase):
 
 
 class NightlyWatchdogTests(unittest.TestCase):
+    def test_browser_quality_cannot_silently_turn_green(self):
+        now=datetime(2026,10,9,12,tzinfo=timezone.utc)
+        report={"completed":True,"generatedAt":now.isoformat(),"updates":{"lunch":"success"},"uiQuality":None}
+        self.assertEqual(health.source_monitor_health(report,now)["reason"],"ui_check_missing")
+        report["uiQuality"]={"completed":True,"generatedAt":now.isoformat(),"issues":[{"reason":"overflow"}]}
+        self.assertEqual(health.source_monitor_health(report,now)["reason"],"ui_review_required")
+        report["uiQuality"]["issues"]=[]
+        self.assertEqual(health.source_monitor_health(report,now)["status"],"green")
+        report["uiQuality"]["generatedAt"]="2026-10-07T01:00:00Z"
+        self.assertEqual(health.source_monitor_health(report,now)["reason"],"ui_check_overdue")
+
     def test_missing_and_overdue(self):
         now = datetime(2026, 10, 7, 12, tzinfo=timezone.utc)
         self.assertEqual(health.source_monitor_health({}, now)["reason"], "nightly_check_missing")

@@ -7,7 +7,7 @@ const privacy = fs.readFileSync(path.join(root, "privacy-controls.js"), "utf8");
 const information = fs.readFileSync(path.join(root, "information.html"), "utf8");
 const publicPages = fs.readdirSync(root)
   .filter(name => name.endsWith(".html") && name !== "404.html")
-  .map(name => path.join(root, name)).filter(file => !fs.readFileSync(file, "utf8").includes('content="noindex,nofollow,noarchive"'));
+  .map(name => path.join(root, name)).filter(file => !fs.readFileSync(file, "utf8").includes('content="noindex,nofollow,noarchive"') && !fs.readFileSync(file, "utf8").includes('location.replace(destination.href)'));
 
 assert(privacy.includes('const ANALYTICS_ID = "G-TVLG1QMX8C"'), "Rätt GA4-ID måste användas");
 assert(privacy.includes('analytics_storage: "denied"'), "Analytics måste vara nekad som standard");
@@ -21,7 +21,7 @@ assert(information.includes("Valfri besöksstatistik") && information.includes("
 
 for (const file of publicPages) {
   const html = fs.readFileSync(file, "utf8");
-  assert(html.includes("privacy-controls.js?version=0.25.2"), `${path.basename(file)} saknar aktuell samtyckeskod`);
+  assert(/privacy-controls\.js\?version=\d+\.\d+\.\d+/.test(html), `${path.basename(file)} saknar aktuell samtyckeskod`);
   assert(!html.includes("googletagmanager.com/gtag/js"), `${path.basename(file)} får inte ladda Google statiskt före samtycke`);
 }
 

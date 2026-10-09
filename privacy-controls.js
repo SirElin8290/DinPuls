@@ -29,6 +29,16 @@
     document.documentElement.dataset.season = "autumn";
   })();
 
+  /* Shared read-only UI recovery; never changes content, accounts or source data. */
+  (function loadUIResilience() {
+    if (document.querySelector('script[data-dinpuls-ui-resilience]')) return;
+    const script = document.createElement('script');
+    const base = document.currentScript?.src || location.href;
+    script.src = new URL('ui-resilience.js?version=1.0.0', base).href;
+    script.dataset.dinpulsUiResilience = 'true';
+    (document.head || document.documentElement).appendChild(script);
+  })();
+
   const LOCAL_PREFIX = "dinpuls-";
   const CONSENT_KEY = "dinpuls-privacy-consent-v3";
   const ANALYTICS_ID = "G-TVLG1QMX8C";

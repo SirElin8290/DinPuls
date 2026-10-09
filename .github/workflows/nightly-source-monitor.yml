@@ -30,8 +30,28 @@ jobs:
     needs: school
     if: ${{ always() }}
     uses: ./.github/workflows/update-associations.yml
-  check:
+  news_retry:
     needs: [news, events, lunch, school, associations]
+    if: ${{ always() && (needs.news.result == 'failure' || needs.news.result == 'cancelled') }}
+    uses: ./.github/workflows/update-news.yml
+  events_retry:
+    needs: [news, events, lunch, school, associations]
+    if: ${{ always() && (needs.events.result == 'failure' || needs.events.result == 'cancelled') }}
+    uses: ./.github/workflows/update-events.yml
+  lunch_retry:
+    needs: [news, events, lunch, school, associations]
+    if: ${{ always() && (needs.lunch.result == 'failure' || needs.lunch.result == 'cancelled') }}
+    uses: ./.github/workflows/update-lunch.yml
+  school_retry:
+    needs: [news, events, lunch, school, associations]
+    if: ${{ always() && (needs.school.result == 'failure' || needs.school.result == 'cancelled') }}
+    uses: ./.github/workflows/update-school-meals.yml
+  associations_retry:
+    needs: [news, events, lunch, school, associations]
+    if: ${{ always() && (needs.associations.result == 'failure' || needs.associations.result == 'cancelled') }}
+    uses: ./.github/workflows/update-associations.yml
+  check:
+    needs: [news, events, lunch, school, associations, news_retry, events_retry, lunch_retry, school_retry, associations_retry]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -58,7 +78,9 @@ jobs:
           path = Path('data/source-monitor.json')
           report = json.loads(path.read_text())
           report['runUrl'] = os.environ['RUN_URL']
-          report['updates'] = {name: row['result'] for name, row in json.loads(os.environ['UPDATE_RESULTS']).items()}
+          results = json.loads(os.environ['UPDATE_RESULTS'])
+          report['updateAttempts'] = {name: row['result'] for name, row in results.items()}
+          report['updates'] = {name: ('success' if row['result'] == 'success' or results.get(name + '_retry', {}).get('result') == 'success' else row['result']) for name, row in results.items() if not name.endswith('_retry')}
           path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
           with Path('docs/SOURCE-MONITOR-LATEST.md').open('a') as out:
               out.write('\n## Automatiska uppdateringar\n\n' + '\n'.join(f'- {name}: {status}' for name, status in report['updates'].items()) + '\n')
@@ -106,3 +128,8 @@ jobs:
           if failed:
               raise SystemExit('Uppdatering misslyckades: ' + ', '.join(failed) + '. Källrapporten är ändå sparad.')
           PY
+
+  ui_quality:
+    needs: check
+    if: ${{ always() }}
+    uses: ./.github/workflows/ui-quality.yml

@@ -115,13 +115,16 @@ def content_issues(data_dir,now):
         for municipality,row in data.get('municipalities',{}).items():
             if filename=='lunch.json':
                 for item in row.get('restaurants',[]):
-                    if item.get('status') in {'outdated','review_required','source_error'} or (item.get('status')=='current' and item.get('weekNumber')!=week): issues.append({'kind':'menu_unverified','file':filename,'municipality':municipality,'entity':item.get('name',''),'message':'Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.'})
+                    if (item.get('status') in {'outdated','review_required','source_error'} or (item.get('status')=='unavailable' and not item.get('closureNotice'))) or (item.get('status')=='current' and item.get('weekNumber')!=week): issues.append({'kind':'menu_unverified','file':filename,'municipality':municipality,'entity':item.get('name',''),'message':'Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.'})
             if filename=='school-family.json' and today.weekday()<5:
                 exceptions=json.loads((data_dir/'reporting-exceptions.json').read_text(encoding='utf-8')).get('entries',[]) if (data_dir/'reporting-exceptions.json').exists() else []
                 accepted=any(x.get('municipality')==municipality and x.get('module')=='schoolMeals' for x in exceptions)
                 if row.get('mealSource') and not accepted and not any(x.get('date')==today.date().isoformat() for x in row.get('meals',[])):
                     issues.append({'kind':'school_menu_unverified','file':filename,'municipality':municipality,'entity':'Skolmat','message':'Ingen verifierad skolmatsrad för dagens datum. Lov/stängning kan vara orsaken; kontrollera källan.'})
             if filename=='events.json':
+                future=[x for x in row.get('events',[]) if str(x.get('endDate') or x.get('startDate') or '')[:10]>=today.date().isoformat()]
+                if not future and row.get('sourceHealth'):
+                    issues.append({'kind':'empty_calendar','file':filename,'municipality':municipality,'entity':'Evenemang','message':'Kalendern saknar kommande evenemang. Kontrollera källans publicerade innehåll och hämtformat; tom HTML bevisar inte att evenemang saknas.'})
                 for item in row.get('events',[]):
                     if not item.get('startDate') or not item.get('url'): issues.append({'kind':'event_invalid','file':filename,'municipality':municipality,'entity':item.get('title',''),'message':'Evenemang saknar datum eller källänk.'})
     return issues
