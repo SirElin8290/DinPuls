@@ -31,7 +31,17 @@
     if (link && (link.closest("form") || link.hasAttribute("download"))) return;
     if (!link && (!cardRoutes[card?.id] || event.target.closest?.("button,input,select,label"))) return;
     const raw = link?.href || `${cardRoutes[card.id]}?kommun=${encodeURIComponent(municipality())}`;
-    const destination = publicDestination(raw, location.href);
+    let destination = publicDestination(raw, location.href);
+    let external = false;
+    if (!destination && card) {
+      try {
+        const url = new URL(raw, location.href);
+        if (/^https?:$/.test(url.protocol) && url.origin !== location.origin) {
+          destination = `external:${url.hostname}`; // No external queries or article text.
+          external = true;
+        }
+      } catch {}
+    }
     if (!destination) return;
     const current = publicDestination(location.href, location.href);
     if (destination === current) return; // Ignore local anchors and controls.
@@ -44,7 +54,7 @@
       destination_page: destination,
       transport_type: "beacon"
     };
-    window.gtag("event", "internal_link_click", params);
+    if (!external) window.gtag("event", "internal_link_click", params);
     if ((location.pathname === "/" || location.pathname === "/index.html") && (card || component && component.closest("main"))) {
       window.gtag("event", "module_click", params);
     }

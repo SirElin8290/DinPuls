@@ -251,7 +251,7 @@
   };
 
   const eventScript = document.createElement("script");
-  eventScript.src = new URL("analytics-events.js?version=1.0.0", document.currentScript?.src || location.href).href;
+  eventScript.src = new URL("analytics-events.js?version=1.0.1", document.currentScript?.src || location.href).href;
   eventScript.async = true;
   (document.head || document.documentElement).appendChild(eventScript);
 
