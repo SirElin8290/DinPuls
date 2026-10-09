@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-09T02:12:02+00:00",
+  "generatedAt": "2026-10-09T02:16:48+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -264,19 +264,6 @@
               "line": "730",
               "direction": "Uddevalla",
               "operator": "Västtrafik",
-              "scheduled": "2026-10-09T04:09:00+02:00",
-              "realtime": "2026-10-09T04:09:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "730",
-              "direction": "Uddevalla",
-              "operator": "Västtrafik",
               "scheduled": "2026-10-09T04:53:00+02:00",
               "realtime": "2026-10-09T04:53:00+02:00",
               "delayMinutes": 0,
@@ -493,7 +480,7 @@
               "scheduled": "2026-10-09T04:15:00+02:00",
               "realtime": "2026-10-09T04:15:00+02:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "A"
             },
@@ -1719,7 +1706,9 @@
             "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november",
             "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 oktober",
             "Linje 3: Hållplats Gunnern stängs från 21 september till och med 23 oktober",
-            "Linje 3: Hållplats Rattgatan stängs från 8 oktober till och med 16 oktober."
+            "Linje 3: Hållplats Rattgatan stängs från 8 oktober till och med 16 oktober.",
+            "Linje 401 och 460: Hållplatserna Ruds bytespunkt (endast mot Molkom), Kyrkogårdsallén och Östra infarten stängs från 6 september till och med 20 november",
+            "Linje 500: Hållplats Kronoparkskyrkan stängs från och med måndag 7 september till och med söndag 18 oktober"
           ],
           "lookupTime": "2026-10-09T00:18+02:00",
           "retained": false,
@@ -1917,8 +1906,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "F",
-              "stale": true
+              "platform": "F"
             },
             {
               "mode": "bus",
@@ -1930,8 +1918,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "M",
-              "stale": true
+              "platform": "M"
             },
             {
               "mode": "bus",
@@ -1943,8 +1930,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "bus",
@@ -2170,8 +2156,8 @@
               "direction": "Tjärnheden Deje",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-09T04:29:00+02:00",
-              "realtime": "2026-10-09T04:28:42+02:00",
-              "delayMinutes": 0,
+              "realtime": "2026-10-09T04:28:06+02:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "B"
@@ -2281,6 +2267,30 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "D"
+            },
+            {
+              "mode": "train",
+              "line": "70",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-09T05:14:00+02:00",
+              "realtime": "2026-10-09T05:14:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "T"
+            },
+            {
+              "mode": "train",
+              "line": "73",
+              "direction": "Karlstads central",
+              "operator": "Vy Tåg",
+              "scheduled": "2026-10-09T05:14:00+02:00",
+              "realtime": "2026-10-09T05:14:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "1"
             },
             {
               "mode": "train",
@@ -3274,11 +3284,23 @@
           "name": "Färgelanda centrum",
           "alerts": [],
           "lookupTime": "2026-10-08T18:55+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-08T20:55+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-10-09T05:14:00+02:00",
+              "realtime": "2026-10-09T05:14:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "738",
