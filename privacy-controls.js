@@ -66,6 +66,9 @@
     const url = new URL(location.href);
     const municipality = new URLSearchParams(location.search).get("kommun");
     url.search = municipality ? `?kommun=${encodeURIComponent(municipality)}` : "";
+    // Public association identifier only; never forward account/form query values.
+    const slug = new URLSearchParams(location.search).get("slug");
+    if (/\/forening\.html$/.test(url.pathname) && slug && /^[a-z0-9-]{1,160}$/.test(slug)) url.searchParams.set("slug", slug);
     url.hash = "";
     return url.href;
   }
@@ -246,6 +249,11 @@
     analyticsAllowed,
     getConsentState
   };
+
+  const eventScript = document.createElement("script");
+  eventScript.src = new URL("analytics-events.js?version=1.0.0", document.currentScript?.src || location.href).href;
+  eventScript.async = true;
+  (document.head || document.documentElement).appendChild(eventScript);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initialize, { once: true });

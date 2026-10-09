@@ -29,6 +29,11 @@ jobs:
       - name: Kör lanseringstester
         run: npm test
 
+      - name: Kontrollera statistik och samtycke
+        run: |
+          node scripts/test_analytics_consent.js
+          node scripts/test_analytics_events.js
+
       - name: Kontrollera föreningarnas publiceringsgrind och profilsidor
         run: |
           node scripts/test_association_publication.js
