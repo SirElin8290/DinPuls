@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-10-10T10:28:33+02:00
+Genererad: 2026-10-10T17:22:10+02:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -16,26 +16,26 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 
 | Kommun | Totalstatus | Jobb | Bostäder | Event | Nyheter | Vård | Service | Lunch | Fritid | Föreningar |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Åmål | 🟢 GREEN | 25 | 53 | 14 | 25 / 25 färska | 19 / 8 kat | 17 / 5 kat | 3 | 28 | 27 |
-| Årjäng | 🟢 GREEN | 30 | 9 | 66 | 18 / 18 färska | 8 / 5 kat | 11 / 4 kat | 1 | 37 | 30 |
-| Bengtsfors | 🟢 GREEN | 21 | 45 | 1 | 29 / 29 färska | 16 / 10 kat | 16 / 10 kat | 1 | 27 | 18 |
-| Mellerud | 🟢 GREEN | 25 | 15 | 26 | 19 / 19 färska | 7 / 4 kat | 15 / 4 kat | 3 | 46 | 17 |
-| Arvika | 🟢 GREEN | 59 | 11 | 80 | 73 / 73 färska | 30 / 8 kat | 21 / 11 kat | 5 | 146 | 75 |
-| Grums | 🟢 GREEN | 15 | 13 | 12 | 35 / 35 färska | 12 / 6 kat | 11 / 7 kat | 1 | 38 | 30 |
-| Säffle | 🟢 GREEN | 32 | 32 | 78 | 68 / 68 färska | 17 / 7 kat | 16 / 4 kat | 4 | 37 | 28 |
-| Dals-Ed | 🟢 GREEN | 7 | 21 | 30 | 6 / 6 färska | 9 / 7 kat | 12 / 8 kat | 1 | 13 | 3 |
-| Eda | 🟢 GREEN | 28 | 45 | 9 | 27 / 27 färska | 13 / 7 kat | 12 / 7 kat | 2 | 21 | 23 |
-| Filipstad | 🟢 GREEN | 16 | 51 | 20 | 26 / 26 färska | 8 / 5 kat | 14 / 8 kat | 2 | 10 | 7 |
+| Åmål | 🟢 GREEN | 25 | 53 | 14 | 24 / 24 färska | 19 / 8 kat | 17 / 5 kat | 3 | 28 | 27 |
+| Årjäng | 🟢 GREEN | 30 | 9 | 66 | 19 / 19 färska | 8 / 5 kat | 11 / 4 kat | 1 | 37 | 30 |
+| Bengtsfors | 🟢 GREEN | 21 | 45 | 1 | 37 / 37 färska | 16 / 10 kat | 16 / 10 kat | 1 | 27 | 18 |
+| Mellerud | 🟢 GREEN | 26 | 15 | 26 | 19 / 19 färska | 7 / 4 kat | 15 / 4 kat | 3 | 46 | 17 |
+| Arvika | 🟢 GREEN | 59 | 11 | 80 | 74 / 74 färska | 30 / 8 kat | 21 / 11 kat | 5 | 146 | 75 |
+| Grums | 🟢 GREEN | 15 | 13 | 12 | 36 / 36 färska | 12 / 6 kat | 11 / 7 kat | 1 | 38 | 30 |
+| Säffle | 🟢 GREEN | 32 | 32 | 78 | 69 / 69 färska | 17 / 7 kat | 16 / 4 kat | 4 | 37 | 28 |
+| Dals-Ed | 🟢 GREEN | 6 | 21 | 30 | 7 / 7 färska | 9 / 7 kat | 12 / 8 kat | 1 | 13 | 3 |
+| Eda | 🟢 GREEN | 28 | 44 | 9 | 27 / 27 färska | 13 / 7 kat | 12 / 7 kat | 2 | 21 | 23 |
+| Filipstad | 🟢 GREEN | 16 | 51 | 20 | 27 / 27 färska | 8 / 5 kat | 14 / 8 kat | 2 | 10 | 7 |
 | Forshaga | 🟢 GREEN | 17 | 7 | 79 | 33 / 33 färska | 11 / 6 kat | 13 / 13 kat | 1 | 26 | 21 |
-| Färgelanda | 🟢 GREEN | 5 | 10 | 2 | 12 / 12 färska | 9 / 8 kat | 8 / 5 kat | 1 | 11 | 17 |
+| Färgelanda | 🟢 GREEN | 5 | 10 | 2 | 10 / 10 färska | 9 / 8 kat | 8 / 5 kat | 1 | 11 | 17 |
 | Hagfors | 🟢 GREEN | 24 | 20 | 80 | 26 / 26 färska | 14 / 9 kat | 12 / 7 kat | 3 | 15 | 20 |
-| Hammarö | 🟢 GREEN | 10 | 2 | 44 | 33 / 33 färska | 10 / 7 kat | 8 / 5 kat | 3 | 42 | 23 |
-| Karlstad | 🟢 GREEN | 84 | 97 | 80 | 80 / 80 färska | 36 / 10 kat | 13 / 6 kat | 3 | 146 | 43 |
+| Hammarö | 🟢 GREEN | 10 | 2 | 44 | 37 / 37 färska | 10 / 7 kat | 8 / 5 kat | 3 | 42 | 23 |
+| Karlstad | 🟢 GREEN | 84 | 97 | 80 | 78 / 78 färska | 36 / 10 kat | 13 / 6 kat | 3 | 146 | 43 |
 | Kil | 🟢 GREEN | 16 | 7 | 2 | 25 / 25 färska | 10 / 4 kat | 18 / 5 kat | 3 | 21 | 19 |
 | Kristinehamn | 🟢 GREEN | 50 | 13 | 80 | 36 / 36 färska | 6 / 4 kat | 9 / 6 kat | 1 | 56 | 20 |
 | Munkfors | 🟢 GREEN | 4 | 1 | 38 | 20 / 20 färska | 7 / 6 kat | 7 / 5 kat | 1 | 14 | 13 |
 | Storfors | 🟡 YELLOW | 13 | 5 | 1 | 21 / 21 färska | 5 / 5 kat | 8 / 6 kat | 0 | 17 | 3 |
-| Sunne | 🟢 GREEN | 28 | 6 | 27 | 29 / 29 färska | 16 / 6 kat | 16 / 5 kat | 4 | 7 | 11 |
+| Sunne | 🟢 GREEN | 28 | 6 | 27 | 30 / 30 färska | 16 / 6 kat | 16 / 5 kat | 4 | 7 | 11 |
 | Torsby | 🟢 GREEN | 30 | 20 | 80 | 21 / 21 färska | 7 / 6 kat | 9 / 5 kat | 3 | 15 | 26 |
 
 ## Blockerare per kommun
