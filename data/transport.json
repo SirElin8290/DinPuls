@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-12T00:41:45+00:00",
+  "generatedAt": "2026-10-12T00:56:46+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -1494,7 +1494,9 @@
         {
           "id": "740098025",
           "name": "Karlstad",
-          "alerts": [],
+          "alerts": [
+            "Linje 601 och 660: Hållplats Djupdalsvägen stängd från 6 oktober"
+          ],
           "lookupTime": "2026-10-12T00:10+02:00",
           "retained": false,
           "nextSearchAfter": "2026-10-12T02:10+02:00",
@@ -1512,6 +1514,18 @@
               "isRealtime": false,
               "canceled": false,
               "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Forshaga Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-12T03:55:00+02:00",
+              "realtime": "2026-10-12T03:55:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2643,13 +2657,27 @@
         {
           "id": "740000274",
           "name": "Torsby station",
-          "alerts": [],
+          "alerts": [
+            "Linje 202:  Hållplats Ordensvägen och Lysvik Skola är stängda 8/10 - 12/10"
+          ],
           "lookupTime": "2026-10-11T17:56+02:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-10-11T19:56+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "202",
+              "direction": "Lysvik Sunne",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-10-12T03:50:00+02:00",
+              "realtime": "2026-10-12T03:50:00+02:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "D"
+            },
             {
               "mode": "bus",
               "line": "202",
