@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-10-25T01:43:10+00:00",
+  "generatedAt": "2026-10-25T01:56:53+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -518,7 +518,7 @@
           "name": "Grums station",
           "alerts": [],
           "lookupTime": "2026-10-24T23:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-25T01:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -531,9 +531,10 @@
               "scheduled": "2026-10-25T02:45:00+02:00",
               "realtime": "2026-10-25T02:55:13+02:00",
               "delayMinutes": 10,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "D"
+              "platform": "D",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -623,27 +624,13 @@
         {
           "id": "740000206",
           "name": "Kil station",
-          "alerts": [
-            "Försening på linje 260 mot Kil Karlstad"
-          ],
+          "alerts": [],
           "lookupTime": "2026-10-24T22:25+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-25T00:25+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "260",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-25T02:40:00+02:00",
-              "realtime": "2026-10-25T02:45:04+02:00",
-              "delayMinutes": 5,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "C"
-            },
             {
               "mode": "bus",
               "line": "201",
@@ -870,12 +857,7 @@
         {
           "id": "740098025",
           "name": "Karlstad",
-          "alerts": [
-            "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
-            "Linje 4: Hållplatserna Östra infarten och Kyrkogårdsallén stängs från 28 september",
-            "Linje S, 2 och 61: Omlagd körväg och stängda hållplatser vid Kronoparken till och med 30 oktober",
-            "Linje S, 2 och 61: Trafikförändringar vid Kronoparken måndag 26 oktober 15.00"
-          ],
+          "alerts": [],
           "lookupTime": "2026-10-24T03:16+02:00",
           "retained": false,
           "nextSearchAfter": "2026-10-24T05:16+02:00",
@@ -884,51 +866,16 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "3",
-              "direction": "Ruds bytespunkt",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-25T02:44:00+02:00",
-              "realtime": "2026-10-25T02:45:11+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Edsgatan via Norra Kroppkärr",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-25T02:45:00+02:00",
-              "realtime": "2026-10-25T02:45:36+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "4",
-              "direction": "Gruvlyckan, Oskarslund",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-25T02:48:00+02:00",
-              "realtime": "2026-10-25T02:48:33+02:00",
-              "delayMinutes": 1,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
               "line": "S",
               "direction": "Universitetet via Centrum",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-10-25T02:54:25+02:00",
               "realtime": "2026-10-25T02:55:13+02:00",
               "delayMinutes": 1,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "O"
+              "platform": "O",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1083,23 +1030,11 @@
           "name": "Forshaga centrum",
           "alerts": [],
           "lookupTime": "2026-10-25T00:40+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-25T02:40+02:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "660",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-10-25T02:43:00+02:00",
-              "realtime": "2026-10-25T02:45:22+02:00",
-              "delayMinutes": 2,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "601",
@@ -1777,23 +1712,11 @@
           "name": "Färgelanda centrum",
           "alerts": [],
           "lookupTime": "2026-10-25T01:10+02:00",
-          "retained": false,
+          "retained": true,
           "nextSearchAfter": "2026-10-25T03:10+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "730",
-              "direction": "Bäckefors via Stigen",
-              "operator": "Västtrafik",
-              "scheduled": "2026-10-25T02:50:00+02:00",
-              "realtime": "2026-10-25T02:50:00+02:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "730",
