@@ -2978,11 +2978,12 @@ function renderLunchTicker(municipality) {
   const weekday = getStockholmWeekday();
   const isWeekend = weekday === "saturday" || weekday === "sunday";
   const tickerRestaurants = restaurants
+    .filter(item => window.DinPulsLunchAvailability.isPublic(item))
     .map((restaurant) => ({
       ...restaurant,
       todayDishes: restaurant.status === "current"
         ? (restaurant.days?.[weekday] || [])
-        : []
+        : restaurant.status === "standing_menu" ? (restaurant.standingDishes || []) : []
     }))
     .filter((restaurant) => restaurant.url)
     .sort((first, second) => {
@@ -3007,13 +3008,17 @@ function renderLunchTicker(municipality) {
   const markup = (tickerRestaurants.length ? tickerRestaurants : fallback).map((restaurant) => {
     const detail = restaurant.todayDishes.length
       ? restaurant.todayDishes.slice(0, 3).join(" · ")
+      : restaurant.status === "upcoming"
+        ? "Verifierad meny för nästa vecka – öppna för datum och rätter"
+      : restaurant.status === "current" && restaurant.verifiedMenuImage
+        ? "Verifierad veckomeny som bild – öppna menybilden"
       : restaurant.status === "seasonally_closed"
         ? "Säsongsstängt – se originalkällan för nästa öppning"
         : restaurant.seasonal
           ? "Säsongsöppet – kontrollera aktuell meny och öppettid"
         : isWeekend
           ? "Se restaurangens helgmeny och aktuella öppettider"
-          : "Veckomenyn finns hos restaurangen – öppna och kontrollera dagens rätter";
+          : "Ingen verifierad meny för den här dagen – se veckans övriga dagar";
     const restaurantQuery = restaurant.id && restaurant.id !== "lunch"
       ? `&restaurang=${encodeURIComponent(restaurant.id)}`
       : "";

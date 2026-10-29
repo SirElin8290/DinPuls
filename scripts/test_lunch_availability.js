@@ -1,0 +1,16 @@
+const assert = require('node:assert/strict');
+const {isPublic, weekKey} = require('../lunch-availability.js');
+const now = '2026-10-29T10:00:00+01:00';
+const current = {status:'current',checkedAt:now,weekNumber:44,days:{thursday:['Soup']}};
+assert.equal(isPublic(current,now),true);
+assert.equal(isPublic({...current,status:'unavailable'},now),false);
+assert.equal(isPublic({...current,status:'review_required'},now),false);
+assert.equal(isPublic({...current,checkedAt:'2025-10-29T10:00:00+01:00'},now),false);
+assert.equal(isPublic(current,'2026-11-02T00:01:00+01:00'),false);
+assert.equal(isPublic({...current,days:{},verifiedMenuImage:'https://example.org/menu.png'},now),true);
+assert.equal(isPublic({status:'standing_menu',standingDishes:['Fixed menu']},now),true);
+assert.equal(isPublic({status:'standing_menu',standingDishes:[]},now),false);
+assert.equal(isPublic({status:'upcoming',upcomingMenu:{validFrom:'2026-11-02',days:{monday:['Soup']}}},now),true);
+assert.equal(isPublic({status:'upcoming',upcomingMenu:{validFrom:'2026-10-26',days:{monday:['Soup']}}},now),false);
+assert.deepEqual(weekKey('2027-01-01T12:00:00Z'),{year:2026,week:53});
+console.log('Lunch publication: verified menus only, week/year rollover and image/standing menus PASS');

@@ -45,7 +45,8 @@ function renderLunchPage(){
   updateLunchPageChrome();
   const day=document.querySelector("#lunch-day").value;
   const query=document.querySelector("#lunch-search").value.trim().toLocaleLowerCase("sv-SE");
-  const restaurants=lunchData.municipalities?.[lunchMunicipality]?.restaurants||[];
+  const restaurants=(lunchData.municipalities?.[lunchMunicipality]?.restaurants||[])
+    .filter(item=>window.DinPulsLunchAvailability.isPublic(item));
   const filtered=restaurants
     .filter(item=>[item.name,item.address,...(item.days?.[day]||[]),...(item.standingDishes||[]),...Object.values(item.upcomingMenu?.days||{}).flat()].join(" ").toLocaleLowerCase("sv-SE").includes(query))
     .sort((a,b)=>{
