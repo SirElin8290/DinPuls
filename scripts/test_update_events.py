@@ -9,6 +9,20 @@ import update_events
 
 
 class EventUpdateTests(unittest.TestCase):
+    def test_library_calendar_paginates_and_excludes_cancelled_or_wrong_location(self):
+        source = {'name': 'Storfors bibliotek', 'url': 'https://www.bibliotekvarmland.se/evenemang', 'apiUrl': 'https://api.example/search', 'locations': ['Storfors bibliotek']}
+        item = {'id': 'e8db22b0-0d01-439e-a46f-46ea5a064807', 'title': 'Schack', 'status': 'PUBLISHED', 'startDate': '2099-01-01T09:00:00Z', 'endDate': '2099-01-01T10:00:00Z', 'location': {'value': 'Storfors bibliotek'}}
+        with patch.object(update_events, 'fetch_json', side_effect=[{'totalHits': 3, 'hits': [{'event': item}]}, {'totalHits': 3, 'hits': [{'event': {**item, 'status': 'CANCELLED'}}, {'event': {**item, 'location': {'value': 'Hammarö bibliotek'}}}]}]) as fetch:
+            rows = update_events.fetch_axiell_events('Storfors', source)
+        self.assertEqual(fetch.call_count, 2)
+        self.assertIn('start=1', fetch.call_args.args[0])
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['time'], '10:00–11:00')
+        self.assertEqual(rows[0]['municipality'], 'Storfors')
+        self.assertTrue(rows[0]['url'].endswith('#/events/' + item['id']))
+        with patch.object(update_events, 'fetch_json', return_value={'totalHits': 2, 'hits': []}):
+            with self.assertRaises(RuntimeError):
+                update_events.fetch_axiell_events('Storfors', source)
     def test_sitevision_calendar_pagination_and_explicit_dates(self):
         markup="Soleil.webapps['EventsListing'].render('EventsListing', '#calendar', {\"itemsRoute\":\"/appresource/page/module/items\",\"paths\":[\"archive\"]});"
         item={"title":"Konsert","uri":"/events/2099-12-31-konsert.html","startDate":"31 december","endDate":"1 januari","startTime":"19:00","endTime":"21:00","location":"Medis"}

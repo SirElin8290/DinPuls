@@ -468,6 +468,42 @@ def merge_event_rows(existing: list[dict], collected: list[dict]) -> list[dict]:
     return list(unique.values())
 
 
+def fetch_axiell_events(municipality, source):
+    """Read the public library calendar, with exact location and publication filters."""
+    now = datetime.now(timezone.utc)
+    terms = [{"field": "event.status", "values": ["PUBLISHED"]},
+             {"type": "NOT_IN", "field": "event.deleted", "values": [True]},
+             {"field": "event.location.value", "values": source["locations"]}]
+    rows, start, total = [], 0, 1
+    while start < total:
+        query = urlencode({"queryString": "event.title:*", "rangeFilters": json.dumps([{"field": "event.endDate", "gte": now.isoformat()}]),
+                           "termFilters": json.dumps(terms), "sorts": json.dumps([{"field": "event.startDate", "order": "ASC"}]), "start": start, "size": 100})
+        data = fetch_json(source["apiUrl"] + "?" + query)
+        hits, total = data.get("hits"), data.get("totalHits")
+        if not isinstance(hits, list) or not isinstance(total, int) or (not hits and start < total):
+            raise RuntimeError("Bibliotekskalendern gav ett ofullständigt resultat")
+        for hit in hits:
+            item = hit.get("event") or {}
+            if item.get("status") != "PUBLISHED" or item.get("deleted") or (item.get("location") or {}).get("value") not in source["locations"]:
+                continue
+            identifier = str(item.get("id") or "")
+            if not re.fullmatch(r"[a-f0-9-]{36}", identifier) or not item.get("title"):
+                raise RuntimeError("Bibliotekskalendern saknar titel eller giltigt ID")
+            begin = datetime.fromisoformat(item["startDate"].replace("Z", "+00:00")).astimezone(SWEDEN_TZ)
+            end = datetime.fromisoformat(item["endDate"].replace("Z", "+00:00")).astimezone(SWEDEN_TZ)
+            if end < now:
+                continue
+            code, label = category(item["title"])
+            rows.append({"id": "axiell-" + identifier, "title": item["title"], "municipality": municipality,
+                         "startDate": begin.date().isoformat(), "endDate": end.date().isoformat(),
+                         "time": begin.strftime("%H:%M") + "–" + end.strftime("%H:%M"),
+                         "venue": item["location"]["value"], "category": code, "categoryLabel": label,
+                         "url": source["url"].split("#")[0] + "#/events/" + identifier,
+                         "source": source["name"], "verified": True, "verifiedAt": now.isoformat(timespec="seconds")})
+        start += len(hits)
+    return rows
+
+
 def main() -> int:
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
     catalog = json.loads(SOURCE_CATALOG.read_text(encoding="utf-8"))
@@ -501,6 +537,14 @@ def main() -> int:
                 })
                 continue
             try:
+                if source.get("adapter") == "axiell":
+                    rows = fetch_axiell_events(municipality, source)
+                    existing = [item for item in existing if not str(item.get("id", "")).startswith("axiell-")]
+                    collected.extend(rows)
+                    health.append({"name": source["name"], "url": source["url"], "status": "ok", "mode": "automatic", "events": len(rows), "checkedAt": now})
+                    any_source_ok = True
+                    print(f"{municipality}: {source['name']} – {len(rows)} verifierade biblioteksevenemang")
+                    continue
                 markup = fetch_html(source["url"])
                 rows = []
                 for block in json_ld_blocks(markup):
