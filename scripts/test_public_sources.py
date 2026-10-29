@@ -23,6 +23,18 @@ class SourceTests(unittest.TestCase):
     def test_redirect_remains_usable_without_rewriting(self):
         row=s.inspect(self.src,{},self.now,lambda u:{'status':200,'finalUrl':'https://example.org/new','fingerprint':'a'})
         self.assertEqual(row['state'],'reachable');self.assertTrue(row['redirected']);self.assertEqual(row['url'],self.src['url'])
+    def test_school_holiday_suppresses_only_missing_meal_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d=Path(tmp)
+            for name in ['news.json','events.json','lunch.json']:
+                (d/name).write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{}}),encoding='utf-8')
+            row={'mealSource':{'url':'https://example.org'},'meals':[],'calendar':[{'eventType':'holiday','startDate':'2026-10-05','endDate':'2026-10-09','schoolGroup':None}]}
+            path=d/'school-family.json'
+            path.write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{'Test':row}}),encoding='utf-8')
+            self.assertFalse(any(x['kind']=='school_menu_unverified' for x in s.content_issues(d,self.now)))
+            row['calendar'][0]['schoolGroup']='only-one-school'
+            path.write_text(json.dumps({'generatedAt':self.now.isoformat(),'municipalities':{'Test':row}}),encoding='utf-8')
+            self.assertTrue(any(x['kind']=='school_menu_unverified' for x in s.content_issues(d,self.now)))
     def test_retry_recovers_without_warning(self):
         calls=[]
         def fetch(u):

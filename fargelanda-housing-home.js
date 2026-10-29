@@ -21,7 +21,7 @@
       if (typeof housingData === "undefined" || !housingData?.municipalities) return false;
       // A dated manual fallback must never replace a newer automatic import.
       const current = housingData.municipalities[MUNICIPALITY];
-      if (current?.listings?.length && Date.parse(current.checkedAt || current.updatedAt || "") >= Date.parse(supplement.sourceChecked || "")) return true;
+      if (current && Date.parse(current.checkedAt || current.updatedAt || "") >= Date.parse(supplement.sourceChecked || "")) return true;
       applying = true;
       housingData.municipalities[MUNICIPALITY] = {
         ...supplement,

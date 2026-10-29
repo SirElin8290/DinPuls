@@ -119,7 +119,9 @@ def content_issues(data_dir,now):
             if filename=='school-family.json' and today.weekday()<5:
                 exceptions=json.loads((data_dir/'reporting-exceptions.json').read_text(encoding='utf-8')).get('entries',[]) if (data_dir/'reporting-exceptions.json').exists() else []
                 accepted=any(x.get('municipality')==municipality and x.get('module')=='schoolMeals' for x in exceptions)
-                if row.get('mealSource') and not accepted and not any(x.get('date')==today.date().isoformat() for x in row.get('meals',[])):
+                day=today.date().isoformat()
+                closed=any(x.get('schoolGroup') is None and x.get('eventType') in {'holiday','study-day'} and str(x.get('startDate') or '') <= day <= str(x.get('endDate') or '') for x in row.get('calendar',[]))
+                if row.get('mealSource') and not accepted and not closed and not any(x.get('date')==day for x in row.get('meals',[])):
                     issues.append({'kind':'school_menu_unverified','file':filename,'municipality':municipality,'entity':'Skolmat','message':'Ingen verifierad skolmatsrad för dagens datum. Lov/stängning kan vara orsaken; kontrollera källan.'})
             if filename=='events.json':
                 future=[x for x in row.get('events',[]) if str(x.get('endDate') or x.get('startDate') or '')[:10]>=today.date().isoformat()]

@@ -36,7 +36,7 @@ async function initializePortal() {
       if (supplementResponse.ok) {
         const supplement = await supplementResponse.json();
         const current = portalData.municipalities?.Färgelanda;
-        const newerImport = current?.listings?.length && Date.parse(current.checkedAt || current.updatedAt || "") >= Date.parse(supplement.sourceChecked || "");
+        const newerImport = current && Date.parse(current.checkedAt || current.updatedAt || "") >= Date.parse(supplement.sourceChecked || "");
         if (!newerImport && Array.isArray(supplement?.listings) && supplement.listings.length > 0) {
           portalData.municipalities ||= {};
           portalData.municipalities.Färgelanda = {

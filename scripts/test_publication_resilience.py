@@ -9,11 +9,20 @@ from unittest.mock import patch
 import apply_storfors_events
 import update_housing
 from validate_housing_publication import validate
+from merge_housing_updates import merge
 from test_system_health import payloads, opener_for
 import check_system_health as health
 
 
 class PublicationResilienceTests(unittest.TestCase):
+    def test_publication_keeps_newer_municipality_and_other_main_changes(self):
+        current = {'version': 'keep-main', 'generatedAt': '2026-10-29T09:00:00Z', 'municipalities': {'A': {'checkedAt': '2026-10-29T09:00:00Z', 'total': 1}, 'B': {'checkedAt': '2026-10-29T07:00:00Z'}}}
+        candidate = {'generatedAt': '2026-10-29T08:00:00Z', 'municipalities': {'A': {'checkedAt': '2026-10-29T08:00:00Z', 'total': 99}, 'B': {'checkedAt': '2026-10-29T08:00:00Z', 'total': 2}}}
+        result = merge(current, candidate)
+        self.assertEqual(result['version'], 'keep-main')
+        self.assertEqual(result['municipalities']['A']['total'], 1)
+        self.assertEqual(result['municipalities']['B']['total'], 2)
+        self.assertEqual(result['generatedAt'], '2026-10-29T09:00:00+00:00')
     def test_expired_storfors_supplement_does_not_block_other_municipalities(self):
         with tempfile.TemporaryDirectory() as directory:
             events = Path(directory) / 'events.json'
