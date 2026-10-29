@@ -1,4 +1,5 @@
 import copy
+import io
 import json
 import tempfile
 import unittest
@@ -7,6 +8,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import apply_storfors_events
+import apply_munkfors_strict
+from urllib.error import HTTPError
 import update_housing
 from validate_housing_publication import validate
 from merge_housing_updates import merge
@@ -15,6 +18,17 @@ import check_system_health as health
 
 
 class PublicationResilienceTests(unittest.TestCase):
+    def test_manual_munkfors_snapshot_cannot_restore_removed_automatic_housing(self):
+        data={'municipalities':{'Munkfors':{'availabilityMode':'automatic','total':0,'listings':[],'checkedAt':'2026-10-29T09:00:00Z','sourceHealth':[{'status':'ok','rawCount':0}]}}}
+        with patch.object(apply_munkfors_strict,'load',return_value=data),patch.object(apply_munkfors_strict,'save') as save:
+            apply_munkfors_strict.apply({'housing'})
+            apply_munkfors_strict.gate({'housing'})
+            save.assert_not_called()
+        self.assertEqual(data['municipalities']['Munkfors']['listings'],[])
+
+    def test_transient_redirect_error_retries_without_claiming_source_dead(self):
+        with patch.object(update_housing,'urlopen',side_effect=[HTTPError('https://example.org',307,'temporary',{},None),io.BytesIO(b'fresh')]),patch.object(update_housing.time,'sleep'):
+            self.assertEqual(update_housing.fetch('https://example.org'),b'fresh')
     def test_publication_keeps_newer_municipality_and_other_main_changes(self):
         current = {'version': 'keep-main', 'generatedAt': '2026-10-29T09:00:00Z', 'municipalities': {'A': {'checkedAt': '2026-10-29T09:00:00Z', 'total': 1}, 'B': {'checkedAt': '2026-10-29T07:00:00Z'}}}
         candidate = {'generatedAt': '2026-10-29T08:00:00Z', 'municipalities': {'A': {'checkedAt': '2026-10-29T08:00:00Z', 'total': 99}, 'B': {'checkedAt': '2026-10-29T08:00:00Z', 'total': 2}}}

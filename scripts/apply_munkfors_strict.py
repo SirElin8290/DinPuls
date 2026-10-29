@@ -68,13 +68,15 @@ def apply(modules):
     if 'housing' in modules:
         data = load('housing.json')
         entry = data.setdefault('municipalities', {}).setdefault('Munkfors', {})
-        entry['listings'] = merge(entry.get('listings') or [], SRC['housing'])
-        entry['total'] = len(entry['listings'])
-        entry['checkedAt'] = SRC['sourceChecked'] + 'T09:00:00+02:00'
-        entry['updatedAt'] = entry['checkedAt']
-        entry['stale'] = False
-        entry['errors'] = []
-        save('housing.json', data)
+        # Automatic inventories, including verified zero, supersede the September snapshot.
+        if entry.get('availabilityMode') != 'automatic':
+            entry['listings'] = merge(entry.get('listings') or [], SRC['housing'])
+            entry['total'] = len(entry['listings'])
+            entry['checkedAt'] = SRC['sourceChecked'] + 'T09:00:00+02:00'
+            entry['updatedAt'] = entry['checkedAt']
+            entry['stale'] = False
+            entry['errors'] = []
+            save('housing.json', data)
 
     if 'health' in modules:
         data = load('health-local-supplement.json')
@@ -148,7 +150,11 @@ def service_state():
 def gate(modules):
     if 'housing' in modules:
         entry = load('housing.json').get('municipalities', {}).get('Munkfors', {})
-        assert len(entry.get('listings') or []) >= 1, 'Munkfors housing < 1'
+        if entry.get('availabilityMode') == 'automatic':
+            assert entry.get('total') == len(entry.get('listings') or []), 'Munkfors automatic total mismatch'
+            assert entry.get('sourceHealth'), 'Munkfors automatic source health missing'
+        else:
+            assert len(entry.get('listings') or []) >= 1, 'Munkfors housing < 1'
     if 'health' in modules:
         items, cats = health_state()
         assert len(items) >= 5 and len(cats) >= 3, (len(items), cats)

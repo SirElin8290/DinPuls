@@ -6,6 +6,7 @@ import html
 import json
 import re
 import sys
+import time
 import uuid
 from http.cookiejar import CookieJar
 from datetime import datetime, timezone
@@ -157,13 +158,17 @@ def get_json(path: Path, fallback: dict) -> dict:
 
 def fetch(url: str) -> bytes:
     request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/json"})
-    try:
-        with urlopen(request, timeout=35) as response:
-            return response.read()
-    except HTTPError as error:
-        raise RuntimeError(f"HTTP {error.code}") from None
-    except (URLError, TimeoutError) as error:
-        raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+    for attempt in range(3):
+        try:
+            with urlopen(request, timeout=35) as response:
+                return response.read()
+        except HTTPError as error:
+            if error.code not in {307, 502, 503, 504} or attempt == 2:
+                raise RuntimeError(f"HTTP {error.code}") from None
+        except (URLError, TimeoutError) as error:
+            if attempt == 2:
+                raise RuntimeError(f"kunde inte nå källan: {getattr(error, 'reason', error)}") from None
+        time.sleep(attempt + 1)
 
 
 def number(value: str) -> int | float | None:
@@ -859,7 +864,7 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_orvelin_residential(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
-                if not fetched and previous_provider_listings and parser_name != "vitec-public":
+                if not fetched and previous_provider_listings and parser_name != "vitec-public" and not (parser_name == "momentum" and provider.get("allowVerifiedEmpty")):
                     raise RuntimeError(
                         f"källan gav oväntat 0 objekt; behåller {len(previous_provider_listings)} tidigare objekt"
                     )
