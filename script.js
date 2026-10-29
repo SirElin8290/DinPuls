@@ -2867,18 +2867,17 @@ function renderCinemaHome() {
   const municipality = DinPulsMunicipality.getName();
   const cinemas = cinemaHomeData.municipalities?.[municipality] || [];
   const now = Date.now();
-  const localFilms = cinemas.flatMap(cinema => (cinema.films || []).filter(film => !Array.isArray(film.showtimes) || film.showtimes.some(value => Date.parse(value) >= now)).map(film => ({
+  const localFilms = cinemas.flatMap(cinema => (cinema.films || []).filter(film => Array.isArray(film.showtimes) && film.showtimes.some(value => Date.parse(value) >= now)).map(film => ({
     ...film,
     cinema: cinema.name,
     url: cinema.programUrl,
     verifiedLocal: true
   })));
-  const fallbackUrl = cinemas[0]?.programUrl || `bio.html?kommun=${encodeURIComponent(municipality)}`;
-  const films = (localFilms.length ? localFilms : (cinemaHomeData.featuredFilms || []).map(film => ({
-    ...film,
-    cinema: cinemas[0]?.name || `Bio i ${municipality}`,
-    url: fallbackUrl,
-    verifiedLocal: false
+  const films = (localFilms.length ? localFilms : cinemas.filter(cinema => cinema.programUrl).map(cinema => ({
+    title: cinema.name,
+    label: "Se filmer, visningstider och bokning",
+    url: cinema.programUrl,
+    programLink: true
   }))).slice(0, 4);
 
   const subtitle = document.querySelector("#cinema-home-subtitle");
@@ -2886,15 +2885,15 @@ function renderCinemaHome() {
     subtitle.textContent = localFilms.length
       ? `${localFilms.length} publicerade filmer hos ${cinemas.map(cinema => cinema.name).join(" och ")}.`
       : cinemas.length
-        ? `Aktuella biotitlar – kontrollera vilka som visas hos ${cinemas.map(cinema => cinema.name).join(" och ")}.`
-        : "Aktuella biotitlar – kontrollera lokal visning och bokning.";
+        ? `Se kommande filmer och visningstider hos ${cinemas.map(cinema => cinema.name).join(" och ")}.`
+        : "Se biografernas program för filmer och visningstider.";
   }
 
   const grid = document.querySelector("#cinema-home-grid");
   if (grid) {
     grid.innerHTML = films.length ? films.map((film, index) => `<a class="cinema-home-film" href="${escapeAttribute(safeExternalUrl(film.url))}" target="_blank" rel="noopener noreferrer">
       <span class="cinema-home-number">${String(index + 1).padStart(2, "0")}</span>
-      <span><small>${escapeHtml(film.verifiedLocal ? film.cinema : "Filmer på bio just nu")}</small><strong>${escapeHtml(film.title)}</strong><em>${escapeHtml(film.label || "Se program och visningstider")}</em></span>
+      <span><small>${escapeHtml(film.programLink ? "Officiellt bioprogram" : film.cinema)}</small><strong>${escapeHtml(film.title)}</strong><em>${escapeHtml(film.label || "Se program och visningstider")}</em></span>
       <i data-lucide="ticket"></i>
     </a>`).join("") : `<span class="cinema-home-empty">Inga aktuella filmtitlar är publicerade. Öppna biografens program för senaste uppgifterna.</span>`;
   }
