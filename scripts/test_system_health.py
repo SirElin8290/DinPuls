@@ -21,7 +21,7 @@ def payloads(empty_module=None, verified_zero=False):
     for module, (filenames, _) in health.MODULES.items():
         for file_index, filename in enumerate(filenames):
             value = json.loads(json.dumps(common))
-            if module == "energy" and filename == "energy.json": value["areas"] = {"SE3": {"periods": [{}]}}
+            if module == "energy" and filename == "energy.json": value["areas"] = {"SE3": {"periods": [{"start": "2026-09-10T00:00:00Z", "end": "2026-09-11T00:00:00Z"}]}}
             if module == "energy" and filename == "electricity-areas.json": value["municipalities"] = {item: "SE3" for item in names}
             for name in names:
                 row = value["municipalities"][name]
@@ -29,7 +29,7 @@ def payloads(empty_module=None, verified_zero=False):
                     continue
                 if module == "news": value.setdefault("articles", []).append({"municipalities": [name]})
                 elif module == "jobs": row["jobs"] = [{}]
-                elif module == "housing": row["listings"] = [{}]
+                elif module == "housing": row.update(listings=[{}], checkedAt=now)
                 elif module == "events": row["events"] = [{}]
                 elif module == "weather": row["nowcast"] = {"current": {"time": now}}
                 elif module == "energy": pass

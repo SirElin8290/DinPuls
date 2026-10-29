@@ -65,7 +65,7 @@ jobs:
       - name: Lägg in verifierade Storfors-evenemang
         run: python scripts/apply_storfors_events.py
       - name: Testa evenemangslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py scripts/test_dals_ed_imports.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_events.py scripts/test_dals_ed_imports.py scripts/test_publication_resilience.py
       - name: Verifiera alla kommuner i evenemangsdatan
         run: |
           python - <<'PY'
@@ -84,7 +84,7 @@ jobs:
           for municipality in ('Kil', 'Säffle', 'Färgelanda', 'Storfors'):
               municipality_events = ((events.get('municipalities') or {}).get(municipality) or {}).get('events') or []
               if not municipality_events:
-                  raise SystemExit(f'{municipality} saknar aktuella verifierade evenemang efter supplement')
+                  print(f'::warning::{municipality}: inga verifierade framtida evenemang; övriga kommuner publiceras')
               if any(not item.get('url') or not item.get('startDate') for item in municipality_events):
                   raise SystemExit(f'{municipality} har evenemang utan verifierbar källa eller datum')
               checked[municipality] = municipality_events

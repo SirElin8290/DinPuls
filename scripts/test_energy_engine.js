@@ -15,5 +15,8 @@ const periods = [
 const summary = engine.summarize({ periods }, "2026-09-28T10:05:00+02:00");
 assert.equal(summary.current.orePerKwh, -2.5); assert.equal(summary.minimum, -2.5); assert.equal(summary.maximum, 18.2);
 assert.equal(engine.summarize({ periods }, "2026-09-29T10:05:00+02:00"), null, "Gammal data får inte visas som aktuell");
+const tomorrow = periods.map(item => ({ ...item, start: item.start.replace("09-28", "09-29"), end: item.end.replace("09-28", "09-29") }));
+assert.deepEqual(engine.summarize({ periods, tomorrow: { periods: tomorrow } }, "2026-09-29T10:05:00+02:00").periods, tomorrow, "Efter dygnsskifte används hela nästa prisdygn");
+assert.equal(engine.summarize({ periods, tomorrow: { periods: tomorrow } }, "2026-09-30T10:05:00+02:00"), null);
 assert.equal(engine.summarize({ periods: [{ start: "bad", end: "bad", orePerKwh: 1 }] }), null);
 console.log("Energy engine: 21/21 kommuner och fel-/negativprisfall PASS");

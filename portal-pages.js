@@ -35,7 +35,9 @@ async function initializePortal() {
       const supplementResponse = await fetch("data/housing-fargelanda-supplement.json", { cache: "no-store" });
       if (supplementResponse.ok) {
         const supplement = await supplementResponse.json();
-        if (Array.isArray(supplement?.listings) && supplement.listings.length > 0) {
+        const current = portalData.municipalities?.Färgelanda;
+        const newerImport = current?.listings?.length && Date.parse(current.checkedAt || current.updatedAt || "") >= Date.parse(supplement.sourceChecked || "");
+        if (!newerImport && Array.isArray(supplement?.listings) && supplement.listings.length > 0) {
           portalData.municipalities ||= {};
           portalData.municipalities.Färgelanda = {
             ...supplement,
@@ -57,7 +59,8 @@ function renderPortal() {
   updatePortalChrome();
   const municipalityData = portalData.municipalities?.[portalMunicipality] || {};
   const query = document.querySelector("#portal-search")?.value.trim().toLocaleLowerCase("sv-SE") || "";
-  const sourceItems = portalType === "jobs" ? (municipalityData.jobs || []) : (municipalityData.listings || []);
+  const rawItems = portalType === "jobs" ? (municipalityData.jobs || []) : (municipalityData.listings || []);
+  const sourceItems = portalType === "jobs" ? rawItems.filter(job => !job.applicationDeadline || !Number.isFinite(Date.parse(job.applicationDeadline)) || Date.parse(job.applicationDeadline) >= Date.now()) : rawItems;
   let filtered = sourceItems.filter(item => {
     const text = portalType === "jobs"
       ? [item.headline, item.employer, item.occupation, item.workplace].join(" ")
@@ -76,7 +79,7 @@ function renderPortal() {
   }
   const total = document.querySelector("#portal-total");
   if (portalType === "jobs") {
-    const advertisedTotal = Number(municipalityData.total) || sourceItems.length;
+    const advertisedTotal = Math.max(sourceItems.length, (Number(municipalityData.total) || rawItems.length) - (rawItems.length - sourceItems.length));
     total.textContent = query
       ? `${filtered.length} jobb matchar sökningen`
       : sourceItems.length < advertisedTotal

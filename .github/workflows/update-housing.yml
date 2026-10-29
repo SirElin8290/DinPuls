@@ -2,12 +2,14 @@ name: Uppdatera lediga bostäder
 
 on:
   workflow_dispatch:
+  workflow_call:
   schedule:
     - cron: "43 */4 * * *"
   push:
     branches:
       - main
     paths:
+      - "scripts/validate_housing_publication.py"
       - "scripts/update_housing.py"
       - "scripts/update_housing_sunne.py"
       - "scripts/update_housing_eda.py"
@@ -159,152 +161,42 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Hämta aktuella bostäder
-        run: |
-          set -euo pipefail
-          python scripts/update_housing.py
-          python scripts/update_housing_sunne.py
-          python scripts/update_housing_eda.py
-          python scripts/update_housing_launch.py
-          python scripts/update_housing_forshaga.py
-          python scripts/update_housing_fargelanda.py
-          python scripts/update_housing_storfors.py
-          python scripts/update_housing_coverage_evidence.py
+      - name: Hämta bostäder – update_housing
+        continue-on-error: true
+        run: python scripts/update_housing.py
 
-      - name: Verifiera kommunregistret och bostadskällornas hälsa
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+      - name: Hämta bostäder – update_housing_sunne
+        continue-on-error: true
+        run: python scripts/update_housing_sunne.py
 
-          config = json.loads(Path('data/municipalities.json').read_text(encoding='utf-8'))
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          launch = json.loads(Path('data/housing-launch-sources.json').read_text(encoding='utf-8'))
-          expected = {item['name'] for item in config.get('municipalities', []) if item.get('name')}
-          actual = set((data.get('municipalities') or {}).keys())
-          assert actual == expected, f'Bostadskommuner saknas/fel: expected={sorted(expected)}, got={sorted(actual)}'
+      - name: Hämta bostäder – update_housing_eda
+        continue-on-error: true
+        run: python scripts/update_housing_eda.py
 
-          launch_names = set((launch.get('municipalities') or {}).keys())
-          strict_provider_names = {'Karlstad', 'Kristinehamn', 'Hammarö', 'Grums', 'Filipstad', 'Bengtsfors'}
-          for item in config.get('municipalities', []):
-              name = item['name']
-              municipality = data['municipalities'][name]
-              assert isinstance(municipality.get('listings'), list), f'{name} saknar bostadslista'
-              if name in launch_names:
-                  health = municipality.get('sourceHealth') or []
-                  assert health and all(row.get('status') == 'ok' for row in health), f'{name}: bostadskällan är inte frisk: {health}'
-                  mode = municipality.get('availabilityMode')
-                  assert mode in {'automatic', 'official-reference'}, f'{name}: okänt availabilityMode {mode!r}'
-                  if mode == 'automatic':
-                      assert isinstance(municipality.get('total'), int), f'{name}: automatic saknar numerisk total'
-                      assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
-                  else:
-                      assert municipality.get('total') is None, f'{name}: official-reference får inte visa falsk total'
-                  assert municipality.get('stale') is False, f'{name}: bostadsdata markerad stale'
-                  assert not municipality.get('errors'), f'{name}: bostadskällfel {municipality.get("errors")}'
-              else:
-                  assert municipality.get('total') == len(municipality['listings']), f'{name}: total matchar inte listan'
-              if name in strict_provider_names:
-                  configured = [provider['name'] for provider in item.get('housingProviders', []) if provider.get('parser')]
-                  health = municipality.get('sourceHealth') or []
-                  assert [row.get('provider') for row in health] == configured, f'{name}: alla konfigurerade providers kördes inte: {health}'
-                  assert all(row.get('status') == 'ok' and row.get('stale') is False for row in health), f'{name}: källfel {health}'
-                  assert sum(row.get('rawCount') or 0 for row in health) == municipality.get('total'), f'{name}: råantal matchar inte total'
-                  assert len({(row.get('provider'), row.get('id')) for row in municipality['listings']}) == len(municipality['listings']), f'{name}: dubbletter'
-          print(f'Bostadsdata innehåller alla {len(expected)} kommuner; {len(launch_names)} lanseringskällor är friska')
-          PY
+      - name: Hämta bostäder – update_housing_launch
+        continue-on-error: true
+        run: python scripts/update_housing_launch.py
 
-      - name: Verifiera Hammarö-data
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          hammaro = data.get('municipalities', {}).get('Hammarö', {})
-          assert hammaro.get('availabilityMode') == 'automatic', 'Hammarö är inte automatisk'
-          assert hammaro.get('total') == len(hammaro.get('listings') or []), 'Hammarös total matchar inte listan'
-          assert hammaro.get('stale') is False, 'Hammarö-data är markerad stale'
-          assert not hammaro.get('errors'), f"Hammarö har källfel: {hammaro.get('errors')}"
-          health = hammaro.get('sourceHealth') or []
-          assert len(health) == 1 and health[0].get('status') == 'ok', f'Hammarö har osäker källhälsa: {health}'
-          assert health[0].get('rawCount') == len(hammaro.get('listings') or []), 'Hammarös råantal matchar inte listan'
-          for item in hammaro.get('listings') or []:
-              assert item.get('address'), f'Hammarö-objekt saknar adress: {item}'
-              assert item.get('url'), f'Hammarö-objekt saknar länk: {item}'
-          print(f"Verifierat: Hammaröportalen gav {hammaro['total']} aktuella bostadsobjekt")
-          PY
+      - name: Hämta bostäder – update_housing_forshaga
+        continue-on-error: true
+        run: python scripts/update_housing_forshaga.py
 
-      - name: Verifiera Färgelanda-data
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          fargelanda = data.get('municipalities', {}).get('Färgelanda', {})
-          assert fargelanda.get('availabilityMode') == 'automatic', 'Färgelanda är inte automatisk'
-          assert fargelanda.get('total', 0) > 0, 'Färgelanda saknar verifierade bostadsobjekt'
-          assert fargelanda.get('total') == len(fargelanda.get('listings', [])), 'Färgelandas total matchar inte listan'
-          for item in fargelanda.get('listings', []):
-              assert item.get('address') and any(ch.isdigit() for ch in item['address']), f"Färgelanda har ogiltig adress: {item}"
-              assert isinstance(item.get('rooms'), (int, float)) and item['rooms'] > 0, f"Färgelanda har ogiltigt rumsantal: {item}"
-              assert isinstance(item.get('rent'), (int, float)) and item['rent'] > 1000, f"Färgelanda har ogiltig hyra: {item}"
-              assert item.get('url'), f"Färgelanda-objekt saknar länk: {item}"
-          print(f"Verifierat: Färgelanda har {fargelanda['total']} aktuella bostadsobjekt")
-          PY
+      - name: Hämta bostäder – update_housing_fargelanda
+        continue-on-error: true
+        run: python scripts/update_housing_fargelanda.py
 
-      - name: Verifiera Forshaga-data
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          forshaga = data.get('municipalities', {}).get('Forshaga', {})
-          assert forshaga.get('availabilityMode') == 'automatic', 'Forshaga är inte automatisk'
-          assert forshaga.get('total', 0) > 0, 'Forshaga saknar verifierade bostadsobjekt'
-          assert forshaga.get('total') == len(forshaga.get('listings', [])), 'Forshagas total matchar inte listan'
-          for item in forshaga.get('listings', []):
-              assert item.get('address') and any(ch.isdigit() for ch in item['address']), f"Forshaga har ogiltig adress: {item.get('address')}"
-              assert isinstance(item.get('rooms'), (int, float)) and 0 < item['rooms'] < 20, f"Forshaga har orimligt rumsantal: {item}"
-              assert isinstance(item.get('size'), (int, float)) and item['size'] > 10, f"Forshaga har orimlig yta: {item}"
-              assert isinstance(item.get('rent'), (int, float)) and item['rent'] > 1000, f"Forshaga har orimlig hyra: {item}"
-              assert item.get('url', '').startswith('https://minasidor.forshagabostader.se/'), f"Forshaga har fel objektlänk: {item}"
-          print(f"Verifierat: Forshaga har {forshaga['total']} korrekt parsade bostadsobjekt")
-          PY
+      - name: Hämta bostäder – update_housing_storfors
+        continue-on-error: true
+        run: python scripts/update_housing_storfors.py
 
-      - name: Verifiera Sunne-data
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          sunne = data.get('municipalities', {}).get('Sunne', {})
-          assert sunne.get('total', 0) > 0, 'Sunne saknar bostadsobjekt efter hämtning'
-          assert len(sunne.get('listings', [])) == sunne.get('total'), 'Sunnes total matchar inte listan'
-          assert sunne.get('stale') is False, 'Sunne-data är markerad stale'
-          assert not sunne.get('errors'), f"Sunne har källfel: {sunne.get('errors')}"
-          print(f"Verifierat: Sunne har {sunne['total']} aktuella bostadsobjekt")
-          PY
+      - name: Kontrollera alla kommuner och särredovisa källfel
+        run: python scripts/validate_housing_publication.py
 
-      - name: Verifiera Eda-data
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          data = json.loads(Path('data/housing.json').read_text(encoding='utf-8'))
-          eda = data.get('municipalities', {}).get('Eda', {})
-          assert eda.get('total', 0) > 0, 'Eda saknar bostadsobjekt efter hämtning'
-          assert len(eda.get('listings', [])) == eda.get('total'), 'Edas total matchar inte listan'
-          assert eda.get('stale') is False, 'Eda-data är markerad stale'
-          for item in eda.get('listings', []):
-              assert item.get('id'), 'Eda-objekt saknar objektnummer'
-              assert item.get('address'), 'Eda-objekt saknar adress'
-              assert item.get('url'), 'Eda-objekt saknar länk'
-              assert item.get('provider') == 'Eda Bostads AB'
-          print(f"Verifierat: Eda har {eda['total']} aktuella bostadsobjekt")
-          PY
+      - name: Uppdatera källevidens
+        run: python scripts/update_housing_coverage_evidence.py
 
       - name: Testa bostadslogiken
-        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_update_housing_forshaga.py scripts/test_dals_ed_imports.py
+        run: PYTHONPATH=scripts python -m unittest scripts/test_update_housing.py scripts/test_update_housing_launch.py scripts/test_update_housing_forshaga.py scripts/test_dals_ed_imports.py scripts/test_publication_resilience.py
 
       - name: Spara ny bostadsdata
         shell: bash

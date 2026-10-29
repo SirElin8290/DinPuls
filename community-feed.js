@@ -28,7 +28,7 @@
 (() => {
   if (document.querySelector('script[data-fargelanda-housing-home]')) return;
   const script = document.createElement("script");
-  script.src = "fargelanda-housing-home.js?v=1";
+  script.src = "fargelanda-housing-home.js?v=2";
   script.dataset.fargelandaHousingHome = "true";
   document.head.appendChild(script);
 })();

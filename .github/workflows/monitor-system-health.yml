@@ -2,6 +2,12 @@ name: Övervaka DinPuls driftstatus
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_system_health.py'
+      - 'scripts/test_system_health.py'
+      - '.github/workflows/monitor-system-health.yml'
   schedule:
     - cron: '47 * * * *'
 

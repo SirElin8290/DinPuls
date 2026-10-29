@@ -25,6 +25,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="https://dinpuls.se")
     parser.add_argument("--output", type=Path, default=ROOT / "data/ui-quality.json")
+    parser.add_argument("--all-municipalities", action="store_true", help="Kontrollera även varje undersida i samtliga 21 kommuner")
     args = parser.parse_args()
     municipalities = [row["name"] for row in json.loads((ROOT / "data/municipalities.json").read_text(encoding="utf-8"))["municipalities"]]
     checks, issues = [], []
@@ -43,7 +44,7 @@ def main():
             context.add_init_script(f"localStorage.setItem('dinpuls-theme', {json.dumps(theme)});")
             for width, height in ((1440, 900), (390, 844)):
                 page.set_viewport_size({"width": width, "height": height})
-                routes = [("index.html", name, None) for name in municipalities] + [("forening.html", name, identifier) for name,identifier in profiles.items()] + [(name, "Åmål", None) for name in PAGES]
+                routes = [("index.html", name, None) for name in municipalities] + [("forening.html", name, identifier) for name,identifier in profiles.items()] + [(route, name, None) for route in PAGES for name in (municipalities if args.all_municipalities else ["Åmål"])]
                 for route, municipality, identifier in routes:
                     entry = {"page": route, "municipality": municipality, "theme": theme, "viewport": f"{width}×{height}"}
                     try:
@@ -97,7 +98,7 @@ def main():
         except Exception as error:
             issues.append({"reason": "recovery_test_failed", "error": str(error)[:300]})
         browser.close()
-    report = {"generatedAt": datetime.now(timezone.utc).isoformat(), "completed": True, "municipalities": len(municipalities), "checks": len(checks), "issues": issues, "results": checks, "scope": "Real Chromium DOM geometry and eligible solid-background text; photos/gradients require visual review. No emails, purchases, uploads or screenshots."}
+    report = {"generatedAt": datetime.now(timezone.utc).isoformat(), "completed": True, "allMunicipalitySubpages": args.all_municipalities, "municipalities": len(municipalities), "checks": len(checks), "issues": issues, "results": checks, "scope": "Real Chromium DOM geometry and eligible solid-background text; photos/gradients require visual review. No emails, purchases, uploads or screenshots."}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"UI quality: {len(checks)} checks, {len(issues)} issues", flush=True)

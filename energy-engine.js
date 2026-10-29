@@ -11,8 +11,10 @@
       .filter(item => item.start && item.end && item.orePerKwh !== null && Number.isFinite(Date.parse(item.start)) && Number.isFinite(Date.parse(item.end)) && Date.parse(item.end) > Date.parse(item.start));
   }
   function summarize(areaData, now = new Date()) {
-    const periods = normalizePeriods(areaData?.periods);
     const nowMs = now instanceof Date ? now.getTime() : new Date(now).getTime();
+    // Tomorrow is already published before midnight; use its complete day when it becomes current.
+    const buckets = [areaData?.periods, areaData?.tomorrow?.periods].map(normalizePeriods);
+    const periods = buckets.find(items => items.some(item => Date.parse(item.start) <= nowMs && nowMs < Date.parse(item.end))) || [];
     if (!periods.length || !Number.isFinite(nowMs)) return null;
     const current = periods.find(item => Date.parse(item.start) <= nowMs && nowMs < Date.parse(item.end));
     if (!current) return null;

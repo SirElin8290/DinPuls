@@ -2641,7 +2641,9 @@ function renderJobs() {
 
   const municipality = DinPulsMunicipality.getName();
   const municipalityData = jobsData.municipalities?.[municipality] || { total: 0, jobs: [] };
-  const allJobs = Array.isArray(municipalityData.jobs) ? municipalityData.jobs : [];
+  const rawJobs = Array.isArray(municipalityData.jobs) ? municipalityData.jobs : [];
+  const allJobs = rawJobs.filter(job => !job.applicationDeadline || !Number.isFinite(Date.parse(job.applicationDeadline)) || Date.parse(job.applicationDeadline) >= Date.now());
+  const currentTotal = Math.max(allJobs.length, (Number(municipalityData.total) || rawJobs.length) - (rawJobs.length - allJobs.length));
   const relevant = allJobs.filter((job) => {
     if (!activeJobsQuery) return true;
     return [job.headline, job.employer, job.occupation, job.workingHours]
@@ -2655,13 +2657,13 @@ function renderJobs() {
   empty.hidden = visible.length > 0;
 
   const total = document.querySelector("#jobs-total");
-  if (total) total.textContent = String(Number(municipalityData.total) || allJobs.length);
+  if (total) total.textContent = String(currentTotal);
 
   const showing = document.querySelector("#jobs-showing");
   if (showing) {
     showing.textContent = activeJobsQuery
       ? `${relevant.length} träffar i hämtade annonser`
-      : `Visar ${visible.length} av ${Number(municipalityData.total) || allJobs.length}`;
+      : `Visar ${visible.length} av ${currentTotal}`;
   }
 
   const updated = document.querySelector("#jobs-updated");
@@ -2675,7 +2677,7 @@ function renderJobs() {
     sourceLink.href = `jobb.html?kommun=${encodeURIComponent(municipality)}`;
   }
 
-  updateQuickJobs(municipalityData, municipality);
+  updateQuickJobs({ ...municipalityData, total: currentTotal }, municipality);
   if (window.lucide) lucide.createIcons();
 }
 

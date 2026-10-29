@@ -645,10 +645,16 @@ def parse_vitec_arena(provider: dict) -> list[dict]:
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     register = Request(
         urljoin(provider["url"], "/api/v1/token/register/"),
-        data=json.dumps({"Guid": provider["appGuid"]}).encode(),
+        data=json.dumps({"Guid": provider.get("appGuid")}).encode(),
         headers={**headers, "Content-Type": "application/json;charset=utf-8"},
     )
     try:
+        if provider.get("parser") == "vitec-public":
+            endpoint = urljoin(provider["url"], "/rentalobject/Listapartment/published?sortOrder=NEWEST")
+            payload = json.loads(decode_web_text(opener.open(Request(endpoint, headers=headers), timeout=35).read()))
+            if payload.get("status") != "success":
+                raise RuntimeError("Vitec: publicerat bostadsresultat kunde inte verifieras")
+            return normalize_vitec_items(payload, provider)
         key = json.loads(decode_web_text(opener.open(register, timeout=35).read())).get("key")
         if not key:
             raise RuntimeError("Vitec Arena: registrering saknar nyckel")
@@ -667,6 +673,10 @@ def parse_vitec_arena(provider: dict) -> list[dict]:
         raise RuntimeError(f"Vitec Arena: HTTP {error.code}") from None
     except (URLError, TimeoutError) as error:
         raise RuntimeError(f"Vitec Arena kunde inte nås: {getattr(error, 'reason', error)}") from None
+    return normalize_vitec_items(payload, provider)
+
+
+def normalize_vitec_items(payload, provider):
     raw_items = payload.get("data") if isinstance(payload, dict) else None
     items = json.loads(raw_items) if isinstance(raw_items, str) else raw_items
     if not isinstance(items, list):
@@ -826,7 +836,7 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_munkfors(provider)
                 elif parser_name == "torsby-municipal":
                     fetched = parse_torsby_municipal(provider)
-                elif parser_name == "vitec-arena-token":
+                elif parser_name in {"vitec-arena-token", "vitec-public"}:
                     fetched = parse_vitec_arena(provider)
                 elif parser_name == "momentum":
                     fetched = parse_momentum(provider)
@@ -849,7 +859,7 @@ def main(only_municipality: str | None = None) -> int:
                     fetched = parse_orvelin_residential(provider)
                 else:
                     raise RuntimeError(f"okänd hämtare: {parser_name}")
-                if not fetched and previous_provider_listings:
+                if not fetched and previous_provider_listings and parser_name != "vitec-public":
                     raise RuntimeError(
                         f"källan gav oväntat 0 objekt; behåller {len(previous_provider_listings)} tidigare objekt"
                     )
@@ -885,7 +895,7 @@ def main(only_municipality: str | None = None) -> int:
             content = {
                 **core,
                 "errors": errors,
-                "stale": False,
+                "stale": bool(errors),
                 "checkedAt": now,
                 "updatedAt": old.get("updatedAt", now) if core == old_core else now,
             }

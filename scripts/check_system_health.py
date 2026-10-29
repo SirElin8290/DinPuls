@@ -87,6 +87,10 @@ def count_for(module, payload, municipality):
 
 
 def verified_zero(module, payload, municipality):
+    if module == "housing":
+        row = (payload.get("municipalities") or {}).get(municipality, {})
+        sources = row.get("sourceHealth") or []
+        return row.get("availabilityMode") == "official-reference" or (row.get("total") == 0 and not row.get("stale") and not row.get("errors") and bool(sources) and all(source.get("status") == "ok" and source.get("rawCount") == 0 for source in sources))
     if module != "lunch":
         return False
     row = (payload.get("municipalities") or {}).get(municipality, {})
@@ -136,11 +140,15 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
                 payload = payloads[0]
                 if module == "energy":
                     area = (payloads[1].get("municipalities") or {}).get(municipality)
-                    periods = ((payloads[0].get("areas") or {}).get(area, {}) or {}).get("periods") if isinstance(area, str) else None
-                    count = 1 if area in {"SE1", "SE2", "SE3", "SE4"} and periods else 0
+                    prices = ((payloads[0].get("areas") or {}).get(area, {}) or {}) if isinstance(area, str) else {}
+                    periods = (prices.get("periods") or []) + ((prices.get("tomorrow") or {}).get("periods") or [])
+                    count = int(any(parse_time(item.get("start")) and parse_time(item.get("end")) and parse_time(item["start"]) <= now < parse_time(item["end"]) for item in periods))
                 else:
                     count = sum(count_for(module, item, municipality) for item in payloads)
                 checked = payload_time(payload)
+                row = (payload.get("municipalities") or {}).get(municipality, {})
+                if module == "housing" and isinstance(row, dict):
+                    checked = parse_time(row.get("checkedAt") or row.get("updatedAt"))
                 age_hours = (now - checked).total_seconds() / 3600 if checked else None
                 accepted_empty = next((entry for entry in exceptions
                     if entry.get("municipality") == municipality and entry.get("module") == module
@@ -148,13 +156,17 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
                 if count == 0 and accepted_empty:
                     status, reason = "green", "accepted_empty_supply"
                 elif count == 0 and not verified_zero(module, payload, municipality):
-                    status, reason = "critical", "zero_records"
+                    status, reason = ("warning", "no_verified_events") if module == "events" else ("critical", "zero_records")
                 elif checked is None:
                     status, reason = "warning", "missing_timestamp"
                 elif age_hours > max_age_hours:
                     status, reason = "warning", "stale_data"
                 else:
                     status, reason = "green", None
+                if module == "housing" and isinstance(row, dict) and (row.get("stale") or row.get("errors") or any(item.get("status") != "ok" for item in row.get("sourceHealth", []))):
+                    status, reason = "warning", "municipality_source_failed"
+                if module == "lunch" and any(item.get("status") in {"unavailable", "review_required"} for item in row.get("restaurants", [])):
+                    status, reason = "warning", "unverified_menus"
             summary[status] += 1
             results[municipality][module] = {
                 "status": status,
