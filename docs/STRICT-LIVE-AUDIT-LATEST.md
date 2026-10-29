@@ -1,6 +1,6 @@
 # DinPuls – STRICT LIVE v4 audit
 
-Genererad: 2026-10-29T09:46:11+01:00
+Genererad: 2026-10-29T09:53:24+01:00
 Datakälla: 39 livefiler, 0 repo-fallback.
 Kalibreringskommun: Åmål.
 
@@ -34,7 +34,7 @@ Fasta numeriska miniminivåer används inte som statusgrindar. GREEN blockeras a
 | Kil | 🟢 GREEN | 16 | 6 | 1 | 24 / 24 färska | 10 / 4 kat | 18 / 5 kat | 3 | 21 | 19 |
 | Kristinehamn | 🟢 GREEN | 53 | 11 | 80 | 37 / 37 färska | 6 / 4 kat | 9 / 6 kat | 1 | 56 | 20 |
 | Munkfors | 🟢 GREEN | 9 | 1 | 41 | 4 / 4 färska | 7 / 6 kat | 7 / 5 kat | 1 | 14 | 13 |
-| Storfors | 🟡 YELLOW | 8 | 5 | 0 | 11 / 11 färska | 5 / 5 kat | 8 / 6 kat | 0 | 17 | 3 |
+| Storfors | 🟡 YELLOW | 8 | 5 | 33 | 11 / 11 färska | 5 / 5 kat | 8 / 6 kat | 0 | 17 | 3 |
 | Sunne | 🟢 GREEN | 28 | 8 | 21 | 41 / 41 färska | 16 / 6 kat | 16 / 5 kat | 4 | 7 | 11 |
 | Torsby | 🟢 GREEN | 34 | 20 | 80 | 37 / 37 färska | 7 / 6 kat | 9 / 5 kat | 3 | 15 | 26 |
 
@@ -95,7 +95,6 @@ Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 Ingen känd väsentlig lucka eller teknisk blockerare. Kommunen når v4 GREEN.
 
 ### Storfors — 🟡 YELLOW
-- **Evenemang:** 🟡 — inga aktuella/framtida evenemang och inget verifierat nolläge (0)
 - **Dagens lunch:** 🟡 — inga verifierade lunchställen (0)
 
 ### Sunne — 🟢 GREEN
