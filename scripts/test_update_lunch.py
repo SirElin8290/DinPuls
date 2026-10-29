@@ -8,6 +8,16 @@ import update_lunch
 
 
 class LunchUpdateTests(unittest.TestCase):
+    def test_matilda_lunch_is_dated_and_excludes_dessert(self):
+        rss='''<rss><channel><title>Uranus Matsal</title><item><title>Torsdag 29 oktober, 2026</title><description>Lunch\n\nLunch 1: Svampsoppa\n\nLunch 2: Moussaka</description></item><item><title>Torsdag 29 oktober, 2026</title><description>Dessert\n\nPannkaka</description></item></channel></rss>'''
+        now=datetime(2026,10,29,tzinfo=ZoneInfo('Europe/Stockholm'))
+        source={'id':'uranus-test','name':'Uranus','url':'https://example.org','dataUrl':'https://example.org/rss','parser':'matilda-rss','expectedMenuPattern':'Uranus Matsal'}
+        result=update_lunch.fetch_restaurant(source,now,lambda _:rss,{},44)
+        self.assertEqual(result['status'],'current')
+        self.assertEqual(result['days']['thursday'],['Svampsoppa','Moussaka'])
+        with self.assertRaises(RuntimeError):update_lunch.parse_matilda_lunch(rss.replace('2026','2025'),now,'Uranus Matsal')
+        with self.assertRaises(RuntimeError):update_lunch.parse_matilda_lunch(rss,now,'Annan matsal')
+        with self.assertRaises(RuntimeError):update_lunch.parse_matilda_lunch('not xml',now,'Uranus Matsal')
     def test_concurrent_fetches_preserve_order_and_week_validation(self):
         import threading
         import time

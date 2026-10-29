@@ -310,20 +310,42 @@
         {
           "id": "rosellmagasinet",
           "name": "Restaurang Rosellmagasinet",
-          "url": "https://www.bengtsforshandel.se/butiker%2C-restauranger-caf%C3%A9er/rosellmagasinet-43233637",
-          "dataUrl": "https://www.lunchsidan.se/plats/teaker/2669256/",
+          "url": "https://www.lunchsidan.se/restaurang/restaurang-rosellmagasinet/980843791",
+          "dataUrl": "https://www.lunchsidan.se/restaurang/restaurang-rosellmagasinet/980843791",
           "address": "Karlsbergsvägen 5, Bengtsfors",
           "hours": "Vardagar 11.30–14.00",
-          "parser": "lunchsidan-place-restaurant",
+          "parser": "lunchsidan-restaurant",
           "expectedNamePattern": "Restaurang Rosellmagasinet",
-          "expectedAddress": "Karlsbergsvägen 5, Bengtsfors",
+          "expectedAddress": "Karlsbergsvägen 5, 666 31 Bengtsfors",
           "fallbackMode": "reference",
-          "checkedAt": "2026-10-29T09:34:24+01:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "unavailable",
-          "mode": "reference",
-          "error": "Lunchsidan: restaurangsektion saknas"
+          "checkedAt": "2026-10-29T09:51:37+01:00",
+          "weekNumber": 44,
+          "days": {
+            "monday": [
+              "Panerad fisk med ansjoviskräm",
+              "Fläskfilé i långpanna med pepparsås"
+            ],
+            "tuesday": [
+              "Pocherad kummel med fänkålssås",
+              "Stekt fläsk med löksås"
+            ],
+            "wednesday": [
+              "Ugnsbakad fisk med sparris",
+              "Mustig köttgryta med paprika och haricots verts. Serveras med potatismos"
+            ],
+            "thursday": [
+              "Fisksoppa",
+              "Nötfärsbiffar med blandsvampsås och lingonsylt"
+            ],
+            "friday": [
+              "Fisk i ugn",
+              "Schnitzel med rödvinssås, gröna ärtor och stekt potatis"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         }
       ],
       "referenceSources": [
@@ -1451,16 +1473,41 @@
           "url": "https://www.kristinehamn.se/stod-och-omsorg/aldreomsorg/mat-och-maltider/mat-i-oppna-matsalen-uranus/",
           "address": "Kristinehamn",
           "hours": "Besökare 12.15–13.30 – se kommunens aktuella information",
-          "parser": "mashie-menu",
-          "dataUrl": "https://mpi.mashie.com/public/menu/kristinehamns+kommun/27756661?country=se",
-          "expectedMenuPattern": "Matsedel Uranus Matsal",
-          "checkedAt": "2026-10-29T09:34:24+01:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "unavailable",
-          "mode": "automatic",
-          "fetchFailure": true,
-          "error": "[Errno 111] Connection refused"
+          "parser": "matilda-rss",
+          "dataUrl": "https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697338e1e2d237d90a0e7c51&lang=sv",
+          "expectedMenuPattern": "Uranus Matsal",
+          "checkedAt": "2026-10-29T09:48:50+01:00",
+          "weekNumber": 44,
+          "days": {
+            "monday": [
+              "Gratinerad falukorv med potatismos",
+              "Isterband med dillstuvad potatis och inlagda rödbetor"
+            ],
+            "tuesday": [
+              "Kokt fisk serveras med äggsås och kokt potatis",
+              "Stekt fläsk med bruna bönor och kokt potatis"
+            ],
+            "wednesday": [
+              "Gratinerad Kassler med kokt ris",
+              "Kycklinggryta med ädelost och kokt ris"
+            ],
+            "thursday": [
+              "Höstig svampsoppa",
+              "Svensk moussaka"
+            ],
+            "friday": [
+              "Köttkorv med kokt potatis och senapssås",
+              "Fiskgratäng á la Rut serveras med kokt potatis"
+            ],
+            "saturday": [
+              "Skinkstek serveras med kokt potatis, gräddsås och äppelmos"
+            ],
+            "sunday": [
+              "Dillkött med kokt potatis"
+            ]
+          },
+          "status": "current",
+          "mode": "automatic"
         }
       ],
       "referenceSources": [

@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
@@ -675,13 +676,39 @@ def retain_verified_week(item,previous,now):
     item.update(status="current",weekNumber=previous["weekNumber"],days=previous["days"],checkedAt=previous["checkedAt"],fetchAttemptedAt=now.isoformat(timespec="seconds"),fetchWarning=item["error"],menuFreshness="retained_verified",mode="automatic")
 
 
+def parse_matilda_lunch(content, now, expected_pattern):
+    from update_school_meals import parse_matilda_rss
+    try:
+        root = ET.fromstring(content)
+    except ET.ParseError:
+        raise RuntimeError('Matilda: ogiltigt RSS-svar') from None
+    if not re.search(expected_pattern, root.findtext('./channel/title', ''), re.I):
+        raise RuntimeError('Matilda: matsalens identitet kunde inte verifieras')
+    # RSS contains separate lunch and dessert items; never turn dessert/dinner into main dishes.
+    for item in list(root.findall('./channel/item')):
+        if not re.match(r'^Lunch\s*(?:\n|$)', item.findtext('description', '').strip(), re.I):
+            root.find('./channel').remove(item)
+    rows = parse_matilda_rss(ET.tostring(root), '', '', '')
+    days = {day: [] for day in dict.fromkeys(DAYS.values())}
+    for row in rows:
+        day = date.fromisoformat(row['date'])
+        if day.isocalendar()[:2] != now.isocalendar()[:2]:
+            continue
+        days[list(days)[day.weekday()]].extend(option['meal'] for option in row['options'] if re.match(r'^Lunch\s*\d*$', option['label'], re.I))
+    if not any(days.values()):
+        raise RuntimeError('Matilda: ingen verifierad lunch för aktuell vecka')
+    return now.isocalendar().week, days
+
+
 def fetch_restaurant(source,now,fetcher,previous_by_id,current_week):
     item={**source,"checkedAt":now.isoformat(timespec="seconds"),"weekNumber":None,"days":{},"status":"reference","mode":"reference"}
     if source.get("nameAfter") and source.get("nameAfterDate") and now.date() >= date.fromisoformat(source["nameAfterDate"]): item["name"]=source["nameAfter"]
     parser_name=source.get("parser")
-    if parser_name in {"weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}:
+    if parser_name in {"matilda-rss","weekday-headings","all-days-heading","scoped-weekday-headings","dated-weekday-headings","lunchsidan-restaurant","lunchsidan-place-restaurant","image-weekday-menu","calendar-weekday-headings","rotating-weekday-headings","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}:
         try:
-            if parser_name=="wordpress-relative-week-menu":
+            if parser_name=="matilda-rss":
+                week,days=parse_matilda_lunch(fetcher(source['dataUrl']),now,source['expectedMenuPattern'])
+            elif parser_name=="wordpress-relative-week-menu":
                 page=fetcher(source["url"]); metadata=json.loads(fetcher(source["metadataUrl"])); week,days=parse_wordpress_relative_menu(page,metadata,now,source["url"])
             elif parser_name=="ramo-standing-lunch":
                 item["standingDishes"]=parse_ramo_lunch(fetcher(source["url"])); week=None; days={}
@@ -720,7 +747,7 @@ def fetch_restaurant(source,now,fetcher,previous_by_id,current_week):
             elif parser_name=="dated-weekday-headings": week,days=parse_dated_weekday_menu(page,now.date(),source.get("dateHeadingPattern"))
             elif parser_name=="lunchsidan-restaurant": week,days=parse_lunchsidan_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
             elif parser_name=="lunchsidan-place-restaurant": week,days=parse_lunchsidan_place_restaurant(page,source["expectedNamePattern"],source["expectedAddress"],source.get("removePrefixes"))
-            elif parser_name not in {"image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
+            elif parser_name not in {"matilda-rss","image-weekday-menu","galna-tuppen-json","omsorgen-json","pdf-weekday-menu","mashie-menu","standing-html","standing-pdf","hogsater-json","public-social-image","public-social-text","hagfors-standing-pizza","ramo-standing-lunch","wordpress-relative-week-menu"}: week,days=parse_weekday_menu(page,source.get("stopAfterPattern"))
             if source.get("menuYearPattern"):
                 match=re.search(source["menuYearPattern"],page,re.I)
                 target=(now+timedelta(days=7)).isocalendar() if week==(now+timedelta(days=7)).isocalendar().week else now.isocalendar()
