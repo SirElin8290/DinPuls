@@ -9,6 +9,12 @@ import update_events
 
 
 class EventUpdateTests(unittest.TestCase):
+    def test_only_fresh_repeated_404_is_withheld_not_access_block(self):
+        now=datetime(2026,10,29,12,tzinfo=timezone.utc)
+        report={'generatedAt':now.isoformat(),'completed':True,'sources':[{'url':'https://example.org/gone','state':'broken','status':404,'consecutiveFailures':2},{'url':'https://example.org/blocked','state':'unverified','status':403,'consecutiveFailures':20},{'url':'https://example.org/once','state':'unverified','status':404,'consecutiveFailures':1}]}
+        self.assertEqual(update_events.verified_broken_event_urls(report,now),{'https://example.org/gone'})
+        report['generatedAt']='2026-10-20T12:00:00Z'
+        self.assertEqual(update_events.verified_broken_event_urls(report,now),set())
     def test_library_calendar_paginates_and_excludes_cancelled_or_wrong_location(self):
         source = {'name': 'Storfors bibliotek', 'url': 'https://www.bibliotekvarmland.se/evenemang', 'apiUrl': 'https://api.example/search', 'locations': ['Storfors bibliotek']}
         item = {'id': 'e8db22b0-0d01-439e-a46f-46ea5a064807', 'title': 'Schack', 'status': 'PUBLISHED', 'startDate': '2099-01-01T09:00:00Z', 'endDate': '2099-01-01T10:00:00Z', 'location': {'value': 'Storfors bibliotek'}}

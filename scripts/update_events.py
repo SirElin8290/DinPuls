@@ -504,12 +504,25 @@ def fetch_axiell_events(municipality, source):
     return rows
 
 
+def verified_broken_event_urls(report, now=None):
+    now = now or datetime.now(timezone.utc)
+    try:
+        checked = datetime.fromisoformat(report['generatedAt'].replace('Z', '+00:00'))
+        if not report.get('completed') or not 0 <= (now - checked).total_seconds() <= 48 * 3600:
+            return set()
+    except (KeyError, ValueError, TypeError):
+        return set()
+    return {row['url'] for row in report.get('sources', []) if row.get('state') == 'broken' and row.get('status') in {404, 410} and row.get('consecutiveFailures', 0) >= 2}
+
+
 def main() -> int:
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
     catalog = json.loads(SOURCE_CATALOG.read_text(encoding="utf-8"))
     today = date.today().isoformat()
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     any_source_ok = False
+    monitor = ROOT / 'data/source-monitor.json'
+    broken_urls = verified_broken_event_urls(json.loads(monitor.read_text(encoding='utf-8'))) if monitor.exists() else set()
 
     for municipality, payload in data.get("municipalities", {}).items():
         municipality_catalog = catalog.get("municipalities", {}).get(municipality, {})
@@ -590,7 +603,8 @@ def main() -> int:
             if replace_at is not None:
                 selected[replace_at] = verified
                 selected_keys.add(verified.get("id"))
-        payload["events"] = sorted(selected, key=lambda item: (item.get("startDate") or "", item.get("title") or ""))
+        payload['withheldEvents'] = [{'url': item['url'], 'title': item.get('title'), 'reason': 'confirmed_404_or_410'} for item in selected if item.get('url') in broken_urls]
+        payload["events"] = sorted([item for item in selected if item.get('url') not in broken_urls], key=lambda item: (item.get("startDate") or "", item.get("title") or ""))
         payload["sourceHealth"] = health
 
     if not any_source_ok:
