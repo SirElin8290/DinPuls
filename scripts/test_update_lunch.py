@@ -625,3 +625,14 @@ class AdditionalPublicLunchTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class BergaMenuTests(unittest.TestCase):
+    def test_berga_uses_current_week_section_and_no_price_as_dish(self):
+        source=next(x for x in json.loads(update_lunch.SOURCES.read_text(encoding='utf-8'))['municipalities']['Åmål'] if x['id']=='berga-bistro')
+        page='<h3>ALLA DAGAR:</h3><p>Pannbiff</p><p>Lunchbuffé V 45</p><p>Måndag</p><p>Biff Lindström</p><p>Onsdag</p><p>Schnitzel med potatis</p><p>Fredag</p><p>Stekt fisk med potatis</p><p>Pris: 140kr</p>'
+        now=datetime(2026,11,4,tzinfo=ZoneInfo('Europe/Stockholm'))
+        result=update_lunch.fetch_restaurant(source,now,lambda _:page,{},45)
+        self.assertEqual(result['days']['wednesday'],['Schnitzel med potatis'])
+        self.assertFalse(any('Pris:' in dish for dishes in result['days'].values() for dish in dishes))
+        stale=update_lunch.fetch_restaurant(source,now,lambda _:page.replace('V 45','V 44'),{},45)
+        self.assertNotEqual(stale['status'],'current')

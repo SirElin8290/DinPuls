@@ -136,7 +136,54 @@ def main():
         odeon["programStatus"] = "unavailable"
         odeon["programError"] = type(error).__name__
     update_svea(data, now)
+    update_amal(data, now)
     OUTPUT.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+
+
+def parse_amal_program(identity, payload, now):
+    if identity.get("id") != 13875 or identity.get("slug") != "saga-amal" or identity.get("city") != "Åmål":
+        raise ValueError("Fel biograf i Åmåls programkälla")
+    if not isinstance(payload.get("movies"), list):
+        raise ValueError("Ofullständigt bioprogram")
+    films = []
+    for item in payload["movies"]:
+        movie = item.get("movie", {})
+        if not movie.get("title") or not isinstance(movie.get("id"), int) or not isinstance(item.get("sessions"), list):
+            raise ValueError("Ofullständig film")
+        times = []
+        for session in item["sessions"]:
+            if not str(session.get("payment_link", "")).startswith("/bokning/cinemaId/13875/"):
+                raise ValueError("Visning tillhör annan biograf")
+            value = datetime.fromisoformat(session["show_date_time"])
+            value = value.replace(tzinfo=STOCKHOLM) if value.tzinfo is None else value.astimezone(STOCKHOLM)
+            if value >= now:
+                times.append(value.isoformat(timespec="minutes"))
+        if times:
+            times = sorted(set(times))
+            films.append({"title": movie["title"], "showtimes": times,
+                          "url": "https://bio.se/biografer/saga-amal",
+                          "label": " · ".join(datetime.fromisoformat(t).strftime("%d/%m %H:%M") for t in times)})
+    return sorted(films, key=lambda film: film["showtimes"][0])
+
+
+def update_amal(data, now):
+    cinema = next(item for item in data["municipalities"]["Åmål"] if item["name"] == "Saga Bio Åmål")
+    cinema["programSource"] = "https://bio.se/biografer/saga-amal"
+    cinema["programCheckedAt"] = now.isoformat(timespec="seconds")
+    try:
+        identity = json.loads(fetch("https://bio.se/api/cinemas/slug/saga-amal"))
+        request = Request("https://bio.se/api/cinemas/films", data=b'{"cinemaId":13875}',
+                          headers={"Content-Type": "application/json", "User-Agent": "DinPuls/1.0 (+https://dinpuls.se/)"})
+        with urlopen(request, timeout=30) as response:
+            payload = json.load(response)
+        cinema["films"] = parse_amal_program(identity, payload, now)
+        cinema["address"] = identity["street_address"]
+        cinema["programStatus"] = "ok"
+        cinema.pop("programError", None)
+    except Exception as error:
+        cinema["films"] = []
+        cinema["programStatus"] = "unavailable"
+        cinema["programError"] = type(error).__name__
 
 
 if __name__ == "__main__":

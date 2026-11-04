@@ -1767,9 +1767,8 @@ function renderNewsForMunicipality(municipality) {
     .filter((article) => article.scope === "local")
     .filter((article) => (article.municipalities || []).includes(municipality) || (article.municipalities || []).includes("Alla"))
     .filter(matchesNewsFilter);
-  let relevant = scoped
-    .sort(compareNewsQuality)
-    .slice(0, 5);
+  const ranked = scoped.sort(compareNewsQuality);
+  let relevant = municipality === "Åmål" ? selectAmalNews(ranked, 5) : ranked.slice(0, 5);
   const sourceFallback = relevant.length === 0;
   if (sourceFallback) {
     relevant = allNewsSources
@@ -1809,9 +1808,28 @@ function renderNewsForMunicipality(municipality) {
   if (window.lucide) lucide.createIcons();
 }
 
+function selectAmalNews(ranked, limit) {
+  // One sports story in the compact overview; all original articles remain on the news page.
+  const normalize = article => article.title.toLocaleLowerCase("sv-SE").replace(/\s+[-–|]\s+[^–|]+$/, "").replace(/[^\p{L}\p{N}\s]/gu, "").trim();
+  const sports = article => /\b(hockey|karlskoga ik|toppmötet|toppmatchen|ibf|ibk|vinstsviten|raka segrar|matchen|målskytt|fotboll|innebandy)\b/i.test(article.title) || /sport/i.test(article.category || "");
+  const chosen = [], titles = new Set();
+  let sportsCount = 0;
+  for (const article of ranked) {
+    const key = normalize(article);
+    if (titles.has(key)) continue;
+    titles.add(key);
+    if (sports(article) && sportsCount) continue;
+    chosen.push(article);
+    if (sports(article)) sportsCount++;
+    if (chosen.length === limit) return chosen;
+  }
+  // Do not fill empty slots with alternate headlines about the same sporting event.
+  return chosen.slice(0, limit);
+}
+
 function matchesNewsFilter(article) {
   if (activeNewsFilter === "all") return true;
-  if (activeNewsFilter === "free") return article.access === "free";
+  if (activeNewsFilter === "free") return article.access === "free" && !(DinPulsMunicipality.getName() === "Åmål" && article.source?.startsWith("Google Nyheter"));
   if (activeNewsFilter === "subscription") return article.access === "subscription";
   if (activeNewsFilter === "authority") return ["authority","municipality"].includes(article.sourceType);
   if (activeNewsFilter === "media") return article.sourceType === "media";
@@ -1831,7 +1849,8 @@ function renderImportantNews(articles) {
   box.innerHTML=important.length?`<div class="important-news-title"><i data-lucide="triangle-alert"></i><strong>Viktiga händelser</strong></div>${important.map(a=>`<a href="${escapeAttribute(safeExternalUrl(a.url))}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(a.source)}</span><b>${escapeHtml(a.title)}</b><i data-lucide="arrow-up-right"></i></a>`).join("")}`:"";
 }
 function renderNewsArticle(article) {
-  const access=article.access==="subscription"?'<span class="news-access subscription"><i data-lucide="lock"></i>Prenumeration</span>':'<span class="news-access free"><i data-lucide="unlock"></i>Fri</span>';
+  const unverifiedAccess = DinPulsMunicipality.getName() === "Åmål" && article.source?.startsWith("Google Nyheter");
+  const access=unverifiedAccess?'<span class="news-access">Villkor hos originalkällan</span>':article.access==="subscription"?'<span class="news-access subscription"><i data-lucide="lock"></i>Prenumeration</span>':'<span class="news-access free"><i data-lucide="unlock"></i>Fri</span>';
   const sourceClass=article.sourceType==="authority"?"authority":article.sourceType==="municipality"?"municipality":"media";
   const score=Math.round(calculateNewsScore(article));
   return `<a class="news-item" href="${escapeAttribute(safeExternalUrl(article.url))}" target="_blank" rel="noopener noreferrer" aria-label="Läs ${escapeAttribute(article.title)} hos ${escapeAttribute(article.source)}"><span class="news-source-mark ${sourceClass}">${getNewsSourceInitials(article.source)}</span><span class="news-item-content"><span class="news-meta"><strong>${escapeHtml(article.source)}</strong><span>•</span><time datetime="${escapeAttribute(article.publishedAt)}">${formatRelativeNewsTime(article.publishedAt)}</time></span><b class="news-title">${escapeHtml(article.title)}</b><span class="news-summary">${escapeHtml(article.summary||"")}</span><span class="news-labels">${access}<span class="news-region">${escapeHtml(article.category||article.region||"Lokal nyhet")}</span><span class="news-score" title="DinPuls-index">DP ${score}</span><span class="news-direct-link">Läs originalartikeln</span></span></span><i class="news-open-icon" data-lucide="arrow-up-right"></i></a>`;

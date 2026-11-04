@@ -16,6 +16,13 @@ function renderCinemaPage() {
   document.querySelector("#cinema-updated").textContent = `Källor kontrollerade ${cinemaData.updatedAt || ""}`;
   const list = document.querySelector("#cinema-list");
   list.innerHTML = cinemas.map(cinema => `<article class="cinema-card"><span class="portal-card-icon cinema"><i data-lucide="ticket"></i></span><div class="cinema-card-copy"><small>${escapeCinema(cinema.place)}</small><h3>${escapeCinema(cinema.name)}</h3><p><i data-lucide="map-pin"></i>${escapeCinema(cinema.address)}</p><div class="portal-tags">${(cinema.features || []).map(feature => `<span>${escapeCinema(feature)}</span>`).join("")}</div>${cinema.notice ? `<div class="cinema-notice"><i data-lucide="info"></i>${escapeCinema(cinema.notice)}</div>` : ""}</div><div class="cinema-actions"><a class="portal-source-button" href="${escapeCinema(safeCinemaUrl(cinema.programUrl))}" target="_blank" rel="noopener noreferrer">Se filmprogram <i data-lucide="external-link"></i></a><a href="${escapeCinema(safeCinemaUrl(cinema.bookingUrl))}" target="_blank" rel="noopener noreferrer">Biljetter och tider <i data-lucide="ticket"></i></a></div></article>`).join("");
+  if (cinemaMunicipality === "Åmål") {
+    const now = Date.now();
+    const films = cinemas.flatMap(cinema => (cinema.films || []).map(film => ({ ...film, times: (film.showtimes || []).filter(time => Date.parse(time) >= now) }))).filter(film => film.times.length);
+    list.innerHTML += films.map(film => `<article class="cinema-card"><span class="portal-card-icon cinema"><i data-lucide="film"></i></span><div class="cinema-card-copy"><small>Saga Bio Åmål · kommande visning</small><h3>${escapeCinema(film.title)}</h3><p>${film.times.map(time => escapeCinema(new Date(time).toLocaleString("sv-SE", { timeZone: "Europe/Stockholm", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }))).join(" · ")}</p></div><div class="cinema-actions"><a class="portal-source-button" href="${escapeCinema(safeCinemaUrl(film.url))}" target="_blank" rel="noopener noreferrer">Biljetter hos biografen <i data-lucide="external-link"></i></a></div></article>`).join("");
+    const checked = cinemas[0]?.programCheckedAt;
+    document.querySelector("#cinema-updated").textContent = checked ? `Program kontrollerat ${new Date(checked).toLocaleString("sv-SE", { timeZone: "Europe/Stockholm" })}` : "Aktuellt program finns hos biografen";
+  }
   list.hidden = !cinemas.length;
   const empty = document.querySelector("#cinema-empty");
   empty.textContent = query
