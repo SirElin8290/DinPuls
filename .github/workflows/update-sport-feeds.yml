@@ -2,6 +2,11 @@ name: Uppdatera sportflöden
 
 on:
   workflow_dispatch:
+    inputs:
+      verify_amal_only:
+        description: "Läsande Åmålskontroll av lunch-OCR och IBK, utan dataändringar"
+        type: boolean
+        default: false
   pull_request:
     paths:
       - "scripts/sport-feed/**"
@@ -19,6 +24,7 @@ concurrency:
 
 jobs:
   collect:
+    if: ${{ inputs.verify_amal_only != true }}
     runs-on: ubuntu-latest
     steps:
       - name: Hämta repository
@@ -79,3 +85,21 @@ jobs:
           git commit -m "data: uppdatera officiella sportflöden"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin HEAD:${GITHUB_REF_NAME}
+
+  verify-amal:
+    if: ${{ inputs.verify_amal_only == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installera ordinarie OCR och offentlig statistikklient
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-swe
+          python -m pip install "Pillow==11.3.0" "playwright==1.55.0"
+          python -m playwright install --with-deps chromium
+      - name: Verifiera verkliga källor utan att skriva data
+        run: python scripts/verify_amal_sources.py
