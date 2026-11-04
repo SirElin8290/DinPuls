@@ -1,5 +1,9 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 const ROOT = new URL("../../", import.meta.url);
 const SOURCES_PATH = new URL("data/sport-sources.json", ROOT);
@@ -216,8 +220,10 @@ async function collectSource(source) {
   const startedAt = new Date().toISOString();
   try {
     const adapter = adapters[source.adapter];
-    if (!adapter) throw new Error(`Okänd eller ej verifierad adapter: ${source.adapter}`);
-    const parsed = adapter(await fetchText(source.sourceUrl), source);
+    if (!adapter && source.adapter !== "amal-ibk-official") throw new Error(`Okänd eller ej verifierad adapter: ${source.adapter}`);
+    const parsed = source.adapter === "amal-ibk-official"
+      ? JSON.parse((await promisify(execFile)(process.env.PYTHON || "python3", [fileURLToPath(new URL("fetch_amal_innebandy.py", import.meta.url)), JSON.stringify(source)], { timeout: 90000, maxBuffer: 2_000_000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } })).stdout)
+      : adapter(await fetchText(source.sourceUrl), source);
     const rawMatches = Array.isArray(parsed) ? parsed : parsed.matches || [];
     const matches = rawMatches.filter(match => sourceIncludesTeam(match, source));
     const standings = Array.isArray(parsed) ? [] : parsed.standings || [];
@@ -262,4 +268,7 @@ async function main() {
   console.log(`Sportflöde skapat: ${output.sources.length} aktiva källor, ${total} matcher, ${tables} tabeller, ${failures.length} fel.`);
 }
 
-main().catch(error => { console.error(error); process.exitCode = 1; });
+export { collectSource };
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  main().catch(error => { console.error(error); process.exitCode = 1; });
+}

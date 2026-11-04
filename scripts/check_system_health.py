@@ -146,6 +146,13 @@ def build_health(base_url=DEFAULT_BASE_URL, now=None, opener=urllib.request.urlo
                 else:
                     count = sum(count_for(module, item, municipality) for item in payloads)
                 checked = payload_time(payload)
+                if municipality == "Åmål" and module in {"health", "service"}:
+                    key = "providers" if module == "health" else "businesses"
+                    entries = [entry for data in payloads for entry in data.get(key, []) if entry.get("municipality") == municipality]
+                    dates = [parse_time(entry.get("verifiedAt")) for entry in entries]
+                    # Only a complete, dated item-by-item review supersedes the old file timestamp.
+                    if dates and all(date and date <= now for date in dates) and all(entry.get("sourceUrl") or entry.get("url") for entry in entries):
+                        checked = min(dates)
                 row = (payload.get("municipalities") or {}).get(municipality, {})
                 if module == "housing" and isinstance(row, dict):
                     checked = parse_time(row.get("checkedAt") or row.get("updatedAt"))

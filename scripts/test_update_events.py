@@ -136,5 +136,16 @@ class EventUpdateTests(unittest.TestCase):
         self.assertEqual(festival["endDate"], "2099-05-02")
 
 
+
+
+class AmalEventVariantTests(unittest.TestCase):
+    def test_same_event_keeps_time_venue_and_both_sources(self):
+        a={'title':'Författarkväll med Klas Östergren o Isak Holmgren','startDate':'2026-11-05','endDate':'2026-11-05','time':'Se källan','venue':'Stadshotellet Åmål','url':'https://tickster.example/a','sourceName':'Biljetter'}
+        b={**a,'title':'Författarkväll med Klas Östergren och Isak Holmgren','time':'19:00–21:00','venue':'Åmål','url':'https://visit.example/b','sourceName':'Visit'}
+        rows=update_events.merge_amal_event_variants([a,b]);self.assertEqual(len(rows),1);self.assertEqual(rows[0]['time'],'19:00–21:00');self.assertEqual(rows[0]['venue'],'Stadshotellet Åmål');self.assertEqual(len(rows[0]['alternateSources']),2)
+        self.assertEqual(a['time'],'Se källan')
+        self.assertEqual(len(update_events.merge_amal_event_variants([b,{**b,'time':'21:00–22:00'}])),2)
+        self.assertEqual(len(update_events.merge_amal_event_variants([b,{**b,'startDate':'2026-11-06'}])),2)
+
 if __name__ == "__main__":
     unittest.main()

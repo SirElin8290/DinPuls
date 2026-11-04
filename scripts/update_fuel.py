@@ -108,7 +108,8 @@ def normalize(element: dict, municipality: dict) -> dict | None:
         "sourceUrl": f"https://www.openstreetmap.org/{osm_type}/{element.get('id')}",
         "directionsUrl": f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}",
     }
-    if kind == "charging":
+    # Åmål: static operator tariffs are not a verified current station price.
+    if kind == "charging" and municipality.get("name") != "Åmål":
         operator_key = operator.casefold()
         tariff = next((value for key, value in CHARGING_TARIFFS.items() if key in operator_key), None)
         if tariff:

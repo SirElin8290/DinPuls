@@ -623,8 +623,7 @@ class AdditionalPublicLunchTests(unittest.TestCase):
         self.assertEqual(result['municipalities']['Hammarö']['restaurants'][0]['days']['monday'],['Panerad fisk med potatis'])
 
 
-if __name__ == "__main__":
-    unittest.main()
+
 
 class BergaMenuTests(unittest.TestCase):
     def test_berga_uses_current_week_section_and_no_price_as_dish(self):
@@ -636,3 +635,6 @@ class BergaMenuTests(unittest.TestCase):
         self.assertFalse(any('Pris:' in dish for dishes in result['days'].values() for dish in dishes))
         stale=update_lunch.fetch_restaurant(source,now,lambda _:page.replace('V 45','V 44'),{},45)
         self.assertNotEqual(stale['status'],'current')
+
+if __name__ == "__main__":
+    unittest.main()

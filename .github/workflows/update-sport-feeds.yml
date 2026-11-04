@@ -37,8 +37,17 @@ jobs:
         with:
           node-version: "22"
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installera offentlig statistikklient för Åmål
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
       - name: Hämta och normalisera matcher
-        run: node scripts/sport-feed/update-sport-feeds.mjs
+        run: |
+          PYTHONPATH=scripts python -m unittest scripts/test_amal_innebandy.py
+          node scripts/sport-feed/update-sport-feeds.mjs
 
       - name: Kontrollera JSON
         run: node -e "JSON.parse(require('fs').readFileSync('data/sport-feeds.json','utf8')); console.log('sport-feeds.json är giltig JSON')"

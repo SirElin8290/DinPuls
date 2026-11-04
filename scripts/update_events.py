@@ -468,6 +468,33 @@ def merge_event_rows(existing: list[dict], collected: list[dict]) -> list[dict]:
     return list(unique.values())
 
 
+def merge_amal_event_variants(rows):
+    """Same named event/date with o/och variants; preserve distinct timed performances."""
+    result = []
+    for row in rows:
+        title = re.sub(r"\bo\b", "och", str(row.get("title", "")).casefold())
+        title = re.sub(r"\W+", "", title)
+        same = next((old for old in result if
+                     re.sub(r"\W+", "", re.sub(r"\bo\b", "och", str(old.get("title", "")).casefold())) == title
+                     and old.get("startDate") == row.get("startDate")
+                     and old.get("endDate") == row.get("endDate")
+                     and (old.get("time") == row.get("time") or old.get("time") in {None, "Se källan"} or row.get("time") in {None, "Se källan"})), None)
+        if same is None:
+            result.append(dict(row))
+            continue
+        sources = {x["url"]: x for x in same.get("alternateSources", [])}
+        for item in [same, row]:
+            if item.get("url"):
+                sources[item["url"]] = {"url": item["url"], "name": item.get("sourceName", "")}
+        if same.get("time") in {None, "Se källan"} and row.get("time") not in {None, "Se källan"}:
+            previous_venue = same.get("venue")
+            same.update(row)
+            if same.get("venue") in {None, "Åmål"} and previous_venue:
+                same["venue"] = previous_venue
+        same["alternateSources"] = list(sources.values())
+    return result
+
+
 def fetch_axiell_events(municipality, source):
     """Read the public library calendar, with exact location and publication filters."""
     now = datetime.now(timezone.utc)
@@ -592,8 +619,11 @@ def main() -> int:
                 health.append({"name": source["name"], "url": source["url"], "status": "error", "events": 0, "checkedAt": now, "message": str(error)[:180]})
                 print(f"VARNING {municipality}: {source['name']} – {error}")
 
+        merged = merge_event_rows(existing, collected)
+        if municipality == "Åmål":
+            merged = merge_amal_event_variants(merged)
         ordered = sorted(
-            collapse_contiguous_events(merge_event_rows(existing, collected)),
+            collapse_contiguous_events(merged),
             key=lambda item: (item.get("startDate") or "", item.get("title") or ""),
         )
         selected = ordered[:80]

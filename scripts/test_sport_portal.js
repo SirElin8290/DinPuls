@@ -46,7 +46,9 @@ assert(vikenTable.competition && /^https:\/\//.test(vikenTable.sourceUrl), "IF V
 assert((feeds.municipalities.Åmål.standings || []).some(table => table.rows.some(row => normalize(row.team) === normalize(ifkAmal.name))), "IFK Åmål saknar egen kopplad tabell");
 
 const amalsIbk = club("Åmål", "Åmåls IBK");
-assert(amalsIbk && /innebandy\.se/.test(amalsIbk.url), "Åmåls IBK ska ha kvar officiell iBIS-länk även när flödet fallerar");
+assert(amalsIbk && /amalsibk\.com/.test(amalsIbk.url), "Åmåls IBK ska länka till klubbens aktuella officiella matchprogram");
+assert(matches("Åmål").some(match => belongs(match, amalsIbk)), "Åmåls IBK saknar verifierade matcher");
+assert((feeds.municipalities.Åmål.standings || []).some(table => /stats\.innebandy\.se/.test(table.sourceUrl) && table.rows.some(row => normalize(row.team) === normalize(amalsIbk.name))), "Åmåls IBK saknar förbundets aktuella tabell");
 const grums = club("Grums", "Grums IK Hockey");
 assert(matches("Grums").some(match => belongs(match, grums) && match.sport === "Ishockey"), "Grums IK Hockey saknar korrekt klubbkopplad ishockeymatch");
 assert(!matches("Grums").some(match => belongs(match, viken)), "En annan lagidrott får inte kopplas till IF Viken");

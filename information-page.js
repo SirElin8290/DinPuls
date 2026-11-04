@@ -13,9 +13,8 @@
       throw new Error("Kommunregistret saknar giltiga poster");
     }
 
-    const productionText = production.length ? production.join(", ") : "inga kommuner ännu";
     const pilotText = pilots.length ? pilots.join(", ") : "inga";
-    target.textContent = `DinPuls omfattar ${municipalities.length} kommuner. Fullt lanserade: ${productionText}. Pilotkommuner: ${pilotText}. Plattformen är byggd för att kunna skalas vidare utan att pilotkommuner framställs som färdiga.`;
+    target.textContent = `DinPuls kan användas i ${municipalities.length} kommuner. Vi inleder den lokala lanseringen i Åmål. Utbud och automatisk källtäckning varierar mellan kommunerna. ${pilots.length ? `Kommuner markerade som pilot: ${pilotText}.` : ""}`.trim();
   } catch (error) {
     console.warn("Kunde inte läsa aktuell kommunstatus", error);
   }

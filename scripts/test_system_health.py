@@ -134,5 +134,20 @@ class MorningDeadlineTests(unittest.TestCase):
         now = datetime(2026, 10, 7, 4, tzinfo=timezone.utc)
         self.assertEqual(health.source_monitor_health(report, now)["reason"], "nightly_check_overdue")
 
+
+
+class AmalDirectoryDatesTests(unittest.TestCase):
+    def test_only_complete_sourced_review_can_replace_old_file_date(self):
+        data=json.loads(json.dumps(payloads()).replace('Storfors','Åmål'))
+        now=datetime(2026,11,4,12,tzinfo=timezone.utc)
+        for module,key in [('health','providers'),('service','businesses')]:
+            first=data[health.MODULES[module][0][0]][key][0]
+            first.update(verifiedAt='2026-11-04',sourceUrl='https://example.org/actual-contact')
+            report=health.build_health('https://example.test/',now,opener_for(data))
+            self.assertEqual(report['municipalities']['Åmål'][module]['status'],'green')
+            first.pop('sourceUrl')
+            report=health.build_health('https://example.test/',now,opener_for(data))
+            self.assertEqual(report['municipalities']['Åmål'][module]['reason'],'stale_data')
+
 if __name__ == "__main__":
     unittest.main()
