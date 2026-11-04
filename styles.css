@@ -2315,3 +2315,13 @@ footer:has(.footer-copyright) nav a{color:var(--text)!important}
 /* Temporary, explicitly labelled launch-review imagery, outside customer metrics. */
 [data-test-banner-preview] .homepage-live-ad p{margin:0 0 12px;color:#fff;font-size:13px;font-weight:800;line-height:1.5}
 [data-test-banner-preview] .homepage-live-ad img{display:block;width:100%;height:auto;max-height:360px;object-fit:contain;background:#071426}
+
+/* First-visit context: secondary to the municipality picker, including in app mode. */
+.municipality-onboarding-purpose{max-width:670px;margin:22px auto 0;padding-top:18px;border-top:1px solid var(--border);text-align:left;color:var(--muted);font-size:14px;line-height:1.55}
+.municipality-onboarding-purpose p{margin:0 0 10px}
+.municipality-onboarding-purpose p:last-child{margin-bottom:0}
+.municipality-onboarding-purpose summary{width:fit-content;min-height:44px;display:list-item;align-content:center;cursor:pointer;color:var(--blue700);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.municipality-onboarding-purpose summary:focus-visible{outline:2px solid currentColor;outline-offset:4px;border-radius:3px}
+[data-theme="dark"] .municipality-onboarding-purpose{color:#496078;border-color:#cadce4}
+[data-theme="dark"] .municipality-onboarding-purpose summary{color:#075b72}
+@media(max-width:720px){.municipality-onboarding-purpose{margin-top:18px;padding-top:14px;font-size:14px}}
