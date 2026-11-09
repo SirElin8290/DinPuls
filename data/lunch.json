@@ -1,6 +1,6 @@
 {
   "version": "0.23.0",
-  "generatedAt": "2026-11-09T05:34:59+01:00",
+  "generatedAt": "2026-11-09T14:16:56+01:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 46,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
@@ -38,7 +38,7 @@
             ]
           ],
           "stopAfterPattern": "VECKANS FISK|FINNS HOS OSS",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -52,7 +52,7 @@
           "address": "Åmål",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -87,7 +87,7 @@
           "parser": "scoped-weekday-headings",
           "headingPattern": "Lunchbuffé",
           "excludeDishPattern": "^Pris:",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -140,7 +140,7 @@
           "address": "Norrlandsvägen 39",
           "hours": "Vardagar 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -176,7 +176,7 @@
           "address": "Säffle",
           "hours": "Vardagar 11.00–14.00",
           "parser": "calendar-weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -216,7 +216,7 @@
           "address": "Sundsgatan 30",
           "hours": "Se aktuell lunchmeny",
           "parser": "galna-tuppen-json",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -275,7 +275,7 @@
               0.985
             ]
           ],
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -298,10 +298,33 @@
           "expectedNamePattern": "Restaurang Rosellmagasinet",
           "expectedAddress": "Karlsbergsvägen 5, 666 31 Bengtsfors",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": 45,
-          "days": {},
-          "status": "outdated",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [
+              "Panerad fisk med kall sås",
+              "Kyckling i pestosås. Serveras med ris"
+            ],
+            "tuesday": [
+              "Ugnsbakad fisk med musselsås",
+              "Stekt fläsk med raggmunk och rårörda lingon"
+            ],
+            "wednesday": [
+              "Stekt fisk med skagensås",
+              "Mustig kött- och svampgryta med potatismos"
+            ],
+            "thursday": [
+              "Fisksoppa",
+              "Nötfärslimpa med pepparsås"
+            ],
+            "friday": [
+              "Fisk i ugn",
+              "Piccata (Ostpanerad schnitzel) med mustig tomatsås och ris"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
           "mode": "automatic"
         }
       ],
@@ -323,44 +346,12 @@
           "parser": "wordpress-relative-week-menu",
           "metadataUrl": "https://xn--sunnanrestaurang-iob.se/wp-json/wp/v2/pages?slug=meny&_fields=id,modified_gmt,link",
           "excludeDishPattern": "^Extra rätt[.]?$",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
           "mode": "automatic",
-          "error": "WordPress: menyn uppdaterades inte aktuell vecka",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [
-                "Sprödbakad fiskfilé serveras med kall fisksås med smak av kapris och Boston serveras med Sunnanås potatismos.",
-                "Skinkschnitzel serveras med gröna ärtor, rödvinssky samt rostad potatis."
-              ],
-              "tuesday": [
-                "Hemlagade Raggmunkar med lingon.",
-                "Stekt Fläsk serveras med bruna bönor/ löksås.",
-                "Havets Wallenbergare med skirat smör, lingon och kokt potatis."
-              ],
-              "wednesday": [
-                "Stekt strömming serveras med skirat smör, lingon och Sunnanås potatismos.",
-                "Kycklingschnitzel serveras med sweet chilicremé och stekt potatis."
-              ],
-              "thursday": [
-                "Ärtsoppa.",
-                "Hemlagade tunna pannkakor serveras med sylt och lättvispad grädde.",
-                "Stekt fiskfilé med stuvad spenat och kokt potatis.",
-                "Brässerad karré serveras med äppelmos, skysås och Sunnanås potatismos."
-              ],
-              "friday": [
-                "Stekt fiskfilé serveras med Skagensås och kokt potatis.",
-                "Kotletter i krämig sambaloeleksås serveras med friterad potatis.",
-                "Hembakad fredags kaka."
-              ],
-              "saturday": [],
-              "sunday": []
-            }
-          }
+          "error": "WordPress: menyn uppdaterades inte aktuell vecka"
         },
         {
           "id": "kanyas",
@@ -381,14 +372,14 @@
               0.17
             ]
           ],
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": null,
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
           "days": {},
-          "status": "review_required",
+          "status": "current",
           "mode": "automatic",
-          "sourceAsset": "https://thairestaurangen.se/wp-content/uploads/2026/11/mellerud-vecka-45.png",
+          "sourceAsset": "https://thairestaurangen.se/wp-content/uploads/2026/11/mellerud-vecka-46.png",
           "extraction": "ocr",
-          "error": "OCR kunde inte verifiera aktuell vecka"
+          "verifiedMenuImage": "https://thairestaurangen.se/wp-content/uploads/2026/11/mellerud-vecka-46.png"
         },
         {
           "id": "dinners-mellerud",
@@ -397,33 +388,33 @@
           "address": "Mellerud",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
-              "Fiskfilé med ägg- och dilltäcke serveras med potatismos",
-              "Husets korvstroganoff serveras med basmatiris",
-              "Beställes från köket: Vegetarisk currygryta med halloumi och ris"
+              "Panerad fiskfilé med citronaioli och kokt potatis",
+              "Korvstubbar med bostongurka, ost och tomat serveras med potatismos och senapssås",
+              "Vegetariskt beställes från köket: Vegetarisk linsbolognese med pasta"
             ],
             "tuesday": [
-              "Ugnsbakad fisk med dillsås serveras med kokt potatis och broccoli",
-              "Våra klassiska raggmunkar med stekt rimmat fläsk, bruna bönor, löksås samt lingon",
-              "Beställes från köket: Vegetarisk currygryta med halloumi och ris"
+              "Grekisk fiskgratäng med pesto och oliver serveras med kokt potatis",
+              "Husets raggmunkar med fläsk, löksås, lingonsylt och bruna bönor",
+              "Vegetariskt beställes från köket: Vegetarisk linsbolognese med pasta"
             ],
             "wednesday": [
-              "Panerad fiskfilé med pressad potatis och remouladsås",
-              "Rödcurrygryta med kycklingfilé och pasta penne",
-              "Beställes från köket: Vegetarisk currygryta med halloumi och ris"
+              "Ugnsbakad fiskfilé med ägg- och persiljetäcke serveras med kokt potatis",
+              "Pytt i panna med rödbetor och stekta ägg",
+              "Vegetariskt beställes från köket: Vegetarisk linsbolognese med pasta"
             ],
             "thursday": [
-              "Italiensk fiskgratäng med lagrad ost, pesto och oliver",
-              "Pannbiff med stekt lök, kokt potatis, gräddsås och lingonsylt",
-              "Beställes från köket: Vegetarisk currygryta med halloumi och ris"
+              "Panerad fiskfilé med dillstuvad potatis",
+              "Köttfärslimpa med gräddsås, lingon och kokt potatis",
+              "Vegetariskt beställes från köket: Vegetarisk linsbolognese med pasta"
             ],
             "friday": [
-              "Panerad fiskfilé med vitvinssås och pressad potatis",
-              "Kycklingfilé med champinjonsås och rostad klyftpotatis med örter",
-              "Beställes från köket: Vegetarisk currygryta med halloumi och ris"
+              "Fish & chips serveras med dansk remouladsås",
+              "Kycklinggryta med curry serveras med basmatiris",
+              "Vegetariskt beställes från köket: Vegetarisk linsbolognese med pasta"
             ],
             "saturday": [],
             "sunday": []
@@ -448,7 +439,7 @@
           "address": "Marknadsvägen 24, Årjäng",
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -501,7 +492,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -541,44 +532,39 @@
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": 45,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [
-                "Gratinerad falukorv med chiligrädde och potatismos",
-                "Sprödbakad vitling med kapris-och rödbetsfräs, brynt smör och kokt potatis",
-                "Salcicciapasta"
-              ],
-              "tuesday": [
-                "Stekt fläsk med löksås eller ört-och senapsstuvad savoykål och kokt potatis",
-                "Fiskgratäng med räkor och musslor och potatis-blomkålsmos",
-                "Pasta med kycklinggryta smaksatt med spenat, paprika och vitlök"
-              ],
-              "wednesday": [
-                "Hemlagade köttbullar med gräddsås, picklad gurka, rårörda lingon och potatismos",
-                "Ugnsbakad strömming med pepparrotsgrädde, purjolök och kokt potatis",
-                "Lasagne"
-              ],
-              "thursday": [
-                "Kycklinggryta ala Jakob med lök, banan, bacon och jordnötter. Ris eller kokt potatis",
-                "Laxpudding med pepparrotscreme, brynt smör och ärt-och lökfräs",
-                "Pasta med fläskkarré i champinjonsås"
-              ],
-              "friday": [
-                "Fläskfilé med pepparsås, tomat-och rödlökssallad och potatisgratäng",
-                "Havrepanerad kummelrygg med rom-och dillmajonnäs och potatismos",
-                "Pasta med räkgryta"
-              ],
-              "saturday": [],
-              "sunday": []
-            }
-          }
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [
+              "Asiatisk fläskbogsgryta med kokosgrädde, röd curry, grönsaker, koriander och ris",
+              "Stekt kummelfilé piccata med krämig tomat-örtsås och kokt potatis",
+              "Pasta: Rostbiff i ädelostsås med paprika och lök"
+            ],
+            "tuesday": [
+              "Stekt fläsk med raggmunk och lingonsylt eller löksås och kokt potatis",
+              "Ugnsgratinerad hokifilé med kaviar-dillgrädde och kokt potatis",
+              "Pasta med kasslersås smaksatt med vitlök och chili"
+            ],
+            "wednesday": [
+              "Kålpudding med gräddsås, lingonsylt och kokt potatis",
+              "Stekt panerad makrill med gräddstuvad spenat och kokt potatis",
+              "Pasta med fläskfilégryta smaksatt med bacon"
+            ],
+            "thursday": [
+              "Kokt köttkorv med skånsk senapscreme och rotsaksmos",
+              "Ugnsbakad laxfilé med kräftstjärtsås och dillslungad kokt potatis",
+              "Ärtsoppa, pannkaka med sylt och grädde"
+            ],
+            "friday": [
+              "Värmlandsbiff med gräddsås, lingonsylt, ärtor och kokt potatis",
+              "Tempurapanerad torskfilé med räkröra och dillkryddat potatismos",
+              "Dagens pasta"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "stefan-pa-statt",
@@ -590,7 +576,7 @@
           "hours": "Vardagar 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -621,39 +607,34 @@
           "address": "Magasinsgatan 4, Arvika",
           "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
           "parser": "dated-weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": null,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [],
-              "tuesday": [
-                "Broccolisoppa toppas med frömix. Veg.",
-                "Dagens lunch: Kycklingfilé med ris, currysås & broccoli."
-              ],
-              "wednesday": [
-                "Mexikansk soppa med smetana & quesadillas. Veg.",
-                "Dagens lunch: Kycklingfilé med ris, currysås & broccoli."
-              ],
-              "thursday": [
-                "Grön ärtsoppa med pepparrotsgrädde. Veg.",
-                "Dagens lunch: Viltskavsgryta med potatismos, haricots verts & lingonsylt."
-              ],
-              "friday": [
-                "Klar grönsaksoppa toppas med korv/tofu. Veg.",
-                "Dagens lunch: Viltskavsgryta med potatismos, haricots verts & lingonsylt."
-              ],
-              "saturday": [
-                "Clam chowder + Vegetarisk soppa.",
-                "Helg lunch: Fläskytterfilé med potatiskaka, rödvinsås & brysselkål."
-              ],
-              "sunday": []
-            }
-          }
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [],
+            "tuesday": [
+              "Blomkålsoppa med rostade kikärtor.",
+              "Dagens lunch: Chili Con Carne med majscobettes, nachochips, ris & smetana."
+            ],
+            "wednesday": [
+              "Potatis- & purjolöksoppa toppas med bacon/tomatmix.",
+              "Dagens lunch: Chili Con Carne med majscobettes, nachochips, ris & smetana."
+            ],
+            "thursday": [
+              "Tomatsoppa med pesto- & färskostcremé & krutonger.",
+              "Dagens lunch: Fiskgryta med saffran serveras med potatismos & ärtor."
+            ],
+            "friday": [
+              "Indisk lins- & potatissoppa.",
+              "Dagens lunch: Fiskgryta med saffran serveras med potatismos & ärtor."
+            ],
+            "saturday": [
+              "Thaisoppa toppas med nudlar & räkor.",
+              "Helg lunch: Kycklingfilé med soltorkade tomater & basilika serveras med potatisgratäng & broccoliblandning."
+            ],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "cafe-gnistan-arvika",
@@ -663,7 +644,7 @@
           "hours": "Vardagar 11.00–14.00",
           "parser": "scoped-weekday-headings",
           "headingPattern": "Café Gnistan lunchmeny",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -704,7 +685,7 @@
           "address": "Nyängsgatan 1",
           "hours": "Dagens rätt 11.00–19.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -762,7 +743,7 @@
           "hours": "Lunch 11.00–15.00",
           "parser": "weekday-headings",
           "stopAfterPattern": "LÖRDAG OCH SÖNDAG",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 44,
           "days": {},
           "status": "outdated",
@@ -776,7 +757,7 @@
           "hours": "Vardagslunch 11.00–14.30",
           "parser": "weekday-headings",
           "stopAfterPattern": "Föregående|Våra tjänster",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -815,7 +796,7 @@
           "parser": "public-social-text",
           "publicActorId": "100063796472758",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
@@ -844,7 +825,7 @@
           "hours": "Lunch dagligen 11.00–16.00",
           "parser": "calendar-weekday-headings",
           "stopAfterPattern": "ÖPPET MÅNDAG",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -895,7 +876,7 @@
           "address": "Storgatan 36",
           "hours": "Lunch måndag–lördag 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -944,7 +925,7 @@
           "hours": "Lunch måndag–fredag 11.30–14.30",
           "parser": "calendar-weekday-headings",
           "stopAfterPattern": "Mârtenserbjudanden|Kupongerbjudande|Vi har även sallader|ADRESS",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -982,7 +963,7 @@
           "hours": "Lunch à la carte; vardagar 11.30–14.00, helger 12.00–14.00 – se aktuella öppettider",
           "parser": "standing-pdf",
           "pdfLinkPattern": "/Lunchmeny[^/]*\\.pdf",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1024,7 +1005,7 @@
           "fallbackDataUrls": [
             "https://www.xn--kllmans-5wa.se/lunch/"
           ],
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
@@ -1040,7 +1021,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1097,7 +1078,7 @@
           "address": "Bromsgatan 8, Karlstad",
           "hours": "Lunch måndag–fredag 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1152,7 +1133,7 @@
             "Pizza",
             "Joan´s Klassiker"
           ],
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1198,45 +1179,40 @@
           "address": "Karlagatan 42, Karlstad",
           "hours": "Lunchbuffé tisdag–fredag 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": 45,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [],
-              "tuesday": [
-                "Fläsk / Raggmunk / Rårörda Lingon / Löksås / Bruna Bönor / Kokt Potatis",
-                "Veckans Veg"
-              ],
-              "wednesday": [
-                "Stängt – Huset abonnerat"
-              ],
-              "thursday": [
-                "Ärtsoppa med fläsk",
-                "Pannkakor med sylt och grädde",
-                "Fläsklägg / Rotmos / Senapssås",
-                "Veckans Veg",
-                "FREDAG öppet till 14.30"
-              ],
-              "friday": [],
-              "saturday": [],
-              "sunday": []
-            }
-          }
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [],
+            "tuesday": [
+              "Fläsk / Raggmunk / Rårörda Lingon / Löksås / Bruna Bönor / Kokt Potatis",
+              "Veckans Veg"
+            ],
+            "wednesday": [
+              "Pannbiff / Rosépepparsås / Rårörda lingon / Fabrikens mos",
+              "Veckans Veg"
+            ],
+            "thursday": [
+              "Ärtsoppa med fläsk",
+              "Pannkakor med sylt och grädde",
+              "Nöjes Kalops / Rödbetor / Kokt Potatis",
+              "Veckans Veg"
+            ],
+            "friday": [
+              "Stängt – Huset abonnerat",
+              "Parkera gratis hos oss på lunchen",
+              "Bakom Nöjesfabriken har du som lunchgäst alltid fri parkering under tiden du lunchar. För att få fri parkering registrerar du din bils registreringsnummer vid lunchkassan."
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         }
       ],
       "referenceSources": [
         {
           "name": "Karlstad – restauranger och lunch",
           "url": "https://www.karlstad.com/restauranger"
-        },
-        {
-          "name": "Visit Karlstad – mat och dryck",
-          "url": "https://visitkarlstad.se/visit-karlstad/mat-och-dryck"
         }
       ]
     },
@@ -1253,54 +1229,49 @@
           "expectedNamePattern": "Restaurant at Skoghalls Folkets Hus",
           "expectedAddress": "Skogåsvägen 3, 663 30 Skoghall",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": 45,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [
-                "Chili con carne med ris",
-                "Krispbakad torskfilé med dillmajonnäs & kokt potatis",
-                "Pasta med kyckling i krämig örtsås",
-                "Vegetarisk chili med ris",
-                "Tomatsoppa med basilika"
-              ],
-              "tuesday": [
-                "Raggmunk & stekt fläsk med lingon",
-                "Stekt fläsk med kokt potatis & löksås eller bruna bönor",
-                "Thaikycklinggryta med ris",
-                "Pasta al tonno",
-                "Vegetarisk thaigryta med ris"
-              ],
-              "wednesday": [
-                "Stekt strömming med potatismos, dillsmör & lingon",
-                "Senapsgratinerad falukorv med potatismos & gurkmajjo",
-                "Ungersk biffgulasch med kokt potatis & rödbetor",
-                "Pasta med strimlad fläskytterfilé i diablosås",
-                "Vegetarisk tacopaj med guacamole"
-              ],
-              "thursday": [
-                "Ärtsoppa med pannkakor, sylt & grädde",
-                "Pannbiff med gräddsås, potatis & lingon",
-                "Kokt spättafilé med citronsås & kokt potatis",
-                "Pasta med strimlad rostbiff i ädelostsås",
-                "Vegetarisk ärtsoppa med pannkakor, sylt & grädde"
-              ],
-              "friday": [
-                "Fläsknoisette med pepparsås & rostad potatis",
-                "Lättpanerad koljarygg med skagensås & kokt potatis",
-                "Dagens Pasta",
-                "Bönbiffar med pepparsås & rostad potatis",
-                "Fredagsdessert. Vaniljmousse med bärsås"
-              ],
-              "saturday": [],
-              "sunday": []
-            }
-          }
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [
+              "Pannbiff med champinjonsås & potatis",
+              "Gräddstuvad Pytt i panna med stekt ägg & rödbetor",
+              "Sprödbakad alaskafilé med lime-gräslökssås & kokt potatis",
+              "Pasta med kycklingfilé i rosépepparsås",
+              "Morotsbiffar med champinjonsås & potatis"
+            ],
+            "tuesday": [
+              "Raggmunk & stekt fläsk med lingon",
+              "Stekt fläsk med kokt potatis & löksås eller bruna bönor",
+              "Dillkött med kokt potatis",
+              "Dagens Pasta",
+              "Grillad halloumi med grönsaksgratäng"
+            ],
+            "wednesday": [
+              "Stekt strömming med potatismos, dillsmör & lingon",
+              "Ost-baconfylld lunchkorv med potatismos & gurkmajjo",
+              "Kebabgryta med ris",
+              "Dagens Pasta",
+              "Vegetarisk kebabgryta med ris"
+            ],
+            "thursday": [
+              "Ärtsoppa med pannkakor, sylt & grädde",
+              "Kålpudding med gräddsås, kokt potatis & lingon",
+              "Skärgårdslåda med potatismos",
+              "Dagens Pasta",
+              "Vegetarisk ärtsoppa med pannkakor, sylt & grädde"
+            ],
+            "friday": [
+              "Fläskschnitzel med skånsk potatis",
+              "Sweet chilibakad laxfilé med kall romsås & kokt potatis",
+              "Dagens pasta",
+              "Grönsaksbiff med srirachacrème & purjolökspotatis",
+              "Fredagsdessert. Kokostoscakladdkaka med vispad grädde"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         },
         {
           "id": "glg-lysasen",
@@ -1311,7 +1282,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^Varje dag|VECKANS Veg|Välj dag",
           "excludeDishPattern": "^Kökets val",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1350,7 +1321,7 @@
           "hours": "Varm lunch måndag–fredag 11.00–14.00",
           "parser": "calendar-weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
@@ -1380,7 +1351,7 @@
           "hours": "Lunch vardagar 11.00–14.00",
           "parser": "ramo-standing-lunch",
           "standingNotice": "Fast lunchutbud: endast rätter som restaurangen uttryckligen märker LUNCHPAKET. Ingen veckomeny.",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1413,7 +1384,7 @@
           "parser": "matilda-rss",
           "dataUrl": "https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697338e1e2d237d90a0e7c51&lang=sv",
           "expectedMenuPattern": "Uranus Matsal",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1474,7 +1445,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^Smaklig måltid",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1510,7 +1481,7 @@
           "address": "Hennickehammar, Filipstad",
           "hours": "Lunchbuffé måndag–söndag 12.00–14.00",
           "parser": "rotating-weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1576,7 +1547,7 @@
           "parser": "hagfors-standing-pizza",
           "standingNotice": "Fast lunchutbud: pizzor i prisklass 1–4 enligt restaurangens luncherbjudande. Övriga lunchalternativ finns i originalmenyn.",
           "verified": true,
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1638,13 +1609,13 @@
           "expectedTextPattern": "KRONAN",
           "fallbackMode": "reference",
           "verified": true,
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {},
           "status": "current",
           "mode": "automatic",
-          "verifiedMenuImage": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.99422-6/897290956_1665357954971697_3362160444249563821_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=YfxwcibVYpkQ7kNvwEd2D0-&_nc_oc=AdroHQe7VgBJ2gEuKT7JNNjXUzb3rYF-9UmbmqFfKbTZ_QboXZjNdaBXint4tv0RW_o&_nc_zt=14&_nc_ht=scontent-ord5-1.xx&_nc_gid=eTLrqwzlEC2UP3vbxjA5Jg&_nc_ss=7b20f&oh=00_AQSIKMKRk_UCrtbP-1mCEF3i47GdU2xjcgdicebBRDZK7A&oe=6AF722E2",
-          "sourceAsset": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.99422-6/897290956_1665357954971697_3362160444249563821_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=YfxwcibVYpkQ7kNvwEd2D0-&_nc_oc=AdroHQe7VgBJ2gEuKT7JNNjXUzb3rYF-9UmbmqFfKbTZ_QboXZjNdaBXint4tv0RW_o&_nc_zt=14&_nc_ht=scontent-ord5-1.xx&_nc_gid=eTLrqwzlEC2UP3vbxjA5Jg&_nc_ss=7b20f&oh=00_AQSIKMKRk_UCrtbP-1mCEF3i47GdU2xjcgdicebBRDZK7A&oe=6AF722E2",
+          "verifiedMenuImage": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/897290956_1665357954971697_3362160444249563821_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=YfxwcibVYpkQ7kNvwFZisji&_nc_oc=AdpjiMVIYjLHmvwKfSZRJue4mmCQuQ_ED0L73hGqWYv3UgfTTKyeULPli7GPWc-HjDw&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=NcxClsCT4u2vfz6thmjruQ&_nc_ss=7b20f&oh=00_AQTe_0uHftEyjWKhn2KRvZ2WK9N39X3UZWnGrcCEO2tp6Q&oe=6AF79362",
+          "sourceAsset": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/897290956_1665357954971697_3362160444249563821_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=YfxwcibVYpkQ7kNvwFZisji&_nc_oc=AdpjiMVIYjLHmvwKfSZRJue4mmCQuQ_ED0L73hGqWYv3UgfTTKyeULPli7GPWc-HjDw&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=NcxClsCT4u2vfz6thmjruQ&_nc_ss=7b20f&oh=00_AQTe_0uHftEyjWKhn2KRvZ2WK9N39X3UZWnGrcCEO2tp6Q&oe=6AF79362",
           "sourcePost": "https://www.facebook.com/Restaurangkronanhagfors/posts/pfbid02ki62D1YioY2eiQn9EP7iQDjcB8u7wnzgu9HrFLvme7nb8HznA9CsX2VFk6gTUiRcl",
           "extraction": "ocr",
           "menuImageDate": "2026-11-11",
@@ -1679,7 +1650,7 @@
           ],
           "displayAsImage": true,
           "verified": true,
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -1706,7 +1677,7 @@
           "dataUrl": "https://farinn62.github.io/lunch/",
           "menuYearPattern": "Lunch V\\.\\s*\\d{1,2}\\s+(\\d{4})",
           "stopAfterPattern": "SMAKLIG MÅLTID",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1755,7 +1726,7 @@
           "facilityId": "4b2f1165-54bb-5814-97b0-05927390e107",
           "expectedMunicipalityId": "1737",
           "expectedFacilityName": "Skogsstjärnan",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1793,7 +1764,7 @@
           "address": "Valbergsvägen 12, 685 33 Torsby",
           "hours": "Daglig lunch 11.30–14.30",
           "parser": "calendar-weekday-headings",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1833,7 +1804,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
           "parser": "weekday-headings",
           "stopAfterPattern": "Lunchbuffé serveras|Alltid på helgen",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1877,35 +1848,29 @@
           "stopAfterPattern": "^Crispy chicken burger",
           "dishSplitPattern": "(?<=\\.)\\s+(?=Pannkakor)",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
-          "weekNumber": 45,
-          "days": {},
-          "status": "outdated",
-          "mode": "automatic",
-          "lastSuccessfulMenu": {
-            "weekNumber": 45,
-            "checkedAt": "2026-11-08T23:24:57+01:00",
-            "days": {
-              "monday": [
-                "Korvstroganoff serveras med ris"
-              ],
-              "tuesday": [
-                "Karlssonsfrestelse (potatis & köttfärsgratäng)"
-              ],
-              "wednesday": [
-                "Krämig pasta med kyckling"
-              ],
-              "thursday": [
-                "Gulaschsoppa på köttfärs.",
-                "Pannkakor med grädde & jordgubbssylt"
-              ],
-              "friday": [
-                "Bourguignon (kotlettgryta) serveras med potatisgratäng"
-              ],
-              "saturday": [],
-              "sunday": []
-            }
-          }
+          "checkedAt": "2026-11-09T14:16:56+01:00",
+          "weekNumber": 46,
+          "days": {
+            "monday": [
+              "Köttbullar med gräddsås serveras med mos & lingonsylt. Vi har även chorizokorv på buffén idag."
+            ],
+            "tuesday": [
+              "Panerad torskfilé med kall remouladsås alt. kall dragonsås serveras med ugnsrostad potatis."
+            ],
+            "wednesday": [
+              "Panerad schnitzel med champinjonsås / kall bearnaisesås serveras med stekt potatis."
+            ],
+            "thursday": [
+              "Panerad kycklingfilé (hot & spicy) med bearnaisesås serveras med crispers"
+            ],
+            "friday": [
+              "Ugnsfärs med pepparsås serveras med stekt potatis"
+            ],
+            "saturday": [],
+            "sunday": []
+          },
+          "status": "current",
+          "mode": "automatic"
         }
       ],
       "referenceSources": [
@@ -1929,7 +1894,7 @@
           "hours": "Endast upphämtning av mat för närvarande – se kommunens information",
           "parser": "pdf-weekday-menu",
           "pdfLinkPattern": "matsedel-pensionar-hemma",
-          "checkedAt": "2026-11-09T05:34:59+01:00",
+          "checkedAt": "2026-11-09T14:16:56+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
