@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-11-13T02:41:54+00:00",
+  "generatedAt": "2026-11-13T02:56:59+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -95,11 +95,23 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-11-12T19:25+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-12T21:25+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-13T04:53:00+01:00",
+              "realtime": "2026-11-13T04:53:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
             {
               "mode": "bus",
               "line": "800",
@@ -254,6 +266,18 @@
               "operator": "Västtrafik",
               "scheduled": "2026-11-13T04:09:00+01:00",
               "realtime": "2026-11-13T04:09:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "730",
+              "direction": "Uddevalla",
+              "operator": "Västtrafik",
+              "scheduled": "2026-11-13T04:53:00+01:00",
+              "realtime": "2026-11-13T04:53:00+01:00",
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
@@ -1006,9 +1030,11 @@
         {
           "id": "740000217",
           "name": "Grums station",
-          "alerts": [],
+          "alerts": [
+            "Linje 801: Hållplats Biltema stängs i riktning mot Grums från 2 november"
+          ],
           "lookupTime": "2026-11-13T00:10+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-13T02:10+01:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1023,8 +1049,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "E",
-              "stale": true
+              "platform": "E"
             },
             {
               "mode": "bus",
@@ -1380,11 +1405,35 @@
           "name": "Sunne station",
           "alerts": [],
           "lookupTime": "2026-11-12T18:10+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-12T20:10+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "train",
+              "line": "74",
+              "direction": "Karlstads central",
+              "operator": "Vy Tåg",
+              "scheduled": "2026-11-13T04:53:00+01:00",
+              "realtime": "2026-11-13T04:53:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "1"
+            },
+            {
+              "mode": "train",
+              "line": "74",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-13T04:53:00+01:00",
+              "realtime": "2026-11-13T04:53:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "T"
+            },
             {
               "mode": "bus",
               "line": "204",
@@ -1569,12 +1618,13 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje 401, 501 och 601; Hållplats Millénsgatan stängs 10-13 november",
             "Linje 801: Hållplats Biltema stängs i riktning mot Grums från 2 november",
             "Linje 600, 602 och 660, hållplats Lyckan indragen i riktning mot Karlstad från 9 november - 6 december",
+            "Linje 401, 501 och 601; Hållplats Millénsgatan stängs 10-13 november",
             "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november",
             "Linje 500 och 501: Hållplats Kronoparkskyrkan stängs i riktning mot Centrum från 26 oktober 15.00",
-            "Linje 500 och 501: Hållplats Rönndungen stängd till och med 27 november"
+            "Linje 500 och 501: Hållplats Rönndungen stängd till och med 27 november",
+            "Linje S och 61: Hållplats Kronoparken centrum flyttas 5 november till och med 11 december"
           ],
           "lookupTime": "2026-11-13T00:25+01:00",
           "retained": false,
@@ -1592,7 +1642,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1664,8 +1715,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "C",
-              "stale": true
+              "platform": "C"
             },
             {
               "mode": "bus",
@@ -1677,8 +1727,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "O",
-              "stale": true
+              "platform": "O"
             },
             {
               "mode": "bus",
@@ -2098,7 +2147,8 @@
           "id": "740000375",
           "name": "Forshaga centrum",
           "alerts": [
-            "Linje 401, 501 och 601; Hållplats Millénsgatan stängs 10-13 november"
+            "Linje 401, 501 och 601; Hållplats Millénsgatan stängs 10-13 november",
+            "Linje 600, 602 och 660, hållplats Lyckan indragen i riktning mot Karlstad från 9 november - 6 december"
           ],
           "lookupTime": "2026-11-12T22:40+01:00",
           "retained": false,
@@ -2112,9 +2162,9 @@
               "direction": "Tjärnheden Deje",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-13T04:29:00+01:00",
-              "realtime": "2026-11-13T04:29:00+01:00",
+              "realtime": "2026-11-13T04:29:18+01:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -2128,8 +2178,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -2699,11 +2748,23 @@
           "name": "Filipstad busstation",
           "alerts": [],
           "lookupTime": "2026-11-12T17:25+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-12T19:25+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "408",
+              "direction": "Lesjöfors",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-13T04:50:00+01:00",
+              "realtime": "2026-11-13T04:50:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "C"
+            },
             {
               "mode": "bus",
               "line": "408",
@@ -2779,13 +2840,28 @@
         {
           "id": "740000376",
           "name": "Hagfors busstation",
-          "alerts": [],
+          "alerts": [
+            "Linje 600: Hållplatserna Orretorp, Botorp, Småris och Tjärnhedens bytespunkt stängs från 9 november till och med 10 december.",
+            "Linje 600, 602 och 660, hållplats Lyckan indragen i riktning mot Karlstad från 9 november - 6 december"
+          ],
           "lookupTime": "2026-11-12T18:40+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-12T20:40+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "600",
+              "direction": "Munkfors Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-13T04:51:00+01:00",
+              "realtime": "2026-11-13T04:51:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "307",
@@ -2970,8 +3046,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "train",
@@ -2983,8 +3058,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
             },
             {
               "mode": "bus",
