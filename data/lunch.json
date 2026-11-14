@@ -1,6 +1,6 @@
 {
   "version": "0.23.0",
-  "generatedAt": "2026-11-14T05:51:29+01:00",
+  "generatedAt": "2026-11-14T15:26:02+01:00",
   "timezone": "Europe/Stockholm",
   "currentWeek": 46,
   "principle": "Exakta rätter visas bara när rätt vecka kan verifieras hos restaurangens originalkälla.",
@@ -38,7 +38,7 @@
             ]
           ],
           "stopAfterPattern": "VECKANS FISK|FINNS HOS OSS",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -52,7 +52,7 @@
           "address": "Åmål",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -121,7 +121,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         }
       ],
       "referenceSources": [
@@ -140,7 +145,7 @@
           "address": "Norrlandsvägen 39",
           "hours": "Vardagar 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 47,
           "days": {},
           "status": "upcoming",
@@ -168,34 +173,6 @@
               ],
               "friday": [
                 "Ostfylld kotlett med hemlagat mos och brunsås.",
-                "Taco med tillbehör."
-              ],
-              "saturday": [],
-              "sunday": []
-            }
-          },
-          "lastSuccessfulMenu": {
-            "weekNumber": 46,
-            "checkedAt": "2026-11-13T13:33:34+01:00",
-            "days": {
-              "monday": [
-                "Hemlagade pannbiffar med stekt lök,potatis och brunsås.",
-                "Pytt i panna med stekt ägg,serveras med rödbetor."
-              ],
-              "tuesday": [
-                "Raggmunk,stekt fläsk med bruna bönor/löksås och potatis.",
-                "Kinapytt med köttfärs."
-              ],
-              "wednesday": [
-                "Ugnsbakad fisk med hemlagat mos,serveras med vår skagenröra.",
-                "Kalops och potatis,serveras med rödbetor."
-              ],
-              "thursday": [
-                "Ärtsoppa och pannkaka med grädde ,sylt.",
-                "Baconlindad köttfärslimpa med potatis och brunsås."
-              ],
-              "friday": [
-                "Fläskschnitzel med rostad potatis och kall beasås.",
                 "Taco med tillbehör."
               ],
               "saturday": [],
@@ -241,7 +218,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "galna-tuppen",
@@ -250,7 +232,7 @@
           "address": "Sundsgatan 30",
           "hours": "Se aktuell lunchmeny",
           "parser": "galna-tuppen-json",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -309,7 +291,7 @@
               0.985
             ]
           ],
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -332,7 +314,7 @@
           "expectedNamePattern": "Restaurang Rosellmagasinet",
           "expectedAddress": "Karlsbergsvägen 5, 666 31 Bengtsfors",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -380,7 +362,7 @@
           "parser": "wordpress-relative-week-menu",
           "metadataUrl": "https://xn--sunnanrestaurang-iob.se/wp-json/wp/v2/pages?slug=meny&_fields=id,modified_gmt,link",
           "excludeDishPattern": "^Extra rätt[.]?$",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -432,14 +414,13 @@
               0.17
             ]
           ],
-          "checkedAt": "2026-11-14T05:51:29+01:00",
-          "weekNumber": 46,
+          "checkedAt": "2026-11-14T15:26:02+01:00",
+          "weekNumber": null,
           "days": {},
-          "status": "current",
+          "status": "review_required",
           "mode": "automatic",
-          "sourceAsset": "https://thairestaurangen.se/wp-content/uploads/2026/11/mellerud-vecka-46.png",
-          "extraction": "ocr",
-          "verifiedMenuImage": "https://thairestaurangen.se/wp-content/uploads/2026/11/mellerud-vecka-46.png"
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable"
         },
         {
           "id": "dinners-mellerud",
@@ -448,7 +429,7 @@
           "address": "Mellerud",
           "hours": "Vardagar 11.00–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -499,7 +480,7 @@
           "address": "Marknadsvägen 24, Årjäng",
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 47,
           "days": {},
           "status": "upcoming",
@@ -539,41 +520,6 @@
               "saturday": [],
               "sunday": []
             }
-          },
-          "lastSuccessfulMenu": {
-            "weekNumber": 46,
-            "checkedAt": "2026-11-13T13:33:34+01:00",
-            "days": {
-              "monday": [
-                "Gräddstuvad Pytt i Panna / Pytt i Panna med Stekt Ägg & Rödbetor",
-                "Sprödbakad Alaska med Rödlök & Honungscremé",
-                "Räk & Chilisoppa med Hembakad Focaccia"
-              ],
-              "tuesday": [
-                "Stekt Fläsk med Bruna Bönor / Löksås & Kokt Potatis, Lingonsylt",
-                "Pocherad Hoki med Citrussås & Färsk Spenat",
-                "Blomkålssoppa med Hembakad Foccacia"
-              ],
-              "wednesday": [
-                "Fläskfilégryta med Rotfrukter & Lök med Ugnsrostad Kulpotatis",
-                "Örtpanerad Tilapia med Romsås & Citron",
-                "Grönsakssoppa med Hembakad Foccacia"
-              ],
-              "thursday": [
-                "Örtkryddad Skinkstekt med Sotad Citron, Mustig Sås & Haricovert",
-                "Pocherad Alaska med Skaldjurssås, Dill & Citron",
-                "Köttfärssoppa med Vitlöksaioli / Creme Fraiche & Hembakad Focaccia",
-                "Pannkakor med Sylt & Grädde"
-              ],
-              "friday": [
-                "Fläsknoisette med Husets Potatisgratäng, Grönpepparsås / Vitlökssmör & Ugnsrostade Rotsaker",
-                "Pocherad Hoki med Vitvinsås & Smörstekta Kantareller",
-                "Champinjonsoppa med Hembakad Foccacia",
-                "Hembakad Silviakaka serveras till Kaffet"
-              ],
-              "saturday": [],
-              "sunday": []
-            }
           }
         }
       ],
@@ -593,7 +539,7 @@
           "address": "Gate",
           "hours": "Se veckans meny",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -633,7 +579,7 @@
           "hours": "Vardagar 11.00–14.30",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -699,7 +645,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "elins-bakgard",
@@ -708,7 +659,7 @@
           "address": "Magasinsgatan 4, Arvika",
           "hours": "Tisdag–fredag 11.30–14.30, lördag 12.00–15.00",
           "parser": "dated-weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [],
@@ -745,7 +696,7 @@
           "hours": "Vardagar 11.00–14.00",
           "parser": "scoped-weekday-headings",
           "headingPattern": "Café Gnistan lunchmeny",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "outdated",
@@ -768,7 +719,7 @@
           "address": "Nyängsgatan 1",
           "hours": "Dagens rätt 11.00–19.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -826,11 +777,13 @@
           "hours": "Lunch 11.00–15.00",
           "parser": "weekday-headings",
           "stopAfterPattern": "LÖRDAG OCH SÖNDAG",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
-          "weekNumber": 44,
+          "checkedAt": "2026-11-14T15:26:02+01:00",
+          "weekNumber": null,
           "days": {},
-          "status": "outdated",
-          "mode": "automatic"
+          "status": "unavailable",
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable"
         },
         {
           "id": "kils-hotell",
@@ -840,7 +793,7 @@
           "hours": "Vardagslunch 11.00–14.30",
           "parser": "weekday-headings",
           "stopAfterPattern": "Föregående|Våra tjänster",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -879,7 +832,7 @@
           "parser": "public-social-text",
           "publicActorId": "100063796472758",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
@@ -950,7 +903,12 @@
             ]
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "saffran-vitlok-sunne",
@@ -998,7 +956,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "sagolika-loven",
@@ -1036,7 +999,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "[Errno 101] Network is unreachable",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "[Errno 101] Network is unreachable",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "selma-spa-sunne",
@@ -1046,7 +1014,7 @@
           "hours": "Lunch à la carte; vardagar 11.30–14.00, helger 12.00–14.00 – se aktuella öppettider",
           "parser": "standing-pdf",
           "pdfLinkPattern": "/Lunchmeny[^/]*\\.pdf",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1110,7 +1078,12 @@
             "sunday": []
           },
           "status": "current",
-          "mode": "automatic"
+          "mode": "automatic",
+          "fetchFailure": true,
+          "error": "timed out",
+          "fetchAttemptedAt": "2026-11-14T15:26:02+01:00",
+          "fetchWarning": "timed out",
+          "menuFreshness": "retained_verified"
         },
         {
           "id": "hotell-charlottenberg",
@@ -1120,7 +1093,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
           "parser": "weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1177,7 +1150,7 @@
           "address": "Bromsgatan 8, Karlstad",
           "hours": "Lunch måndag–fredag 11.00–15.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1232,7 +1205,7 @@
             "Pizza",
             "Joan´s Klassiker"
           ],
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1278,7 +1251,7 @@
           "address": "Karlagatan 42, Karlstad",
           "hours": "Lunchbuffé tisdag–fredag 11.30–14.00",
           "parser": "weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [],
@@ -1312,10 +1285,6 @@
         {
           "name": "Karlstad – restauranger och lunch",
           "url": "https://www.karlstad.com/restauranger"
-        },
-        {
-          "name": "Visit Karlstad – mat och dryck",
-          "url": "https://visitkarlstad.se/visit-karlstad/mat-och-dryck"
         }
       ]
     },
@@ -1332,7 +1301,7 @@
           "expectedNamePattern": "Restaurant at Skoghalls Folkets Hus",
           "expectedAddress": "Skogåsvägen 3, 663 30 Skoghall",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1364,8 +1333,8 @@
             ],
             "friday": [
               "Fläskschnitzel med skånsk potatis",
-              "Sweet chilibakad laxfilé med kall romsås & kokt potatis",
-              "Dagens pasta",
+              "Krispbakad torskfilé med kall romsås & kokt potatis",
+              "Pasta med kycklingfilé i rosépepparsås",
               "Grönsaksbiff med srirachacrème & purjolökspotatis",
               "Fredagsdessert. Kokostoscakladdkaka med vispad grädde"
             ],
@@ -1384,7 +1353,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^Varje dag|VECKANS Veg|Välj dag",
           "excludeDishPattern": "^Kökets val",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1423,7 +1392,7 @@
           "hours": "Varm lunch måndag–fredag 11.00–14.00",
           "parser": "calendar-weekday-headings",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "unavailable",
@@ -1453,7 +1422,7 @@
           "hours": "Lunch vardagar 11.00–14.00",
           "parser": "ramo-standing-lunch",
           "standingNotice": "Fast lunchutbud: endast rätter som restaurangen uttryckligen märker LUNCHPAKET. Ingen veckomeny.",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1486,7 +1455,7 @@
           "parser": "matilda-rss",
           "dataUrl": "https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697338e1e2d237d90a0e7c51&lang=sv",
           "expectedMenuPattern": "Uranus Matsal",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1547,7 +1516,7 @@
           "parser": "weekday-headings",
           "stopAfterPattern": "^Smaklig måltid",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1583,7 +1552,7 @@
           "address": "Hennickehammar, Filipstad",
           "hours": "Lunchbuffé måndag–söndag 12.00–14.00",
           "parser": "rotating-weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1649,7 +1618,7 @@
           "parser": "hagfors-standing-pizza",
           "standingNotice": "Fast lunchutbud: pizzor i prisklass 1–4 enligt restaurangens luncherbjudande. Övriga lunchalternativ finns i originalmenyn.",
           "verified": true,
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "standing_menu",
@@ -1711,12 +1680,19 @@
           "expectedTextPattern": "KRONAN",
           "fallbackMode": "reference",
           "verified": true,
-          "checkedAt": "2026-11-14T05:51:29+01:00",
-          "weekNumber": null,
+          "checkedAt": "2026-11-14T15:26:02+01:00",
+          "weekNumber": 46,
           "days": {},
-          "status": "unavailable",
-          "mode": "reference",
-          "error": "menybilden saknar ett fullständigt verifierbart datum"
+          "status": "current",
+          "mode": "automatic",
+          "verifiedMenuImage": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.99422-6/899691489_2512083989314001_2633627188934254069_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=104&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=-TW4ImuES-0Q7kNvwEjADW8&_nc_oc=AdpcvcO2SS2XRzBjUBtOYYrmr6HSofybPbAtzd5A1pMH_7J3IIaRP2R7aq0MeBfaojM&_nc_zt=14&_nc_ht=scontent-ord5-1.xx&_nc_gid=GiIk3K4VRWMKe0WHPM9zyw&_nc_ss=7b20f&oh=00_AQQMCdZlH2vqs9ZNVeNo7uNOEUrjY8WmwDKKKW6RUTwx1g&oe=6AFE451F",
+          "sourceAsset": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.99422-6/899691489_2512083989314001_2633627188934254069_n.png?stp=dst-jpg_tt6&cstp=mx720x1280&ctp=p526x296&_nc_cat=104&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=-TW4ImuES-0Q7kNvwEjADW8&_nc_oc=AdpcvcO2SS2XRzBjUBtOYYrmr6HSofybPbAtzd5A1pMH_7J3IIaRP2R7aq0MeBfaojM&_nc_zt=14&_nc_ht=scontent-ord5-1.xx&_nc_gid=GiIk3K4VRWMKe0WHPM9zyw&_nc_ss=7b20f&oh=00_AQQMCdZlH2vqs9ZNVeNo7uNOEUrjY8WmwDKKKW6RUTwx1g&oe=6AFE451F",
+          "sourcePost": "https://www.facebook.com/Restaurangkronanhagfors/posts/pfbid0uJCUhFGfQVuyJZXhaQYdCRndEJNQSsvGkjapXqGM7B4xMcRHNmZvWBBbQ4z1LEy3l",
+          "extraction": "ocr",
+          "menuImageDate": "2026-11-11",
+          "verifiedMenuImageDays": [
+            "wednesday"
+          ]
         },
         {
           "id": "ferrum-hagfors",
@@ -1745,7 +1721,7 @@
           ],
           "displayAsImage": true,
           "verified": true,
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": null,
           "days": {},
           "status": "review_required",
@@ -1772,34 +1748,68 @@
           "dataUrl": "https://farinn62.github.io/lunch/",
           "menuYearPattern": "Lunch V\\.\\s*\\d{1,2}\\s+(\\d{4})",
           "stopAfterPattern": "SMAKLIG MÅLTID",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
-          "weekNumber": 46,
-          "days": {
-            "monday": [
-              "Kålpudding med gräddsås, lingon och kokt potatis.",
-              "Lunchkorv med stuvad potatis och sallad."
-            ],
-            "tuesday": [
-              "Raggmunkar med stekt fläsk och lingon",
-              "Stekt alaska­filé med spenat och vitvinssås, serveras med potatispuré."
-            ],
-            "wednesday": [
-              "Dillköttgryta med morötter och kokt potatis.",
-              "Spaghetti med baconsås och ost."
-            ],
-            "thursday": [
-              "Blomkålssoppa med bacon och tunna pannkakor med sylt och grädde.",
-              "Ostpanerad schnitzel med chili-paprikasås, gröna bönor och stekt potatis."
-            ],
-            "friday": [
-              "Fläskfilé noisette med bearnaisesås, sparris och kräftsjärtar samt rostad potatis.",
-              "Pannbiff med bacon, grönsaker, Madeirasås och potatismos."
-            ],
-            "saturday": [],
-            "sunday": []
+          "checkedAt": "2026-11-14T15:26:02+01:00",
+          "weekNumber": 47,
+          "days": {},
+          "status": "upcoming",
+          "mode": "automatic",
+          "upcomingMenu": {
+            "weekNumber": 47,
+            "year": 2026,
+            "validFrom": "2026-11-16",
+            "days": {
+              "monday": [
+                "Köttfärsgratäng med kantarellsås, lingon och kokt potatis.",
+                "Stekt falukorv med stuvade morötter, strimlad potatis och sallad."
+              ],
+              "tuesday": [
+                "Raggmunkar med stekt fläsk och lingon",
+                "Skomakarlåda med baconsås, potatismos och lingon."
+              ],
+              "wednesday": [
+                "Böhmisk schnitzel med äppelvinssås, sallad och stekt potatis.",
+                "Stekt Alaskafilé med dill och räksås, citron och potatispuré."
+              ],
+              "thursday": [
+                "Gulaschsoppa med crème fraîche, tunna pannkakor med sylt och grädde.",
+                "Kålmaja med gräddsås, lingon och kokt potatis."
+              ],
+              "friday": [
+                "Benfri kycklingklubba med Café de Paris-sås och grönsaksris.",
+                "Ångad torskfilé med äggsås, grönsaker och kokt potatis."
+              ],
+              "saturday": [],
+              "sunday": []
+            }
           },
-          "status": "current",
-          "mode": "automatic"
+          "lastSuccessfulMenu": {
+            "weekNumber": 46,
+            "checkedAt": "2026-11-14T05:51:29+01:00",
+            "days": {
+              "monday": [
+                "Kålpudding med gräddsås, lingon och kokt potatis.",
+                "Lunchkorv med stuvad potatis och sallad."
+              ],
+              "tuesday": [
+                "Raggmunkar med stekt fläsk och lingon",
+                "Stekt alaska­filé med spenat och vitvinssås, serveras med potatispuré."
+              ],
+              "wednesday": [
+                "Dillköttgryta med morötter och kokt potatis.",
+                "Spaghetti med baconsås och ost."
+              ],
+              "thursday": [
+                "Blomkålssoppa med bacon och tunna pannkakor med sylt och grädde.",
+                "Ostpanerad schnitzel med chili-paprikasås, gröna bönor och stekt potatis."
+              ],
+              "friday": [
+                "Fläskfilé noisette med bearnaisesås, sparris och kräftsjärtar samt rostad potatis.",
+                "Pannbiff med bacon, grönsaker, Madeirasås och potatismos."
+              ],
+              "saturday": [],
+              "sunday": []
+            }
+          }
         }
       ],
       "referenceSources": [
@@ -1821,7 +1831,7 @@
           "facilityId": "4b2f1165-54bb-5814-97b0-05927390e107",
           "expectedMunicipalityId": "1737",
           "expectedFacilityName": "Skogsstjärnan",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1859,7 +1869,7 @@
           "address": "Valbergsvägen 12, 685 33 Torsby",
           "hours": "Daglig lunch 11.30–14.30",
           "parser": "calendar-weekday-headings",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1896,7 +1906,7 @@
           "hours": "Lunchbuffé måndag–fredag 11.30–14.00",
           "parser": "weekday-headings",
           "stopAfterPattern": "Lunchbuffé serveras|Alltid på helgen",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1940,7 +1950,7 @@
           "stopAfterPattern": "^Crispy chicken burger",
           "dishSplitPattern": "(?<=\\.)\\s+(?=Pannkakor)",
           "fallbackMode": "reference",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
@@ -1986,7 +1996,7 @@
           "hours": "Endast upphämtning av mat för närvarande – se kommunens information",
           "parser": "pdf-weekday-menu",
           "pdfLinkPattern": "matsedel-pensionar-hemma",
-          "checkedAt": "2026-11-14T05:51:29+01:00",
+          "checkedAt": "2026-11-14T15:26:02+01:00",
           "weekNumber": 46,
           "days": {
             "monday": [
