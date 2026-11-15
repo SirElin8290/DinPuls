@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-11-15T04:26:55+00:00",
+  "generatedAt": "2026-11-15T04:41:57+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -147,7 +147,7 @@
           "name": "Säffle station",
           "alerts": [],
           "lookupTime": "2026-11-15T00:40+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-15T02:40+01:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -162,8 +162,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "F",
-              "stale": true
+              "platform": "F"
             },
             {
               "mode": "bus",
@@ -829,7 +828,7 @@
           "name": "Charlottenberg station",
           "alerts": [],
           "lookupTime": "2026-11-14T22:25+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-15T00:25+01:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -844,8 +843,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "train",
@@ -857,8 +855,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "3",
-              "stale": true
+              "platform": "3"
             },
             {
               "mode": "train",
@@ -923,9 +920,6 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje 501 och 560: Hållplatserna Kyrkogårdsallén och Östra infarten stängs från 6 september 22:00 till och med 20 november",
-            "Linje 500 och 501: Hållplats Kronoparkskyrkan stängs i riktning mot Centrum från 26 oktober 15.00",
-            "Linje 500 och 501: Hållplats Rönndungen stängd till och med 27 november",
             "Linje S och 61: Hållplats Kronoparken centrum flyttas 5 november till och med 11 december",
             "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
             "Linje 1 och 4: Hållplats Biltema stängs i riktning mot Bergvik och Ikea från 2 november"
@@ -938,31 +932,6 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "900",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-15T05:25:00+01:00",
-              "realtime": "2026-11-15T05:25:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "904",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-15T05:35:00+01:00",
-              "realtime": "2026-11-15T05:35:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "F"
-            },
-            {
-              "mode": "bus",
               "line": "501",
               "direction": "Skattkärr Väse",
               "operator": "Värmlandstrafik",
@@ -971,7 +940,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "D"
+              "platform": "D",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -983,7 +953,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -991,9 +962,9 @@
               "direction": "Välsviken handelsområde via Centrum",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-15T05:43:55+01:00",
-              "realtime": "2026-11-15T05:43:55+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-15T05:44:41+01:00",
+              "delayMinutes": 1,
+              "isRealtime": true,
               "canceled": false,
               "platform": "O"
             },
@@ -1015,7 +986,7 @@
               "direction": "Jakobsberg via Sjukhuset",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-15T05:52:01+01:00",
-              "realtime": "2026-11-15T05:51:52+01:00",
+              "realtime": "2026-11-15T05:52:01+01:00",
               "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
@@ -1051,9 +1022,9 @@
               "direction": "Gräsdalen via Gruvlyckan",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-15T06:03:00+01:00",
-              "realtime": "2026-11-15T06:03:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-15T06:01:42+01:00",
+              "delayMinutes": -1,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
@@ -1212,6 +1183,42 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Centrum via Stora Torget",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-15T06:34:00+01:00",
+              "realtime": "2026-11-15T06:34:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "904",
+              "direction": "Skoghall",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-15T06:35:00+01:00",
+              "realtime": "2026-11-15T06:35:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "901",
+              "direction": "Lövnäs",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-15T06:40:00+01:00",
+              "realtime": "2026-11-15T06:40:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "C"
             }
           ]
         }
@@ -1248,9 +1255,9 @@
               "direction": "Busstationen via Sjukhuset",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-15T05:50:00+01:00",
-              "realtime": "2026-11-15T05:50:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-15T05:56:57+01:00",
+              "delayMinutes": 7,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -1834,7 +1841,7 @@
           "name": "Torsby station",
           "alerts": [],
           "lookupTime": "2026-11-14T21:25+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-14T23:25+01:00",
           "engineVersion": "0.21.3",
           "error": null,
@@ -1849,8 +1856,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "T",
-              "stale": true
+              "platform": "T"
             },
             {
               "mode": "train",
@@ -1862,8 +1868,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
             },
             {
               "mode": "train",
