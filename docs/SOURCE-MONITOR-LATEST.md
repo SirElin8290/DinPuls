@@ -1,10 +1,10 @@
 # DinPuls nattkontroll
 
-Kontrollerad: 2026-11-20T05:47:37+00:00
+Kontrollerad: 2026-11-21T05:39:20+00:00
 
 ## Resultat
 
-{'reachable': 1913, 'changed': 760, 'unverified': 666, 'broken': 11, 'total': 3350, 'contentWarnings': 10}
+{'reachable': 1872, 'changed': 763, 'unverified': 682, 'broken': 12, 'total': 3329, 'contentWarnings': 12}
 
 ## Källor som behöver granskas
 
@@ -18,7 +18,8 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Åmål; Åmåls kommun | unverified | https://amal.se/arkiv/nyheter |
 | Äntligen dags fär julmarknad i Åmål – första advent och skyltsöndag! | unverified | https://amal.se/arkiv/nyheter/2026-nyheter/2026-11-06-antligen-dags-far-julmarknad-i-amal---forsta-advent-och-skyltsondag |
 | Ökad förståelse, skratt och nya perspektiv – Malte Hallquist kommer till Åmål med "Vardagens superhjältar" | unverified | https://amal.se/arkiv/nyheter/2026-nyheter/2026-11-17-okad-forstaelse-skratt-och-nya-perspektiv---malte-hallquist-kommer-till-amal-med-vardagens-superhjaltar |
-| SE-Alert – viktigt meddelande direkt i mobilen testas 7 december kl 15:00 SE-Alert är ett sätt att skicka ut Viktigt meddelande till allmänheten direkt till mobiltelefonen. Den 7 december klockan 15.00 testas för första gången SE-Alert i hela Sverige. Har du en uppdaterad smart mobil kommer du att få en notis med en skarp ljudsignal och vibration. | unverified | https://amal.se/arkiv/nyheter/2026-nyheter/2026-11-18-se-alert---viktigt-meddelande-direkt-i-mobilen-testas-7-december-kl-1500 |
+| SE-Alert – viktigt meddelande direkt i mobilen testas 7 december kl 15:00 | unverified | https://amal.se/arkiv/nyheter/2026-nyheter/2026-11-18-se-alert---viktigt-meddelande-direkt-i-mobilen-testas-7-december-kl-1500 |
+| Hjälp oss förbättra kommunernas digitala självservice Hur fungerar kommunernas e-tjänster, appar och andra digitala självservicefunktioner för dig? | unverified | https://amal.se/arkiv/nyheter/2026-nyheter/2026-11-20-hjalp-oss-forbattra-kommunernas-digitala-sjalvservice |
 | Åmål – Karlbergsgymnasiet | unverified | https://amal.se/barn-och-utbildning/karlbergsgymnasiet |
 | Åmål – Fritidshem | unverified | https://amal.se/barn-och-utbildning/kommunal-grundskola-och-fritidshem |
 | Åmål – Kristinebergskolan | unverified | https://amal.se/barn-och-utbildning/kommunal-grundskola-och-fritidshem/kristinebergskolan |
@@ -122,12 +123,12 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Färgelanda – Färgelanda Ridklubb; Färgelanda – Nättjebacka hembygdsförening; Färgelanda – OK Skärmen; Färgelanda – Stigens IF | changed | https://fargelanda.se/uppleva-och-gora/fritid/foreningsverksamhet/foreningar-med-egen-hemsida/ |
 | Färgelanda – Färgelanda Fotoklubb | unverified | https://fargelandafotoklubb.se/ |
 | Färgelanda – Färgelanda Släktforskarförening | unverified | https://fargelandasf.se/ |
-| Arvika – Svensk Syriska Föreningen i Arvika | changed | https://fb.com/ssfarvika |
 | Munkfors – Klarälven inom Munkfors fiskevårdsområdesförening | unverified | https://fiskevardsforbundet.se/ |
 | Åmål – Forsbacka Golfklubb | changed | https://forsbackagk.se/ |
 | Forshaga – Forshaga Amatörfiskeklubb | unverified | https://forshagaafk.se/ |
 | Forshaga – Forshaga Motor Club | changed | https://forshagamotorclub.se/ |
 | Mellerud – Framtidsbygder Dalsland | changed | https://framtidsbygder.se/ |
+| Arvika – Fredros Bygdegårdsförening | changed | https://fredrosbygdegard.blogspot.com/ |
 | Kristinehamn – Friskvården i Värmland/Kristinehamn | changed | https://friskvarden.org/friskvardscentral/kristinehamn/ |
 | Karlstad – FRO Värmland | changed | https://fro.se/fro-varmland/ |
 | Karlstad – Dyslexiförbundet Värmland | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=11 |
@@ -199,7 +200,6 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstad – PRO Lindfors | unverified | https://karlstad.se/kalender/omsorg-och-stod/traffpunkt-molkom/2025-01-02-traffpunktscafe-peking---musikunderhallning-med-anders-stavarby |
 | Karlstad – Karlstad Makers | unverified | https://karlstad.se/kommun-och-politik/sa-arbetar-vi-med/miljo-och-hallbarhet/handbok-for-delningsekonomi/goda-exempel-pa-delningslosningar |
 | Karlstad | unverified | https://karlstad.se/nyheter |
-| träd planteras i Karlstads kommun | unverified | https://karlstad.se/nyheter/startsida/2026-11-04-80-nya-trad-planteras-i-karlstads-kommun |
 | Hagaborgs cyklister trampade hem en tredjeplats i Sverige | unverified | https://karlstad.se/nyheter/startsida/2026-11-04-hagaborgs-cyklister-trampade-hem-en-tredjeplats-i-sverige |
 | Trygghetsmätningen 2026: Allt fler Karlstadsbor känner sig trygga | unverified | https://karlstad.se/nyheter/startsida/2026-11-09-trygghetsmatningen-2026-allt-fler-karlstadsbor-kanner-sig-trygga |
 | Vad ska den nya mötesplatsen i Vålberg heta? | unverified | https://karlstad.se/nyheter/startsida/2026-11-11-vad-ska-den-nya-motesplatsen-i-valberg-heta |
@@ -208,6 +208,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstadsbor är varmt välkomna att fira nyinvigningen av en av Karlstads största och mest anrika salonger | unverified | https://karlstad.se/nyheter/startsida/2026-11-16-karlstadsbor-ar-varmt-valkomna-att-fira-nyinvigningen-av-en-av-karlstads-storsta-och-mest-anrika-salonger |
 | Tobaksfria veckan – tillsammans kan vi skydda barn och unga | unverified | https://karlstad.se/nyheter/startsida/2026-11-17-tobaksfria-veckan---tillsammans-kan-vi-skydda-barn-och-unga |
 | Första seniorlandskampen i Karlstad på 34 år | unverified | https://karlstad.se/nyheter/startsida/2026-11-18-forsta-seniorlandskampen-i-karlstad-pa-34-ar |
+| Gemensamma insatser mot snö och halka i vinter | unverified | https://karlstad.se/nyheter/startsida/2026-11-20-gemensamma-insatser-mot-sno-och-halka-i-vinter |
 | Fira in det nya året på Stora torget med lasershower | unverified | https://karlstad.se/nyheter/uppleva-och-gora/uppleva-och-gora/2026-11-12-fira-in-det-nya-aret-pa-stora-torget-med-lasershower |
 | Karlstad – Internationella Qvinnoföreningen i Karlstad | unverified | https://karlstad.se/omsorg-och-stod/ekonomi-och-pengar/stod-till-arbete-och-studier |
 | Karlstad; Karlstad – Fröding Arena; Karlstad – Molkoms sporthall; Karlstad – Räddningstjänsten Karlstadsregionen | unverified | https://karlstad.se/omsorg-och-stod/trygg-och-saker/kris-och-beredskap/kommunens-beredskap-for-kris-och-krig/trygghetspunkter |
@@ -234,7 +235,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstad – Karlstad Stadsmission | changed | https://karlstadstadsmission.se/ |
 | Karlstad – Karlstad Studentkår | changed | https://karlstadstudentkar.se/ |
 | Karlstad – Karlstad Segelsällskap | changed | https://kdss.se/ |
-| Kristinehamn – KFUM Kristinehamn | unverified | https://kfumkristinehamn.se/ |
+| Kristinehamn – KFUM Kristinehamn | changed | https://kfumkristinehamn.se/ |
 | Kristinehamn – Kristinehamns Gymnastiksällskap | changed | https://kgsgympa.se/ |
 | Kil; Kil – Felanmälan; Kil – Gata och vårsopning; Kil – Kil kommun; Kil – Snö- och halkbekämpning | unverified | https://kil.se/ |
 | Kil – Kils evenemangskalender; Kils evenemangskalender | unverified | https://kil.se/arkiv/evenemang |
@@ -317,13 +318,13 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Kristinehamn | changed | https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=6973315ae2d237d90a0e78f9&lang=sv |
 | Grums | changed | https://menu.matildaplatform.com/rss?displayMode=Week&distributorId=697a13a9e2d237d90a0ef1c2&lang=sv |
 | Hagfors – Molkers Däck AB | unverified | https://molkersdack.nu/ |
+| Forshaga – Montagetjänst i Forshaga AB | changed | https://montagetjanst.se/ |
 | Karlstad – Karlstads Filmstudio | changed | https://mowie.filmstudio.se/ |
 | Munkfors – Munkfors motorklubb | changed | https://munkforsmc.se/ |
 | Karlstad – NEURO Karlstad | changed | https://neuro.se/forening/foereningar-a-oe/karlstad/ |
 | Mellerud – Nordalskretsen | changed | https://nordal.naturskyddsforeningen.se/ |
 | Kristinehamn – Föreningen Nordens lokalavdelning Kristinehamn | changed | https://norden.se/ |
 | Kristinehamn – Nördkreatörerna | changed | https://nordkreatorerna.wordpress.com/ |
-| Arvika – Tjejjouren Miriam | changed | https://old.intranet.roks.se/hittaenjour |
 | Årjäng – O.O.Design Optikpraktik | changed | https://oodesign.se/ |
 | Kristinehamn – Brottsofferjouren Östra Värmland | changed | https://ostravarmland.boj.se/ |
 | Karlstad – Värmlands Parasportförbund | unverified | https://parasport.se/distrikt/varmland |
@@ -372,6 +373,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Säffle – Julmarknad i Lönnskog | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-22-julmarknad-i-lonnskog.html |
 | Säffle – Gåfotboll | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-23-gafotboll.html |
 | Säffle – Canasta - Hjärngympa | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-24-canasta---hjarngympa.html |
+| Säffle – Familjerna Silvén och Silvénska Villan | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-24-familjerna-silven-och-silvenska-villan.html |
 | Säffle – Inflyttningsfika | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-24-inflyttningsfika.html |
 | Säffle – Mötesplatsen, Liv till åren  Mandala och högläsning | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-24-motesplatsen-liv-till-aren--mandala-och-hoglasning.html |
 | Säffle – Nick of Time - A Taste of Christmas | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-25-nick-of-time---a-taste-of-christmas.html |
@@ -395,6 +397,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Säffle – Canasta - Hjärngympa | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-08-canasta---hjarngympa.html |
 | Säffle – Mötesplatsen, Liv till åren  Shared reading | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-08-motesplatsen-liv-till-aren--shared-reading.html |
 | Säffle – Luciaparad till häst | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-12-luciaparad-till-hast.html |
+| Säffle – Lördagscafé med Sifhällatomtarna | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-19-lordagscafe-med-sifhallatomtarna.html |
 | Säffle – Wermland Operas Julturné - En sagolik jul | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-20-wermland-operas-julturne---en-sagolik-jul.html |
 | Säffle – Julfirande för ensamma | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-12-24-julfirande-for-ensamma.html |
 | Säffle kommun | unverified | https://saffle.se/arkiv/nyhetsarkiv.html |
@@ -507,7 +510,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Torsby – Torsby Brukshundklubb | changed | https://torsbybk.com/ |
 | Årjäng – Nordiska Travmuseet | changed | https://travmuseet.com/ |
 | Torsby – Gårdsföreningen Vägsjöfors Herrgård | changed | https://vagsjofors.se/ |
-| Årjäng – Västra Fågelviks Hbf Vår Gård | changed | https://vargard.wordpress.com/ |
+| Årjäng – Västra Fågelviks Hbf Vår Gård | unverified | https://vargard.wordpress.com/ |
 | Kristinehamn – ABF Cantabile | unverified | https://varmland.abf.se/ |
 | Karlstad – Värmlands Biodlardistrikt | changed | https://varmland.biodlarna.se/ |
 | Karlstad – Brottsofferjouren Värmland | changed | https://varmland.boj.se/ |
@@ -534,6 +537,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstad – Fysioterapimottagningen Gripen | changed | https://www.1177.se/Varmland/hitta-vard/kontaktkort/Fysioterapimottagningen-Gripen-Karlstad/ |
 | Karlstad – Fysioterapimottagningen Kronoparken | changed | https://www.1177.se/Varmland/hitta-vard/kontaktkort/Fysioterapimottagningen-Kronoparken-Karlstad/ |
 | Säffle – Jourcentralen Säffle | changed | https://www.1177.se/Varmland/hitta-vard/kontaktkort/Jourcentralen-Saffle/ |
+| Torsby – Akutmottagningen Torsby | changed | https://www.1177.se/Varmland/sa-fungerar-varden/varden-i-varmland/1att-besoka-en-akutmottagning/att-besoka-akutmottagningen-i-torsby/ |
 | Forshaga – Barnmorskemottagningen vårdcentralen Forshaga | changed | https://www.1177.se/Vasternorrland/hitta-vard/kontaktkort/Barnmorskemottagningen-vardcentralen-Forshaga/ |
 | Dals-Ed – Dals-Ed ungdomsmottagning | changed | https://www.1177.se/Vastra-Gotaland/hitta-vard/kontaktkort/Dals-Ed-ungdomsmottagning/ |
 | Åmål – Medpro Clinic Åmål Vårdcentral | changed | https://www.1177.se/Vastra-Gotaland/hitta-vard/kontaktkort/Medpro-Clinic-Amal-Vardcentral/ |
@@ -590,11 +594,11 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Hammarö – Folktandvården Skoghall | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Skoghall/ |
 | Sunne – Folktandvården Sunne | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Sunne/ |
 | Karlstad – Folktandvården Tingvalla | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Tingvalla-Karlstad/ |
-| Torsby – Folktandvården Torsby | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Torsby/ |
+| Torsby – Folktandvården Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Torsby/ |
 | Karlstad – Folktandvården Våxnäs | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Vaxnas-Karlstad/ |
-| Arvika – Fysioterapimottagning Mia Måseide | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagning-Mia-Maseide/ |
+| Arvika – Fysioterapimottagning Mia Måseide | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagning-Mia-Maseide/ |
 | Årjäng – Fysioterapimottagningen Årjäng | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Arjang/ |
-| Karlstad – Fysioterapimottagningen Centralsjukhuset Karlstad | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Centralsjukhuset-Karlstad-Centralsjukhuset/ |
+| Karlstad – Fysioterapimottagningen Centralsjukhuset Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Centralsjukhuset-Karlstad-Centralsjukhuset/ |
 | Eda – Fysioterapimottagningen Charlottenberg | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Charlottenberg/ |
 | Filipstad – Fysioterapimottagningen Filipstad | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Filipstad/ |
 | Forshaga – Fysioterapimottagningen Forshaga | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Forshaga/ |
@@ -602,30 +606,30 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Hammarö – Hammarö Fysioterapi | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hammaro-Fysioterapi/ |
 | Arvika – Fysioterapimottagningen Jösse vårdcentral Arvika | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Josse-vardcentral-Arvika/ |
 | Arvika – Fysioterapimottagningen Karin Jansson Ski och Fysio | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Karin-Jansson-Ski-och-Fysio-Arvika/ |
-| Karlstad – Fysioterapimottagningen Kasernhöjden Karlstad | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kasernhojden-Karlstad/ |
-| Kil – Fysioterapimottagningen Kil | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kil/ |
+| Karlstad – Fysioterapimottagningen Kasernhöjden Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kasernhojden-Karlstad/ |
+| Kil – Fysioterapimottagningen Kil | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kil/ |
 | Kristinehamn – Fysioterapimottagningen Kristinehamn | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kristinehamn/ |
-| Munkfors – Fysioterapimottagningen Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Munkfors/ |
-| Säffle – Fysioterapimottagningen Säffle | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Saffle/ |
-| Hammarö – Fysioterapimottagningen Skoghall | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Skoghall/ |
+| Munkfors – Fysioterapimottagningen Munkfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Munkfors/ |
+| Säffle – Fysioterapimottagningen Säffle | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Saffle/ |
+| Hammarö – Fysioterapimottagningen Skoghall | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Skoghall/ |
 | Sunne – Fysioterapimottagningen Sunne | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Sunne/ |
-| Bengtsfors – Gula villans tandvård | changed | https://www.1177.se/hitta-vard/kontaktkort/Gula-villans-tandvard-Bengtsfors/ |
-| Arvika – Jourcentralen Arvika | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/ |
+| Bengtsfors – Gula villans tandvård | unverified | https://www.1177.se/hitta-vard/kontaktkort/Gula-villans-tandvard-Bengtsfors/ |
+| Arvika – Jourcentralen Arvika | changed | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/ |
 | Torsby – Jourcentralen Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Torsby/ |
 | Åmål – Medpro Clinic Rehab Åmål | unverified | https://www.1177.se/hitta-vard/kontaktkort/Medpro-Clinic-Rehab-Amal/ |
-| Bengtsfors – Mini-Maria Bengtsfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Mini-Maria-Bengtsfors/ |
+| Bengtsfors – Mini-Maria Bengtsfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Mini-Maria-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors rehabmottagning | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-rehabmottagning-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors vårdcentral – Dals Långed | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Dals-Langed-Dals-Langed/ |
 | Dals-Ed – Närhälsan Dals-Ed barnavårdscentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Dals-Ed-barnavardscentral-Ed/ |
 | Dals-Ed – Närhälsan Dals-Ed rehabmottagning | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Dals-Ed-rehabmottagning-Ed/ |
 | Dals-Ed – Närhälsan Dals-Ed vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Dals-Ed-vardcentral-Ed/ |
-| Färgelanda – Närhälsan Färgelanda vårdcentral | changed | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Fargelanda-vardcentral-Fargelanda/ |
-| Mellerud – Närhälsan Mellerud vårdcentral | changed | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Mellerud-vardcentral-Mellerud/ |
+| Färgelanda – Närhälsan Färgelanda vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Fargelanda-vardcentral-Fargelanda/ |
+| Mellerud – Närhälsan Mellerud vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Mellerud-vardcentral-Mellerud/ |
 | Kristinehamn – Ögonmottagningen Kristinehamn | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ogonmottagningen-Kristinehamn/ |
 | Torsby – Psykiatrisk mottagning Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Psykiatrisk-mottagning-Torsby/ |
 | Arvika – Sjukhuset Arvika | unverified | https://www.1177.se/hitta-vard/kontaktkort/Sjukhuset-Arvika/ |
-| Torsby – Sjukhuset Torsby | changed | https://www.1177.se/hitta-vard/kontaktkort/Sjukhuset-Torsby/ |
+| Torsby – Sjukhuset Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Sjukhuset-Torsby/ |
 | Forshaga – Tandläkare Erik Hallman | unverified | https://www.1177.se/hitta-vard/kontaktkort/Tandlakare-Erik-Hallman-Forshaga/ |
 | Eda – Ungdomsmottagningen Eda | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ungdomsmottagningen-Eda/ |
 | Filipstad – Ungdomsmottagningen Filipstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ungdomsmottagningen-Filipstad/ |
@@ -633,21 +637,21 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Grums – Ungdomsmottagningen Grums | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ungdomsmottagningen-Grums/ |
 | Hagfors – Ungdomsmottagningen Hagfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ungdomsmottagningen-Hagfors/ |
 | Hammarö – Ungdomsmottagningen Mörmo Gård Skoghall | unverified | https://www.1177.se/hitta-vard/kontaktkort/Ungdomsmottagningen-Mormo-Gard-Skoghall/ |
-| Munkfors – Vaccinationsmottagning Munkfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Vaccinationsmottagning-Munkfors/ |
+| Munkfors – Vaccinationsmottagning Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vaccinationsmottagning-Munkfors/ |
 | Årjäng – Vårdcentralen Årjäng | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Arjang |
 | Karlstad – Vårdcentralen Åttkanten Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Attkanten-Karlstad |
 | Eda – Vårdcentralen Eda | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Eda/ |
 | Filipstad – Vårdcentralen Filipstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Filipstad/ |
-| Forshaga – Vårdcentralen Forshaga | changed | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Forshaga |
+| Forshaga – Vårdcentralen Forshaga | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Forshaga |
 | Karlstad – Vårdcentralen Gripen Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Gripen-Karlstad/ |
 | Grums – Vårdcentralen Grums | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Grums/ |
 | Hagfors – Vårdcentralen Hagfors Ekshärad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Hagfors-Eksharad/ |
-| Kil – Vårdcentralen Kil | changed | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Kil/ |
+| Kil – Vårdcentralen Kil | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Kil/ |
 | Kristinehamn – Vårdcentralen Kristinehamn | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Kristinehamn |
 | Karlstad – Vårdcentralen Kronoparken Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Kronoparken-Karlstad/ |
 | Munkfors – Vårdcentralen Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Munkfors |
 | Munkfors – Vårdcentralen Munkfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Munkfors/ |
-| Säffle – Vårdcentralen Säffle | changed | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Saffle/ |
+| Säffle – Vårdcentralen Säffle | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Saffle/ |
 | Karlstad – Vårdcentralen Skåre Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Skare-Karlstad/ |
 | Hammarö – Vårdcentralen Skoghall | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Skoghall/ |
 | Storfors – Vårdcentralen Storfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Vardcentralen-Storfors/ |
@@ -734,13 +738,13 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Arvika; Arvika kommun | unverified | https://www.arvika.se/nyheter.2932.html |
 | Det händer på Arvika bibliotek vecka 46 | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/dethanderpaarvikabibliotekvecka46.9250.html |
 | Det händer på Arvika bibliotek vecka 47 | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/dethanderpaarvikabibliotekvecka47.9280.html |
+| Det händer på Arvika bibliotek vecka 48 | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/dethanderpaarvikabibliotekvecka48.9312.html |
 | Emil Mattsson blir ny gymnasiechef | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/emilmattssonblirnygymnasiechef.9165.html |
-| En simhall för hälsa och gemenskap | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/ensimhallforhalsaochgemenskap.9118.html |
 | En vecka fri från våld | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/enveckafrifranvald.9238.html |
+| Från kommunstyrelsen 18 november | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/frankommunstyrelsen18november.9311.html |
 | Helikopterkalkning i kommunen | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/helikopterkalkningikommunen.9282.html |
 | Kommunfullmäktige 9 november | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/kommunfullmaktige9november.9222.html |
 | Nya kommunfullmäktige har börjat | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/nyakommunfullmaktigeharborjat.9265.html |
-| Ny lägesbild om brottsligheten i Arvika kommun | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/nylagesbildombrottsligheteniarvikakommun.9130.html |
 | Vägledningscentrum har stängt för antagningsarbete | unverified | https://www.arvika.se/nyheter/nyhetsarkiv/vagledningscentrumharstangtforantagningsarbete.9237.html |
 | Arvika – Eritreanska Kulturföreningen i Arvika | unverified | https://www.arvika.se/omsorgochstod/aldreomsorg/dagverksamhetochmotesplatser/foreningarmedaktiviteterforseniorer.8096.html |
 | Arvika; Arvika – Edane skola; Arvika – Glava skola; Arvika – Järvenskolan; Arvika – Klässbols skola; Arvika – Kulturhuset Ritz; Arvika – Rinnens skola; Arvika – Räddningstjänsten Arvika; Arvika – Sulviks skola | unverified | https://www.arvika.se/omsorgochstod/tryggochsaker/krisochberedskap/kommunenstrygghetspunkter.7093.html |
@@ -790,8 +794,10 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Senior Sport School avslutades med diplom, gemenskap och framtidstro | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-12-senior-sport-school-avslutades-med-diplom-gemenskap-och-framtidstro |
 | Orange Week uppmärksammar allas rätt till ett liv fritt från våld | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-13-orange-week-uppmarksammar-allas-ratt-till-ett-liv-fritt-fran-vald |
 | Returen stängd 25 november | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-13-returen-stangd-25-november |
-| Intresseanmälan - Uthyrning av Kaffestugan på Majberget Vi söker hyresgäst till Kaffestugan invid Halmens hus på Majberget. | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-17-intresseanmalan-----uthyrning-av-kaffestugan-pa-majberget |
+| Intresseanmälan - Uthyrning av Kaffestugan på Majberget | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-17-intresseanmalan-----uthyrning-av-kaffestugan-pa-majberget |
 | Ny avfallsplan ute på samråd | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-17-ny-avfallsplan-ute-pa-samrad |
+| God man – Trygghet och stöd för ensamma och utsatta personer De är många gånger tryggheten i tillvaron för ensamma och utsatta personer. | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-20-god-man---trygghet-och-stod-for-ensamma-och-utsatta-personer |
+| Hjälp oss utveckla vår digitala självservice | unverified | https://www.bengtsfors.se/arkiv/nyheter/nyheter/2026-11-20-hjalp-oss-utveckla-var-digitala-sjalvservice |
 | Bengtsfors – Kultursommar Bengtsfors; Bengtsfors – Kultursommar i Bengtsfors kommun | unverified | https://www.bengtsfors.se/download/18.f14c6aa19ddcc3e5ed4192b/1778651132375/Program_Kultursommar_2026.pdf |
 | Bengtsfors; Bengtsfors – Bengtsgårdens sporthall; Bengtsfors – Bäckefors gymnastikhall; Bengtsfors – Ekhagshallen i Dals Långed; Bengtsfors – Lövåsens bollhall i Billingsfors; Bengtsfors – Norra Älvsborgs Räddningstjänstförbund; Bengtsfors – Strömkullen | unverified | https://www.bengtsfors.se/kommun-och-politik/kris-och-sakerhet/trygghetspunkter-och-informationspunkter |
 | Bengtsfors – Bengtsfors kommun | unverified | https://www.bengtsfors.se/kommunala-bolag/bengtsfors-energi-ab/vatten-och-avlopp/driftinformation |
@@ -836,7 +842,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Arvika – IF Brunskog United | unverified | https://www.brunskogunited.se/ |
 | Årjäng – Bufff Värmland | changed | https://www.bufff.se/ |
 | Dals-Ed – Ulf Rings El i Ed AB | unverified | https://www.bygg.se/experter/elektriker/dals-ed |
-| Säffle – Centrumkyrkans Församling | changed | https://www.centrumkyrkansaffle.se/ |
+| Säffle – Centrumkyrkans Församling | unverified | https://www.centrumkyrkansaffle.se/ |
 | Karlstad – CheerXplosion | changed | https://www.cheerxplosion.se/ |
 | Karlstad – Carlstad Crusaders | changed | https://www.crusaders.se/ |
 | CSN | changed | https://www.csn.se/ |
@@ -880,17 +886,29 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Åmål – Edsleskogs Byalag | changed | https://www.edsleskog.com/ |
 | Hagfors – Ekshärads Golfklubb | unverified | https://www.eksharadsgk.se/ |
 | Arvika – Elbil Sverige / Värmland | changed | https://www.elbilsverige.se/ |
-| Hagfors – Elcenter Hagfors | changed | https://www.elcenterab.se/kontakt/ |
+| Hagfors – Elcenter Hagfors | unverified | https://www.elcenterab.se/kontakt/ |
 | Arvika – Equmenia Arvika; Arvika – Equmenia Arvika - SMU; Arvika – Equmeniakyrkan Arvika | changed | https://www.equmeniakyrkanarvika.se/ |
 | Karlstad – Equmenia Väse | changed | https://www.equmeniakyrkanvase.se/ |
-| Karlstad – Karlstad Rotaryklubb | changed | https://www.facebook.com/RotaryiKarlstad/ |
-| Säffle – Säffle Kampsportklubb | changed | https://www.facebook.com/SaffleKampsport/ |
-| Arvika – Glaskogens JSK | changed | https://www.facebook.com/groups/1703246056616802/ |
+| Bengtsfors – Ärtemarks IF | changed | https://www.facebook.com/61570160823919/?locale=id_ID |
+| Karlstad – Bellevues ponnyridklubb | changed | https://www.facebook.com/BellevuesPonnyridklubb |
+| Torsby – Ambjörby Folkets Husförening | changed | https://www.facebook.com/BioNordvarmland |
+| Grums – Borgviks IF | changed | https://www.facebook.com/BorgviksIF/ |
+| Grums – Grums Bordtennisklubb | changed | https://www.facebook.com/GBTK2017/ |
+| Årjäng – Silleruds Hembygdsförening | changed | https://www.facebook.com/SillerudsHembygdsforening/ |
+| Munkfors – Clear River MC | changed | https://www.facebook.com/groups/115636515178371/ |
+| Arvika – Kvinnor i Arvika | changed | https://www.facebook.com/groups/1538613232859920/ |
+| Mellerud – Melleruds Trollingklubb | changed | https://www.facebook.com/groups/221880274845620/ |
+| Arvika – Arvika Kanotklubb | changed | https://www.facebook.com/groups/272463359448514/ |
+| Arvika – Arvika Dragspelsklubb | changed | https://www.facebook.com/groups/arvikadragspelsklubb/ |
+| Årjäng – Hämnäs bygdegård | changed | https://www.facebook.com/hamnasbygdegard/?locale=sv_SE |
+| Kil – Kils Konstförening | changed | https://www.facebook.com/kilsgalleri/ |
 | Munkfors – Munkfors revy och teaterförening | unverified | https://www.facebook.com/munkforsrevyn/about?locale=sv_SE |
-| Årjäng – Östervallskogs Hembygdsförening | changed | https://www.facebook.com/ostervallskogs.hembygdsforening/ |
-| Årjäng – Årjängs Gymnastikförening | changed | https://www.facebook.com/p/%C3%85rj%C3%A4ngs-Gymnastikf%C3%B6rening-100064697646371/ |
-| Mellerud – Bettes Drängar | changed | https://www.facebook.com/p/Bettes-Dr%C3%A4ngar-med-Elisabette-Emanuelsson-100030928647141/ |
+| Arvika – Bytorpsföreningen | changed | https://www.facebook.com/p/Bytorpsf%C3%B6reningen-61584716013188/ |
 | Arvika – Föreningen Arvika Systema | broken | https://www.facebook.com/search/top?q=arvika%20systema |
+| Säffle – Tveta Bygdeförening | changed | https://www.facebook.com/tvetabygdegardsforening/?locale=sv_SE |
+| Karlstad – Värmlands Dövas Förening | changed | https://www.facebook.com/varmlandsdovaslansforening |
+| Karlstad – Värmlands Kattklubb | changed | https://www.facebook.com/varmlandskattklubb/ |
+| Karlstad – Värmlands Teater | changed | https://www.facebook.com/varmlandsteaternkarlstad/ |
 | Färgelanda – Färgelanda IF | changed | https://www.fargelandaif.se/ |
 | Karlstad – Färjestad BK | changed | https://www.farjestadbk.se/ |
 | Karlstad – Färjestads ridklubb | unverified | https://www.fark.se/ |
@@ -905,8 +923,8 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Förtjänstteckenutdelning efter 25 år i kommunens tjänst | unverified | https://www.filipstad.se/nyheter/nyheterstartsidan/fortjanstteckenutdelningefter25arikommunenstjanst.12133.html |
 | Näringsliv, kommun och polis kraftsamlar för ett tryggare Filipstad | unverified | https://www.filipstad.se/nyheter/nyheterstartsidan/naringslivkommunochpoliskraftsamlarforetttryggarefilipstad.12056.html |
 | Sammanträde med kommunfullmäktige 19 november 2026 | unverified | https://www.filipstad.se/nyheter/nyheterstartsidan/sammantrademedkommunfullmaktige19november2026.12116.html |
+| Bidrag för föreningar till jullovsaktiviteter | unverified | https://www.filipstad.se/nyheter/puffar/bidragforforeningartilljullovsaktiviteter.9026.html |
 | Lediga sjönära villatomter vid Finnshyttans strand | unverified | https://www.filipstad.se/nyheter/puffar/ledigasjonaravillatomtervidfinnshyttansstrand.11921.html |
-| Öppet hus på Spångbergsgymnasiet 19 november | unverified | https://www.filipstad.se/nyheter/puffar/oppethuspaspangbergsgymnasiet19november.10379.html |
 | Vi söker familjehem och kontaktfamiljer | unverified | https://www.filipstad.se/nyheter/puffar/visokerfamiljehemochkontaktfamiljer.9283.html |
 | Filipstad – Filipstad kommun – läsårstider; Filipstad – Höstlov; Filipstad – Lovdag; Filipstad – Påsklov; Filipstad – Sportlov; Filipstad – Terminsavslutning; Filipstad – Terminsstart | unverified | https://www.filipstad.se/toppmeny/barnochutbildning/lasarstider.808.html |
 | Filipstad – Filipstad kommun – skolmat | unverified | https://www.filipstad.se/toppmeny/barnochutbildning/matsedelinomskolan.645.html |
@@ -974,7 +992,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Grums; Grums – Kartbaserad felanmälan | unverified | https://www.grums.se/kommunpolitik/kontaktaoss/felanmalan.1671.html |
 | Bygg- och avloppslördag 21 november | unverified | https://www.grums.se/nyheter/startsida/byggochavloppslordag21november.12421.html |
 | Har du tips på ett riktigt roligt fågelbord? | unverified | https://www.grums.se/nyheter/startsida/hardutipspaettriktigtroligtfagelbord.12481.html |
-| Karlbergs avfallsstation har ändrade öppettider på tisdag 20 oktober | unverified | https://www.grums.se/nyheter/startsida/karlbergsavfallsstationharandradeoppettiderpatisdag20oktober.12332.html |
+| Hjälp till att stoppa invasiva arter - rengör båt, kanot och utrustning | unverified | https://www.grums.se/nyheter/startsida/hjalptillattstoppainvasivaarterrengorbatkanotochutrustning.12361.html |
 | Kriskommunikationsövning med radio den 19 november | unverified | https://www.grums.se/nyheter/startsida/kriskommunikationsovningmedradioden19november.12581.html |
 | Nya kommunfullmäktige i Grums kommun | unverified | https://www.grums.se/nyheter/startsida/nyakommunfullmaktigeigrumskommun.12363.html |
 | Prata med din ungdom inför Halloween och höstlovet | unverified | https://www.grums.se/nyheter/startsida/pratameddinungdominforhalloweenochhostlovet.12333.html |
@@ -1076,7 +1094,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstad – I2 Skytteförening | changed | https://www.i2skf.se/ |
 | Hammarö – ICA Supermarket Skoghall | unverified | https://www.ica.se/butiker/supermarket/hammaro/ica-supermarket-skoghall-1003506/tjanster/lunch/ |
 | Karlstad – IF Boltic Karlstad | changed | https://www.ifboltic.com/ |
-| Karlstad – IF Boltic Karlstad | unverified | https://www.ifboltic.com/sida/?ID=522652 |
+| Karlstad – IF Boltic Karlstad | broken | https://www.ifboltic.com/sida/?ID=522652 |
 | Karlstad – IF Göta Karlstad | changed | https://www.ifgota.se/ |
 | Mellerud – Nedre Upperudsälvens FVO | changed | https://www.ifiske.se/en/fishing-nedre-upperudsalvens-fvo.htm |
 | Arvika – Stömne FVOF | changed | https://www.ifiske.se/fiske-stomne-fvof.htm |
@@ -1087,7 +1105,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Integritetsskyddsmyndigheten (IMY) | changed | https://www.imy.se/ |
 | Arvika – IOGT-NTO Arvika | changed | https://www.iogt.se/ |
 | Arvika – IOGT-NTO:s Juniorförening Moviekids; Arvika – Movendi Arvika | broken | https://www.iogt.se/varmland/foreningsinfo |
-| Arvika – Manskören IRIS | changed | https://www.iriskoren.se/ |
+| Arvika – Manskören IRIS | unverified | https://www.iriskoren.se/ |
 | Arvika – Jössebygdens Trädgårdsförening | changed | https://www.jossebygden.se/ |
 | Arvika – Jössefiskarna | unverified | https://www.jossefiskarna.se/ |
 | Arvika – Jössefors IK | changed | https://www.josseforsik.se/ |
@@ -1099,6 +1117,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/ |
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/start/tr%C3%A4na-karate |
 | Karlstad – Karlstad – restauranger och lunch | unverified | https://www.karlstad.com/restauranger |
+| Karlstad – Karlstad Badmintonklubb | unverified | https://www.karlstadbadminton.se/ |
 | Karlstad – Karlstad Båtklubb | changed | https://www.karlstadbatklubb.se/ |
 | Karlstad – IF Karlstad Fotboll | changed | https://www.karlstadfotboll.com/ |
 | Karlstad – Karlstad IBF | changed | https://www.karlstadinnebandy.se/ |
@@ -1138,6 +1157,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Arvika – Kronans Apotek Arvika | changed | https://www.kronansapotek.se/hitta-apotek/kronans-apotek-arvika-1831/ |
 | Filipstad – Kronans Apotek Filipstad | changed | https://www.kronansapotek.se/hitta-apotek/kronans-apotek-filipstad-0598/ |
 | Kil – Kronans Apotek Kil | changed | https://www.kronansapotek.se/hitta-apotek/kronans-apotek-kil-0592/ |
+| Säffle – Kronans Apotek Säffle 45:an Köpcentrum | changed | https://www.kronansapotek.se/hitta-apotek/kronans-apotek-saffle-45an-kopcentrum-1834/ |
 | Mellerud – Kroppefjälls IF | changed | https://www.kroppefjallsif.se/kroppefjallsif-fotboll-seniorherrar |
 | Kristinehamn – Kristinehamns Simsällskap | unverified | https://www.krss.org/ |
 | Arvika – Krukmakeriets Vänner | unverified | https://www.krukmakerietsvanner.se/ |
@@ -1293,6 +1313,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Hammarö – Skoghalls BTK; Hammarö – Skoghalls Bordtennisklubb | changed | https://www.skoghallsbtk.se/ |
 | Hammarö – Skoghallsfolketshus | changed | https://www.skoghallsfolketshus.se/ |
 | Hammarö – Skoghalls Innebandyklubb; Hammarö – Skoghalls Innebandyklubb Utveckling | unverified | https://www.skoghallsinnebandy.se/ |
+| Hammarö – Skoghalls Musikkår | unverified | https://www.skoghallsmusikkar.se/ |
 | Kil | changed | https://www.skolmat.info/api/public/matsedlar/F943DCD2-B218-47EF-8BC9-C683010685A0/rss?limit=7 |
 | Karlstad – Sörmons ridklubb | unverified | https://www.smrk.se/ |
 | Karlstad – Bujinkan Solstaden Dojo IF | unverified | https://www.solstadendojo.com/ |
@@ -1360,7 +1381,7 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Filipstad – Filipstads SF | changed | https://www.svenskalag.se/filipstadssf |
 | Grums – Grums Gymnastikklubb | changed | https://www.svenskalag.se/grumsgymnastikklubb |
 | Grums – Grums IK Hockey | changed | https://www.svenskalag.se/grumsik |
-| Hagfors – Hagfors IBS | unverified | https://www.svenskalag.se/hagforsibs |
+| Hagfors – Hagfors IBS | changed | https://www.svenskalag.se/hagforsibs |
 | Hammarö – Hammarö Jaktvårdsklubb | changed | https://www.svenskalag.se/hammarojaktvardsklubb |
 | Färgelanda – HEF Valbo BK | changed | https://www.svenskalag.se/hefvalbobk |
 | Karlstad – Herrhagens innebandyförening | changed | https://www.svenskalag.se/herrhagensif |
@@ -1441,17 +1462,17 @@ Kontrollerad: 2026-11-20T05:47:37+00:00
 | Evenemang i Torsby; Torsby – Evenemang i Torsby | changed | https://www.visitvarmland.com/torsby/evenemang |
 | Arvika – Frigörande dansföreningen Vojago | unverified | https://www.vojago.se/ |
 | Arvika – Västvärmlands OK | unverified | https://www.vvok.se/ |
-| Hammarö – VVS Partner i Karlstad AB | unverified | https://www.vvs-karlstad.se/ |
 | Årjäng – XL-BYGG Årjäng | changed | https://www.xlbygg.se/butiker/xl-bygg-arjang/ |
 | Säffle – Säffle Ridklubb | unverified | https://www.xn--sfflerk-5wa.se/ |
 | Torsby – NordVärmlands Släktforskarförening | changed | https://www.xn--slktitorsby-m8a.se/ |
 | Arvika – Stavnäs Idrottsklubb | unverified | https://www.xn--stavnsik-4za.se/ |
-| Eda – Källmans Konditori; Källmans Konditori | unverified | https://xn--kllmans-5wa.se/lunch/ |
+| Eda – Källmans Konditori; Källmans Konditori | changed | https://xn--kllmans-5wa.se/lunch/ |
 
 ## Innehåll och uppdateringar
 
 Färgelanda – Evenemang: Kalendern saknar kommande evenemang. Kontrollera källans publicerade innehåll och hämtformat; tom HTML bevisar inte att evenemang saknas.
 Åmål – Dalslands Skafferi: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
+Åmål – Berga Bistro: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Säffle – Fyren Duse Udde: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Mellerud – Sunnanå Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Mellerud – Kanyas Café & Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
@@ -1459,6 +1480,7 @@ Kil – Kils Golfrestaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny m
 Kil – Järnvägscafét i Kil: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Sunne – Selma Spa Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Hammarö – ICA Supermarket Skoghall: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
+Hagfors – Restaurang Kronan: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Hagfors – Restaurang Ferrum: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 
 ## Automatiska uppdateringar
