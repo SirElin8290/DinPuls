@@ -1,6 +1,6 @@
 {
   "version": "0.21.3",
-  "generatedAt": "2026-11-22T15:27:19+00:00",
+  "generatedAt": "2026-11-22T15:42:30+00:00",
   "source": "Trafiklab",
   "sourceUrl": "https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/",
   "partial": false,
@@ -160,18 +160,6 @@
           "error": null,
           "departures": [
             {
-              "mode": "bus",
-              "line": "800",
-              "direction": "Grums Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:23:00+01:00",
-              "realtime": "2026-11-22T16:25:18+01:00",
-              "delayMinutes": 2,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
-            {
               "mode": "train",
               "line": "3968",
               "direction": "Karlstad Central",
@@ -310,7 +298,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "X"
+              "platform": "X",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -322,7 +311,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -347,7 +337,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -359,7 +350,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -371,7 +363,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A"
+              "platform": "A",
+              "stale": true
             }
           ]
         }
@@ -425,6 +418,30 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "A"
+            },
+            {
+              "mode": "train",
+              "line": "3971",
+              "direction": "Göteborg Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-11-22T17:35:00+01:00",
+              "realtime": "2026-11-22T17:35:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "train",
+              "line": "13216",
+              "direction": "Säffle",
+              "operator": "187",
+              "scheduled": "2026-11-22T17:36:00+01:00",
+              "realtime": "2026-11-22T17:36:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
             },
             {
               "mode": "bus",
@@ -484,25 +501,12 @@
           "departures": [
             {
               "mode": "bus",
-              "line": "600",
-              "direction": "Oslo",
-              "operator": "FlixBus Sverige AB",
-              "scheduled": "2026-11-22T16:25:00+01:00",
-              "realtime": "2026-11-22T16:31:21+01:00",
-              "delayMinutes": 6,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "D",
-              "stale": true
-            },
-            {
-              "mode": "bus",
               "line": "700",
               "direction": "Töcksfors",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T17:00:00+01:00",
-              "realtime": "2026-11-22T16:57:12+01:00",
-              "delayMinutes": -3,
+              "realtime": "2026-11-22T16:59:02+01:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "B"
@@ -697,7 +701,9 @@
           "id": "740000217",
           "name": "Grums station",
           "alerts": [
-            "Linje 801: Hållplats Biltema stängs i riktning mot Grums från 2 november"
+            "Linje 801: Hållplats Biltema stängs i riktning mot Grums från 2 november",
+            "Linje 800 försenad från Åmål resecentrum kl 16:00 - Karlstad busstation",
+            "Försening på linje 800 mot Säffle Grums Karlstad"
           ],
           "lookupTime": "2026-11-22T15:10+01:00",
           "retained": false,
@@ -715,7 +721,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": ""
+              "platform": "",
+              "stale": true
             },
             {
               "mode": "train",
@@ -725,9 +732,10 @@
               "scheduled": "2026-11-22T16:39:00+01:00",
               "realtime": "2026-11-22T16:39:00+01:00",
               "delayMinutes": 0,
-              "isRealtime": true,
+              "isRealtime": false,
               "canceled": false,
-              "platform": "T"
+              "platform": "T",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -735,8 +743,8 @@
               "direction": "Grums",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:50:00+01:00",
-              "realtime": "2026-11-22T16:51:02+01:00",
-              "delayMinutes": 1,
+              "realtime": "2026-11-22T16:48:50+01:00",
+              "delayMinutes": -1,
               "isRealtime": true,
               "canceled": false,
               "platform": "E"
@@ -747,8 +755,8 @@
               "direction": "Karlstad",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:53:00+01:00",
-              "realtime": "2026-11-22T16:57:09+01:00",
-              "delayMinutes": 4,
+              "realtime": "2026-11-22T17:02:37+01:00",
+              "delayMinutes": 10,
               "isRealtime": true,
               "canceled": false,
               "platform": "A"
@@ -851,7 +859,9 @@
         {
           "id": "740000206",
           "name": "Kil station",
-          "alerts": [],
+          "alerts": [
+            "Linje 201 försenad från Karlstad busstation kl 16:10 - Fagerås resecentrum"
+          ],
           "lookupTime": "2026-11-22T12:55+01:00",
           "retained": false,
           "nextSearchAfter": "2026-11-22T14:55+01:00",
@@ -859,39 +869,13 @@
           "error": null,
           "departures": [
             {
-              "mode": "train",
-              "line": "3971",
-              "direction": "Göteborg Central",
-              "operator": "SJ AB",
-              "scheduled": "2026-11-22T16:25:00+01:00",
-              "realtime": "2026-11-22T16:25:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "",
-              "stale": true
-            },
-            {
-              "mode": "train",
-              "line": "71",
-              "direction": "Göteborg",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:25:00+01:00",
-              "realtime": "2026-11-22T16:25:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "T",
-              "stale": true
-            },
-            {
               "mode": "bus",
               "line": "201",
               "direction": "Fagerås",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:40:00+01:00",
-              "realtime": "2026-11-22T16:44:52+01:00",
-              "delayMinutes": 5,
+              "realtime": "2026-11-22T16:54:41+01:00",
+              "delayMinutes": 15,
               "isRealtime": true,
               "canceled": false,
               "platform": "F"
@@ -931,6 +915,42 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "B"
+            },
+            {
+              "mode": "train",
+              "line": "3968",
+              "direction": "Karlstad Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-11-22T17:33:00+01:00",
+              "realtime": "2026-11-22T17:33:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "train",
+              "line": "71",
+              "direction": "Karlstad centralstation",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:33:00+01:00",
+              "realtime": "2026-11-22T17:33:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": true,
+              "canceled": false,
+              "platform": "T"
+            },
+            {
+              "mode": "train",
+              "line": "74",
+              "direction": "Torsby",
+              "operator": "Vy Tåg",
+              "scheduled": "2026-11-22T17:41:00+01:00",
+              "realtime": "2026-11-22T17:41:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "3"
             }
           ]
         }
@@ -1078,12 +1098,15 @@
           "id": "740098025",
           "name": "Karlstad",
           "alerts": [
-            "Linje S och 61: Hållplats Kronoparken centrum flyttas 5 november till och med 11 december",
-            "Linje 1 och 4: Hållplats Biltema stängs i riktning mot Bergvik och Ikea från 2 november",
             "Linje 4: Ändrad körväg och stängda hållplatser från 3 augusti",
+            "Linje 1 och 4: Hållplats Biltema stängs i riktning mot Bergvik och Ikea från 2 november",
+            "Försening på linje 4 mot Gräsdalen",
+            "Linje S och 61: Hållplats Kronoparken centrum flyttas 5 november till och med 11 december",
             "Linje 801: Hållplats Biltema stängs i riktning mot Grums från 2 november",
             "Linje 600: Hållplatserna Orretorp, Botorp, Småris och Tjärnhedens bytespunkt stängs från 9 november till och med 10 december.",
-            "Linje 600, 602 och 660, hållplats Lyckan indragen i riktning mot Karlstad från 9 november - 6 december"
+            "Linje 600, 602 och 660, hållplats Lyckan indragen i riktning mot Karlstad från 9 november - 6 december",
+            "Linje 500 och 501: Hållplats Kronoparkskyrkan stängs i riktning mot Centrum från 26 oktober 15.00",
+            "Linje 500 och 501: Hållplats Rönndungen stängd till och med 27 november"
           ],
           "lookupTime": "2026-11-22T03:25+01:00",
           "retained": false,
@@ -1091,127 +1114,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "900",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:25:00+01:00",
-              "realtime": "2026-11-22T16:25:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A",
-              "stale": true
-            },
-            {
-              "mode": "train",
-              "line": "72",
-              "direction": "Stockholms central",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-11-22T16:31:00+01:00",
-              "realtime": "2026-11-22T16:31:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "1"
-            },
-            {
-              "mode": "train",
-              "line": "73",
-              "direction": "Kristinehamn",
-              "operator": "Vy Tåg",
-              "scheduled": "2026-11-22T16:31:00+01:00",
-              "realtime": "2026-11-22T16:31:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "1"
-            },
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Kristinehamn",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:31:00+01:00",
-              "realtime": "2026-11-22T16:31:15+01:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "T"
-            },
-            {
-              "mode": "bus",
-              "line": "S",
-              "direction": "Välsviken Station via Centrum",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:33:24+01:00",
-              "realtime": "2026-11-22T16:33:39+01:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "7",
-              "direction": "Stora Torget via Busstationen",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:29:00+01:00",
-              "realtime": "2026-11-22T16:34:39+01:00",
-              "delayMinutes": 6,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
-            {
-              "mode": "bus",
-              "line": "904",
-              "direction": "Skoghall",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:35:00+01:00",
-              "realtime": "2026-11-22T16:35:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "D"
-            },
-            {
-              "mode": "bus",
-              "line": "3",
-              "direction": "Gruvlyckan via Våxnäs",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:38:00+01:00",
-              "realtime": "2026-11-22T16:37:52+01:00",
-              "delayMinutes": 0,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "S",
-              "direction": "Jakobsberg via Sjukhuset",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:32:21+01:00",
-              "realtime": "2026-11-22T16:38:31+01:00",
-              "delayMinutes": 6,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "M"
-            },
-            {
-              "mode": "bus",
-              "line": "1",
-              "direction": "Campus via Universitetet",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:34:00+01:00",
-              "realtime": "2026-11-22T16:38:31+01:00",
-              "delayMinutes": 5,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "O"
-            },
             {
               "mode": "bus",
               "line": "901",
@@ -1222,7 +1124,8 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B"
+              "platform": "B",
+              "stale": true
             },
             {
               "mode": "bus",
@@ -1230,8 +1133,8 @@
               "direction": "Edsgatan via Norra Kroppkärr",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:39:00+01:00",
-              "realtime": "2026-11-22T16:41:00+01:00",
-              "delayMinutes": 2,
+              "realtime": "2026-11-22T16:42:16+01:00",
+              "delayMinutes": 3,
               "isRealtime": true,
               "canceled": false,
               "platform": "O"
@@ -1242,9 +1145,9 @@
               "direction": "Zakrisdal",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:43:00+01:00",
-              "realtime": "2026-11-22T16:43:00+01:00",
+              "realtime": "2026-11-22T16:42:53+01:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
@@ -1254,8 +1157,8 @@
               "direction": "Skutberget via Våxnäs",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:43:00+01:00",
-              "realtime": "2026-11-22T16:43:51+01:00",
-              "delayMinutes": 1,
+              "realtime": "2026-11-22T16:43:22+01:00",
+              "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
               "platform": "M"
@@ -1266,9 +1169,9 @@
               "direction": "Norra Kroppkärr via Rud",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:44:00+01:00",
-              "realtime": "2026-11-22T16:44:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-22T16:44:35+01:00",
+              "delayMinutes": 1,
+              "isRealtime": true,
               "canceled": false,
               "platform": "O"
             },
@@ -1287,26 +1190,26 @@
             {
               "mode": "bus",
               "line": "4",
-              "direction": "Gräsdalen via Gruvlyckan",
+              "direction": "Stora Torget via Busstationen",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:43:00+01:00",
-              "realtime": "2026-11-22T16:48:31+01:00",
-              "delayMinutes": 6,
+              "scheduled": "2026-11-22T16:49:00+01:00",
+              "realtime": "2026-11-22T16:48:40+01:00",
+              "delayMinutes": 0,
               "isRealtime": true,
               "canceled": false,
-              "platform": "M"
+              "platform": "O"
             },
             {
               "mode": "bus",
               "line": "4",
-              "direction": "Stora Torget via Busstationen",
+              "direction": "Gräsdalen via Gruvlyckan",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:49:00+01:00",
-              "realtime": "2026-11-22T16:49:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "scheduled": "2026-11-22T16:43:00+01:00",
+              "realtime": "2026-11-22T16:50:20+01:00",
+              "delayMinutes": 7,
+              "isRealtime": true,
               "canceled": false,
-              "platform": "O"
+              "platform": "M"
             },
             {
               "mode": "bus",
@@ -1362,7 +1265,7 @@
               "direction": "Jakobsberg via Sjukhuset",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:52:21+01:00",
-              "realtime": "2026-11-22T16:55:37+01:00",
+              "realtime": "2026-11-22T16:55:29+01:00",
               "delayMinutes": 3,
               "isRealtime": true,
               "canceled": false,
@@ -1434,9 +1337,9 @@
               "direction": "Henstad via Våxnäs",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T17:03:00+01:00",
-              "realtime": "2026-11-22T17:03:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-22T17:02:25+01:00",
+              "delayMinutes": -1,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
@@ -1478,25 +1381,25 @@
             },
             {
               "mode": "bus",
-              "line": "S",
-              "direction": "Jakobsberg via Sjukhuset",
+              "line": "4",
+              "direction": "Bergvik Ikea via Gruvlyckan",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T17:12:21+01:00",
-              "realtime": "2026-11-22T17:12:21+01:00",
+              "scheduled": "2026-11-22T17:13:00+01:00",
+              "realtime": "2026-11-22T17:12:31+01:00",
               "delayMinutes": 0,
-              "isRealtime": false,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
             {
               "mode": "bus",
-              "line": "4",
-              "direction": "Bergvik Ikea via Gruvlyckan",
+              "line": "S",
+              "direction": "Jakobsberg via Sjukhuset",
               "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T17:13:00+01:00",
-              "realtime": "2026-11-22T17:13:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "scheduled": "2026-11-22T17:12:21+01:00",
+              "realtime": "2026-11-22T17:13:06+01:00",
+              "delayMinutes": 1,
+              "isRealtime": true,
               "canceled": false,
               "platform": "M"
             },
@@ -1571,6 +1474,126 @@
               "isRealtime": false,
               "canceled": false,
               "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "700",
+              "direction": "Grums Årjäng Töcksfors",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:25:00+01:00",
+              "realtime": "2026-11-22T17:25:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "K"
+            },
+            {
+              "mode": "bus",
+              "line": "900",
+              "direction": "Skoghall",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:25:00+01:00",
+              "realtime": "2026-11-22T17:25:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "train",
+              "line": "674",
+              "direction": "Stockholm Central",
+              "operator": "SJ AB",
+              "scheduled": "2026-11-22T17:25:00+01:00",
+              "realtime": "2026-11-22T17:25:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "7",
+              "direction": "Zakrisdal",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:28:00+01:00",
+              "realtime": "2026-11-22T17:28:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "train",
+              "line": "74",
+              "direction": "Torsby",
+              "operator": "Vy Tåg",
+              "scheduled": "2026-11-22T17:29:00+01:00",
+              "realtime": "2026-11-22T17:29:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "1"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Arlanda flygplats",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-11-22T17:30:00+01:00",
+              "realtime": "2026-11-22T17:30:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
+            },
+            {
+              "mode": "bus",
+              "line": "S",
+              "direction": "Jakobsberg via Sjukhuset",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:32:21+01:00",
+              "realtime": "2026-11-22T17:32:21+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "M"
+            },
+            {
+              "mode": "bus",
+              "line": "S",
+              "direction": "Välsviken Station via Centrum",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:33:24+01:00",
+              "realtime": "2026-11-22T17:33:24+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "1",
+              "direction": "Campus via Universitetet",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:34:00+01:00",
+              "realtime": "2026-11-22T17:34:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "O"
+            },
+            {
+              "mode": "bus",
+              "line": "800",
+              "direction": "Grums Säffle Åmål",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:35:00+01:00",
+              "realtime": "2026-11-22T17:35:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "G"
             }
           ]
         }
@@ -1582,27 +1605,13 @@
         {
           "id": "740000820",
           "name": "Skoghall centrum",
-          "alerts": [
-            "Linje 902 försenad från Karlstad busstation kl 16:00 - Karlstad busstation"
-          ],
+          "alerts": [],
           "lookupTime": "2026-11-22T00:10+01:00",
           "retained": false,
           "nextSearchAfter": "2026-11-22T02:10+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "902",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:26:00+01:00",
-              "realtime": "2026-11-22T16:33:11+01:00",
-              "delayMinutes": 7,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "900",
@@ -1621,9 +1630,9 @@
               "direction": "Busstationen via Sjukhuset",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T16:50:00+01:00",
-              "realtime": "2026-11-22T16:50:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
+              "realtime": "2026-11-22T16:54:01+01:00",
+              "delayMinutes": 4,
+              "isRealtime": true,
               "canceled": false,
               "platform": "B"
             },
@@ -1662,24 +1671,12 @@
           "id": "740000375",
           "name": "Forshaga centrum",
           "alerts": [],
-          "lookupTime": "2026-11-22T08:40+01:00",
+          "lookupTime": "2026-11-22T16:40+01:00",
           "retained": false,
-          "nextSearchAfter": "2026-11-22T10:40+01:00",
+          "nextSearchAfter": "2026-11-22T18:40+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "bus",
-              "line": "601",
-              "direction": "Karlstad",
-              "operator": "Värmlandstrafik",
-              "scheduled": "2026-11-22T16:30:00+01:00",
-              "realtime": "2026-11-22T16:33:56+01:00",
-              "delayMinutes": 4,
-              "isRealtime": true,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "bus",
               "line": "601",
@@ -1690,8 +1687,55 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T18:29:00+01:00",
+              "realtime": "2026-11-22T18:29:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T18:30:00+01:00",
+              "realtime": "2026-11-22T18:30:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T19:29:00+01:00",
+              "realtime": "2026-11-22T19:29:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T19:30:00+01:00",
+              "realtime": "2026-11-22T19:30:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
             },
             {
               "mode": "bus",
@@ -1703,8 +1747,7 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "B",
-              "stale": true
+              "platform": "B"
             },
             {
               "mode": "bus",
@@ -1716,8 +1759,43 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "A",
-              "stale": true
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T22:40:00+01:00",
+              "realtime": "2026-11-22T22:40:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Tjärnheden Deje",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T23:29:00+01:00",
+              "realtime": "2026-11-22T23:29:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
+            {
+              "mode": "bus",
+              "line": "601",
+              "direction": "Karlstad",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T23:30:00+01:00",
+              "realtime": "2026-11-22T23:30:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
             }
           ]
         }
@@ -1739,30 +1817,6 @@
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "train",
-              "line": "672",
-              "direction": "Stockholm Central",
-              "operator": "SJ AB",
-              "scheduled": "2026-11-22T16:34:00+01:00",
-              "realtime": "2026-11-22T16:34:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": ""
-            },
-            {
-              "mode": "train",
-              "line": "70",
-              "direction": "Kil station",
-              "operator": "Tågab",
-              "scheduled": "2026-11-22T16:36:00+01:00",
-              "realtime": "2026-11-22T16:36:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": ""
-            },
             {
               "mode": "bus",
               "line": "600",
@@ -1817,11 +1871,23 @@
               "direction": "Karlskoga",
               "operator": "Värmlandstrafik",
               "scheduled": "2026-11-22T17:05:00+01:00",
-              "realtime": "2026-11-22T17:04:02+01:00",
-              "delayMinutes": -1,
+              "realtime": "2026-11-22T17:01:25+01:00",
+              "delayMinutes": -4,
               "isRealtime": true,
               "canceled": false,
               "platform": "E"
+            },
+            {
+              "mode": "bus",
+              "line": "850",
+              "direction": "Karlstad Busstation",
+              "operator": "Vy bus4you",
+              "scheduled": "2026-11-22T17:35:00+01:00",
+              "realtime": "2026-11-22T17:35:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": ""
             }
           ]
         }
@@ -2164,11 +2230,23 @@
           "name": "Torsby station",
           "alerts": [],
           "lookupTime": "2026-11-22T14:25+01:00",
-          "retained": true,
+          "retained": false,
           "nextSearchAfter": "2026-11-22T16:25+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
+            {
+              "mode": "bus",
+              "line": "209",
+              "direction": "Malung",
+              "operator": "Värmlandstrafik",
+              "scheduled": "2026-11-22T17:42:00+01:00",
+              "realtime": "2026-11-22T17:42:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "B"
+            },
             {
               "mode": "bus",
               "line": "209",
@@ -2232,37 +2310,12 @@
           "id": "740000283",
           "name": "Ed station",
           "alerts": [],
-          "lookupTime": "2026-11-22T08:40+01:00",
+          "lookupTime": "2026-11-22T16:40+01:00",
           "retained": false,
-          "nextSearchAfter": "2026-11-22T10:40+01:00",
+          "nextSearchAfter": "2026-11-22T18:40+01:00",
           "engineVersion": "0.21.3",
           "error": null,
           "departures": [
-            {
-              "mode": "train",
-              "line": "920",
-              "direction": "Göteborg C",
-              "operator": "Vy Tåg AB",
-              "scheduled": "2026-11-22T16:25:00+01:00",
-              "realtime": "2026-11-22T16:25:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "1",
-              "stale": true
-            },
-            {
-              "mode": "bus",
-              "line": "700",
-              "direction": "Vänersborg",
-              "operator": "Västtrafik",
-              "scheduled": "2026-11-22T16:29:00+01:00",
-              "realtime": "2026-11-22T16:29:00+01:00",
-              "delayMinutes": 0,
-              "isRealtime": false,
-              "canceled": false,
-              "platform": "A"
-            },
             {
               "mode": "train",
               "line": "920",
@@ -2273,8 +2326,43 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
+            },
+            {
+              "mode": "train",
+              "line": "920",
+              "direction": "Göteborg C",
+              "operator": "Vy Tåg AB",
+              "scheduled": "2026-11-22T18:26:00+01:00",
+              "realtime": "2026-11-22T18:26:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "1"
+            },
+            {
+              "mode": "bus",
+              "line": "775",
+              "direction": "Åmål via Bengtsfors",
+              "operator": "Västtrafik",
+              "scheduled": "2026-11-22T19:22:00+01:00",
+              "realtime": "2026-11-22T19:22:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
+            },
+            {
+              "mode": "train",
+              "line": "920",
+              "direction": "Oslo S",
+              "operator": "Vy Tåg AB",
+              "scheduled": "2026-11-22T19:28:00+01:00",
+              "realtime": "2026-11-22T19:28:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "1"
             },
             {
               "mode": "train",
@@ -2286,8 +2374,19 @@
               "delayMinutes": 0,
               "isRealtime": false,
               "canceled": false,
-              "platform": "1",
-              "stale": true
+              "platform": "1"
+            },
+            {
+              "mode": "bus",
+              "line": "700",
+              "direction": "Vänersborg",
+              "operator": "Västtrafik",
+              "scheduled": "2026-11-23T05:08:00+01:00",
+              "realtime": "2026-11-23T05:08:00+01:00",
+              "delayMinutes": 0,
+              "isRealtime": false,
+              "canceled": false,
+              "platform": "A"
             }
           ]
         }
