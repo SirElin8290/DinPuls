@@ -1,10 +1,10 @@
 # DinPuls nattkontroll
 
-Kontrollerad: 2026-11-21T05:39:20+00:00
+Kontrollerad: 2026-11-22T05:06:46+00:00
 
 ## Resultat
 
-{'reachable': 1872, 'changed': 763, 'unverified': 682, 'broken': 12, 'total': 3329, 'contentWarnings': 12}
+{'reachable': 1741, 'changed': 881, 'unverified': 682, 'broken': 12, 'total': 3316, 'contentWarnings': 13}
 
 ## Källor som behöver granskas
 
@@ -62,6 +62,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Årjäng; Årjäng – Afriminte; Årjäng – Anhörigförening i Årjängs kommun; Årjäng – Astma- och Allergiföreningen Årjäng m.fl.; Årjäng – BRIS Region Mitt; Årjäng – Barlingshults Viltvårdsområde; Årjäng – Betaniaförsamlingen Årjäng; Årjäng – Björnviks Viltvårdsområde; Årjäng – Blomsjöbygdens Viltvårdsområde; Årjäng – Blomskogs Byalag; Årjäng – Blomskogs Bygdegårdsförening; Årjäng – Blomskogs Fiskevårdsområde; Årjäng – Blomskogs Folkets Husförening; Årjäng – Blomskogs Idrottsförening; Årjäng – Blomskogs Sockenråd; Årjäng – Blomskogs Västra Viltvårdsområde; Årjäng – Bockleruds Viltvårdsområde; Årjäng – Bovikens Sportklubb; Årjäng – Box Team Nordmarken; Årjäng – Brottsofferjouren Värmland – Årjäng; Årjäng – Bufff Värmland; Årjäng – Bäckens Viltvårdsområde; Årjäng – Bäckevarvs Älgjaktsförening; Årjäng – Civilförsvarsförbundet V:a Värmland; Årjäng – Clarorna; Årjäng – Equmenia Holmedal-Blomskog; Årjäng – Equmenia Sillerud; Årjäng – Equmenia Töcksfors; Årjäng – Equmenia Västra Fågelvik; Årjäng – Equmenia Årjäng; Årjäng – Equmenia Östervallskog; Årjäng – Filadelfiaförsamlingen Töcksfors; Årjäng – Finnskogarnas Sportklubb; Årjäng – Flötane Byalag; Årjäng – Foxen Fiskevårdsområde; Årjäng – Friluftsfrämjandet Årjäng; Årjäng – Friskvården Värmland; Årjäng – Funktionsrätt Årjäng; Årjäng – Föreningen Töcksmarksveckan; Årjäng – Företagarna Årjäng; Årjäng – Gustavsfors Idrottsförening; Årjäng – Harnäs Viltvårdsområde; Årjäng – Hembygd och Fornminnesföreningen Nordmarksstugan; Årjäng – Holmedals Byalag; Årjäng – Holmedals Bygdegårdsförening; Årjäng – Holmedals Kyrkliga Arbetskrets; Årjäng – Holmedals Veteranbilsklubb; Årjäng – Holmedals kyrkokör; Årjäng – Holmedalsjöns Fiskvårdsområde; Årjäng – Holy Inspiration Sång & Musikförening; Årjäng – Hyresgästföreningen Årjäng; Årjäng – Hålteby-Rinnens Fiskevårdsområde; Årjäng – Håns Byalag; Årjäng – Högelians Skolhusförening; Årjäng – Hörselskadades Förening Arvika, Eda och Årjäng; Årjäng – ILCO Värmland; Årjäng – IOGT-NTO Silbodal Lf 311; Årjäng – Idé & Hantverk i Sillerud; Årjäng – Ivarsbyns Jaktskytteklubb; Årjäng – Järnsjöns Fiskevårdsområde; Årjäng – Kamratföreningen Fort 118; Årjäng – Karlanda Bygdegårdsförening; Årjäng – Karlanda Idrottsförening; Årjäng – Karlanda Jaktskytteklubb; Årjäng – Karlanda LRF-avdelning; Årjäng – Karlanda Ungdomsförening; Årjäng – Karlandamons Viltvårdsområde; Årjäng – Konstföreningen Årjäng; Årjäng – Lennartsfors Byalag; Årjäng – Lennartsfors Bygdegårdsförening; Årjäng – Lennartsfors Hembygdsförening; Årjäng – Lennartsfors Idrottsförening; Årjäng – Lennartsfors Kulturgrupp; Årjäng – Lennartsfors Viltvårdsområde; Årjäng – Liane Hembygdsgård; Årjäng – Liane Viltvårdsområde; Årjäng – Lians Byalag; Årjäng – Lions Club Årjäng; Årjäng – Lysås Byalag; Årjäng – Majblomman Årjäng; Årjäng – Mosseruds Ryttarförening; Årjäng – Mörtnäs Hembygdsgård; Årjäng – Naturskyddsföreningen Årjäng; Årjäng – Norane Byalag; Årjäng – Nordmarkens Jakt & Sportskytteklubb; Årjäng – Nordmarkens Kammarorkester; Årjäng – Nordmarkens Pastorat; Årjäng – Nordmarkens Skolas Idrottsförening; Årjäng – Nordmarkens boxningsklubb; Årjäng – Norra Lelång Fiskevårdsområde; Årjäng – PRO Karlanda; Årjäng – PRO Lennartsfors; Årjäng – PRO Sillerud; Årjäng – PRO Töcksfors; Årjäng – RPG Årjäng; Årjäng – RSMH Årjäng; Årjäng – Reumatikerföreningen Årjäng; Årjäng – Rinnens Viltvårdsområde; Årjäng – Risvikens Viltvårdsområde; Årjäng – Rädda Barnen Årjäng; Årjäng – Ränken Bouleförening; Årjäng – SKPF Årjäng; Årjäng – SPF Seniorerna Töcksfors; Årjäng – Sannhems Hembygds och Kulturförening; Årjäng – Silbodals kyrkokör; Årjäng – Sillebottens Byalag; Årjäng – Silleruds Byalag; Årjäng – Silleruds Framtidsgrupp; Årjäng – Silleruds Föreningsgård Tjolitta; Årjäng – Silleruds Idrottsförening; Årjäng – Silleruds Kulturförening; Årjäng – Silleruds LRF-avdelning; Årjäng – Silleruds Ungdomsförening; Årjäng – Silleruds kyrkliga syförening; Årjäng – Silleruds kyrkokör; Årjäng – Sjögårdarnas Viltvårdsområde; Årjäng – Skogens Viltvårdsområde; Årjäng – Skogstjärnens Fiskevårdsområde; Årjäng – Snarkil Tollersruds Byalag; Årjäng – Stallarbyns Viltvårdsområde; Årjäng – Stora Börs Fiskevårdsområde; Årjäng – Struven/Stora Le Fiskevårdsområde; Årjäng – Struvsjöns Byalag; Årjäng – Ström Långelanda Viltvårdsområde; Årjäng – Svensbyns Föräldraförening; Årjäng – Sång- o Musikföreningen Urbandet; Årjäng – Trankils Byalag; Årjäng – Trankils Bygdegårdsförening; Årjäng – Trankils Folkets Husförening; Årjäng – Trankils Hembygdsförening; Årjäng – Träffpunkt 2000; Årjäng – Töck-Hurr Fiskevårdsområde; Årjäng – Töcksfors 4H-klubb; Årjäng – Töcksfors Brukshundklubb; Årjäng – Töcksfors Byalag; Årjäng – Töcksfors Bygdegårdsförening; Årjäng – Töcksfors Båtklubb; Årjäng – Töcksfors Folkets Husförening; Årjäng – Töcksfors Fritidsgård; Årjäng – Töcksfors Hembygdsförening; Årjäng – Töcksfors Karateklubb; Årjäng – Töcksfors Kulturförening; Årjäng – Töcksfors Ungdomsförening; Årjäng – Töcksmarks Hembygdsförening; Årjäng – Töcksmarks Missionsförsamling; Årjäng – Töcksmarks kyrkokör; Årjäng – Ulvestads Viltvårdsområde; Årjäng – V:a Karlanda Fiskevårdsområde; Årjäng – Vännacka Byalag; Årjäng – Värmlands Orienteringsförbund; Årjäng – Västra Fågelviks Byalag; Årjäng – Västra Fågelviks Bygdegårdsförening; Årjäng – Västra Fågelviks Hbf Vår Gård; Årjäng – Västra Fågelviks Kyrkliga Syförening; Årjäng – Västra Fågelviks Missionsförsamling; Årjäng – Västra Fågelviks Skytteförening; Årjäng – Västra Fågelviks Viltvårdsområde; Årjäng – Västra Fågelviks idrottsförenings badhusförening u.p.a; Årjäng – Västra Silens Fiskevårdsområde; Årjäng – Våxlanda Viltvårdsområde; Årjäng – Yttre Blomskogs Viltvårdsområde; Årjäng – Årjängs 4H-klubb; Årjäng – Årjängs Atletklubb; Årjäng – Årjängs Biodlarförening; Årjäng – Årjängs Bridgeklubb; Årjäng – Årjängs Centerkrets; Årjäng – Årjängs Centrumförening; Årjäng – Årjängs Dartklubb; Årjäng – Årjängs Diabetesförening; Årjäng – Årjängs Dragspelsklubb; Årjäng – Årjängs Filatelistklubb; Årjäng – Årjängs Finska Förening; Årjäng – Årjängs Folkets Husförening; Årjäng – Årjängs Fotoklubb; Årjäng – Årjängs Företagarförening; Årjäng – Årjängs Försvarsutbildningsförening; Årjäng – Årjängs Hemslöjdsförening; Årjäng – Årjängs HjärtLung; Årjäng – Årjängs Hundungdom; Årjäng – Årjängs Internationella Förening; Årjäng – Årjängs Koloniträdgårdsförening; Årjäng – Årjängs Konstförening; Årjäng – Årjängs Konsthantverksförening; Årjäng – Årjängs Kristdemokratiska förening; Årjäng – Årjängs Kulturförening; Årjäng – Årjängs Kvinnojour; Årjäng – Årjängs Kyrkliga Arbetskrets; Årjäng – Årjängs Körsällskap; Årjäng – Årjängs LRF-avdelning; Årjäng – Årjängs Liberalförening; Årjäng – Årjängs MC-klubb; Årjäng – Årjängs Miljöpartiavdelning; Årjäng – Årjängs Missionsförsamling; Årjäng – Årjängs Modellflygklubb; Årjäng – Årjängs Moderatförening; Årjäng – Årjängs Motorhistoriska Förening; Årjäng – Årjängs Musikförening; Årjäng – Årjängs Musikkår; Årjäng – Årjängs Natur- och Kulturförening; Årjäng – Årjängs Nykterhetsförening; Årjäng – Årjängs Padelklubb; Årjäng – Årjängs Parasportförening; Årjäng – Årjängs Publikförening; Årjäng – Årjängs Samlarförening; Årjäng – Årjängs Schackklubb; Årjäng – Årjängs Sjöräddningsförening; Årjäng – Årjängs Skolidrottsförening; Årjäng – Årjängs Släktforskarförening; Årjäng – Årjängs Socialdemokratiska Förening; Årjäng – Årjängs Somaliska Förening; Årjäng – Årjängs Spelmanslag; Årjäng – Årjängs Sverigedemokratiska förening; Årjäng – Årjängs Teaterförening; Årjäng – Årjängs Trädgårdsförening; Årjäng – Årjängs Ungdomsförening; Årjäng – Årjängs Veteranfordonsklubb; Årjäng – Årjängs Villaägareförening; Årjäng – Årjängs Vänsterpartiförening; Årjäng – Årjängs Vävförening; Årjäng – Årjängs kulturskolas elevförening; Årjäng – Årjängs pastorat kyrkokör; Årjäng – Årjängs sändaramatörer; Årjäng – Årjängsbygdens Rödakorskrets; Årjäng – Åsebyfors Viltvårdsområde; Årjäng – Örje IL Friidrott; Årjäng – Östervallskogs Badhusförening; Årjäng – Östervallskogs Byalag; Årjäng – Östervallskogs Bygdegårdsförening; Årjäng – Östervallskogs Fiskevårdsområde; Årjäng – Östervallskogs Hembygdsförening; Årjäng – Östervallskogs Jaktskytteklubb; Årjäng – Östervallskogs Mellersta VVO; Årjäng – Östervallskogs Sockenråd; Årjäng – Östervallskogs kyrkokör; Årjäng – Östomsjöns Jaktskytteklubb; Årjäng – Östomsjöns Viltvårdsområde; Årjäng – Östra Silens Fiskevårdsområde | changed | https://arjang.interbookfri.se/AssociationRegister |
 | Årjäng – Årjängs Brukshundsklubb | changed | https://arjangsbrukshund.wordpress.com/ |
 | Arvika – Arvika Golfklubb | changed | https://arvikagk.com/ |
+| Arvika – Arvika Hamnfest | unverified | https://arvikahamnfest.se/ |
 | Arvika – Arvika Jazz Club; Arvika – Arvika Konsertförening; Arvika – Arvika Stadsmusikkår; Arvika – Arvika Suzukiförening; Arvika – Musikföreningen Blå Huset; Arvika – Stavnäs Visklubb | changed | https://arvikamusik.se/foreningar/ |
 | Arvika – Arvika Rehab AB | changed | https://arvikarehab.se/ |
 | Arvika – Arvika Ridklubb | changed | https://arvikaridklubb.com/ |
@@ -71,6 +72,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Kristinehamn – Bäckhammars bygderåd med omnejd | unverified | https://backhammarsbygden.com/ |
 | Mellerud – Dalslands Ornitologiska Förening | unverified | https://birdlife.se/serie/fagelvaren-runt-mellerud-dalslands-ornitologiska-forening/ |
 | Kristinehamn – Björneborgs hembygdsförening | unverified | https://bjorneborgshembygdsforening.se/ |
+| Bengtsfors – Björneruds Byalag | changed | https://bjornerudsbyalag.webber.se/ |
 | Kristinehamn – Björneborgs Jaktskytteklubb | unverified | https://bjsk.se/ |
 | Karlstad – BK Orion | unverified | https://bkorion.se/ |
 | Säffle – BK Tegnér | changed | https://bktegner.wordpress.com/ |
@@ -123,6 +125,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Färgelanda – Färgelanda Ridklubb; Färgelanda – Nättjebacka hembygdsförening; Färgelanda – OK Skärmen; Färgelanda – Stigens IF | changed | https://fargelanda.se/uppleva-och-gora/fritid/foreningsverksamhet/foreningar-med-egen-hemsida/ |
 | Färgelanda – Färgelanda Fotoklubb | unverified | https://fargelandafotoklubb.se/ |
 | Färgelanda – Färgelanda Släktforskarförening | unverified | https://fargelandasf.se/ |
+| Arvika – Svensk Syriska Föreningen i Arvika | changed | https://fb.com/ssfarvika |
 | Munkfors – Klarälven inom Munkfors fiskevårdsområdesförening | unverified | https://fiskevardsforbundet.se/ |
 | Åmål – Forsbacka Golfklubb | changed | https://forsbackagk.se/ |
 | Forshaga – Forshaga Amatörfiskeklubb | unverified | https://forshagaafk.se/ |
@@ -368,8 +371,6 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Säffle – Kulturnatt i Säffle | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-09-04-kulturnatt.html |
 | Säffle – Musikalisk salong | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-09-05-musikalisk-salong.html |
 | Säffle – Skördefest på Värmlandsnäs | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-09-05-skordefest-pa-varmlandsnas.html |
-| Säffle – Julmarknad i Lönnskog | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-21-julmarknad-i-lonnskog.html |
-| Säffle – Lördagscafé med Ulla, Jan & Victor | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-21-lordagscafe-med-ulla-jan--victor.html |
 | Säffle – Julmarknad i Lönnskog | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-22-julmarknad-i-lonnskog.html |
 | Säffle – Gåfotboll | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-23-gafotboll.html |
 | Säffle – Canasta - Hjärngympa | unverified | https://saffle.se/arkiv/evenemang/evenemang/2026-11-24-canasta---hjarngympa.html |
@@ -419,7 +420,6 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Säffle – Släktforskarhjälp | unverified | https://saffle.se/uppleva-och-gora/bibliotek/kalender/bibliotek/2026-12-08-slaktforskarhjalp.html |
 | Säffle – After school | unverified | https://saffle.se/uppleva-och-gora/bibliotek/kalender/bibliotek/2026-12-10-after-school.html |
 | Säffle – NPF-timme för familjer | unverified | https://saffle.se/uppleva-och-gora/bibliotek/kalender/bibliotek/2026-12-12-npf-timme-for-familjer.html |
-| Säffle – Bio: The Hunger Games: Sunrise of the reaping | unverified | https://saffle.se/uppleva-och-gora/biograf/bioprogram/bioprogram/2026-11-21-bio-the-hunger-games-sunrise-of-the-reaping.html |
 | Säffle – Bio: Jakten på jultomtens verkstad (svenskt tal) | unverified | https://saffle.se/uppleva-och-gora/biograf/bioprogram/bioprogram/2026-11-22-bio-jakten-pa-jultomtens-verkstad-svenskt-tal.html |
 | Säffle – Bio: Jävla Karlar | unverified | https://saffle.se/uppleva-och-gora/biograf/bioprogram/bioprogram/2026-11-22-bio-javla-karlar.html |
 | Säffle – Bio: Meet the Parents: Focker-In-Law | unverified | https://saffle.se/uppleva-och-gora/biograf/bioprogram/bioprogram/2026-11-28-bio-meet-the-parents-focker-in-law.html |
@@ -428,7 +428,6 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Säffle – Huggenäs Bygdegårdsförening; Säffle – Svanskogs Byalag | unverified | https://saffle.se/uppleva-och-gora/foreningsliv/foreningsstod-och-bidrag/bygdepeng.html |
 | Säffle – Byälven, Sandbackens badplats; Säffle – Duse klippbad; Säffle – Getebol badplats; Säffle – Mellan Svan, Strand badplats; Säffle – Strandbad, Gaperhult; Säffle – Strandbad, Åkershus; Säffle – Vildmarken (Finnsjön) badplats | unverified | https://saffle.se/uppleva-och-gora/idrott-friluftsliv-och-lek/badplatser.html |
 | Säffle – Säffle simhall | unverified | https://saffle.se/uppleva-och-gora/idrott-friluftsliv-och-lek/saffle-simhall/ |
-| Säffle – Änglagård | unverified | https://saffle.se/uppleva-och-gora/medis---teater-musik-och-scen/medis/2026-11-20-anglagard.html |
 | Säffle – Mogendans på Medis | unverified | https://saffle.se/uppleva-och-gora/medis---teater-musik-och-scen/medis/2026-11-25-mogendans-pa-medis.html |
 | Säffle – Viktor Norén julturné | unverified | https://saffle.se/uppleva-och-gora/medis---teater-musik-och-scen/medis/2026-11-26-viktor-noren-julturne.html |
 | Säffle – Medis julbord med The Jets | unverified | https://saffle.se/uppleva-och-gora/medis---teater-musik-och-scen/medis/2026-12-04-medis-julbord-med-the-jets.html |
@@ -478,6 +477,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Arvika – Fri Natur Stömneskog | unverified | https://stomneskog.se/ |
 | Sunne – Sunne Fastighets AB | changed | https://sunnefastighet.se/ |
 | Sunne Fastighets AB | changed | https://sunnefastighet.se/lediga-lagenheter/ |
+| Karlstad – Värmlands Kaninhopparförening | changed | https://sv-se.facebook.com/pages/V%C3%A4rmlands-Kaninhoppare/346886132027204 |
 | Årjäng – Nordmarkens Innebandyförening | changed | https://svenskalag.se/nibf |
 | Karlstad – Karlstad Trädgårdsförening | changed | https://svensktradgard.se/tradgardsforeningar/karlstads-tradgardssallskap/ |
 | Kristinehamn – Kristinehamns trädgårdsförening | changed | https://svensktradgard.se/tradgardsforeningar/kristinehamns-tradgardsforening/ |
@@ -510,7 +510,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Torsby – Torsby Brukshundklubb | changed | https://torsbybk.com/ |
 | Årjäng – Nordiska Travmuseet | changed | https://travmuseet.com/ |
 | Torsby – Gårdsföreningen Vägsjöfors Herrgård | changed | https://vagsjofors.se/ |
-| Årjäng – Västra Fågelviks Hbf Vår Gård | unverified | https://vargard.wordpress.com/ |
+| Årjäng – Västra Fågelviks Hbf Vår Gård | broken | https://vargard.wordpress.com/ |
 | Kristinehamn – ABF Cantabile | unverified | https://varmland.abf.se/ |
 | Karlstad – Värmlands Biodlardistrikt | changed | https://varmland.biodlarna.se/ |
 | Karlstad – Brottsofferjouren Värmland | changed | https://varmland.boj.se/ |
@@ -592,7 +592,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Karlstad – Folktandvården Molkom | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Molkom/ |
 | Munkfors – Folktandvården Munkfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Munkfors/ |
 | Hammarö – Folktandvården Skoghall | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Skoghall/ |
-| Sunne – Folktandvården Sunne | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Sunne/ |
+| Sunne – Folktandvården Sunne | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Sunne/ |
 | Karlstad – Folktandvården Tingvalla | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Tingvalla-Karlstad/ |
 | Torsby – Folktandvården Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Torsby/ |
 | Karlstad – Folktandvården Våxnäs | changed | https://www.1177.se/hitta-vard/kontaktkort/Folktandvarden-Vaxnas-Karlstad/ |
@@ -603,23 +603,23 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Filipstad – Fysioterapimottagningen Filipstad | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Filipstad/ |
 | Forshaga – Fysioterapimottagningen Forshaga | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Forshaga/ |
 | Hagfors – Fysioterapimottagningen Hagfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hagfors/ |
-| Hammarö – Hammarö Fysioterapi | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hammaro-Fysioterapi/ |
+| Hammarö – Hammarö Fysioterapi | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Hammaro-Fysioterapi/ |
 | Arvika – Fysioterapimottagningen Jösse vårdcentral Arvika | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Josse-vardcentral-Arvika/ |
 | Arvika – Fysioterapimottagningen Karin Jansson Ski och Fysio | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Karin-Jansson-Ski-och-Fysio-Arvika/ |
 | Karlstad – Fysioterapimottagningen Kasernhöjden Karlstad | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kasernhojden-Karlstad/ |
 | Kil – Fysioterapimottagningen Kil | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kil/ |
-| Kristinehamn – Fysioterapimottagningen Kristinehamn | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kristinehamn/ |
+| Kristinehamn – Fysioterapimottagningen Kristinehamn | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Kristinehamn/ |
 | Munkfors – Fysioterapimottagningen Munkfors | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Munkfors/ |
 | Säffle – Fysioterapimottagningen Säffle | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Saffle/ |
-| Hammarö – Fysioterapimottagningen Skoghall | changed | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Skoghall/ |
+| Hammarö – Fysioterapimottagningen Skoghall | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Skoghall/ |
 | Sunne – Fysioterapimottagningen Sunne | unverified | https://www.1177.se/hitta-vard/kontaktkort/Fysioterapimottagningen-Sunne/ |
-| Bengtsfors – Gula villans tandvård | unverified | https://www.1177.se/hitta-vard/kontaktkort/Gula-villans-tandvard-Bengtsfors/ |
-| Arvika – Jourcentralen Arvika | changed | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/ |
+| Bengtsfors – Gula villans tandvård | changed | https://www.1177.se/hitta-vard/kontaktkort/Gula-villans-tandvard-Bengtsfors/ |
+| Arvika – Jourcentralen Arvika | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Arvika/ |
 | Torsby – Jourcentralen Torsby | unverified | https://www.1177.se/hitta-vard/kontaktkort/Jourcentralen-Torsby/ |
 | Åmål – Medpro Clinic Rehab Åmål | unverified | https://www.1177.se/hitta-vard/kontaktkort/Medpro-Clinic-Rehab-Amal/ |
 | Bengtsfors – Mini-Maria Bengtsfors | unverified | https://www.1177.se/hitta-vard/kontaktkort/Mini-Maria-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors rehabmottagning | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-rehabmottagning-Bengtsfors/ |
-| Bengtsfors – Närhälsan Bengtsfors vårdcentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Bengtsfors/ |
+| Bengtsfors – Närhälsan Bengtsfors vårdcentral | changed | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Bengtsfors/ |
 | Bengtsfors – Närhälsan Bengtsfors vårdcentral – Dals Långed | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Bengtsfors-vardcentral-Dals-Langed-Dals-Langed/ |
 | Dals-Ed – Närhälsan Dals-Ed barnavårdscentral | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Dals-Ed-barnavardscentral-Ed/ |
 | Dals-Ed – Närhälsan Dals-Ed rehabmottagning | unverified | https://www.1177.se/hitta-vard/kontaktkort/Narhalsan-Dals-Ed-rehabmottagning-Ed/ |
@@ -668,6 +668,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Kil – AB Karl Hedin Bygghandel Kil | changed | https://www.abkarlhedin.se/bygghandel/karta/kil/ |
 | Sunne – AB Karl Hedin Bygghandel Sunne | changed | https://www.abkarlhedin.se/bygghandel/karta/sunne/ |
 | Hammarö – Afasiföreningen Karlstad med omnejd | unverified | https://www.afasivarmland.se/ |
+| Arvika – Älgå Sportklubb | changed | https://www.algask.se/ |
 | Åmål – Amneruds Måleri & Golvtjänst | unverified | https://www.allabolag.se/foretag/amneruds-m%C3%A5leri-golvtj%C3%A4nst/fengersfors/byggm%C3%A4stare/7VJQ7BCNTI5YDDT |
 | Åmål – DC Elteknik AB | unverified | https://www.allabolag.se/foretag/dc-elteknik-ab/%C3%A5m%C3%A5l/konsulter/2KJ6C0CI5YF3I |
 | Eda – Lässeruds Bygg AB | unverified | https://www.allabolag.se/foretag/l%C3%A4sseruds-bygg-ab/%C3%A5motfors/byggm%C3%A4stare/2K30YZKI5YDDT |
@@ -724,7 +725,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Årjäng – Årjäng kommun – skolmat | unverified | https://www.arjang.se/kommunalservice/startsida/utbildningochbarnomsorg.html |
 | Årjäng – Årjängs kulturskolas elevförening | unverified | https://www.arjang.se/kommunalservice/startsida/utbildningochbarnomsorg/kulturskolan |
 | Årjäng – Höstlov; Årjäng – Studiedag; Årjäng – Terminsavslutning; Årjäng – Terminsstart; Årjäng – Årjäng kommun – läsårstider | unverified | https://www.arjang.se/kommunalservice/startsida/utbildningochbarnomsorg/terminerlovochledigheter.3205.html |
-| Årjäng – Årjängs Golfklubb | changed | https://www.arjangsgk.se/ |
+| Årjäng – Årjängs Golfklubb | unverified | https://www.arjangsgk.se/ |
 | Årjäng – Årjängs Slalomklubb | changed | https://www.arjangsslk.se/ |
 | Årjäng – Nordmarkens Travsällskap | changed | https://www.arjangstravet.se/ |
 | Arvika – Sällskapet Länkarna Arvika | unverified | https://www.arvika.dfsl.se/ |
@@ -815,6 +816,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Bengtsfors; Bengtsfors – Allmänt vatten och avlopp | unverified | https://www.bengtsforsenergi.se/kommunala-bolag/bengtsfors-energi-ab/vatten-och-avlopp |
 | Bengtsfors – Bengtsfors Handel – restauranger | unverified | https://www.bengtsforshandel.se/ |
 | Arvika – Studieförbundet Bilda Svealand; Hammarö – Studieförbundet Bilda Svealand | changed | https://www.bilda.nu/ |
+| Eda – Studieförbundet Bilda | changed | https://www.bilda.nu/svealand |
 | Grums – Billeruds Golfklubb | changed | https://www.billerudsgk.se/ |
 | Arvika – Filmföreningen Bio Kontrast | changed | https://www.biokontrast.nu/ |
 | Arvika – BK Jösse | unverified | https://www.bkjosse.se/ |
@@ -842,7 +844,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Arvika – IF Brunskog United | unverified | https://www.brunskogunited.se/ |
 | Årjäng – Bufff Värmland | changed | https://www.bufff.se/ |
 | Dals-Ed – Ulf Rings El i Ed AB | unverified | https://www.bygg.se/experter/elektriker/dals-ed |
-| Säffle – Centrumkyrkans Församling | unverified | https://www.centrumkyrkansaffle.se/ |
+| Säffle – Centrumkyrkans Församling | changed | https://www.centrumkyrkansaffle.se/ |
 | Karlstad – CheerXplosion | changed | https://www.cheerxplosion.se/ |
 | Karlstad – Carlstad Crusaders | changed | https://www.crusaders.se/ |
 | CSN | changed | https://www.csn.se/ |
@@ -889,22 +891,136 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Hagfors – Elcenter Hagfors | unverified | https://www.elcenterab.se/kontakt/ |
 | Arvika – Equmenia Arvika; Arvika – Equmenia Arvika - SMU; Arvika – Equmeniakyrkan Arvika | changed | https://www.equmeniakyrkanarvika.se/ |
 | Karlstad – Equmenia Väse | changed | https://www.equmeniakyrkanvase.se/ |
+| Kil – Frykeruds Spelmanslag | changed | https://www.facebook.com/100069190938493/ |
+| Säffle – Night Rebels Säffle | changed | https://www.facebook.com/129613527111716 |
+| Bengtsfors – Skåpafors IF | changed | https://www.facebook.com/439293226838028 |
 | Bengtsfors – Ärtemarks IF | changed | https://www.facebook.com/61570160823919/?locale=id_ID |
+| Bengtsfors – Steneby Skytteförening | changed | https://www.facebook.com/61590473535085/ |
 | Karlstad – Bellevues ponnyridklubb | changed | https://www.facebook.com/BellevuesPonnyridklubb |
 | Torsby – Ambjörby Folkets Husförening | changed | https://www.facebook.com/BioNordvarmland |
 | Grums – Borgviks IF | changed | https://www.facebook.com/BorgviksIF/ |
+| Karlstad – Edsvalla IF | changed | https://www.facebook.com/EdsvallaIF |
 | Grums – Grums Bordtennisklubb | changed | https://www.facebook.com/GBTK2017/ |
+| Kil – Högboda IF | changed | https://www.facebook.com/HogbodaIF/ |
+| Arvika – KFUM Arvika Volleyboll | changed | https://www.facebook.com/KFUMArvikaVolleyboll/ |
+| Karlstad – Tjejjouren Karlstad | changed | https://www.facebook.com/KarlstadsTjejjour |
+| Mellerud – Melleruds Jaktvårdskrets | changed | https://www.facebook.com/MellerudsJaktvardskrets/ |
+| Munkfors – Munkfors BTK | changed | https://www.facebook.com/MunkforsBtk/?locale=sv_SE |
+| Bengtsfors – Ödskölts Bygdegårdsförening | changed | https://www.facebook.com/Odskoltsbygdegardsforening/ |
+| Karlstad – Karlstad Rotaryklubb | changed | https://www.facebook.com/RotaryiKarlstad/ |
+| Säffle – Säffle Kampsportklubb | changed | https://www.facebook.com/SaffleKampsport/ |
 | Årjäng – Silleruds Hembygdsförening | changed | https://www.facebook.com/SillerudsHembygdsforening/ |
+| Storfors – Storfors Fotbollsförening | changed | https://www.facebook.com/StorforsFF |
+| Karlstad – Värmlands Museumförening | changed | https://www.facebook.com/V%C3%A4rmlands-Museif%C3%B6rening-1547093158900181/ |
+| Säffle – Säffle Boxningsklubb | changed | https://www.facebook.com/amalsaffleboxningsklubb/?locale=sv_SE |
+| Årjäng – Årjängs Motorklubb | changed | https://www.facebook.com/arjangsmotorklubb.amk/ |
+| Arvika – Arvika Träningscenter | changed | https://www.facebook.com/arvikatraningscenter |
+| Arvika – ASKIM | changed | https://www.facebook.com/askim.arvika/ |
+| Arvika – Barn Paradis | changed | https://www.facebook.com/barnparadis/ |
+| Bengtsfors – Bengtsfors Musikkår | changed | https://www.facebook.com/bengtsforsmusikkar/ |
+| Storfors – Bjurbäckens Byalag | changed | https://www.facebook.com/bjurbackens.byalag |
+| Storfors – Bjurtjärns Teaterförening | changed | https://www.facebook.com/bjurtjarnteaterforening/ |
+| Grums – Bôrgens MC | changed | https://www.facebook.com/borgensmc1967/ |
+| Arvika – Bortans IK | changed | https://www.facebook.com/bortansikolympia/ |
+| Mellerud – Dals Motorklubb | changed | https://www.facebook.com/dmkrally/ |
+| Kil – Fagerås BK | changed | https://www.facebook.com/fagerasbollklubb/ |
+| Forshaga – Forshaga-Ulleruds Folkdansare | changed | https://www.facebook.com/forshagaullerudsfolkdansare/ |
+| Grums – Grums Skateboardförening | changed | https://www.facebook.com/groups/103306950078724/ |
+| Mellerud – Dalslands Spelmansförbund | changed | https://www.facebook.com/groups/106957579339517/ |
+| Storfors – Storfors Pistolskytteklubb | changed | https://www.facebook.com/groups/1075054680450638/?hoisted_section_header_type=recently_seen&multi_permalinks=1271697544119683 |
+| Grums – Grums Ridklubb | changed | https://www.facebook.com/groups/108458325838867/ |
+| Karlstad – Autism Sverige Värmland | changed | https://www.facebook.com/groups/113511218691733 |
 | Munkfors – Clear River MC | changed | https://www.facebook.com/groups/115636515178371/ |
+| Åmål – IFK Åmål Handboll | changed | https://www.facebook.com/groups/1237495700110348/ |
+| Storfors – Nykroppa-Storfors Fiskevårdsförening | changed | https://www.facebook.com/groups/139127382823732/ |
+| Forshaga – Klarälvens Discgolfklubb | changed | https://www.facebook.com/groups/139655046162181 |
 | Arvika – Kvinnor i Arvika | changed | https://www.facebook.com/groups/1538613232859920/ |
+| Arvika – Glaskogens JSK | changed | https://www.facebook.com/groups/1703246056616802/ |
+| Storfors – Storfors Båtklubb | changed | https://www.facebook.com/groups/1790485504400859 |
+| Arvika – Arvika Kammarkör | changed | https://www.facebook.com/groups/1806560522895746/ |
+| Kristinehamn – Christinehamns Motorklubb | changed | https://www.facebook.com/groups/193483560767069 |
 | Mellerud – Melleruds Trollingklubb | changed | https://www.facebook.com/groups/221880274845620/ |
+| Mellerud – Kroppefjälls Vandrare | changed | https://www.facebook.com/groups/236335284249682/ |
+| Årjäng – Töcksfors Car Club | changed | https://www.facebook.com/groups/243691397997916/ |
 | Arvika – Arvika Kanotklubb | changed | https://www.facebook.com/groups/272463359448514/ |
+| Grums – Grums Hobby RC | changed | https://www.facebook.com/groups/285107894967391/ |
+| Arvika – Strokeföreningen i Västra Värmland | changed | https://www.facebook.com/groups/313041388284090/ |
+| Säffle – Ölseruds Bygdegårdsförening | changed | https://www.facebook.com/groups/352721524764260/ |
+| Arvika – Verdandi | changed | https://www.facebook.com/groups/374278301414652/ |
+| Mellerud – Spelmän och dansare på Dal | changed | https://www.facebook.com/groups/379383072234326/ |
+| Åmål – Åmål Multisport | changed | https://www.facebook.com/groups/384265818324457/ |
+| Bengtsfors – Billingsfors Karateklubb | changed | https://www.facebook.com/groups/384621474886894/ |
+| Arvika – Allstakans Byalag | changed | https://www.facebook.com/groups/412850878821959/ |
+| Mellerud – Skålleruds Sockens Byalag | changed | https://www.facebook.com/groups/441065566088264/ |
+| Arvika – Fusionshuset | changed | https://www.facebook.com/groups/523760260275388/ |
+| Säffle – Eskilsäters Bygdegårdsförening | changed | https://www.facebook.com/groups/525903160916124/ |
+| Kristinehamn – Kristinehamns konstförening | changed | https://www.facebook.com/groups/567257540028891/ |
+| Åmål – Åmåls Bouleklubb | changed | https://www.facebook.com/groups/7537642502914193/ |
+| Årjäng – Nordmarksfiskarna | changed | https://www.facebook.com/groups/756288627849511/ |
+| Storfors – Storfors Wolves BSK | changed | https://www.facebook.com/groups/829371952614175 |
+| Forshaga – Forshaga Bangolfförening | changed | https://www.facebook.com/groups/939655396789633/ |
+| Åmål – Åmåls demensförening | changed | https://www.facebook.com/groups/947611763714281/ |
+| Mellerud – Rocky Mountains Squaredancers | changed | https://www.facebook.com/groups/987144922154857/ |
 | Arvika – Arvika Dragspelsklubb | changed | https://www.facebook.com/groups/arvikadragspelsklubb/ |
+| Säffle – By Byalag | changed | https://www.facebook.com/groups/bybyalag/ |
+| Arvika – Fri Natur Stömneskog | changed | https://www.facebook.com/groups/stomneskog/ |
+| Storfors – Storfors Hundklubb | changed | https://www.facebook.com/groups/storforshundklubb?locale=sv_SE |
+| Grums – Grums Tennisklubb | changed | https://www.facebook.com/grumstennisklubb/ |
 | Årjäng – Hämnäs bygdegård | changed | https://www.facebook.com/hamnasbygdegard/?locale=sv_SE |
+| Kil – Högboda Folkets Husförening | changed | https://www.facebook.com/hogbodafolketshus/ |
+| Karlstad – Karlstad Trädgårdsförening | changed | https://www.facebook.com/karlstadstradgardssallskap |
+| Karlstad – Karlstad Studentkår | changed | https://www.facebook.com/karlstadstudentkar/ |
 | Kil – Kils Konstförening | changed | https://www.facebook.com/kilsgalleri/ |
+| Åmål – Åmåls Konstförening | changed | https://www.facebook.com/konstbild82/ |
+| Storfors – Lungsunds Hembygdsförening | changed | https://www.facebook.com/lungsundshembygd/?locale=sv_SE |
 | Munkfors – Munkfors revy och teaterförening | unverified | https://www.facebook.com/munkforsrevyn/about?locale=sv_SE |
+| Årjäng – Nordmarkens Karateklubb | changed | https://www.facebook.com/nordmarkenskarateklubb/?locale=sv_SE |
+| Arvika – OK Jösse | changed | https://www.facebook.com/okjosse/ |
+| Årjäng – Östervallskogs Hembygdsförening | changed | https://www.facebook.com/ostervallskogs.hembygdsforening/ |
+| Åmål – Åmål Concert Band | changed | https://www.facebook.com/p/%C3%85m%C3%A5l-Concert-Band-100090941236535/ |
+| Åmål – Åmåls Pistolklubb | changed | https://www.facebook.com/p/%C3%85m%C3%A5ls-Pistolklubb-100070403403003/ |
+| Åmål – Åmåls Gymnastikförening | changed | https://www.facebook.com/p/%C3%85m%C3%A5ls-gymnastikf%C3%B6rening-100041926272189/ |
+| Årjäng – Årjängs Gymnastikförening | changed | https://www.facebook.com/p/%C3%85rj%C3%A4ngs-Gymnastikf%C3%B6rening-100064697646371/ |
+| Årjäng – Övre Blomsjöbygdens Byalag | changed | https://www.facebook.com/p/%C3%96vre-Blomsj%C3%B6bygdens-Byalag-100064406330777/ |
+| Munkfors – Wolfland Cruisers | changed | https://www.facebook.com/p/ACCS-Wolfland-Cruisers-100057379821409/ |
+| Arvika – Arvika Gymnastikförening | changed | https://www.facebook.com/p/Arvika-Gymnastikf%C3%B6rening-100024868500794/ |
+| Arvika – Arvika Karateklubb | changed | https://www.facebook.com/p/Arvika-Karateklubb-100064396373533/ |
+| Arvika – Arvika Stråkorkester | changed | https://www.facebook.com/p/Arvika-Str%C3%A5korkester-100063850238882/ |
+| Åmål – BMS Åminton | changed | https://www.facebook.com/p/BMS-%C3%85minton-61578835956543/ |
+| Mellerud – Bettes Drängar | changed | https://www.facebook.com/p/Bettes-Dr%C3%A4ngar-med-Elisabette-Emanuelsson-100030928647141/ |
+| Arvika – Billingsudde Vänner | changed | https://www.facebook.com/p/Billingsudde-V%C3%A4nner-100080435317719/ |
+| Mellerud – Bolstad Hembygdsförening | changed | https://www.facebook.com/p/Bolstad-hembygdsf%C3%B6rening-100089835895852/ |
 | Arvika – Bytorpsföreningen | changed | https://www.facebook.com/p/Bytorpsf%C3%B6reningen-61584716013188/ |
+| Arvika – Dalens Bygdegårdsförening | changed | https://www.facebook.com/p/Dalens-bygdeg%C3%A5rdsf%C3%B6rening-100070990313128/ |
+| Kil – Foto & Interiör | changed | https://www.facebook.com/p/Foto-Interi%C3%B6r-100063985745576/ |
+| Mellerud – Fox Fight Club | changed | https://www.facebook.com/p/Fox-Fight-Club-100063639159788/ |
+| Arvika – Gustaf Schröder Sällskapet | changed | https://www.facebook.com/p/Gustaf-Schr%C3%B6der-S%C3%A4llskapet-100051055308182/ |
+| Storfors – Storfors Hembygdsförening | changed | https://www.facebook.com/p/Hembygdsf%C3%B6reningen-i-Storfors-100079181421095/?locale=sv_SE |
+| Åmål – IFK Åmål Basket | changed | https://www.facebook.com/p/IFK-%C3%85m%C3%A5l-Basket-100089597793991/ |
+| Arvika – Järperuds Bygdegårdsförening | changed | https://www.facebook.com/p/J%C3%A4rperuds-Bygdeg%C3%A5rdsf%C3%B6rening-61583997151806/ |
+| Årjäng – Karlanda Byalag | changed | https://www.facebook.com/p/Karlanda-Byalag-100064703285256/ |
+| Säffle – Kila Byalag | changed | https://www.facebook.com/p/Kila-Byalag-61553229102110/ |
+| Kil – Kils AIK Handboll | changed | https://www.facebook.com/p/Kils-AIK-Handboll-61579623582960/ |
+| Grums – Långsta Bygdegårdsförening | changed | https://www.facebook.com/p/L%C3%A5ngsta-Bygdeg%C3%A5rdsf%C3%B6rening-61558137358125/ |
+| Årjäng – Lennartsfors Båtklubb | changed | https://www.facebook.com/p/Lennartsfors-B%C3%A5tklubb-100064403094066/ |
+| Mellerud – Melleruds Paintballförening | changed | https://www.facebook.com/p/Melleruds-Paintballf%C3%B6rening-61558938132723/ |
+| Arvika – Rackstad Hembygdsförening | changed | https://www.facebook.com/p/Rackstad-Hembygdsf%C3%B6rening-100064543005998/ |
+| Mellerud – Rostocks manskör | changed | https://www.facebook.com/p/Rostocks-Mansk%C3%B6r-100063632074170/ |
+| Säffle – Säffle Atletklubb | changed | https://www.facebook.com/p/S%C3%A4ffle-Atletklubb-100054501608731/ |
+| Årjäng – Silbodals Hembygdsförening | changed | https://www.facebook.com/p/Silbodals-Hembygdsf%C3%B6rening-61556782634086/ |
+| Grums – Slottsbrons Musikkårs Drill | changed | https://www.facebook.com/p/Slottsbrons-Musikk%C3%A5rs-Drill-100072380116018/ |
+| Mellerud – Support Group Mellerud | changed | https://www.facebook.com/p/Support-Group-Mellerud-100063561522747/ |
+| Åmål – Tösse Bygdegårdsförening | changed | https://www.facebook.com/p/T%C3%B6sse-Bygdeg%C3%A5rdsf%C3%B6rening-100093189767015/ |
+| Mellerud – Vänortsföreningen Mellerud-Scandia | changed | https://www.facebook.com/p/V%C3%A4nortsf%C3%B6reningen-Mellerud-Scandia-61568144190511/ |
+| Grums – Värmskogs Hembygdsförening | changed | https://www.facebook.com/p/V%C3%A4rmskogs-Hembygdsf%C3%B6rening-100089365132222/ |
+| Årjäng – Västra Värmlands Djurskyddsförening | changed | https://www.facebook.com/p/V%C3%A4stra-V%C3%A4rmlands-Djurskyddsf%C3%B6rening-100063631689058/ |
+| Munkfors – Ransäters travklubb | changed | https://www.facebook.com/ransatertravklubb?locale=sv_SE |
+| Säffle – Säffle Idrottsklubb | changed | https://www.facebook.com/saffleidrottsklubb/?locale=sv_SE |
 | Arvika – Föreningen Arvika Systema | broken | https://www.facebook.com/search/top?q=arvika%20systema |
+| Arvika – Föreningen Sölje Bygdegård | changed | https://www.facebook.com/soljebygden |
+| Arvika – Ställwerket | changed | https://www.facebook.com/stallwerket/ |
+| Storfors – Storfors Innebandyförening | changed | https://www.facebook.com/storforsibf?locale=sv_SE |
+| Storfors – Föreningen Storfors skidor | changed | https://www.facebook.com/storforsskidor |
 | Säffle – Tveta Bygdeförening | changed | https://www.facebook.com/tvetabygdegardsforening/?locale=sv_SE |
 | Karlstad – Värmlands Dövas Förening | changed | https://www.facebook.com/varmlandsdovaslansforening |
 | Karlstad – Värmlands Kattklubb | changed | https://www.facebook.com/varmlandskattklubb/ |
@@ -1117,7 +1233,6 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/ |
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/start/tr%C3%A4na-karate |
 | Karlstad – Karlstad – restauranger och lunch | unverified | https://www.karlstad.com/restauranger |
-| Karlstad – Karlstad Badmintonklubb | unverified | https://www.karlstadbadminton.se/ |
 | Karlstad – Karlstad Båtklubb | changed | https://www.karlstadbatklubb.se/ |
 | Karlstad – IF Karlstad Fotboll | changed | https://www.karlstadfotboll.com/ |
 | Karlstad – Karlstad IBF | changed | https://www.karlstadinnebandy.se/ |
@@ -1163,7 +1278,8 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Arvika – Krukmakeriets Vänner | unverified | https://www.krukmakerietsvanner.se/ |
 | Kristinehamn – Kristinehamns Skytteförening | changed | https://www.kskf.se/ |
 | Forshaga – Kulturens Bildningsverksamhet | unverified | https://www.kulturens.se/ |
-| Säffle – EFS-Kyrkan i Säffle | changed | https://www.kyrktorget.se/efs.saffle |
+| Säffle – EFS-Kyrkan i Säffle | unverified | https://www.kyrktorget.se/efs.saffle |
+| Arvika – LP-Kontakten | unverified | https://www.kyrktorget.se/lp.arvika |
 | Filipstad – Filipstads Fotbollsförening | changed | https://www.laget.se/FilipstadsFF/ |
 | Grums – Grums simsällskap | changed | https://www.laget.se/GrumsSS/ |
 | Forshaga – Handbollssklubben Brukspöjkera | changed | https://www.laget.se/HKBrukspojkera |
@@ -1228,7 +1344,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Storfors – Claussons Rörservice AB; Storfors – P-EL AB; Storfors – Stegelvikens Bygg AB | changed | https://www.merinfo.se/vvs-elinstallationer/storfors/foretag/1 |
 | Torsby – Rinns Bygg & Entreprenad AB; Torsby – Uppvalls Elektriska AB | changed | https://www.merinfo.se/vvs-elinstallationer/torsby/foretag |
 | Torsby – VVS-Arbeten i Torsby AB | changed | https://www.merinfo.se/vvs-elinstallationer/torsby/foretag/1 |
-| Arvika – Arvika MHF Motorförarnas Helnykterhets Förbund | changed | https://www.mhf.se/ |
+| Arvika – Arvika MHF Motorförarnas Helnykterhets Förbund | unverified | https://www.mhf.se/ |
 | Migrationsverket | changed | https://www.migrationsverket.se/ |
 | Arvika – Gunnarskogs Missionsförsamling | changed | https://www.missionskyrkan.se/gunnarskog |
 | Munkfors; Munkfors – Munkfors kommun; Munkfors – Snöröjning och gator | changed | https://www.munkfors.se/ |
@@ -1285,6 +1401,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Karlstad – Karlstads Teaterförening | changed | https://www.riksteatern.se/forening/karlstads-riksteaterforening |
 | Kristinehamn – Kristinehamns Teaterförening - en del av Riksteatern | changed | https://www.riksteatern.se/forening/kristinehamns-teaterforening---en-del-av-riksteatern |
 | Säffle – Säffle Teaterförening | changed | https://www.riksteatern.se/forening/saffle-teaterforening---en-del-av-riksteatern/ |
+| Karlstad – Dansklubben Rocksulan | changed | https://www.rocksulan.com/ |
 | Karlstad – Karlstad Röda Korskrets | changed | https://www.rodakorset.se/karlstad/ |
 | Arvika – Arvikabygdens rödakorskrets | changed | https://www.rodakorset.se/ort/varmland/arvika-kommun/ |
 | Mellerud – Roslinds Optik | changed | https://www.roslindsoptik.se/ |
@@ -1301,6 +1418,7 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Åmål – SÅ Volley | changed | https://www.savolley.se/ |
 | Säffle – Säffle Schackklubb | unverified | https://www.sefflesk.se/ |
 | Arvika – Sensus Studieförbund; Hammarö – Sensus studieförbund, distrikt västra Sverige, enhet Värmland; Kristinehamn – Sensus studieförbund region västra Sverige | changed | https://www.sensus.se/ |
+| Karlstad – SIF Armsport Karlstad | changed | https://www.sifarmsport.se/ |
 | Årjäng – Sillebottens Byalag | unverified | https://www.sillebotten.se/ |
 | Årjäng – Silleruds Framtidsgrupp | unverified | https://www.sillerud.se/ |
 | Säffle – Husföreningen Silvénska villan | unverified | https://www.silvenskavillan.se/ |
@@ -1313,8 +1431,8 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Hammarö – Skoghalls BTK; Hammarö – Skoghalls Bordtennisklubb | changed | https://www.skoghallsbtk.se/ |
 | Hammarö – Skoghallsfolketshus | changed | https://www.skoghallsfolketshus.se/ |
 | Hammarö – Skoghalls Innebandyklubb; Hammarö – Skoghalls Innebandyklubb Utveckling | unverified | https://www.skoghallsinnebandy.se/ |
-| Hammarö – Skoghalls Musikkår | unverified | https://www.skoghallsmusikkar.se/ |
 | Kil | changed | https://www.skolmat.info/api/public/matsedlar/F943DCD2-B218-47EF-8BC9-C683010685A0/rss?limit=7 |
+| Karlstad – DHR Karlstadsavdelningen | changed | https://www.smartakartan.se/karlstad/dhrs-loppis/ |
 | Karlstad – Sörmons ridklubb | unverified | https://www.smrk.se/ |
 | Karlstad – Bujinkan Solstaden Dojo IF | unverified | https://www.solstadendojo.com/ |
 | Arvika – Arvika Soroptimistklubb | changed | https://www.soroptimistsweden.se/ |
@@ -1414,7 +1532,6 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Arvika – Thingshusets Kulturförening | unverified | https://www.thingshuset.se/ |
 | Arvika – Byggnadsföreningen Thorsborg | changed | https://www.thorsborg.se/ |
 | Mellerud – Humorshow med Kristoffer Appelquist; Mellerud – Nycirkusshow: En hyllning till fotbollen!; Mellerud – Ticketmaster Kulturbruket | unverified | https://www.ticketmaster.se/venue/kulturbruket-pa-dal-mellerud-biljetter/kp9/640 |
-| Säffle – Änglagård | broken | https://www.tickster.com/se/sv/events/egv24ub3wx8cwa1/2026-09-18/anglagard |
 | Åmål – Malins Fotvård Åmål | unverified | https://www.timecenter.se/malinsfotvardamal/ |
 | Karlstad – Equmenia Karlstad; Karlstad – Tingvallakyrkan | changed | https://www.tingvallakyrkan.se/ |
 | Årjäng – Töcksfors Idrottsförening | unverified | https://www.tocksforsif.se/ |
@@ -1462,11 +1579,12 @@ Kontrollerad: 2026-11-21T05:39:20+00:00
 | Evenemang i Torsby; Torsby – Evenemang i Torsby | changed | https://www.visitvarmland.com/torsby/evenemang |
 | Arvika – Frigörande dansföreningen Vojago | unverified | https://www.vojago.se/ |
 | Arvika – Västvärmlands OK | unverified | https://www.vvok.se/ |
+| Hammarö – VVS Partner i Karlstad AB | unverified | https://www.vvs-karlstad.se/ |
 | Årjäng – XL-BYGG Årjäng | changed | https://www.xlbygg.se/butiker/xl-bygg-arjang/ |
 | Säffle – Säffle Ridklubb | unverified | https://www.xn--sfflerk-5wa.se/ |
 | Torsby – NordVärmlands Släktforskarförening | changed | https://www.xn--slktitorsby-m8a.se/ |
 | Arvika – Stavnäs Idrottsklubb | unverified | https://www.xn--stavnsik-4za.se/ |
-| Eda – Källmans Konditori; Källmans Konditori | changed | https://xn--kllmans-5wa.se/lunch/ |
+| Eda – Källmans Konditori; Källmans Konditori | unverified | https://xn--kllmans-5wa.se/lunch/ |
 
 ## Innehåll och uppdateringar
 
@@ -1476,6 +1594,7 @@ Färgelanda – Evenemang: Kalendern saknar kommande evenemang. Kontrollera käl
 Säffle – Fyren Duse Udde: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Mellerud – Sunnanå Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Mellerud – Kanyas Café & Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
+Arvika – Stefan på Statt: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Kil – Kils Golfrestaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Kil – Järnvägscafét i Kil: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Sunne – Selma Spa Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
