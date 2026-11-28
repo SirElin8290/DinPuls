@@ -1,18 +1,16 @@
 # DinPuls nattkontroll
 
-Kontrollerad: 2026-11-27T06:45:49+00:00
+Kontrollerad: 2026-11-28T06:17:35+00:00
 
 ## Resultat
 
-{'reachable': 1513, 'changed': 953, 'unverified': 807, 'broken': 13, 'total': 3286, 'contentWarnings': 11}
+{'reachable': 1529, 'changed': 957, 'unverified': 785, 'broken': 13, 'total': 3284, 'contentWarnings': 12}
 
 ## Källor som behöver granskas
 
 | Kommun / verksamhet | Status | Källa |
 |---|---|---|
 | Strandell Fastigheter Värmland AB | changed | http://strandellfastigheter.se/ledigt |
-| Storfors – Storfors Motorklubb | changed | http://www.facebook.com/StorforsMK |
-| Karlstad – Bröstcancerföreningen Värmland | changed | http://www.facebook.com/ungakurage |
 | Eda – Aaror AB | unverified | https://aaror.se/ |
 | Kristinehamn – Aktiva Seniorer i Kristinehamn | changed | https://aktivaseniorerikristinehamn.n.nu/ |
 | Kristinehamn – Visnums och Visnums-Kils Hembygdsförening | broken | https://aktivlandsbygd.se/wordpress |
@@ -37,14 +35,9 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arbetsförmedlingen | changed | https://arbetsformedlingen.se/ |
 | Årjäng; Årjäng – Afriminte; Årjäng – Anhörigförening i Årjängs kommun; Årjäng – Astma- och Allergiföreningen Årjäng m.fl.; Årjäng – BRIS Region Mitt; Årjäng – Barlingshults Viltvårdsområde; Årjäng – Betaniaförsamlingen Årjäng; Årjäng – Björnviks Viltvårdsområde; Årjäng – Blomsjöbygdens Viltvårdsområde; Årjäng – Blomskogs Byalag; Årjäng – Blomskogs Bygdegårdsförening; Årjäng – Blomskogs Fiskevårdsområde; Årjäng – Blomskogs Folkets Husförening; Årjäng – Blomskogs Idrottsförening; Årjäng – Blomskogs Sockenråd; Årjäng – Blomskogs Västra Viltvårdsområde; Årjäng – Bockleruds Viltvårdsområde; Årjäng – Bovikens Sportklubb; Årjäng – Box Team Nordmarken; Årjäng – Brottsofferjouren Värmland – Årjäng; Årjäng – Bufff Värmland; Årjäng – Bäckens Viltvårdsområde; Årjäng – Bäckevarvs Älgjaktsförening; Årjäng – Civilförsvarsförbundet V:a Värmland; Årjäng – Clarorna; Årjäng – Equmenia Holmedal-Blomskog; Årjäng – Equmenia Sillerud; Årjäng – Equmenia Töcksfors; Årjäng – Equmenia Västra Fågelvik; Årjäng – Equmenia Årjäng; Årjäng – Equmenia Östervallskog; Årjäng – Filadelfiaförsamlingen Töcksfors; Årjäng – Finnskogarnas Sportklubb; Årjäng – Flötane Byalag; Årjäng – Foxen Fiskevårdsområde; Årjäng – Friluftsfrämjandet Årjäng; Årjäng – Friskvården Värmland; Årjäng – Funktionsrätt Årjäng; Årjäng – Föreningen Töcksmarksveckan; Årjäng – Företagarna Årjäng; Årjäng – Gustavsfors Idrottsförening; Årjäng – Harnäs Viltvårdsområde; Årjäng – Hembygd och Fornminnesföreningen Nordmarksstugan; Årjäng – Holmedals Byalag; Årjäng – Holmedals Bygdegårdsförening; Årjäng – Holmedals Kyrkliga Arbetskrets; Årjäng – Holmedals Veteranbilsklubb; Årjäng – Holmedals kyrkokör; Årjäng – Holmedalsjöns Fiskvårdsområde; Årjäng – Holy Inspiration Sång & Musikförening; Årjäng – Hyresgästföreningen Årjäng; Årjäng – Hålteby-Rinnens Fiskevårdsområde; Årjäng – Håns Byalag; Årjäng – Högelians Skolhusförening; Årjäng – Hörselskadades Förening Arvika, Eda och Årjäng; Årjäng – ILCO Värmland; Årjäng – IOGT-NTO Silbodal Lf 311; Årjäng – Idé & Hantverk i Sillerud; Årjäng – Ivarsbyns Jaktskytteklubb; Årjäng – Järnsjöns Fiskevårdsområde; Årjäng – Kamratföreningen Fort 118; Årjäng – Karlanda Bygdegårdsförening; Årjäng – Karlanda Idrottsförening; Årjäng – Karlanda Jaktskytteklubb; Årjäng – Karlanda LRF-avdelning; Årjäng – Karlanda Ungdomsförening; Årjäng – Karlandamons Viltvårdsområde; Årjäng – Konstföreningen Årjäng; Årjäng – Lennartsfors Byalag; Årjäng – Lennartsfors Bygdegårdsförening; Årjäng – Lennartsfors Hembygdsförening; Årjäng – Lennartsfors Idrottsförening; Årjäng – Lennartsfors Kulturgrupp; Årjäng – Lennartsfors Viltvårdsområde; Årjäng – Liane Hembygdsgård; Årjäng – Liane Viltvårdsområde; Årjäng – Lians Byalag; Årjäng – Lions Club Årjäng; Årjäng – Lysås Byalag; Årjäng – Majblomman Årjäng; Årjäng – Mosseruds Ryttarförening; Årjäng – Mörtnäs Hembygdsgård; Årjäng – Naturskyddsföreningen Årjäng; Årjäng – Norane Byalag; Årjäng – Nordmarkens Jakt & Sportskytteklubb; Årjäng – Nordmarkens Kammarorkester; Årjäng – Nordmarkens Pastorat; Årjäng – Nordmarkens Skolas Idrottsförening; Årjäng – Nordmarkens boxningsklubb; Årjäng – Norra Lelång Fiskevårdsområde; Årjäng – PRO Karlanda; Årjäng – PRO Lennartsfors; Årjäng – PRO Sillerud; Årjäng – PRO Töcksfors; Årjäng – RPG Årjäng; Årjäng – RSMH Årjäng; Årjäng – Reumatikerföreningen Årjäng; Årjäng – Rinnens Viltvårdsområde; Årjäng – Risvikens Viltvårdsområde; Årjäng – Rädda Barnen Årjäng; Årjäng – Ränken Bouleförening; Årjäng – SKPF Årjäng; Årjäng – SPF Seniorerna Töcksfors; Årjäng – Sannhems Hembygds och Kulturförening; Årjäng – Silbodals kyrkokör; Årjäng – Sillebottens Byalag; Årjäng – Silleruds Byalag; Årjäng – Silleruds Framtidsgrupp; Årjäng – Silleruds Föreningsgård Tjolitta; Årjäng – Silleruds Idrottsförening; Årjäng – Silleruds Kulturförening; Årjäng – Silleruds LRF-avdelning; Årjäng – Silleruds Ungdomsförening; Årjäng – Silleruds kyrkliga syförening; Årjäng – Silleruds kyrkokör; Årjäng – Sjögårdarnas Viltvårdsområde; Årjäng – Skogens Viltvårdsområde; Årjäng – Skogstjärnens Fiskevårdsområde; Årjäng – Snarkil Tollersruds Byalag; Årjäng – Stallarbyns Viltvårdsområde; Årjäng – Stora Börs Fiskevårdsområde; Årjäng – Struven/Stora Le Fiskevårdsområde; Årjäng – Struvsjöns Byalag; Årjäng – Ström Långelanda Viltvårdsområde; Årjäng – Svensbyns Föräldraförening; Årjäng – Sång- o Musikföreningen Urbandet; Årjäng – Trankils Byalag; Årjäng – Trankils Bygdegårdsförening; Årjäng – Trankils Folkets Husförening; Årjäng – Trankils Hembygdsförening; Årjäng – Träffpunkt 2000; Årjäng – Töck-Hurr Fiskevårdsområde; Årjäng – Töcksfors 4H-klubb; Årjäng – Töcksfors Brukshundklubb; Årjäng – Töcksfors Byalag; Årjäng – Töcksfors Bygdegårdsförening; Årjäng – Töcksfors Båtklubb; Årjäng – Töcksfors Folkets Husförening; Årjäng – Töcksfors Fritidsgård; Årjäng – Töcksfors Hembygdsförening; Årjäng – Töcksfors Karateklubb; Årjäng – Töcksfors Kulturförening; Årjäng – Töcksfors Ungdomsförening; Årjäng – Töcksmarks Hembygdsförening; Årjäng – Töcksmarks Missionsförsamling; Årjäng – Töcksmarks kyrkokör; Årjäng – Ulvestads Viltvårdsområde; Årjäng – V:a Karlanda Fiskevårdsområde; Årjäng – Vännacka Byalag; Årjäng – Värmlands Orienteringsförbund; Årjäng – Västra Fågelviks Byalag; Årjäng – Västra Fågelviks Bygdegårdsförening; Årjäng – Västra Fågelviks Hbf Vår Gård; Årjäng – Västra Fågelviks Kyrkliga Syförening; Årjäng – Västra Fågelviks Missionsförsamling; Årjäng – Västra Fågelviks Skytteförening; Årjäng – Västra Fågelviks Viltvårdsområde; Årjäng – Västra Fågelviks idrottsförenings badhusförening u.p.a; Årjäng – Västra Silens Fiskevårdsområde; Årjäng – Våxlanda Viltvårdsområde; Årjäng – Yttre Blomskogs Viltvårdsområde; Årjäng – Årjängs 4H-klubb; Årjäng – Årjängs Atletklubb; Årjäng – Årjängs Biodlarförening; Årjäng – Årjängs Bridgeklubb; Årjäng – Årjängs Centerkrets; Årjäng – Årjängs Centrumförening; Årjäng – Årjängs Dartklubb; Årjäng – Årjängs Diabetesförening; Årjäng – Årjängs Dragspelsklubb; Årjäng – Årjängs Filatelistklubb; Årjäng – Årjängs Finska Förening; Årjäng – Årjängs Folkets Husförening; Årjäng – Årjängs Fotoklubb; Årjäng – Årjängs Företagarförening; Årjäng – Årjängs Försvarsutbildningsförening; Årjäng – Årjängs Hemslöjdsförening; Årjäng – Årjängs HjärtLung; Årjäng – Årjängs Hundungdom; Årjäng – Årjängs Internationella Förening; Årjäng – Årjängs Koloniträdgårdsförening; Årjäng – Årjängs Konstförening; Årjäng – Årjängs Konsthantverksförening; Årjäng – Årjängs Kristdemokratiska förening; Årjäng – Årjängs Kulturförening; Årjäng – Årjängs Kvinnojour; Årjäng – Årjängs Kyrkliga Arbetskrets; Årjäng – Årjängs Körsällskap; Årjäng – Årjängs LRF-avdelning; Årjäng – Årjängs Liberalförening; Årjäng – Årjängs MC-klubb; Årjäng – Årjängs Miljöpartiavdelning; Årjäng – Årjängs Missionsförsamling; Årjäng – Årjängs Modellflygklubb; Årjäng – Årjängs Moderatförening; Årjäng – Årjängs Motorhistoriska Förening; Årjäng – Årjängs Musikförening; Årjäng – Årjängs Musikkår; Årjäng – Årjängs Natur- och Kulturförening; Årjäng – Årjängs Nykterhetsförening; Årjäng – Årjängs Padelklubb; Årjäng – Årjängs Parasportförening; Årjäng – Årjängs Publikförening; Årjäng – Årjängs Samlarförening; Årjäng – Årjängs Schackklubb; Årjäng – Årjängs Sjöräddningsförening; Årjäng – Årjängs Skolidrottsförening; Årjäng – Årjängs Släktforskarförening; Årjäng – Årjängs Socialdemokratiska Förening; Årjäng – Årjängs Somaliska Förening; Årjäng – Årjängs Spelmanslag; Årjäng – Årjängs Sverigedemokratiska förening; Årjäng – Årjängs Teaterförening; Årjäng – Årjängs Trädgårdsförening; Årjäng – Årjängs Ungdomsförening; Årjäng – Årjängs Veteranfordonsklubb; Årjäng – Årjängs Villaägareförening; Årjäng – Årjängs Vänsterpartiförening; Årjäng – Årjängs Vävförening; Årjäng – Årjängs kulturskolas elevförening; Årjäng – Årjängs pastorat kyrkokör; Årjäng – Årjängs sändaramatörer; Årjäng – Årjängsbygdens Rödakorskrets; Årjäng – Åsebyfors Viltvårdsområde; Årjäng – Örje IL Friidrott; Årjäng – Östervallskogs Badhusförening; Årjäng – Östervallskogs Byalag; Årjäng – Östervallskogs Bygdegårdsförening; Årjäng – Östervallskogs Fiskevårdsområde; Årjäng – Östervallskogs Hembygdsförening; Årjäng – Östervallskogs Jaktskytteklubb; Årjäng – Östervallskogs Mellersta VVO; Årjäng – Östervallskogs Sockenråd; Årjäng – Östervallskogs kyrkokör; Årjäng – Östomsjöns Jaktskytteklubb; Årjäng – Östomsjöns Viltvårdsområde; Årjäng – Östra Silens Fiskevårdsområde | changed | https://arjang.interbookfri.se/AssociationRegister |
 | Årjäng – Årjängs Brukshundsklubb | changed | https://arjangsbrukshund.wordpress.com/ |
+| Arvika – Äwas Fötter & Skönhet | unverified | https://arvikafotvard.com/ |
 | Arvika – Arvika Golfklubb | unverified | https://arvikagk.com/ |
 | Arvika – Arvika Golfkrog | unverified | https://arvikagk.com/gaster/restaurang/ |
-| Arvika – Arvika Hamnfest | unverified | https://arvikahamnfest.se/ |
-| Döms efter dubbla fynd i tullen – förklaringen räcker inte | unverified | https://arvikamagasinet.se/doms-efter-dubbla-fynd-i-tullen-forklaringen-racker-inte/ |
-| Julgranen på plats i Arvika | unverified | https://arvikamagasinet.se/julgranen-pa-plats-i-arvika/ |
-| Mopedförare kan få böta 20 000 efter kontroll i Årjäng | unverified | https://arvikamagasinet.se/mopedforare-kan-fa-bota-20-000-efter-kontroll-i-arjang/ |
-| Våldsamt på Olssons Brygga: ”Skulle dra ut alla mina tänder” | unverified | https://arvikamagasinet.se/valdsamt-pa-olssons-brygga-skulle-dra-ut-alla-mina-tander/ |
-| Viltolycka på E18 utanför Töcksfors | unverified | https://arvikamagasinet.se/viltolycka-pa-e18-utanfor-tocksfors/ |
 | Arvika – Arvika Jazz Club; Arvika – Arvika Konsertförening; Arvika – Arvika Stadsmusikkår; Arvika – Arvika Suzukiförening; Arvika – Musikföreningen Blå Huset; Arvika – Stavnäs Visklubb | changed | https://arvikamusik.se/foreningar/ |
 | Arvika – Arvika Rehab AB | unverified | https://arvikarehab.se/ |
 | Arvika – Arvika Ridklubb | changed | https://arvikaridklubb.com/ |
@@ -53,7 +46,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Hagfors – AsCy Rör & Industri AB | changed | https://ascy.se/ |
 | Kristinehamn – Bäckhammars bygderåd med omnejd | unverified | https://backhammarsbygden.com/ |
 | Bengtsfors – Bengtsfors Pistolskytteklubb | unverified | https://bengtsforspsk.com/ |
-| Mellerud – Dalslands Ornitologiska Förening | changed | https://birdlife.se/serie/fagelvaren-runt-mellerud-dalslands-ornitologiska-forening/ |
+| Mellerud – Dalslands Ornitologiska Förening | unverified | https://birdlife.se/serie/fagelvaren-runt-mellerud-dalslands-ornitologiska-forening/ |
 | Kristinehamn – Björneborgs hembygdsförening | unverified | https://bjorneborgshembygdsforening.se/ |
 | Bengtsfors – Björneruds Byalag | changed | https://bjornerudsbyalag.webber.se/ |
 | Kristinehamn – Björneborgs Jaktskytteklubb | unverified | https://bjsk.se/ |
@@ -102,8 +95,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Equmeniakyrkan Arvika | unverified | https://equmeniakyrkanarvika.se/kalender/ |
 | Mellerud – Equmeniakyrkan Mellerud | unverified | https://equmeniakyrkanmellerud.se/ |
 | Mellerud; Mellerud – Felanmälan till rätt enhet | changed | https://etjanst.mellerud.se/MenuGroup2.aspx?groupId=41 |
-| Kristinehamn – Kristinehamns Bågskytteklubb | changed | https://facebook.com/KristinehamnsBSK |
-| Kristinehamn – Små Pärlor | changed | https://facebook.com/smaparlor |
 | Färgelanda; Färgelanda – Färgelanda kommun | changed | https://fargelanda.se/ |
 | Färgelanda – Färgelanda kommun – skolmat | changed | https://fargelanda.se/barn-och-utbildning/ |
 | Färgelanda – Kroppefjäll | changed | https://fargelanda.se/bygga-bo-och-miljo/ |
@@ -129,13 +120,14 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Forshaga – Forshaga Motor Club | changed | https://forshagamotorclub.se/ |
 | Mellerud – Framtidsbygder Dalsland | unverified | https://framtidsbygder.se/ |
 | Arvika – Fredros Bygdegårdsförening | changed | https://fredrosbygdegard.blogspot.com/ |
+| Karlstad – Friluftsfrämjandet Karlstad | changed | https://friluftsframjandet.se/karlstad |
 | Kristinehamn – Friskvården i Värmland/Kristinehamn | changed | https://friskvarden.org/friskvardscentral/kristinehamn/ |
 | Karlstad – FRO Värmland | changed | https://fro.se/fro-varmland/ |
-| Karlstad – Dyslexiförbundet Värmland | unverified | https://funktionsrattvarmland.se/medlemsforeningar/?id=11 |
-| Karlstad – Epilepsiföreningen Värmland | unverified | https://funktionsrattvarmland.se/medlemsforeningar/?id=14 |
-| Karlstad – Njurföreningen Värmland | unverified | https://funktionsrattvarmland.se/medlemsforeningar/?id=27 |
-| Karlstad – Psoriasisförbundet Värmland | unverified | https://funktionsrattvarmland.se/medlemsforeningar/?id=32 |
-| Karlstad – Värmlands Dövas Förening | unverified | https://funktionsrattvarmland.se/medlemsforeningar/?id=39 |
+| Karlstad – Dyslexiförbundet Värmland | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=11 |
+| Karlstad – Epilepsiföreningen Värmland | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=14 |
+| Karlstad – Njurföreningen Värmland | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=27 |
+| Karlstad – Psoriasisförbundet Värmland | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=32 |
+| Karlstad – Värmlands Dövas Förening | changed | https://funktionsrattvarmland.se/medlemsforeningar/?id=39 |
 | Arvika – Föreningen Bruksgården | unverified | https://glavaglasbruk.org/ |
 | Karlstad – Grava Skidklubb | changed | https://gravask.se/ |
 | Grums – Grums Båtsällskap | changed | https://grumsbatsallskap.se/ |
@@ -167,7 +159,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Forshaga – Deje Skidförening | unverified | https://idrottonline.se/DejeSF/ |
 | Kristinehamn – IFK Kristinehamn Huvudstyrelsen | broken | https://ifkkristinehamn.weebly.com/ |
 | Kristinehamn – Kristinehamns Inner Wheel Club | changed | https://innerwheel.se/ |
-| Karlstad – Bröstcancerföreningen Värmland | unverified | https://instagram.com/bcfvarmland |
 | Arvika – Arvika Jaktvårdskrets | changed | https://jagareforbundetvarmland.se/kretsar/arvika-jaktvardskrets |
 | Storfors – Jordkullen AB | changed | https://jordkullen.se/ |
 | Mellerud – K-Bygg Mellerud | changed | https://k-bygg.se/varuhus/k-bygg-mellerud |
@@ -282,7 +273,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Kristinehamn – Nördkreatörerna | changed | https://nordkreatorerna.wordpress.com/ |
 | Arvika – Odd Fellow Logen nr 29 Fidelitas | unverified | https://oddfellow.se/hitta/institution?inst=b29&p=history |
 | Arvika – Odd Fellow Logen nr 29 Fidelitas | unverified | https://oddfellow.se/hitta/institution?inst=b29&p=house |
-| Arvika – Tjejjouren Miriam | changed | https://old.intranet.roks.se/hittaenjour |
 | Årjäng – O.O.Design Optikpraktik | changed | https://oodesign.se/ |
 | Kristinehamn – Brottsofferjouren Östra Värmland | changed | https://ostravarmland.boj.se/ |
 | Karlstad – Värmlands Parasportförbund | changed | https://parasport.se/distrikt/varmland |
@@ -314,7 +304,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Säffle; Säffle – Snöröjning, halka och gratis sand | changed | https://saffle.se/boende-trafik-och-miljo/gator-och-trafik/skotsel-av-gator-och-vagar/sno-och-halka.html |
 | Säffle – Byälven, Sandbackens badplats; Säffle – Duse klippbad; Säffle – Getebol badplats; Säffle – Mellan Svan, Strand badplats; Säffle – Strandbad, Gaperhult; Säffle – Strandbad, Åkershus; Säffle – Vildmarken (Finnsjön) badplats | changed | https://saffle.se/uppleva-och-gora/idrott-friluftsliv-och-lek/badplatser.html |
 | Säffle – Säffle simhall | changed | https://saffle.se/uppleva-och-gora/idrott-friluftsliv-och-lek/saffle-simhall/ |
-| Säffle – Säffle Dragspelsklubb | changed | https://saffledragspel.webber.se/ |
 | Säffle – Säfflebygdens Hembygdsförening | unverified | https://safflehembygd.se/ |
 | Säffle – Säffle Motorbåtssällskap | changed | https://safflemotorbatssallskap.se/ |
 | Säffle – Säffle Musikförening | unverified | https://safflemusikforening.se/ |
@@ -349,7 +338,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Sunne – Sunne Fastighets AB | changed | https://sunnefastighet.se/ |
 | Sunne Fastighets AB | changed | https://sunnefastighet.se/lediga-lagenheter/ |
 | Sunne – Sunne Equmeniascout | unverified | https://sunnemissionskyrka.se/scout-2/ |
-| Karlstad – Brottsofferjouren Värmland | changed | https://sv-se.facebook.com/brottsofferjourenvarmland |
 | Karlstad – Värmlands Kaninhopparförening | changed | https://sv-se.facebook.com/pages/V%C3%A4rmlands-Kaninhoppare/346886132027204 |
 | Årjäng – Nordmarkens Innebandyförening | changed | https://svenskalag.se/nibf |
 | Karlstad – Karlstad Trädgårdsförening | changed | https://svensktradgard.se/tradgardsforeningar/karlstads-tradgardssallskap/ |
@@ -584,6 +572,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Årjäng – Årjängs Golfklubb | changed | https://www.arjangsgk.se/ |
 | Årjäng – Årjängs Slalomklubb | changed | https://www.arjangsslk.se/ |
 | Årjäng – Nordmarkens Travsällskap | changed | https://www.arjangstravet.se/ |
+| Allmänna reklamationsnämnden (ARN) | changed | https://www.arn.se/ |
 | Arvika – Sällskapet Länkarna Arvika | unverified | https://www.arvika.dfsl.se/ |
 | Arvika – Naturskyddsföreningen i Arvikabygden | unverified | https://www.arvika.naturskyddsforeningen.se/ |
 | Arvika; Arvika – Arvika kommun | changed | https://www.arvika.se/ |
@@ -886,6 +875,10 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Karlstad – Försvarsutbildarna Värmland | unverified | https://www.forsvarsutbildarna.se/varmland/ |
 | Torsby – Konstföreningen Fri Form | unverified | https://www.friform.org/ |
 | Arvika – Friluftsfrämjandet Arvika-Sunne | changed | https://www.friluftsframjandet.se/ |
+| Säffle – Friluftsfrämjandet Åmål -Säffle; Åmål – Friluftsfrämjandet Åmål-Säffle | changed | https://www.friluftsframjandet.se/amal-saffle |
+| Hammarö – Friluftsfrämjandet Hammarö LA | changed | https://www.friluftsframjandet.se/hammaro |
+| Kristinehamn – Friluftsfrämjandet | changed | https://www.friluftsframjandet.se/kristinehamn |
+| Årjäng – Friluftsfrämjandet Årjäng | changed | https://www.friluftsframjandet.se/regioner/vast/lokalavdelningar/arjang/ |
 | Säffle – IF Friskis och Svettis Säffle | changed | https://www.friskissvettis.se/saffle |
 | Hammarö – Friskvården i Värmland | unverified | https://www.friskvarden.rog/ |
 | Forshaga – Fritidsbanken i Deje | changed | https://www.fritidsbanken.se/ |
@@ -910,9 +903,11 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Grums; Grums – Snöröjning och halkbekämpning | changed | https://www.grums.se/trafikgator/snorojning/vintervaghallning.1760.html |
 | Grums – Grums Bouleklubb; Grums – Grums Bowlingklubb; Grums – Grums Cykelklubb; Grums – Grums Fotbollsförening; Grums – Grums Friidrottsklubb; Grums – Grums Handbollsklubb; Grums – Grums Hockeyförening; Grums – Grums Innebandyklubb; Grums – Grums Kanotklubb; Grums – Grums Motorklubb; Grums – Grums Orienteringsklubb; Grums – Grums Pistolskytteklubb; Grums – Grums Skidklubb; Grums – Grums Skytteförening; Grums – Grums Sportfiskeklubb | changed | https://www.grums.se/upplevagora/foreningsliv/foreningsregister.8238.html |
 | Grums – Borgviks Hembygdsförening; Grums – Bygdegårdsförening Värmskog; Grums – Grums Fotoklubb; Grums – Grums Konstförening; Grums – Grums Släktforskarförening Probanden; Grums – Kultur Bums; Grums – PRO Slottsbron; Grums – SMU Grums; Grums – SMU Östra Värmskog; Grums – Segmons Byalag; Grums – Segmons Folkets Hus-förening; Grums – Skruvstads Bygdeförening; Grums – Slottsbrons Båtsällskap; Grums – Slottsbrons Hembygdsförening | changed | https://www.grums.se/upplevagora/foreningsliv/riktforeningsliv.8626.html |
+| Grums – Borgviks lekplats; Grums – Floravägens lekplats; Grums – Karlbergs lekplats; Grums – Medskogs lekplats; Grums – Mossens lekplats; Grums – Segmons lekplats; Grums – Slottsbrons lekplats; Grums – Violvägens lekplats | changed | https://www.grums.se/upplevagora/idrottochfritid/lekplatser.10112.html |
 | Grums – Grums IBK | changed | https://www.grumsibk.se/ |
 | Grums – Grums Slalomklubb | unverified | https://www.grumsslk.se/ |
 | Arvika – Gunnarskogs Bygdelag | changed | https://www.gunnarskog.nu/ |
+| Arvika – Mârtens-Alliansen Gunnarskog | changed | https://www.gunnerskemarten.se/ |
 | Hagfors; Hagfors – Felanmälan; Hagfors – Hagfors Fotbollsallians; Hagfors – IK Vikings Idrottsallians; Hagfors – Laddinfrastruktur; Hagfors – Parkering; Hagfors – Renhållning och gator; Hagfors – Snöröjning och halkbekämpning; Hagfors – Vatten, avlopp och driftinformation | changed | https://www.hagfors.se/ |
 | Hagfors – Hagfors kommun – skolmat | changed | https://www.hagfors.se/forskola-skola-och-utbildning/skolskjuts-mat-och-schema/skolmatsedel |
 | Hagfors – Hagfors kommun – aktuella störningar VA och sophämtning | changed | https://www.hagfors.se/ovrigt/driftinformation |
@@ -994,12 +989,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Årjäng – Idrottsklubben Spring Väst | changed | https://www.ikspringvast.com/ |
 | Arvika – Ingesunds Musikhögskola SMISK | unverified | https://www.imh.kau.se/ |
 | Integritetsskyddsmyndigheten (IMY) | changed | https://www.imy.se/ |
-| Karlstad – Bellevues ponnyridklubb | unverified | https://www.instagram.com/bellevuesponnyridklubb/ |
-| Karlstad – Brottsofferjouren Värmland | unverified | https://www.instagram.com/brottsofferjourenvarmland/ |
-| Karlstad – Karlstad Studentkår | unverified | https://www.instagram.com/karlstadstudentkar/ |
-| Karlstad – Studentföreningen Inferno | unverified | https://www.instagram.com/kau_inferno/ |
-| Karlstad – Värmlands Kaninhopparförening | unverified | https://www.instagram.com/varmlandskaninhoppare |
-| Karlstad – Värmlands Teater | unverified | https://www.instagram.com/varmlandsteatern/ |
 | Arvika – IOGT-NTO Arvika | changed | https://www.iogt.se/ |
 | Arvika – IOGT-NTO:s Juniorförening Moviekids; Arvika – Movendi Arvika | broken | https://www.iogt.se/varmland/foreningsinfo |
 | Arvika – Manskören IRIS | unverified | https://www.iriskoren.se/ |
@@ -1008,7 +997,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Jössefiskarna | unverified | https://www.jossefiskarna.se/ |
 | Arvika – Jössefors IK | changed | https://www.josseforsik.se/ |
 | Arvika – Jösse MC | unverified | https://www.jossemc.se/ |
-| Arvika – Judo Arvika | changed | https://www.judoarvika.se/ |
 | Arvika – Junis Arvika | changed | https://www.junis.se/om-junis/ |
 | Kil – Kils AIK Ishockeyklubb | changed | https://www.kaikhockey.se/ |
 | Säffle – Källarbackens Intresseförening | unverified | https://www.kallarbacken.se/ |
@@ -1017,6 +1005,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/ |
 | Karlstad – Karlstad Karateklubb | changed | https://www.karlstad-karate.nu/start/tr%C3%A4na-karate |
 | Karlstad – Karlstad – restauranger och lunch | unverified | https://www.karlstad.com/restauranger |
+| Karlstad – Karlstad Badmintonklubb | unverified | https://www.karlstadbadminton.se/ |
 | Karlstad – Karlstad Båtklubb | changed | https://www.karlstadbatklubb.se/ |
 | Karlstad – IF Karlstad Fotboll | changed | https://www.karlstadfotboll.com/ |
 | Karlstad – Karlstad IBF | changed | https://www.karlstadinnebandy.se/ |
@@ -1255,6 +1244,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Hammarö – Studieförbundet Vuxenskolan Värmland, SV Värmland | changed | https://www.sv.se/varmland |
 | Arvika – Gunnarskogs Kyrkliga Syförening | changed | https://www.svenskakyrkan.se/ |
 | Arvika – Svenska kyrkan Arvika Pastorat | changed | https://www.svenskakyrkan.se/arvika |
+| Karlstad – Grava kyrkokör; Karlstad – Norrstrands kyrkokör | unverified | https://www.svenskakyrkan.se/filer/574410/Verksamhetskatalog%20h%C3%B6st%202025.pdf |
 | Karlstad – Grava kyrkokör | changed | https://www.svenskakyrkan.se/grava |
 | Karlstad – Norrstrands kyrkokör; Karlstad – Svenska kyrkan Karlstads pastorat | changed | https://www.svenskakyrkan.se/karlstad |
 | Karlstad – Svenska kyrkan Karlstads pastorat | changed | https://www.svenskakyrkan.se/karlstad/forsamlingar |
@@ -1326,7 +1316,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Karlstad – Värmlands Författarsällskap | unverified | https://www.varmlandskaforfattarsallskapet.se/ |
 | Karlstad – Värmlands Kattklubb | changed | https://www.varmlandskattklubb.se/ |
 | Arvika – Värmlands Spelmansförbund; Karlstad – Värmlands Spelmansförbund | changed | https://www.varmlandsspelmansforbund.se/ |
-| Åmål – Bokdagar i Dalsland | unverified | https://www.vastsverige.com/amal/evenemang/bokdagar-i-dalsland/?site=478 |
 | Mellerud – Veteran Classic Dalsland | unverified | https://www.veteranclassic.se/ |
 | Arvika – Villaägarna i Västra Värmland | unverified | https://www.villaagarna.se/varmland |
 | Kristinehamn – Villastadens IF | unverified | https://www.villastadensif.nu/ |
@@ -1335,7 +1324,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Årjäng – Öppen föreläsning | unverified | https://www.visitvarmland.com/arjang/evenemang/forelasning-och-workshop/oppen-forelasning-118620 |
 | Årjäng – Adventslördag i Årjängs Centrum | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/adventslordag-i-arjangs-centrum |
 | Årjäng – Adventsmys på Byahuset i Hån | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/adventsmys-pa-byahuset-i-han |
-| Årjäng – Julmarknad, Blomskogs Föreningshus | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/julmarknad-blomskogs-foreningshus-2 |
 | Årjäng – Julmarknad, Hånsfors Bruk | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/julmarknad-hansfors-bruk |
 | Årjäng – Julmarknad i Kulturladan Vârke | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/julmarknad-i-kulturladan-varke-2 |
 | Årjäng – Julmarknad i Lennartsfors, Strömsborg | unverified | https://www.visitvarmland.com/arjang/evenemang/marknad-massa-auktion-och-loppis/julmarknad-i-lennartsfors-stromsborg |
@@ -1370,7 +1358,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Julmarknad på logen i Skotta | unverified | https://www.visitvarmland.com/arvika/evenemang/marknad-massa-auktion-och-loppis/julmarknad-pa-logen-i-skotta |
 | Arvika – Julmarknad på Nytomta Minnesgård och Rackstadmuseet | unverified | https://www.visitvarmland.com/arvika/evenemang/marknad-massa-auktion-och-loppis/julmarknad-pa-nytomta-minnesgard-och-rackstadmuseet-2 |
 | Arvika – Skyltsöndag & Julmarknad i Arvika | unverified | https://www.visitvarmland.com/arvika/evenemang/marknad-massa-auktion-och-loppis/skyltsondag-and-julmarknad-i-arvika |
-| Arvika – Adventskonsert i Glava | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/adventskonsert-i-glava |
 | Arvika – Allt för den ljuse stjärna | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/allt-for-den-ljuse-stjarna |
 | Arvika – Arvika Hamnfest 2026 | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/arvika-hamnfest-2026 |
 | Arvika – Boksläpp och konsert | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/bokslapp-och-konsert |
@@ -1393,7 +1380,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Luciafirande på Ingesund | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/luciafirande-pa-ingesund |
 | Arvika – Musik i advent | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/musik-i-advent-2 |
 | Arvika – Musikcafé i advent | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/musikcafe-i-advent |
-| Arvika – Musikhögskolan Ingesund: Konstnärligt projekt | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/musikhogskolan-ingesund-konstnarligt-projekt-119223 |
 | Arvika – Occrasy | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/occrasy |
 | Arvika – Open genre sessions - Band Night | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/open-genre-sessions-band-night |
 | Arvika – United sounds of Arvika | unverified | https://www.visitvarmland.com/arvika/evenemang/musik/united-sounds-of-arvika |
@@ -1415,6 +1401,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Träffpunkten - Arvika Fordonsmuseum | unverified | https://www.visitvarmland.com/arvika/evenemang/ovriga-evenemang/traffpunkten-arvika-fordonsmuseum |
 | Arvika – Traktorlucia | unverified | https://www.visitvarmland.com/arvika/evenemang/ovriga-evenemang/traktorlucia |
 | Arvika – Veteranfordonsträff & våffelkväll | unverified | https://www.visitvarmland.com/arvika/evenemang/ovriga-evenemang/veteranfordonstraff-and-vaffelkvall |
+| Arvika – Årets första dopp | unverified | https://www.visitvarmland.com/arvika/evenemang/sport-motion-och-halsa/arets-forsta-dopp |
 | Arvika – Bastukväll vid Glafsfjorden | unverified | https://www.visitvarmland.com/arvika/evenemang/sport-motion-och-halsa/bastukvall-vid-glafsfjorden |
 | Arvika – Feldenkrais-workshops | unverified | https://www.visitvarmland.com/arvika/evenemang/sport-motion-och-halsa/feldenkrais-workshops |
 | Arvika – Mindfulness meditation | unverified | https://www.visitvarmland.com/arvika/evenemang/sport-motion-och-halsa/mindfulness-meditation |
@@ -1423,6 +1410,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Arvika – Julutställning på Arvika Konsthantverk | unverified | https://www.visitvarmland.com/arvika/evenemang/utstallning/julutstallning-pa-arvika-konsthantverk |
 | Arvika – Konstrundan Värmlands Hjärta | unverified | https://www.visitvarmland.com/arvika/evenemang/utstallning/konstrundan-varmlands-hjarta |
 | Arvika – Rackstadmuseet: Tidernas tankar och ting | unverified | https://www.visitvarmland.com/arvika/evenemang/utstallning/rackstadmuseet-tidernas-tankar-och-ting |
+| Arvika – Vernissage Julsalong | unverified | https://www.visitvarmland.com/arvika/evenemang/utstallning/vernissage-julsalong |
 | Eda – Evenemang i Eda; Evenemang i Eda | unverified | https://www.visitvarmland.com/eda/evenemang |
 | Eda – Adventsmys i arbetarbostäderna | unverified | https://www.visitvarmland.com/eda/evenemang/marknad-massa-auktion-och-loppis/adventsmys-i-arbetarbostaderna |
 | Eda – Jul på Häljeboda Handelsträdgård | unverified | https://www.visitvarmland.com/eda/evenemang/marknad-massa-auktion-och-loppis/jul-pa-haljeboda-handelstradgard |
@@ -1531,7 +1519,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Hagfors – Lions Konstutställning 2026 | unverified | https://www.visitvarmland.com/hagfors/evenemang/utstallning/lions-konstutstallning-2026 |
 | Hagfors – Wermland Opera i Edebäck | unverified | https://www.visitvarmland.com/hagfors/evenemang/wermland-opera-i-edeback |
 | Hagfors – Wermland Opera i Råda | unverified | https://www.visitvarmland.com/hagfors/evenemang/wermland-opera-i-rada |
-| Hagfors – Wermland Opera i Sunnemo Folkets Hus | unverified | https://www.visitvarmland.com/hagfors/evenemang/wermland-opera-i-sunnemo-folkets-hus-2 |
 | Hagfors – Visit Hagfors – mat & dryck | unverified | https://www.visitvarmland.com/hagfors/mat-dryck |
 | Hagfors – Klarälvsbanan och Klarälvsleden | unverified | https://www.visitvarmland.com/hagfors/om-hagfors/ |
 | Hammarö – Visit Hammarö – mat och restauranger | unverified | https://www.visitvarmland.com/hammaro/ |
@@ -1542,7 +1529,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Hammarö – Hammarö Kulturskolas julstök | unverified | https://www.visitvarmland.com/hammaro/evenemang/hammaro-kulturskolas-julstok |
 | Hammarö – Julmys på bibblan | unverified | https://www.visitvarmland.com/hammaro/evenemang/julmys-pa-bibblan |
 | Hammarö – Kulturbygdens adventsfirande | unverified | https://www.visitvarmland.com/hammaro/evenemang/kulturbygdens-adventsfirande |
-| Hammarö – Blueskväll med musik från Backbone Blue Band | unverified | https://www.visitvarmland.com/hammaro/evenemang/musik/blueskvall-med-musik-fran-backbone-blue-band |
 | Hammarö – Julmarknaden Tomtens dag | unverified | https://www.visitvarmland.com/hammaro/evenemang/musik/julmarknaden-tomtens-dag |
 | Hammarö – Luciashow 2026 | unverified | https://www.visitvarmland.com/hammaro/evenemang/musik/luciashow-2026 |
 | Hammarö – Sabaton - Den stora Sverigeturnén | unverified | https://www.visitvarmland.com/hammaro/evenemang/musik/sabaton-den-stora-sverigeturnen |
@@ -1556,6 +1542,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Hammarö – Konstutställning i adventstider | unverified | https://www.visitvarmland.com/hammaro/evenemang/utstallning/konstutstallning-i-adventstider-2 |
 | Hammarö – Visit Värmland Hammarö – mat & dryck | unverified | https://www.visitvarmland.com/hammaro/mat-dryck |
 | Evenemang i Karlstad; Karlstad – Evenemang i Karlstad | unverified | https://www.visitvarmland.com/karlstad/evenemang |
+| Karlstad – Föreläsning: Rädda vitryggen! | unverified | https://www.visitvarmland.com/karlstad/evenemang/forelasning-och-workshop/forelasning-radda-vitryggen |
 | Karlstad – Företagens historia – vem bryr sig? | unverified | https://www.visitvarmland.com/karlstad/evenemang/forelasning-och-workshop/foretagens-historia-vem-bryr-sig |
 | Karlstad – Leila Inanna Sultan: Straffkolonien | unverified | https://www.visitvarmland.com/karlstad/evenemang/forelasning-och-workshop/leila-inanna-sultan-straffkolonien |
 | Karlstad – Släktforska med DNA och AI - Peter Sjölund | unverified | https://www.visitvarmland.com/karlstad/evenemang/forelasning-och-workshop/slaktforska-med-dna-och-ai-peter-sjolund |
@@ -1575,14 +1562,13 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Karlstad – Adventskonsert med Karlstads musikkår | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/adventskonsert-med-karlstads-musikkar |
 | Karlstad – Backyard Live Music 2026 | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/backyard-live-music-2026 |
 | Karlstad – Bubblor på Bageriet med Kizelo Mleko | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/bubblor-pa-bageriet-med-kizelo-mleko |
+| Karlstad – Eddie Meduza-fest - Erik Meduza and Barsebäckz | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/eddie-meduza-fest-erik-meduza-and-barsebackz |
 | Karlstad – Hits & Wonders - Julshow med Johan & Björn | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/hits-and-wonders-julshow-med-johan-and-bjorn |
 | Karlstad – Kulturskolans adventskonsert i Domkyrkan | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/kulturskolans-adventskonsert-i-domkyrkan-2 |
 | Karlstad – LIVEMUSIK PÅ SING SING KARAOKE - Vild Vittra och Instinct | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/livemusik-pa-sing-sing-karaoke-vild-vittra-och-instinct |
 | Karlstad – MANHEM / JUL & LJUS | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/manhem-jul-and-ljus |
 | Karlstad – Molly Hammar | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/molly-hammar |
-| Karlstad – Mwuana | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/mwuana |
 | Karlstad – Neil Young Tribute med EP´s Trailer Park + Gäster | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/neil-young-tribute-med-ep-s-trailer-park-gaster |
-| Karlstad – ODZ / O'NIGHTS / 28 NOV | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/odz-o-nights-28-nov |
 | Karlstad – Pernilla Andersson | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/pernilla-andersson |
 | Karlstad – Stråkfest i Sundstaaulan | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/strakfest-i-sundstaaulan |
 | Karlstad – Timo Räisiänen ”Julen enligt Timo” / Backyard Live Music | unverified | https://www.visitvarmland.com/karlstad/evenemang/musik/timo-raisianen-julen-enligt-timo-backyard-live-music |
@@ -1610,9 +1596,8 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Karlstad – MaktmissSpråk | unverified | https://www.visitvarmland.com/karlstad/evenemang/teater-och-underhallning/maktmisssprak |
 | Karlstad – Boris Duhm - Automatisk Intelligens | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/boris-duhm-automatisk-intelligens |
 | Karlstad – Glögg mingel | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/glogg-mingel |
-| Karlstad – Invigning av ljud- och ljuspromenaden Karlstad Lightscape | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/invigning-av-ljud-och-ljuspromenaden-karlstad-lightscape |
 | Karlstad – Utställning: När naturen prövar samhället | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/utstallning-nar-naturen-provar-samhallet |
-| Karlstad – Vintersalong 27/11-20/12 | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/vintersalong-27-11-20-12 |
+| Karlstad – Vintersalong | unverified | https://www.visitvarmland.com/karlstad/evenemang/utstallning/vintersalong |
 | Kil – Visit Kil; Visit Kil | unverified | https://www.visitvarmland.com/kil/ |
 | Evenemang i Kil; Kil – Evenemang i Kil | unverified | https://www.visitvarmland.com/kil/evenemang |
 | Kil – Andreas Jonsson & Rigmor Gustafsson, Wermland Big Band | unverified | https://www.visitvarmland.com/kil/evenemang/musik/andreas-jonsson-and-rigmor-gustafsson-wermland-big-band-3 |
@@ -1624,17 +1609,18 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Kristinehamn – 3:e advent i Kristinehamn | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/3-e-advent-i-kristinehamn |
 | Kristinehamn – After school | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/after-school |
 | Kristinehamn – Fantasyklubb | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/fantasyklubb |
+| Kristinehamn – Författarklubb | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/forfattarklubb |
 | Kristinehamn – Läs-Kul | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/las-kul |
 | Kristinehamn – Lustiga Lördagar | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/lustiga-lordagar |
 | Kristinehamn – Lustiga Lördagar | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/lustiga-lordagar-118993 |
-| Kristinehamn – Mörkervandring till Tomten med Friluftsfrämjandet | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/morkervandring-till-tomten-med-friluftsframjandet |
 | Kristinehamn – Signering med Sandra Spelling | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/barn-2/signering-med-sandra-spelling |
+| Kristinehamn – Julshow | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/dans/julshow-3 |
 | Kristinehamn – Boksignering: Gentlemannen från Kristinehamn | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/boksignering-gentlemannen-fran-kristinehamn |
 | Kristinehamn – En dans på rosor | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/en-dans-pa-rosor |
+| Kristinehamn – Handarbetscafé | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/handarbetscafe-2 |
 | Kristinehamn – Konsthappening: Asemisk skrift | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/konsthappening-asemisk-skrift |
 | Kristinehamn – Sjöfarten och den gröna omställningen | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/sjofarten-och-den-grona-omstallningen |
 | Kristinehamn – Språkcafé med högläsning | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/sprakcafe-med-hoglasning |
-| Kristinehamn – Visning med inriktning på Drottning Kristina | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/visning-med-inriktning-pa-drottning-kristina |
 | Kristinehamn – Workshop: Bygg en modell av Charles Dickens En julsaga! | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/forelasning-och-workshop/workshop-bygg-en-modell-av-charles-dickens-en-julsaga |
 | Kristinehamn – Julmarknad hos Annexet | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/marknad-massa-auktion-och-loppis/julmarknad-hos-annexet |
 | Kristinehamn – Julmarknad i Bäckhammar | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/marknad-massa-auktion-och-loppis/julmarknad-i-backhammar |
@@ -1650,9 +1636,9 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Kristinehamn – Dolly på svenska | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/dolly-pa-svenska |
 | Kristinehamn – Drottning Kristina 400 år - Drottning Kristina, musiken, maten och maximerna | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/drottning-kristina-400-ar-drottning-kristina-musiken-maten-och-maximerna |
 | Kristinehamn – En sagolik jul | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/en-sagolik-jul |
-| Kristinehamn – Glöggmingel med live musik | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/gloggmingel-med-live-musik |
 | Kristinehamn – Jul på Kulturskolan | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/jul-pa-kulturskolan |
 | Kristinehamn – Julkonsert med Bastkören | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/julkonsert-med-bastkoren |
+| Kristinehamn – Julkonsert med Gloriakören | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/julkonsert-med-gloriakoren |
 | Kristinehamn – Julkonsert med No Silence | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/julkonsert-med-no-silence |
 | Kristinehamn – Julkonsert med Sacrekör | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/julkonsert-med-sacrekor |
 | Kristinehamn – Kören Himla Väsen | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/musik/koren-himla-vasen |
@@ -1664,15 +1650,12 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Kristinehamn – Glöggmingel på Garnisonsvägen 3 | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/ovriga-evenemang/gloggmingel-pa-garnisonsvagen-3 |
 | Kristinehamn – Julöppet hos Rudskogaslöjdarna | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/ovriga-evenemang/juloppet-hos-rudskogaslojdarna |
 | Kristinehamn – Killkväll hos Tant Turkos | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/ovriga-evenemang/killkvall-hos-tant-turkos |
-| Kristinehamn – Möt en kändis från förr | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/ovriga-evenemang/mot-en-kandis-fran-forr |
 | Kristinehamn – Öppet hus på Brogymnasiet | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/ovriga-evenemang/oppet-hus-pa-brogymnasiet |
-| Kristinehamn – Enkronasmatch. KHT mot Filipstad | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/sport-motion-och-halsa/enkronasmatch-kht-mot-filipstad |
 | Kristinehamn – Innebandy dam, div 2 | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/sport-motion-och-halsa/innebandy-dam-div-2 |
 | Kristinehamn – Moelven Open | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/sport-motion-och-halsa/moelven-open |
 | Kristinehamn – Besök Bokbussen | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/teater-och-underhallning/besok-bokbussen |
 | Kristinehamn – När hustomtarna tog pension | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/teater-och-underhallning/nar-hustomtarna-tog-pension |
 | Kristinehamn – Pettson får julbesök | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/teater-och-underhallning/pettson-far-julbesok |
-| Kristinehamn – Eva Larsson & Karin J Nilsdotter | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/utstallning/eva-larsson-and-karin-j-nilsdotter |
 | Kristinehamn – Extraöppet Historiska | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/utstallning/extraoppet-historiska |
 | Kristinehamn – Järnet födde staden | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/utstallning/jarnet-fodde-staden-2 |
 | Kristinehamn – Jul i Galleri Vågen! | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/utstallning/jul-i-galleri-vagen |
@@ -1683,7 +1666,7 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Kristinehamn – Vrån – IngBritt Wikström Svensson & Malin Fredrika | unverified | https://www.visitvarmland.com/kristinehamn/evenemang/utstallning/vran-ingbritt-wikstrom-svensson-and-malin-fredrika |
 | Kristinehamn – Visit Kristinehamn – mat & dryck | unverified | https://www.visitvarmland.com/kristinehamn/mat-dryck |
 | Evenemang i Munkfors; Munkfors – Evenemang i Munkfors | unverified | https://www.visitvarmland.com/munkfors/evenemang |
-| Munkfors – Auktion | unverified | https://www.visitvarmland.com/munkfors/evenemang/marknad-massa-auktion-och-loppis/auktion-3 |
+| Munkfors – Juldagsdisco @ MFKC | unverified | https://www.visitvarmland.com/munkfors/evenemang/dans/juldagsdisco-mfkc |
 | Munkfors – Julmarknad i Stensdalen | unverified | https://www.visitvarmland.com/munkfors/evenemang/marknad-massa-auktion-och-loppis/julmarknad-i-stensdalen |
 | Munkfors – Julmarknad på Ransäter | unverified | https://www.visitvarmland.com/munkfors/evenemang/marknad-massa-auktion-och-loppis/julmarknad-pa-ransater |
 | Munkfors – Julbord på wärdshuset | unverified | https://www.visitvarmland.com/munkfors/evenemang/mat-och-dryck/julbord-pa-wardshuset |
@@ -1714,7 +1697,6 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Evenemang i Torsby; Torsby – Evenemang i Torsby | unverified | https://www.visitvarmland.com/torsby/evenemang |
 | Torsby – Adventsmys i Sysslebäck | unverified | https://www.visitvarmland.com/torsby/evenemang/barn-2/adventsmys-i-syssleback |
 | Torsby – After school på Torsby bibliotek | unverified | https://www.visitvarmland.com/torsby/evenemang/barn-2/after-school-pa-torsby-bibliotek |
-| Torsby – Chillkväll i Knutboa | unverified | https://www.visitvarmland.com/torsby/evenemang/barn-2/chillkvall-i-knutboa |
 | Torsby – Fritidsgård Knutboa | unverified | https://www.visitvarmland.com/torsby/evenemang/barn-2/fritidsgard-knutboa |
 | Torsby – Café Liten & Stor | unverified | https://www.visitvarmland.com/torsby/evenemang/cafe-liten-and-stor |
 | Torsby – Trivseldans i Knutboa | unverified | https://www.visitvarmland.com/torsby/evenemang/dans/trivseldans-i-knutboa |
@@ -1738,13 +1720,13 @@ Kontrollerad: 2026-11-27T06:45:49+00:00
 | Torsby – Öppen butik på Torpgården | unverified | https://www.visitvarmland.com/torsby/evenemang/marknad-massa-auktion-och-loppis/oppen-butik-pa-torpgarden |
 | Torsby – Öppet hos Borstbindare Halvardsson | unverified | https://www.visitvarmland.com/torsby/evenemang/marknad-massa-auktion-och-loppis/oppet-hos-borstbindare-halvardsson |
 | Torsby – Öppet på Slöjdboa i Östmark | unverified | https://www.visitvarmland.com/torsby/evenemang/marknad-massa-auktion-och-loppis/oppet-pa-slojdboa-i-ostmark |
+| Torsby – Ridande luciatåg i Torsby | unverified | https://www.visitvarmland.com/torsby/evenemang/marknad-massa-auktion-och-loppis/ridande-luciatag-i-torsby |
 | Torsby – Skyltsöndag i Torsby | unverified | https://www.visitvarmland.com/torsby/evenemang/marknad-massa-auktion-och-loppis/skyltsondag-i-torsby |
 | Torsby – Glöggmingel på Hotell Örnen | unverified | https://www.visitvarmland.com/torsby/evenemang/mat-och-dryck/gloggmingel-pa-hotell-ornen |
 | Torsby – Julfrukost på Hotell Örnen | unverified | https://www.visitvarmland.com/torsby/evenemang/mat-och-dryck/julfrukost-pa-hotell-ornen |
 | Torsby – Julöppet hos Naturpralinen | unverified | https://www.visitvarmland.com/torsby/evenemang/mat-och-dryck/juloppet-hos-naturpralinen |
 | Torsby – Våffeldag i Valbergsstugan | unverified | https://www.visitvarmland.com/torsby/evenemang/mat-och-dryck/vaffeldag-i-valbergsstugan |
 | Torsby – En sagolik jul - Stranna Folkets Hus | unverified | https://www.visitvarmland.com/torsby/evenemang/musik/en-sagolik-jul-stranna-folkets-hus |
-| Torsby – Jubileumskonsert Ge&Hör 40 år | unverified | https://www.visitvarmland.com/torsby/evenemang/musik/jubileumskonsert-ge-and-hor-40-ar |
 | Torsby – Konsert på Torsby bibliotek | unverified | https://www.visitvarmland.com/torsby/evenemang/musik/konsert-pa-torsby-bibliotek |
 | Torsby – Stämningsfull julkonsert i Fryksände kyrka | unverified | https://www.visitvarmland.com/torsby/evenemang/musik/stamningsfull-julkonsert-i-fryksande-kyrka |
 | Torsby – Gubbfika i Knutboa | unverified | https://www.visitvarmland.com/torsby/evenemang/ovriga-evenemang/gubbfika-i-knutboa |
@@ -1795,8 +1777,9 @@ Kil – Järnvägscafét i Kil: Aktuell veckomeny kunde inte verifieras. Ingen n
 Sunne – Selma Spa Restaurang: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Eda – Källmans Konditori: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Hammarö – ICA Supermarket Skoghall: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
+Hagfors – Restaurang Kronan: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 Hagfors – Restaurang Ferrum: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
-Bengtsfors – Skolmat: Ingen verifierad skolmatsrad för dagens datum. Lov/stängning kan vara orsaken; kontrollera källan.
+Munkfors – Mäster Fälling: Aktuell veckomeny kunde inte verifieras. Ingen ny meny gissas.
 
 ## Automatiska uppdateringar
 
